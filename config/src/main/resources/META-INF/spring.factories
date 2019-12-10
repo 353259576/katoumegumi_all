@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.ws.java.config.DataSourceConfig,\
+  com.ws.java.config.RedisConfig,\
+  com.ws.java.config.HibernateConfig,\
+  com.ws.java.config.JpaConfig,\
+  com.ws.java.config.mybatis.MybatisPlusAutoConfiguration

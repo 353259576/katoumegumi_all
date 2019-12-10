@@ -1,0 +1,19 @@
+server:
+  port: 8099
+spring:
+  cloud:
+    nacos:
+      config:
+        file-extension: yml
+        server-addr: 127.0.0.1:8848
+      discovery:
+        server-addr: 127.0.0.1:8848
+  application:
+    name: authServer
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          introspection-uri: http://localhost:8099/introspect
+          client-id: client
+          client-secret: secret

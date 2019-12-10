@@ -1,0 +1,55 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+        file-extension: yml
+        shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+  application:
+    name: lxClient
+  profiles:
+    active: dev
+  redis:
+    #password: 199645
+    host: 127.0.0.1
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          client-id: pig
+          client-secret: pig
+          introspection-uri: http://localhost:8083/introspect
+dubbo:
+  registry:
+    address: spring-cloud://127.0.0.1:8848
+    #subscribe: true
+  protocols:
+    dubbo:
+      name: dubbo
+      port: 20891
+    rest:
+      name: rest
+      port: 20892
+      server: netty
+server:
+  port: 1921
+logging:
+  level:
+    com:
+      alibaba:
+        seata: debug
+        nacos: error
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+ws:
+  hibernate:
+    enable: true
+    show-sql: true
+  jpa:
+    enable: true
+    show-sql: true
