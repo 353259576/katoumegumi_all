@@ -110,7 +110,7 @@
 
         <dependency>
             <groupId>com.ws.java</groupId>
-            <artifactId>config</artifactId>
+            <artifactId>data-integration-boot-starter</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

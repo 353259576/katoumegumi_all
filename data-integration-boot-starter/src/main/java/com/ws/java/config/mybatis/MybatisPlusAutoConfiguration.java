@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.core.incrementer.IKeyGenerator;
 import com.baomidou.mybatisplus.core.injector.ISqlInjector;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import com.ws.java.config.DataSourceConfig;
 import com.ws.java.mybatis.SpringBootVFS;
 import com.ws.java.properties.MybatisPlusProperties;
 import org.apache.ibatis.annotations.Mapper;
@@ -55,10 +56,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandi
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.context.annotation.*;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -69,6 +68,7 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -81,7 +81,7 @@ import java.util.stream.Stream;
  * otherwise this auto-configuration will attempt to register mappers based on
  * the interface definitions in or under the root auto-configuration package.
  * </p>
- * <p> copy from {@link org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration}</p>
+ *
  *
  * @author Eddú Meléndez
  * @author Josh Long
@@ -92,8 +92,8 @@ import java.util.stream.Stream;
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
 @ConditionalOnSingleCandidate(DataSource.class)
 @EnableConfigurationProperties(MybatisPlusProperties.class)
-@AutoConfigureAfter({DataSourceAutoConfiguration.class})
-@ConditionalOnProperty(prefix = "ws.mybatis",value = "enable",havingValue = "true")
+@AutoConfigureAfter({DataSourceConfig.class,MybatisPlusLanguageDriverAutoConfiguration.class})
+@ConditionalOnProperty(prefix = "ws.mybatis", value = {"enable"}, havingValue = "true")
 public class MybatisPlusAutoConfiguration implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(MybatisPlusAutoConfiguration.class);
@@ -149,12 +149,14 @@ public class MybatisPlusAutoConfiguration implements InitializingBean {
         if (this.properties.isCheckConfigLocation() && StringUtils.hasText(this.properties.getConfigLocation())) {
             Resource resource = this.resourceLoader.getResource(this.properties.getConfigLocation());
             Assert.state(resource.exists(),
-                "Cannot find config location: " + resource + " (please add config file or check your Mybatis configuration)");
+                    "Cannot find config location: " + resource + " (please add config file or check your Mybatis configuration)");
         }
     }
 
+
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Bean
+    @Primary
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
         // TODO 使用 MybatisSqlSessionFactoryBean 而不是 SqlSessionFactoryBean
@@ -191,11 +193,11 @@ public class MybatisPlusAutoConfiguration implements InitializingBean {
         }
 
         // TODO 对源码做了一定的修改(因为源码适配了老旧的mybatis版本,但我们不需要适配)
-        /*Class<? extends LanguageDriver> defaultLanguageDriver = this.properties.getDefaultScriptingLanguageDriver();
+        Class<? extends LanguageDriver> defaultLanguageDriver = this.properties.getDefaultScriptingLanguageDriver();
         if (!ObjectUtils.isEmpty(this.languageDrivers)) {
             factory.setScriptingLanguageDrivers(this.languageDrivers);
-        }*/
-        //Optional.ofNullable(defaultLanguageDriver).ifPresent(factory::setDefaultScriptingLanguageDriver);
+        }
+        Optional.ofNullable(defaultLanguageDriver).ifPresent(factory::setDefaultScriptingLanguageDriver);
 
         // TODO 自定义枚举包
         if (StringUtils.hasLength(this.properties.getTypeEnumsPackage())) {
@@ -287,7 +289,7 @@ public class MybatisPlusAutoConfiguration implements InitializingBean {
             BeanWrapper beanWrapper = new BeanWrapperImpl(MapperScannerConfigurer.class);
             Stream.of(beanWrapper.getPropertyDescriptors())
                 // Need to mybatis-spring 2.0.2+
-                .filter(x -> "lazyInitialization".equals(x.getName())).findAny()
+                .filter(x -> x.getName().equals("lazyInitialization")).findAny()
                 .ifPresent(x -> builder.addPropertyValue("lazyInitialization", "${mybatis.lazy-initialization:false}"));
             registry.registerBeanDefinition(MapperScannerConfigurer.class.getName(), builder.getBeanDefinition());
         }

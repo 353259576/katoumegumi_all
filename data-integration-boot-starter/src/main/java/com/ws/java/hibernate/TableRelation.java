@@ -9,7 +9,7 @@ import javax.persistence.criteria.JoinType;
  * @date Created by Administrator on 2019/12/9 14:53
  */
 @Data
-public class TableRelationship {
+public class TableRelation {
 
     private JoinType joinType;
 

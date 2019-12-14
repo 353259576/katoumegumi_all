@@ -88,6 +88,13 @@ public class MybatisPlusProperties {
     private ExecutorType executorType;
 
     /**
+     * The default scripting language driver class. (Available when use together with mybatis-spring 2.0.2+)
+     * <p>
+     * 如果设置了这个,你会至少失去几乎所有 mp 提供的功能
+     */
+    private Class<? extends LanguageDriver> defaultScriptingLanguageDriver;
+
+    /**
      * Externalized properties for MyBatis configuration.
      */
     private Properties configurationProperties;
@@ -114,8 +121,8 @@ public class MybatisPlusProperties {
 
     public Resource[] resolveMapperLocations() {
         return Stream.of(Optional.ofNullable(this.mapperXmlLocations).orElse(new String[0]))
-            .flatMap(location -> Stream.of(getResources(location)))
-            .toArray(Resource[]::new);
+                .flatMap(location -> Stream.of(getResources(location)))
+                .toArray(Resource[]::new);
     }
 
     private Resource[] getResources(String location) {

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ws_user")
@@ -25,6 +26,10 @@ public class User {
     @Column(name = "password")
     @TableField(value = "password")
     private String password;
+
+    @Column(name = "create_date")
+    @TableField(value = "create_date")
+    private LocalDateTime createDate;
 
     @OneToOne
     @JoinColumn(name = "id",referencedColumnName = "user_id")

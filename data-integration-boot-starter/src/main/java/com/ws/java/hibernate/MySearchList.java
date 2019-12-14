@@ -1,16 +1,12 @@
 package com.ws.java.hibernate;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ws.java.common.SupplierFunc;
 import com.ws.java.common.WsFieldUtils;
 
+import javax.persistence.JoinTable;
 import javax.persistence.criteria.JoinType;
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Function;
 
 public class MySearchList {
     private List<MySearch> mySearches = new ArrayList<>();
@@ -23,9 +19,11 @@ public class MySearchList {
 
     private Map<Class,String> tableAndNickNameMap = new HashMap<>();
 
-    private List<TableRelationship> joins = new ArrayList<>();
+    private List<TableRelation> joins = new ArrayList<>();
 
     private Class mainClass;
+
+    private JoinType defaultJoinType = JoinType.INNER;
 
     private Page pageVO;
 
@@ -268,14 +266,14 @@ public class MySearchList {
         return this;
     }
 
-    public <T> MySearchList on(JoinType joinType,Class mainTable, Class joinTable, SupplierFunc<T> mainColumn, SupplierFunc<T> joinColumn) {
-        TableRelationship tableRelationship = new TableRelationship();
-        tableRelationship.setTableName(mainTable.getSimpleName());
-        tableRelationship.setJoinTableName(joinTable.getSimpleName());
-        tableRelationship.setTableColumn(WsFieldUtils.getFieldName(mainColumn));
-        tableRelationship.setJoinTableColumn(WsFieldUtils.getFieldName(joinColumn));
-        tableRelationship.setJoinType(joinType);
-        joins.add(tableRelationship);
+    public <T> MySearchList join(JoinType joinType,Class mainTable, Class joinTable, SupplierFunc<T> mainColumn, SupplierFunc<T> joinColumn) {
+        TableRelation tableRelation = new TableRelation();
+        tableRelation.setTableName(mainTable.getSimpleName());
+        tableRelation.setJoinTableName(joinTable.getSimpleName());
+        tableRelation.setTableColumn(WsFieldUtils.getFieldName(mainColumn));
+        tableRelation.setJoinTableColumn(WsFieldUtils.getFieldName(joinColumn));
+        tableRelation.setJoinType(joinType);
+        joins.add(tableRelation);
         return this;
     }
 
@@ -283,7 +281,7 @@ public class MySearchList {
         return tableAndNickNameMap;
     }
 
-    public List<TableRelationship> getJoins() {
+    public List<TableRelation> getJoins() {
         return joins;
     }
 
@@ -298,6 +296,15 @@ public class MySearchList {
 
     public List<MySearch> getOrderSearches() {
         return orderSearches;
+    }
+
+    public JoinType getDefaultJoinType() {
+        return defaultJoinType;
+    }
+
+    public MySearchList setDefaultJoinType(JoinType defaultJoinType) {
+        this.defaultJoinType = defaultJoinType;
+        return this;
     }
 }
 

@@ -1,6 +1,9 @@
 package com.ws.java.common;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,22 +49,6 @@ public class WsDateUtils {
         return calendar.getTime();
     }
 
-    public static long dateDifference(Date oldDate,Date newDate,WsDateUtilsEnum wsDateUtilsEnum){
-        long difference = 0L;
-        switch (wsDateUtilsEnum){
-/*            case YEAR:
-                Calendar calendar = Calendar.getInstance();
-                calendar.
-                break;
-            case MONTH:break;*/
-            case DAY: difference = newDate.getTime() - oldDate.getTime();return difference/1000/60/60/24;
-            case HOUR:difference = newDate.getTime() - oldDate.getTime();return difference/1000/60/60;
-            case MINUTE:difference = newDate.getTime() - oldDate.getTime();return difference/1000/60;
-            case SECOND:difference = newDate.getTime() - oldDate.getTime();return difference/1000;
-            default:break;
-        }
-        return 0;
-    }
 
 
 
@@ -148,8 +135,10 @@ public class WsDateUtils {
                 return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
             } else if (object instanceof Number) {
                 return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
-            } else if (object instanceof java.sql.Date) {
-                return dateToString((Date) object, LONGTIMESTRING);
+            }  else if(object instanceof LocalDate){
+                return ((LocalDate) object).format(DateTimeFormatter.ofPattern(LONGTIMESTRING));
+            } else if(object instanceof LocalDateTime){
+                return ((LocalDateTime) object).format(DateTimeFormatter.ofPattern(LONGTIMESTRING));
             } else {
                 return null;
             }

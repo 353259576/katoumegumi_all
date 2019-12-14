@@ -20,7 +20,7 @@ spring:
         opaquetoken:
           client-id: pig
           client-secret: pig
-          introspection-uri: http://localhost:8083/introspect
+          introspection-uri: http://localhost:3000/token/introspect
 dubbo:
   registry:
     address: spring-cloud://127.0.0.1:8848

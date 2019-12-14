@@ -12,6 +12,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
+import org.hibernate.sql.JoinType;
 import org.hibernate.type.StringType;
 import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.HibernateObjectRetrievalFailureException;
@@ -124,103 +125,6 @@ public class HibernateDao {
 
 	private <T> DetachedCriteria myDetachedCriteriaCreate(Class<T> clazz, MySearchList mySearchList) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(clazz);
-        /*List<MySearch> mySearches = mySearchList.getAll();
-		MySearch mySearch;
-		String fieldName;
-		for(int i = 0; i < mySearches.size(); i++) {
-            mySearch = mySearches.get(i);
-            fieldName = mySearch.getFieldName();
-            Field field = null;
-            if(fieldName.contains(".")){
-            	String[] strings = fieldName.split("[.]");
-            	Field ffield = WsFieldUtils.getFieldForClass(strings[0],clazz);
-            	if(ffield == null){
-            		continue;
-				}else {
-            		Field lfield = WsFieldUtils.getFieldForClass(strings[1],ffield.getType());
-            		if(lfield == null) {
-						continue;
-					}
-					field = lfield;
-				}
-			}else {
-                field = WsFieldUtils.getFieldForClass(fieldName, clazz);
-                if (field == null) {
-                    continue;
-                }
-            }
-            if(!mySearch.getOperator().equals(JpaDataHandle.Operator.SORT)){
-				if (Date.class.isAssignableFrom(field.getType()) && !mySearch.getValue().getClass().equals(clazz)) {
-					mySearch.setValue(WsDateUtils.stringToDate(WsDateUtils.objectDateFormatString(mySearch.getValue())));
-				}
-			}
-            switch (mySearch.getOperator()) {
-                case IN:
-                    if (mySearch.getValue() instanceof Collection) {
-                        detachedCriteria.add(Restrictions.in(mySearch.getFieldName(), (Collection) mySearch.getValue()));
-                    } else {
-                        detachedCriteria.add(Restrictions.in(mySearch.getFieldName(), (Object[]) mySearch.getValue()));
-                    }
-                    break;
-                case EQ:
-
-                    detachedCriteria.add(Restrictions.eq(mySearch.getFieldName(),WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
-                    break;
-                case NE:
-                    detachedCriteria.add(Restrictions.ne(mySearch.getFieldName(), WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
-                    break;
-                case LIKE:
-                    String value = WsStringUtils.anyToString(mySearch.getValue());
-                    if(value != null){
-                        detachedCriteria.add(Restrictions.like(mySearch.getFieldName(), value, MatchMode.ANYWHERE));
-                    }
-
-                    break;
-                case NIN:
-                    if (mySearch.getValue() instanceof Collection) {
-                        detachedCriteria.add(Restrictions.not(Restrictions.in(mySearch.getFieldName(), (Collection) mySearch.getValue())));
-                    } else {
-                        detachedCriteria.add(Restrictions.not(Restrictions.in(mySearch.getFieldName(), (Object[]) mySearch.getValue())));
-                    }
-                    break;
-                case GT:
-                    detachedCriteria.add(Restrictions.gt(mySearch.getFieldName(), WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
-                    break;
-                case GTE:
-                    detachedCriteria.add(Restrictions.ge(mySearch.getFieldName(), WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
-                    break;
-                case LT:
-                    detachedCriteria.add(Restrictions.lt(mySearch.getFieldName(), WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
-                    break;
-                case LTE:
-                    detachedCriteria.add(Restrictions.le(mySearch.getFieldName(), WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
-                    break;
-                case NULL:
-                    detachedCriteria.add(Restrictions.isNull(mySearch.getFieldName()));
-                    break;
-                case NOTNULL:
-                    detachedCriteria.add(Restrictions.isNotNull(mySearch.getFieldName()));
-                    break;
-				case SQL:
-					String k = WsStringUtils.anyToString(mySearch.getValue());
-					if(k != null){
-                        detachedCriteria.add(Restrictions.sqlRestriction(k));
-                    }
-					break;
-                case SORT:
-                    if (mySearch.getValue().equals("asc") || mySearch.getValue().equals("ASC")) {
-                        Order order = Order.asc(mySearch.getFieldName());
-                        detachedCriteria.addOrder(order);
-                    } else {
-                        Order order = Order.desc(mySearch.getFieldName());
-                        detachedCriteria.addOrder(order);
-                    }
-                    break;
-				default:break;
-
-            }
-        }*/
-
         Map<String,DetachedCriteria> map = new HashMap<>();
         Conjunction conjunction = myDetachedCriteriaCreate(mySearchList,clazz,true,detachedCriteria,map);
         detachedCriteria.add(conjunction);
@@ -263,6 +167,14 @@ public class HibernateDao {
 
 
 	public Conjunction myDetachedCriteriaCreate(MySearchList mySearchList,Class clazz,boolean isAnd,DetachedCriteria detachedCriteria,Map<String,DetachedCriteria> nameMap){
+		JoinType joinType;
+		switch (mySearchList.getDefaultJoinType()){
+			case INNER:joinType = JoinType.INNER_JOIN;break;
+			case LEFT:joinType = JoinType.LEFT_OUTER_JOIN;break;
+			case RIGHT:joinType = JoinType.RIGHT_OUTER_JOIN;break;
+			default:joinType = JoinType.INNER_JOIN;
+		}
+
 		List<MySearch> mySearches = mySearchList.getAll();
 		MySearch mySearch;
 		String fieldName;
@@ -292,7 +204,7 @@ public class HibernateDao {
 					}
 					nickName.append(strings[k]);
 					if(!nameMap.containsKey(nickName.toString())){
-						criteria = last.createCriteria(strings[k],nickName.toString());
+						criteria = last.createCriteria(strings[k],nickName.toString(),joinType);
 						nameMap.put(nickName.toString(),criteria);
 					}else {
 						criteria = nameMap.get(nickName.toString());

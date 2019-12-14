@@ -22,14 +22,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 
 import javax.persistence.criteria.*;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service(version = "1.0.0",protocol = {"dubbo","rest"})
 @RestController
@@ -83,14 +82,20 @@ public class IndexController implements IndexService {
         user.setPassword("世界");
         hibernateTemplate.saveOrUpdate(user);*/
         //List<User> list = userJpaDao.selectUser();
+        LocalDateTime localDateTime = LocalDateTime.now();
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList();
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
                 MySearchList.newMySearchList().eq(user::getPassword,"世界")
-                ).eq(user::getId,1).sort("id","ASC").sort("userDetails.sex","DESC");
+                )
+                .eq(user::getId,1)
+                .lte(user::getCreateDate,"2019-12-13")
+                .sort("id","ASC")
+                .sort("userDetails.sex","DESC");
         Specification<User> specification = JpaDataHandle.<User>getSpecification(mySearchList);
         List<User> list = userJpaDao.findAll(specification);
         List<User> list1 = hibernateDao.selectValueToList(mySearchList,User.class);
+
         System.out.println(JSON.toJSONString(list1));
 
                 //userJpaDao.findAll();
@@ -100,6 +105,18 @@ public class IndexController implements IndexService {
         hibernateTemplate.insertObject(user);
         //hibernateDao.insertObject(user);
         //throw new RuntimeException("你好错误");
+        Iterator<User> iterator = list1.iterator();
+        Flux.<User>create(userFluxSink -> {
+            while (iterator.hasNext()){
+                userFluxSink.next(iterator.next());
+            }
+            userFluxSink.complete();
+        }).map(user1 -> {
+            System.out.println(JSON.toJSONString(user1));
+            return user1;
+        }).subscribe(user1 -> {
+            System.out.println("?");
+        });
         String str = JSON.toJSONString(list1);
         return str;
     }

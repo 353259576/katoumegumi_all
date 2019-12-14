@@ -11,23 +11,27 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 public class WsBeanUtis {
 
     public static void main(String[] args) {
-
-        //System.out.println(objectToT("192.0",Double.class));
-        int rgb = -1;
+        LocalDateTime localDateTime = LocalDateTime.now();
+        System.out.println(objectToT(System.currentTimeMillis(),LocalDateTime.class));
+        /*int rgb = -1;
         int b = (rgb << 24);
         b = b >>> 24;
-        System.out.println(b);
+        System.out.println(b);*/
     }
 
 
     public static  <T> T copyBean(T object){
         try {
-            byte bytes[] = serializeObject(object);
+            byte[] bytes = serializeObject(object);
             return (T)deSerializeObject(bytes,object.getClass());
         }catch (Exception e){
             e.printStackTrace();
@@ -39,7 +43,7 @@ public class WsBeanUtis {
     public static <T> T copyField(Object object,T newObject){
         try {
             Class clazz = newObject.getClass();
-            Field oldFields[] = WsFieldUtils.getFieldAll(object.getClass());
+            Field[] oldFields = WsFieldUtils.getFieldAll(object.getClass());
             if(oldFields == null||oldFields.length == 0){
                 return (T)newObject;
             }
@@ -147,7 +151,7 @@ public class WsBeanUtis {
                         if(c[0]==int.class||c[0]==Integer.class){
                             try {
                                 method.invoke(dx,Integer.parseInt(String.valueOf(value)));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -156,7 +160,7 @@ public class WsBeanUtis {
                         else if(c[0]==byte.class||c[0]==Byte.class){
                             try {
                                 method.invoke(dx,Byte.parseByte(String.valueOf(value)));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -164,7 +168,7 @@ public class WsBeanUtis {
                         else if(c[0]==char.class||c[0]==Character.class){
                             try {
                                 method.invoke(dx,value);
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -172,7 +176,7 @@ public class WsBeanUtis {
                         else if(c[0]==boolean.class||c[0]==Boolean.class){
                             try {
                                 method.invoke(dx,Boolean.parseBoolean(String.valueOf(value)));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -180,7 +184,7 @@ public class WsBeanUtis {
                         else if(c[0]==short.class||c[0]==Short.class){
                             try {
                                 method.invoke(dx,Short.parseShort(String.valueOf(value)));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -188,7 +192,7 @@ public class WsBeanUtis {
                         else if(c[0]==long.class||c[0]==Long.class){
                             try {
                                 method.invoke(dx,Long.parseLong(String.valueOf(value)));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -196,7 +200,7 @@ public class WsBeanUtis {
                         else if(c[0]==float.class||c[0]==Float.class){
                             try {
                                 method.invoke(dx,Float.parseFloat(String.valueOf(value)));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -204,7 +208,7 @@ public class WsBeanUtis {
                         else if(c[0]==double.class||c[0]==Double.class){
                             try {
                                 method.invoke(dx,Double.parseDouble(String.valueOf(value)));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -212,21 +216,21 @@ public class WsBeanUtis {
                         else if(c[0]==String.class){
                             try {
                                 method.invoke(dx,String.valueOf(value));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
                         }else if(c[0]== BigInteger.class){
                             try {
                                 method.invoke(dx,BigInteger.valueOf(Long.parseLong(String.valueOf(value))));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
                         }else if(c[0]== BigDecimal.class){
                             try {
                                 method.invoke(dx,new BigDecimal(String.valueOf(value)));
-                                break ws;
+                                break;
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -234,20 +238,20 @@ public class WsBeanUtis {
                             try {
                                 if(value instanceof Long){
                                     method.invoke(dx,new Date((Long)value));
-                                    break ws;
+                                    break;
                                 }else if(value.getClass()==long.class){
                                     method.invoke(dx,new Date((long)value));
-                                    break ws;
+                                    break;
                                 }else {
                                     if(WsStringUtils.isNumber((String)value)){
                                         method.invoke(dx,new Date(Long.parseLong((String) value)));
-                                        break ws;
+                                        break;
                                     }else {
                                         //SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
                                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                         simpleDateFormat.setLenient(false);
                                         method.invoke(dx,simpleDateFormat.parse(WsStringUtils.dateToDate((String) value)));
-                                        break ws;
+                                        break;
                                     }
 
                                 }
@@ -771,13 +775,20 @@ public class WsBeanUtis {
                 }else {
                     return (T) WsStringUtils.anyToString(object);
                 }
-            }else if(tClass==Date.class){
-                if(object.getClass()==Date.class){
-                    return (T)object;
+            }else if(tClass==Date.class || tClass == LocalDateTime.class || tClass == LocalDate.class){
+                if(object.getClass()==Date.class) {
+                    if(tClass == LocalDate.class){
+                        return (T)LocalDate.ofInstant(((Date) object).toInstant(), ZoneId.systemDefault());
+                    }
+                    if(tClass == LocalDateTime.class){
+                        return (T)LocalDateTime.ofInstant(((Date) object).toInstant(),ZoneId.systemDefault());
+                    }
+                    return (T) object;
                 }else {
+                    /*Date date = null;
                     try {
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-                        return (T)simpleDateFormat.parse(String.valueOf(object));
+                        date = simpleDateFormat.parse(String.valueOf(object));
                     }catch (Exception e){
                         try {
                             Long dateNum = Long.valueOf(new BigDecimal(String.valueOf(object)).longValue());
@@ -790,6 +801,20 @@ public class WsBeanUtis {
                             return (T) WsDateUtils.objectToDate(object);
                         }
 
+                    }*/
+
+
+                    Date date = WsDateUtils.objectToDate(object);
+                    if(date == null){
+                        return null;
+                    }else {
+                        if(tClass == LocalDate.class){
+                            return (T)LocalDate.ofInstant(date.toInstant(),ZoneId.systemDefault());
+                        }
+                        if(tClass == LocalDateTime.class){
+                            return (T) LocalDateTime.ofInstant(date.toInstant(),ZoneId.systemDefault());
+                        }
+                        return (T)date;
                     }
 
                 }
