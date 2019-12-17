@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
-import com.ws.java.common.FileUtils;
+import cn.katoumegumi.java.common.FileUtils;
 import cn.katoumegumi.java.lx.service.IndexService;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
