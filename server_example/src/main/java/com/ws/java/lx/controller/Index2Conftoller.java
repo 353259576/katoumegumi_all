@@ -5,6 +5,7 @@ import com.ws.java.lx.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -21,6 +22,10 @@ import java.util.List;
 @Controller
 public class Index2Conftoller {
 
+    public static void main(String[] args) {
+        String str = new BCryptPasswordEncoder().encode("nacos");
+        System.out.println(str);
+    }
 
     @Autowired
     private UserJpaDao userJpaDao;

@@ -8,6 +8,7 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -195,6 +196,17 @@ public class WsFieldUtils {
         }else {
             return methodName;
         }
+    }
+
+
+    public static Field getFieldByType(Type type,Class clazz){
+        Field[] fields = getFieldAll(clazz);
+        for(Field field:fields){
+            if(field.getType().equals(type)){
+                return field;
+            }
+        }
+        return null;
     }
 
 }

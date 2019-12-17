@@ -92,7 +92,7 @@ import java.util.stream.Stream;
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
 @ConditionalOnSingleCandidate(DataSource.class)
 @EnableConfigurationProperties(MybatisPlusProperties.class)
-@AutoConfigureAfter({DataSourceConfig.class,MybatisPlusLanguageDriverAutoConfiguration.class})
+@AutoConfigureAfter({DataSourceAutoConfiguration.class,MybatisPlusLanguageDriverAutoConfiguration.class})
 @ConditionalOnProperty(prefix = "ws.mybatis", value = {"enable"}, havingValue = "true")
 public class MybatisPlusAutoConfiguration implements InitializingBean {
 

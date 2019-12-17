@@ -13,6 +13,7 @@ import com.ws.java.lx.model.UserDetails;
 import com.ws.java.lx.service.IndexService;
 import com.ws.java.lx.jpa.UserJpaDao;
 import com.ws.java.lx.model.User;
+import com.ws.java.lx.service.UserService;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -47,6 +48,9 @@ public class IndexController implements IndexService {
 
     @Autowired
     private UserJpaDao userJpaDao;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private UserMapper userMapper;
@@ -92,8 +96,7 @@ public class IndexController implements IndexService {
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
                 .sort("userDetails.sex","DESC");
-        Specification<User> specification = JpaDataHandle.<User>getSpecification(mySearchList);
-        List<User> list = userJpaDao.findAll(specification);
+        List<User> list = userService.selectList(mySearchList);
         List<User> list1 = hibernateDao.selectValueToList(mySearchList,User.class);
 
         System.out.println(JSON.toJSONString(list1));
