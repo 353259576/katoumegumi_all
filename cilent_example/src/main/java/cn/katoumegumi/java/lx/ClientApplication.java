@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EnableDiscoveryClient
-@EnableDubbo(scanBasePackages = "com.ws.java.lx.controller")
+@EnableDubbo(scanBasePackages = "cn.katoumegumi.java.lx.controller")
 @EnableDubboConfig
 @EnableCaching
 @EnableFeignClients

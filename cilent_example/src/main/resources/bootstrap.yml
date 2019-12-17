@@ -48,8 +48,8 @@ management:
         include: "*"
 ws:
   hibernate:
-    enable: true
+    enable: false
     show-sql: true
   jpa:
-    enable: true
+    enable: false
     show-sql: true
