@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/12/6 10:17
  */
 public class PageConvertUtils {
 

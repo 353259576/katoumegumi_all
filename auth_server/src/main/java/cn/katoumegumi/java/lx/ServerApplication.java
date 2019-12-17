@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/11/29 17:19
  */
 @SpringBootApplication
 public class ServerApplication {

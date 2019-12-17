@@ -5,7 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/12/4 10:20
  */
 @Data
 //@ConfigurationProperties(prefix = "ws.mybatis",ignoreInvalidFields = true)

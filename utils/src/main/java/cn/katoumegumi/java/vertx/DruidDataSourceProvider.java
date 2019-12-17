@@ -10,7 +10,6 @@ import java.sql.SQLException;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/11/19 10:12
  */
 public class DruidDataSourceProvider implements DataSourceProvider {
     @Override

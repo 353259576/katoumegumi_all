@@ -7,7 +7,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/11/22 9:30
  */
 @EnableAdminServer
 @SpringBootApplication

@@ -6,6 +6,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +21,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@ConditionalOnBean(DataSource.class)
+@ConditionalOnClass({DataSource.class,SessionFactory.class})
 @AutoConfigureAfter({DataSourceConfig.class})
 @ConditionalOnProperty(name = "ws.hibernate.enable",havingValue = "true")
 @EnableConfigurationProperties(value = {HibernateWsProperties.class})

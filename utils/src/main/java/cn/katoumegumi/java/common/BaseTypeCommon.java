@@ -5,7 +5,6 @@ import java.util.Set;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/12/6 10:49
  */
 public class BaseTypeCommon {
 

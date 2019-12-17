@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/12/2 16:40
  */
 @EnableWebFluxSecurity
 public class SecurityConfig {

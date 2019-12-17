@@ -5,7 +5,6 @@ import javax.ws.rs.Path;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/11/20 16:26
  */
 public interface IndexService {
     @Path("index")

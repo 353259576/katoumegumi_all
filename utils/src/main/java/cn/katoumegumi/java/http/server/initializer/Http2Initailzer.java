@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.http.server.initializer;
 
-import cn.katoumegumi.java.http.example.http2.helloworld.server.HelloWorldHttp1Handler;
 import cn.katoumegumi.java.http.server.handle.Http2RequestHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -82,7 +81,7 @@ public class Http2Initailzer extends ChannelInitializer<SocketChannel> {
                        System.out.println(protocol);
                        ctx.pipeline().addLast(new HttpServerCodec());
                        ctx.pipeline().addLast(new HttpObjectAggregator(1024*1024));
-                       ctx.pipeline().addLast(new HelloWorldHttp1Handler("this is http1.1 protocol"));
+                       //ctx.pipeline().addLast(new HelloWorldHttp1Handler("this is http1.1 protocol"));
 
                    }
                }
@@ -118,7 +117,7 @@ public class Http2Initailzer extends ChannelInitializer<SocketChannel> {
                    HttpMessage httpMessage = (HttpMessage)msg;
                    System.err.println("Directly talking: " + httpMessage.protocolVersion() + " (no upgrade was attempted)");
                    ChannelPipeline pipeline = ctx.pipeline();
-                   pipeline.addAfter(ctx.name(), null, new HelloWorldHttp1Handler("Direct. No Upgrade Attempted."));
+                   //pipeline.addAfter(ctx.name(), null, new HelloWorldHttp1Handler("Direct. No Upgrade Attempted."));
                    pipeline.replace(this, null, new HttpObjectAggregator(1024*1024));
                    ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
                }

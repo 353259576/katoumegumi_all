@@ -10,7 +10,6 @@ import javax.ws.rs.Path;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/11/20 8:58
  */
 //@FeignClient(value = "lxSpring")
 //@DubboTransported(protocol = "rest")

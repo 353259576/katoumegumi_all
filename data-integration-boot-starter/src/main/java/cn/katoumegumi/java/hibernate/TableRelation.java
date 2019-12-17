@@ -6,7 +6,6 @@ import javax.persistence.criteria.JoinType;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/12/9 14:53
  */
 @Data
 public class TableRelation {

@@ -16,7 +16,6 @@ import java.util.Map;
 
 /**
  * @author ws
- * @date Created by ws on 2019/11/19 11:03
  */
 @Slf4j
 public class SQLModelUtils {

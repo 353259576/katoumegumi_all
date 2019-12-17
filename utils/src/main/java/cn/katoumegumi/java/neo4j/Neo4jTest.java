@@ -6,7 +6,6 @@ import java.net.URI;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/12/3 17:07
  */
 public class Neo4jTest {
 

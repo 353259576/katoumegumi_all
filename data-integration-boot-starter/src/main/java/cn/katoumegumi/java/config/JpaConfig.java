@@ -4,6 +4,7 @@ import cn.katoumegumi.java.properties.JpaWsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +25,7 @@ import javax.sql.DataSource;
 //@EnableTransactionManagement
 //@EntityScan(basePackages = {"${ws.jpa.}"})
 @Slf4j
-@ConditionalOnBean(DataSource.class)
+@ConditionalOnClass({DataSource.class,EntityManagerFactory.class})
 @AutoConfigureAfter({HibernateConfig.class})
 @EnableConfigurationProperties({JpaWsProperties.class})
 @ConditionalOnProperty(prefix = "ws.jpa",name = "enable",havingValue = "true")

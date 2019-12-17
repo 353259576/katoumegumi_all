@@ -15,7 +15,6 @@ import java.util.List;
 
 /**
  * @author ws
- * @date Created by Administrator on 2019/12/11 15:43
  */
 @Controller
 public class Index2Conftoller {
