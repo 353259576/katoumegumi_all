@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>ws_all</artifactId>
-        <groupId>com.ws.java</groupId>
+        <groupId>cn.katoumegumi.java</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -182,7 +182,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.ws.java</groupId>
+            <groupId>cn.katoumegumi.java</groupId>
             <artifactId>data-integration-boot-starter</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

@@ -1,6 +1,6 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.ws.java.config.DataSourceConfig,\
-  com.ws.java.config.mybatis.MybatisPlusLanguageDriverAutoConfiguration,\
-  com.ws.java.config.mybatis.MybatisPlusAutoConfiguration,\
-  com.ws.java.config.HibernateConfig,\
-  com.ws.java.config.JpaConfig,\
-  com.ws.java.config.RedisConfig
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=cn.katoumegumi.java.config.DataSourceConfig,\
+  cn.katoumegumi.java.config.mybatis.MybatisPlusLanguageDriverAutoConfiguration,\
+  cn.katoumegumi.java.config.mybatis.MybatisPlusAutoConfiguration,\
+  cn.katoumegumi.java.config.HibernateConfig,\
+  cn.katoumegumi.java.config.JpaConfig,\
+  cn.katoumegumi.java.config.RedisConfig

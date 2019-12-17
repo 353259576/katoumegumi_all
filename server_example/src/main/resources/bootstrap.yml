@@ -59,19 +59,19 @@ ws:
       index1: 100
     #password: 199645
   hibernate:
-    dialect: com.ws.java.hibernate.ExtendedMySQLDialect
-    scan-package: com.ws.java.lx
+    dialect: cn.katoumegumi.java.hibernate.ExtendedMySQLDialect
+    scan-package: cn.katoumegumi.java.lx
     enable: true
     show-sql: true
   jpa:
-    packages-to-scan: com.ws.java.lx
+    packages-to-scan: cn.katoumegumi.java.lx
     generate-ddl: true
     enable: true
-    mapping-resources: com.ws.java.lx.jpa
+    mapping-resources: cn.katoumegumi.java.lx.jpa
     show-sql: true
   mybatis:
     enable: true
-    type-aliases-package: com.ws.java.lx.model
+    type-aliases-package: cn.katoumegumi.java.lx.model
 dubbo:
   cloud:
     subscribed-services: "*"
