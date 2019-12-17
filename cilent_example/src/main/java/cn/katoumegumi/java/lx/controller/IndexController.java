@@ -34,9 +34,6 @@ public class IndexController {
     //@Autowired
     private IndexService indexFeign;
 
-    /*@Value(value = "${localcachevalue:0}")
-    private Integer value;*/
-
     @Value("${jasypt.encryptor.password:0}")
     private String value;
 
