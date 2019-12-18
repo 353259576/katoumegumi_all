@@ -1,12 +1,17 @@
 package cn.katoumegumi.java.http.reptile;
 
 import cn.katoumegumi.java.common.FileUtils;
+import cn.katoumegumi.java.common.WsImageUtils;
 import cn.katoumegumi.java.common.WsStreamUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.http.client.model.HttpRequestBody;
+import cn.katoumegumi.java.http.client.model.HttpResponseBody;
+import cn.katoumegumi.java.http.client.model.HttpResponseTask;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public class HttpUrlRelolver {
@@ -21,7 +26,7 @@ public class HttpUrlRelolver {
 
 
     public static void main(String[] args) throws Exception {
-        /*new Thread(()->{
+        new Thread(()->{
             while (true){
                 try {
                     Thread.sleep(20000);
@@ -53,7 +58,7 @@ public class HttpUrlRelolver {
                         System.out.println(httpResponseBody.getUrl()+"查询成功");
                         if(httpResponseBody.getContentType().contains("text")){
                             String html = httpResponseBody.getResponseBodyToString();
-                            if(StringUtils.isNotBlank(html)){
+                            if(WsStringUtils.isNotBlank(html)){
                                 getUrlFromHtml(html,httpResponseBody.getUrl());
                             }
                         }else if(httpResponseBody.getContentType().contains("image")){
@@ -62,7 +67,7 @@ public class HttpUrlRelolver {
                     }else {
                         System.out.println(httpResponseBody.getUrl()+"查询错误");
                         String html = httpResponseBody.getResponseBodyToString();
-                        if(StringUtils.isNotBlank(html)){
+                        if(WsStringUtils.isNotBlank(html)){
                             getUrlFromHtml(html,httpResponseBody.getUrl());
                         }
                     }
@@ -75,9 +80,9 @@ public class HttpUrlRelolver {
             }catch (Exception e){
                 e.printStackTrace();
             }
-        }*/
+        }
 
-        File file = FileUtils.createFile("F:\\网页\\首页 - 半次元 - ACG爱好者社区.html");
+        /*File file = FileUtils.createFile("F:\\网页\\首页 - 半次元 - ACG爱好者社区.html");
         ByteBuffer byteBuffer = WsStreamUtils.InputStreamToByteBuffer(new FileInputStream(file));
         byte bytes[] = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);
@@ -86,7 +91,7 @@ public class HttpUrlRelolver {
         getUrlFromHtml(str,"https://bcy.net");
         for(String url :queue){
             System.out.println(url);
-        }
+        }*/
     }
 
 

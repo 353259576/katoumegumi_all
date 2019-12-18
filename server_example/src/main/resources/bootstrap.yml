@@ -23,7 +23,7 @@ spring:
     name: lxSpring
   profiles:
     active: dev
-ws:
+megumi:
   datasource:
     enable: true
     druids:

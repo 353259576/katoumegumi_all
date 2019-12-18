@@ -46,7 +46,7 @@ management:
     web:
       exposure:
         include: "*"
-ws:
+megumi:
   hibernate:
     enable: false
     show-sql: true

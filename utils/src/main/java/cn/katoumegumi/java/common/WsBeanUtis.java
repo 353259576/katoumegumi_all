@@ -20,8 +20,8 @@ import java.util.*;
 public class WsBeanUtis {
 
     public static void main(String[] args) {
-        LocalDateTime localDateTime = LocalDateTime.now();
-        System.out.println(objectToT(System.currentTimeMillis(),LocalDateTime.class));
+        Date date = new Date();
+        System.out.println(objectToT(date,LocalDate.class));
         /*int rgb = -1;
         int b = (rgb << 24);
         b = b >>> 24;
@@ -778,7 +778,10 @@ public class WsBeanUtis {
             }else if(tClass==Date.class || tClass == LocalDateTime.class || tClass == LocalDate.class){
                 if(object.getClass()==Date.class) {
                     if(tClass == LocalDate.class){
-                        return (T)LocalDate.ofInstant(((Date) object).toInstant(), ZoneId.systemDefault());
+                        Date date = (Date)object;
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(date);
+                        return (T)LocalDate.ofYearDay(calendar.get(Calendar.YEAR),calendar.get(Calendar.DAY_OF_YEAR));
                     }
                     if(tClass == LocalDateTime.class){
                         return (T)LocalDateTime.ofInstant(((Date) object).toInstant(),ZoneId.systemDefault());
@@ -809,7 +812,9 @@ public class WsBeanUtis {
                         return null;
                     }else {
                         if(tClass == LocalDate.class){
-                            return (T)LocalDate.ofInstant(date.toInstant(),ZoneId.systemDefault());
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(date);
+                            return (T)LocalDate.ofYearDay(calendar.get(Calendar.YEAR),calendar.get(Calendar.DAY_OF_YEAR));
                         }
                         if(tClass == LocalDateTime.class){
                             return (T) LocalDateTime.ofInstant(date.toInstant(),ZoneId.systemDefault());

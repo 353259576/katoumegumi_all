@@ -28,7 +28,7 @@ import javax.sql.DataSource;
 @ConditionalOnClass({DataSource.class,EntityManagerFactory.class})
 @AutoConfigureAfter({HibernateConfig.class})
 @EnableConfigurationProperties({JpaWsProperties.class})
-@ConditionalOnProperty(prefix = "ws.jpa",name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "megumi.jpa",name = "enable",havingValue = "true")
 //@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory",transactionManagerRef = "jpaTransactionManager",basePackages = "com.ws.java.lx.jpa")
 public class JpaConfig {
 

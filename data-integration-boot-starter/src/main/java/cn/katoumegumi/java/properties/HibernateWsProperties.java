@@ -10,7 +10,7 @@ import java.util.List;
  * @author ws
  */
 @Data
-@ConfigurationProperties(prefix = "ws.hibernate",ignoreUnknownFields = true,ignoreInvalidFields = true)
+@ConfigurationProperties(prefix = "megumi.hibernate",ignoreUnknownFields = true,ignoreInvalidFields = true)
 public class HibernateWsProperties {
     private boolean enable = false;
     private List<String> scanPackage;

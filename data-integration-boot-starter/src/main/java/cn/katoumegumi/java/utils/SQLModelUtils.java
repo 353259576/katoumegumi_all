@@ -26,6 +26,9 @@ public class SQLModelUtils {
     }
 
 
+
+
+
     public static String modelToSqlSelect(Class clazz){
 
         String tableName = getTableName(clazz);

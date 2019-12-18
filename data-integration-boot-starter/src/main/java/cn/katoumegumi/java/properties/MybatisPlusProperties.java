@@ -42,7 +42,7 @@ import java.util.stream.Stream;
  */
 @Data
 @Accessors(chain = true)
-@ConfigurationProperties(prefix = "ws.mybatis")
+@ConfigurationProperties(prefix = "megumi.mybatis")
 public class MybatisPlusProperties {
 
     private boolean enable;

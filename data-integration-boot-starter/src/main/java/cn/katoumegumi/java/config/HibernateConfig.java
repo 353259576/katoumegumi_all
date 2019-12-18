@@ -23,7 +23,7 @@ import java.util.Properties;
 @Configuration
 @ConditionalOnClass({DataSource.class,SessionFactory.class})
 @AutoConfigureAfter({DataSourceConfig.class})
-@ConditionalOnProperty(name = "ws.hibernate.enable",havingValue = "true")
+@ConditionalOnProperty(name = "megumi.hibernate.enable",havingValue = "true")
 @EnableConfigurationProperties(value = {HibernateWsProperties.class})
 public class HibernateConfig {
     @Resource

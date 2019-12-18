@@ -9,7 +9,7 @@ import java.util.Map;
  * @author ws
  */
 @Data
-@ConfigurationProperties(value = "ws.redis",ignoreInvalidFields = true)
+@ConfigurationProperties(value = "megumi.redis",ignoreInvalidFields = true)
 public class RedisWsProperties {
 
     private String enable;

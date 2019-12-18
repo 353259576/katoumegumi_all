@@ -32,7 +32,7 @@ import java.util.Map;
 @ConditionalOnClass({DataSource.class, EmbeddedDatabaseType.class})
 //@AutoConfigureBefore({DataSourceAutoConfiguration.class})
 //@ConditionalOnExpression("'${ws.datasource.enable}'.equals('true')")
-@ConditionalOnProperty(prefix = "ws.datasource",value = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "megumi.datasource",value = "enable",havingValue = "true")
 @EnableTransactionManagement(proxyTargetClass = true)
 @EnableConfigurationProperties(value = {DruidDataSourcePropertiesList.class})
 public class DataSourceConfig {

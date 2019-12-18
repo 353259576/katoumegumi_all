@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author ws
  */
 @Data
-@ConfigurationProperties(prefix = "ws.jpa",ignoreInvalidFields = true)
+@ConfigurationProperties(prefix = "megumi.jpa",ignoreInvalidFields = true)
 public class JpaWsProperties {
     private boolean enable;
     private String packagesToScan;

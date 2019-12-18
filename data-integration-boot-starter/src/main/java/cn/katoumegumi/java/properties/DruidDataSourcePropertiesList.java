@@ -9,7 +9,7 @@ import java.util.List;
  * @author ws
  */
 @Data
-@ConfigurationProperties(value = "ws.datasource")
+@ConfigurationProperties(value = "megumi.datasource")
 public class DruidDataSourcePropertiesList {
     private boolean enable = false;
     private boolean seataEnable = false;

@@ -29,7 +29,7 @@ import java.util.*;
 @Slf4j
 @Configuration
 @EnableConfigurationProperties(value = {RedisWsProperties.class})
-@ConditionalOnProperty(prefix = "ws.redis",value = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "megumi.redis",value = "enable",havingValue = "true")
 public class RedisConfig {
 
     @Resource

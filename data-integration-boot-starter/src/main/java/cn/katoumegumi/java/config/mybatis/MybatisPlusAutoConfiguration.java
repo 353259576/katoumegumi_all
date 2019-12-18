@@ -91,7 +91,7 @@ import java.util.stream.Stream;
 @ConditionalOnSingleCandidate(DataSource.class)
 @EnableConfigurationProperties(MybatisPlusProperties.class)
 @AutoConfigureAfter({DataSourceAutoConfiguration.class,MybatisPlusLanguageDriverAutoConfiguration.class})
-@ConditionalOnProperty(prefix = "ws.mybatis", value = {"enable"}, havingValue = "true")
+@ConditionalOnProperty(prefix = "megumi.mybatis", value = {"enable"}, havingValue = "true")
 public class MybatisPlusAutoConfiguration implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(MybatisPlusAutoConfiguration.class);
