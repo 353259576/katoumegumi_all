@@ -4,7 +4,7 @@ spring:
   data:
     jdbc:
       repositories:
-        enabled: false
+        enabled: true
   cloud:
     nacos:
       discovery:
@@ -23,6 +23,15 @@ spring:
     name: lxSpring
   profiles:
     active: dev
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: true
+    properties:
+      hibernate.format_sql: true
+      hibernate.naming.physical-strategy: org.hibernate.scripts.model.naming.PhysicalNamingStrategyStandardImpl
 megumi:
   datasource:
     enable: true

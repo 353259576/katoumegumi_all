@@ -277,7 +277,6 @@
                     <encoding>UTF-8</encoding>
                     <docencoding>UTF-8</docencoding>
                     <skip>true</skip>
-                    <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
             </plugin>
             <!--gpg加密插件-->
