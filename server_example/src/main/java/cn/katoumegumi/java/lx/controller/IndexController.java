@@ -3,6 +3,7 @@ package cn.katoumegumi.java.lx.controller;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
+import cn.katoumegumi.java.hibernate.HibernateTransactional;
 import cn.katoumegumi.java.hibernate.MySearchList;
 import cn.katoumegumi.java.lx.mapper.UserMapper;
 import cn.katoumegumi.java.lx.model.UserDetails;
@@ -39,8 +40,6 @@ public class IndexController implements IndexService {
     @Autowired
     private PlatformTransactionManager platformTransactionManager;
 
-    @Autowired
-    private HibernateDao hibernateTemplate;
 
     @Autowired
     private UserJpaDao userJpaDao;
@@ -53,12 +52,14 @@ public class IndexController implements IndexService {
 
     @Autowired
     private HibernateDao hibernateDao;
+
+
     @Override
     @RequestMapping(value = "index")
     @DataBase(dataBaseName = "master")
     //@Cacheable(cacheNames = "index1")
     //@GlobalTransactional
-    @Transactional(rollbackFor = RuntimeException.class)
+    @HibernateTransactional(rollbackFor = RuntimeException.class)
     @Path("/index")
     @GET
     public String index() throws Exception{
@@ -92,19 +93,24 @@ public class IndexController implements IndexService {
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
                 .sort("userDetails.sex","DESC");
-        List<User> list = userService.selectList(mySearchList);
-        List<User> list1 = hibernateDao.selectValueToList(mySearchList,User.class);
-
-        System.out.println(JSON.toJSONString(list1));
+        //List<User> list = userService.selectList(mySearchList);
+        //List list = new ArrayList();
+        List<User> list = hibernateDao.selectValueToList(mySearchList,User.class);
+        list.get(0).setPassword("修改了一下");
+        System.out.println(JSON.toJSONString(list));
 
                 //userJpaDao.findAll();
         //System.out.println(list.size());
-        user.setName("你好");
+        user.setName("你好hibernate");
         user.setPassword("世界");
-        hibernateTemplate.insertObject(user);
+        //hibernateTemplate.insertObject(user);
         //hibernateDao.insertObject(user);
-        //throw new RuntimeException("你好错误");
-        Iterator<User> iterator = list1.iterator();
+        User user2 = new User();
+        user2.setName("你好jpa");
+        user2.setPassword("世界");
+        //throw new RuntimeException("你好错误");\
+        //userJpaDao.saveAndFlush(user2);
+        Iterator<User> iterator = list.iterator();
         Flux.<User>create(userFluxSink -> {
             while (iterator.hasNext()){
                 userFluxSink.next(iterator.next());
@@ -116,7 +122,8 @@ public class IndexController implements IndexService {
         }).subscribe(user1 -> {
             System.out.println("?");
         });
-        String str = JSON.toJSONString(list1);
+        String str = JSON.toJSONString(list);
+        //throw new RuntimeException("人为错误");
         return str;
     }
 

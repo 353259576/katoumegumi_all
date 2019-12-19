@@ -23,7 +23,6 @@ import java.util.Properties;
 @Configuration
 @ConditionalOnClass({DataSource.class,SessionFactory.class})
 @AutoConfigureAfter({DataSourceConfig.class})
-@ConditionalOnProperty(name = "megumi.hibernate.enable",havingValue = "true")
 @EnableConfigurationProperties(value = {HibernateWsProperties.class})
 public class HibernateConfig {
     @Resource
@@ -54,13 +53,12 @@ public class HibernateConfig {
     }
 
 
+    //@Primary
     @Bean
+    @ConditionalOnProperty(name = "megumi.hibernate.enable",havingValue = "true")
     public LocalSessionFactoryBean localSessionFactoryBean(){
         LocalSessionFactoryBean localSessionFactoryBean = new LocalSessionFactoryBean();
         localSessionFactoryBean.setDataSource(dataSource);
-        /*localSessionFactoryBean.setConfigLocation(new ClassPathResource("hibernate.cfg.xml"));*/
-        //localSessionFactoryBean.setPackagesToScan("com.ws.java.model.*.model.po");
-        //localSessionFactoryBean.setAnnotatedPackages("com.ws.java.model.*.model.po");
         String scans[] = hibernateWsProperties.getScanPackage().toArray(new String[hibernateWsProperties.getScanPackage().size()]);
         localSessionFactoryBean.setPackagesToScan(scans);
         localSessionFactoryBean.setAnnotatedPackages(scans);
@@ -69,20 +67,23 @@ public class HibernateConfig {
     }
 
 
-    @Primary
+    /*@Primary
     @Bean(name = "hibernateSessionFactory")
+    @ConditionalOnBean({LocalSessionFactoryBean.class})
     public SessionFactory sessionFactory(@Qualifier("localSessionFactoryBean")LocalSessionFactoryBean localSessionFactoryBean){
         return localSessionFactoryBean.getObject();
-    }
+    }*/
 
 
     @Bean
-    public HibernateTemplate hibernateTemplate(@Qualifier("hibernateSessionFactory") SessionFactory sessionFactory){
+    @ConditionalOnBean({LocalSessionFactoryBean.class})
+    public HibernateTemplate hibernateTemplate(SessionFactory sessionFactory){
         HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
         return hibernateTemplate;
     }
 
     @Bean
+    @ConditionalOnBean({LocalSessionFactoryBean.class})
     public HibernateDao hibernateDao(HibernateTemplate hibernateTemplate){
         HibernateDao hibernateDao = new HibernateDao();
         hibernateDao.setHibernateTemplate(hibernateTemplate);
@@ -90,9 +91,9 @@ public class HibernateConfig {
     }
 
 
-    @Primary
-    @Bean
-    public HibernateTransactionManager hibernateTransactionManager(@Qualifier("hibernateSessionFactory") SessionFactory sessionFactory) {
+    @Bean(name = "hibernateTransactionManager")
+    @ConditionalOnBean({LocalSessionFactoryBean.class})
+    public HibernateTransactionManager hibernateTransactionManager(SessionFactory sessionFactory) {
         HibernateTransactionManager hibernateTransactionManager = new HibernateTransactionManager(sessionFactory);
         return hibernateTransactionManager;
     }

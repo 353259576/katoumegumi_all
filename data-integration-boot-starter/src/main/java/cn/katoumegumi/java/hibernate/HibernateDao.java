@@ -13,13 +13,14 @@ import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
 import org.hibernate.sql.JoinType;
 import org.springframework.orm.hibernate5.HibernateTemplate;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
 //@Repository("hibernateDao")
-@Transactional(rollbackFor = RuntimeException.class)
+@HibernateTransactional
 public class HibernateDao {
 	
 	//@Resource
@@ -52,7 +53,7 @@ public class HibernateDao {
 		}
 		return;
 	}
-	
+
 	public void deleteObject(String hsql) throws HibernateException {
 		Session session = null;
 		try {
@@ -355,10 +356,11 @@ public class HibernateDao {
 	}
 
 
-	public <T> List<T> selectTbyT(T t){
+	public <T> List<T> selectTbyT(T t) {
 		hibernateObjectConvertor(t);
 		return hibernateTemplate.findByExample(t);
 	}
+
 
 	public Integer update(String hql,Map map){
 		/*hibernateTemplate.execute(new HibernateCallback<T>() {

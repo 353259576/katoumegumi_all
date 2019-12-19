@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.utils;
 
+import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -24,6 +25,8 @@ public class SQLModelUtils {
     public static void main(String[] args) {
 
     }
+
+
 
 
 

@@ -20,8 +20,8 @@ import java.util.*;
 public class WsBeanUtis {
 
     public static void main(String[] args) {
-        Date date = new Date();
-        System.out.println(objectToT(date,LocalDate.class));
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+        System.out.println(objectToT(date, LocalDate.class));
         /*int rgb = -1;
         int b = (rgb << 24);
         b = b >>> 24;
@@ -775,7 +775,7 @@ public class WsBeanUtis {
                 }else {
                     return (T) WsStringUtils.anyToString(object);
                 }
-            }else if(tClass==Date.class || tClass == LocalDateTime.class || tClass == LocalDate.class){
+            }else if(tClass==Date.class || tClass == LocalDateTime.class || tClass == LocalDate.class || tClass == java.sql.Date.class){
                 if(object.getClass()==Date.class) {
                     if(tClass == LocalDate.class){
                         Date date = (Date)object;
@@ -786,27 +786,11 @@ public class WsBeanUtis {
                     if(tClass == LocalDateTime.class){
                         return (T)LocalDateTime.ofInstant(((Date) object).toInstant(),ZoneId.systemDefault());
                     }
+                    if(tClass == java.sql.Date.class){
+                        return (T)new java.sql.Date(((Date) object).getTime());
+                    }
                     return (T) object;
                 }else {
-                    /*Date date = null;
-                    try {
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-                        date = simpleDateFormat.parse(String.valueOf(object));
-                    }catch (Exception e){
-                        try {
-                            Long dateNum = Long.valueOf(new BigDecimal(String.valueOf(object)).longValue());
-                            if(dateNum != null){
-                                return (T)new Date(dateNum);
-                            }else {
-                                return null;
-                            }
-                        }catch (Exception e1){
-                            return (T) WsDateUtils.objectToDate(object);
-                        }
-
-                    }*/
-
-
                     Date date = WsDateUtils.objectToDate(object);
                     if(date == null){
                         return null;
@@ -818,6 +802,9 @@ public class WsBeanUtis {
                         }
                         if(tClass == LocalDateTime.class){
                             return (T) LocalDateTime.ofInstant(date.toInstant(),ZoneId.systemDefault());
+                        }
+                        if(tClass == java.sql.Date.class){
+                            return (T)new java.sql.Date(date.getTime());
                         }
                         return (T)date;
                     }
@@ -852,6 +839,10 @@ public class WsBeanUtis {
             }
         }
         return list1;
+    }
+
+    public static boolean isBaseType(Class clazz){
+        return BaseTypeCommon.CLASS_SET.contains(clazz);
     }
 
 }

@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.config;
 
+import cn.katoumegumi.java.properties.HibernateWsProperties;
 import cn.katoumegumi.java.properties.JpaWsProperties;
+import cn.katoumegumi.java.utils.WsPlatformTransactionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -9,14 +11,17 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Resource;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.util.Properties;
 
 //import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 
@@ -36,10 +41,33 @@ public class JpaConfig {
     private DataSource dataSource;
 
     @Resource
+    private HibernateWsProperties hibernateWsProperties;
+
+    @Resource
     private JpaWsProperties jpaWsProperties;
 
     public JpaConfig(){
 
+    }
+
+    private Properties createProperties(){
+        Properties properties = new Properties();
+        if(hibernateWsProperties.getHbm2ddl() != null){
+            properties.setProperty("hibernate.hbm2ddl.auto",hibernateWsProperties.getHbm2ddl());
+        }
+        if(hibernateWsProperties.getDialect() != null){
+            properties.setProperty("hibernate.dialect",hibernateWsProperties.getDialect().getName());
+        }
+        properties.setProperty("hibernate.show_sql",hibernateWsProperties.getShowSql().toString());
+        properties.setProperty("hibernate.format_sql",hibernateWsProperties.getFormatSql().toString());
+        properties.setProperty("hibernate.use_sql_comments",hibernateWsProperties.getUseSqlComments().toString());
+        if(hibernateWsProperties.getDefaultSchema() != null){
+            properties.setProperty("hibernate.default_schema",hibernateWsProperties.getDefaultSchema());
+        }
+        if(hibernateWsProperties.getFactoryClass() != null){
+            properties.setProperty("transaction.factory_class",hibernateWsProperties.getFactoryClass().getName());
+        }
+        return properties;
     }
 
 
@@ -67,8 +95,9 @@ public class JpaConfig {
 
 
 
+    @Primary
     @Bean(name = "entityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(LocalSessionFactoryBean localSessionFactoryBean){
+    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(){
         HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
         hibernateJpaVendorAdapter.setGenerateDdl(jpaWsProperties.getGenerateDdl());
         hibernateJpaVendorAdapter.setPrepareConnection(jpaWsProperties.getPrepareConnection());
@@ -77,15 +106,19 @@ public class JpaConfig {
         localContainerEntityManagerFactoryBean.setDataSource(dataSource);
         localContainerEntityManagerFactoryBean.setJpaVendorAdapter(hibernateJpaVendorAdapter);
         localContainerEntityManagerFactoryBean.setPackagesToScan(jpaWsProperties.getPackagesToScan().split(","));
-        localContainerEntityManagerFactoryBean.setJpaProperties(localSessionFactoryBean.getHibernateProperties());
+        localContainerEntityManagerFactoryBean.setJpaProperties(createProperties());
         return localContainerEntityManagerFactoryBean;
     }
 
-    @Bean(name = "jpaTransactionManager")
-    public JpaTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory){
+    @Bean
+    @Primary
+    public PlatformTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory){
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactory);
         return jpaTransactionManager;
+        /*WsPlatformTransactionManager wsPlatformTransactionManager = new WsPlatformTransactionManager();
+        wsPlatformTransactionManager.setJpaTransactionManager(jpaTransactionManager);
+        return wsPlatformTransactionManager;*/
     }
 
 

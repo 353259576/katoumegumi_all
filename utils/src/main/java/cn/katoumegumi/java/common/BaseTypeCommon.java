@@ -1,5 +1,8 @@
 package cn.katoumegumi.java.common;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -7,11 +10,6 @@ import java.util.Set;
  * @author ws
  */
 public class BaseTypeCommon {
-
-
-    public static void main(String[] args) {
-        System.out.println(Integer.class.getGenericInterfaces());
-    }
 
     public static final Set<Class> CLASS_SET = new HashSet<>(18);
 
@@ -49,6 +47,14 @@ public class BaseTypeCommon {
 
     public static final Class STRING_CLASS = String.class;
 
+    public static final Class DATE_CALSS = Date.class;
+
+    public static final Class SQL_DATA_CALSS = java.sql.Date.class;
+
+    public static final Class LOCAL_DATE_CLASS = LocalDate.class;
+
+    public static final Class LOCAL_DATE_TIME_CLASS = LocalDateTime.class;
+
 
     static {
         CLASS_SET.add(BYTE_CLASS);
@@ -68,6 +74,11 @@ public class BaseTypeCommon {
         CLASS_SET.add(STRING_CLASS);
         CLASS_SET.add(LONG_CLASS);
         CLASS_SET.add(W_LONG_CLASS);
+        CLASS_SET.add(DATE_CALSS);
+        CLASS_SET.add(SQL_DATA_CALSS);
+        CLASS_SET.add(LOCAL_DATE_CLASS);
+        CLASS_SET.add(LOCAL_DATE_TIME_CLASS);
+
     }
 
 
