@@ -8,6 +8,10 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -31,77 +35,115 @@ public class SQLModelUtils {
 
 
 
-
     public static String modelToSqlSelect(Class clazz){
 
-        String tableName = getTableName(clazz);
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(clazz);
+        String tableName = fieldColumnRelationMapper.getTableName();
         log.info("获取当前表名为："+tableName);
-        Map<String,List<String>> map = getModelSqlIdAndColumn(clazz);
-        String ids = WsStringUtils.jointListString(map.get("id"),",");
-        String columns = WsStringUtils.jointListString(map.get("column"),",");
-        return "select "+ids+","+columns+" from "+tableName;
-
-    }
-
-    public static String modelToSqlInsert(Class clazz){
-
-        String tableName = getTableName(clazz);
-        log.info("获取当前表名为："+tableName);
-        Map<String,List<String>> map = getModelSqlIdAndColumn(clazz);
-        String ids = WsStringUtils.jointListString(map.get("id"),",");
-        String columns = WsStringUtils.jointListString(map.get("columns"),",");
-        return "select "+ids+","+columns;
-
-    }
-
-
-
-
-    public static String getTableName(Class clazz){
-        Annotation annotation = clazz.getAnnotation(TableName.class);
-        if(annotation == null){
-            throw new RuntimeException("未知的表");
+        List<String> list = new ArrayList<>();
+        for(FieldColumnRelation fieldColumnRelation:fieldColumnRelationMapper.getIdSet()){
+            list.add(fieldColumnRelation.getColumnName());
         }
-        TableName tableNameA = (TableName)annotation;
-        return tableNameA.value();
+        for(FieldColumnRelation fieldColumnRelation:fieldColumnRelationMapper.getFieldColumnRelations()){
+            list.add(fieldColumnRelation.getColumnName());
+        }
+
+        return "select "+WsStringUtils.jointListString(list,",") + " from "+tableName;
+
     }
 
 
-    public static Map<String,List<String>> getModelSqlIdAndColumn(Class clazz){
-        Field[] fields = WsFieldUtils.getFieldAll(clazz);
-        if(fields == null || fields.length == 0){
-            throw new RuntimeException("没有字段");
+
+
+
+
+
+    public static FieldColumnRelationMapper analysisClassRelation(Class clazz){
+        Annotation annotation = clazz.getAnnotation(Entity.class);
+        if(annotation != null){
+            return hibernateAnalysisClassRelation(clazz);
         }
-        List<String> columns = new ArrayList<>(fields.length - 1);
-        List<String> ids = new ArrayList<>(1);
-        for(Field field : fields){
-            TableField tableField = field.getAnnotation(TableField.class);
-            if(tableField == null){
-                TableId tableId = field.getAnnotation(TableId.class);
-                if(tableId == null) {
-                    continue;
+        annotation = clazz.getAnnotation(TableName.class);
+        if(annotation != null){
+            return myatisPlusAnalysisClassRelation(clazz);
+        }
+        return null;
+    }
+
+
+    public static FieldColumnRelationMapper hibernateAnalysisClassRelation(Class clazz){
+        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
+        Table table = (Table) clazz.getAnnotation(Table.class);
+        fieldColumnRelationMapper.setTableName(table.name());
+        log.info("表名为："+table.name());
+        Field fields[] = WsFieldUtils.getFieldAll(clazz);
+        for (Field field : fields){
+            if(WsBeanUtis.isBaseType(field.getType())){
+                boolean isId = false;
+                Id id = field.getAnnotation(Id.class);
+                if(id != null){
+                    isId = true;
                 }
-                if(tableId.value() == null){
-                    ids.add(field.getName());
+                Column column = field.getAnnotation(Column.class);
+                FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
+                fieldColumnRelation.setFieldClass(field.getType());
+                fieldColumnRelation.setFieldName(field.getName());
+                if(column == null){
+                    fieldColumnRelation.setColumnName(WsStringUtils.camel_case(field.getName()));
                 }else {
-                    ids.add(tableId.value());
+                    fieldColumnRelation.setColumnName(column.name());
                 }
-                continue;
-
+                fieldColumnRelation.setId(isId);
+                if(isId){
+                    fieldColumnRelationMapper.getIdSet().add(fieldColumnRelation);
+                }else {
+                    fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
+                }
+            }else {
+                fieldColumnRelationMapper.getJoinMap().put(field.getName(),field.getType());
             }
-            columns.add(tableField.value());
         }
-        Map<String,List<String>> map = new HashMap<>();
-        map.put("id",ids);
-        map.put("column",columns);
-        return map;
+        return fieldColumnRelationMapper;
     }
 
 
-
-
-
-
+    public static FieldColumnRelationMapper myatisPlusAnalysisClassRelation(Class clazz){
+        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
+        TableName table = (TableName) clazz.getAnnotation(TableName.class);
+        fieldColumnRelationMapper.setTableName(table.value());
+        log.info("表名为："+table.value());
+        Field fields[] = WsFieldUtils.getFieldAll(clazz);
+        for (Field field : fields){
+            if(WsBeanUtis.isBaseType(field.getType())){
+                boolean isId = false;
+                TableId id = field.getAnnotation(TableId.class);
+                if(id != null){
+                    isId = true;
+                }
+                TableField column = field.getAnnotation(TableField.class);
+                FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
+                fieldColumnRelation.setFieldClass(field.getType());
+                fieldColumnRelation.setFieldName(field.getName());
+                if(column == null){
+                    fieldColumnRelation.setColumnName(WsStringUtils.camel_case(field.getName()));
+                }else {
+                    fieldColumnRelation.setColumnName(column.value());
+                }
+                fieldColumnRelation.setId(isId);
+                if(isId){
+                    fieldColumnRelationMapper.getIdSet().add(fieldColumnRelation);
+                }else {
+                    fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
+                }
+            }else {
+                fieldColumnRelationMapper.getJoinMap().put(field.getName(),field.getType());
+            }
+        }
+        return fieldColumnRelationMapper;
+    }
 
 
 }
+
+
+

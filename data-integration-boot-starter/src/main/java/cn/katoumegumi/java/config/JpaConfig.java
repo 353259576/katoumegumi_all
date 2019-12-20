@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.config;
 
+import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.properties.HibernateWsProperties;
 import cn.katoumegumi.java.properties.JpaWsProperties;
 import cn.katoumegumi.java.utils.WsPlatformTransactionManager;
@@ -103,6 +104,10 @@ public class JpaConfig {
         hibernateJpaVendorAdapter.setGenerateDdl(jpaWsProperties.getGenerateDdl());
         hibernateJpaVendorAdapter.setPrepareConnection(jpaWsProperties.getPrepareConnection());
         hibernateJpaVendorAdapter.setShowSql(jpaWsProperties.getShowSql());
+        hibernateJpaVendorAdapter.setDatabase(jpaWsProperties.getDatabase());
+        if(WsStringUtils.isNotBlank(jpaWsProperties.getDatabasePlatform())) {
+            hibernateJpaVendorAdapter.setDatabasePlatform(jpaWsProperties.getDatabasePlatform());
+        }
         LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
         localContainerEntityManagerFactoryBean.setDataSource(dataSource);
         localContainerEntityManagerFactoryBean.setJpaVendorAdapter(hibernateJpaVendorAdapter);

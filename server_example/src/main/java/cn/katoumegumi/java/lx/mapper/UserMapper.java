@@ -12,5 +12,5 @@ import java.util.Map;
 @Transactional
 public interface UserMapper extends BaseMapper<User> {
 
-    public IPage<User> selectUserList(Page<User> page,@Param("map") Map map);
+    public IPage<User> selectUserList(Page<User> page,@Param("user") User user);
 }

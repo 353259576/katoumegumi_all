@@ -13,10 +13,13 @@
         u.password
     </sql>
 
-    <select id="selectUserList" resultMap="userBaseResultMap">
+    <select id="selectUserList" resultMap="userBaseResultMap" parameterType="user">
         select
         <include refid="baseUserSql"></include>
         from ws_user u
+        <where>
+            u.name = #{user.name}
+        </where>
     </select>
 
 

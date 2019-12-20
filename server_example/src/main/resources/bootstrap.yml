@@ -81,6 +81,8 @@ megumi:
   mybatis:
     enable: true
     type-aliases-package: cn.katoumegumi.java.lx.model
+    configuration:
+      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 dubbo:
   cloud:
     subscribed-services: "*"

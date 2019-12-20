@@ -2,6 +2,7 @@ package cn.katoumegumi.java.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.orm.jpa.vendor.Database;
 
 /**
  * @author ws
@@ -15,4 +16,7 @@ public class JpaWsProperties {
     private Boolean generateDdl = true;
     private Boolean prepareConnection = true;
     private Boolean showSql = false;
+    private Database database = Database.MYSQL;
+    private String databasePlatform;
+
 }

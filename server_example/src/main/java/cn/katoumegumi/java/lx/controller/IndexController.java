@@ -8,6 +8,7 @@ import cn.katoumegumi.java.hibernate.MySearchList;
 import cn.katoumegumi.java.lx.mapper.UserMapper;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.service.UserService;
+import cn.katoumegumi.java.utils.SQLModelUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -20,6 +21,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
@@ -27,6 +29,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service(version = "1.0.0",protocol = {"dubbo","rest"})
 @RestController
@@ -124,14 +127,49 @@ public class IndexController implements IndexService {
         });
         String str = JSON.toJSONString(list);
         //throw new RuntimeException("人为错误");
+
         return str;
     }
 
 
-    public static void main(String[] args) {
+    @ResponseBody
+    @RequestMapping("index3")
+    public String index3(){
         User user = new User();
+        user.setName("你好");
+        Page<User> page = new Page();
+        page.setCurrent(1L);
+        IPage<User> iPage = userMapper.selectUserList(page,user);
+        return JSON.toJSONString(iPage);
+    }
+
+
+    public static void main(String[] args) {
+        /*User user = new User();
         UserDetails userDetails = new UserDetails();
         user.setUserDetails(userDetails);
-        System.out.println(WsFieldUtils.getFieldName(user.getUserDetails()::getId));
+        System.out.println(WsFieldUtils.getFieldName(user.getUserDetails()::getId));*/
+        System.out.println(SQLModelUtils.modelToSqlSelect(User.class));
+        long startTime = System.currentTimeMillis();
+        List<Integer> list = new ArrayList<>();
+        List<Integer> list1 = new ArrayList<>();
+        for(int i = 0 ; i < 100000; i++){
+            list.add(i);
+            if(i % 2== 0){
+                list1.add(i);
+            }
+        }
+        //Set<Integer> set = new HashSet<>(list1);
+
+        list = list.parallelStream().filter(num->{
+            //return !set.contains(num);
+            return !list1.parallelStream().anyMatch(integer -> {
+                return num.equals(integer);
+            });
+        }).collect(Collectors.toList());
+        long endTime = System.currentTimeMillis();
+        System.out.println(endTime - startTime);
+        System.out.println(JSON.toJSONString(list));
+
     }
 }
