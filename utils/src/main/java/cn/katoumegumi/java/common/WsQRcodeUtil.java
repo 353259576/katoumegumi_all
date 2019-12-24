@@ -114,11 +114,14 @@ public class WsQRcodeUtil {
                         //startTime = System.currentTimeMillis();
                         byte bytes[] = WsImageUtils.bufferedImageToByteArray(newBackgroundBufferedImage,"png");
                         lock.lock();
-                        ZipEntry zipEntry = new ZipEntry(k+"你好.png");
-                        zipOutputStream.putNextEntry(zipEntry);
-                        zipOutputStream.write(bytes,0,bytes.length);
-                        zipOutputStream.closeEntry();
-                        lock.unlock();
+                        try {
+                            ZipEntry zipEntry = new ZipEntry(k+"你好.png");
+                            zipOutputStream.putNextEntry(zipEntry);
+                            zipOutputStream.write(bytes,0,bytes.length);
+                            zipOutputStream.closeEntry();
+                        }finally {
+                            lock.unlock();
+                        }
                         WsImageUtils.byteToFile(bytes,k+"","png","F:/imageHandle/QRcode/");
                         //endTime = System.currentTimeMillis();
                         //log.info("图片保存花费时间为：{}",endTime - startTime);
