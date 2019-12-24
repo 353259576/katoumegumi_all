@@ -14,7 +14,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
-public abstract class JpaService<K ,P ,D extends JpaDao<K,P>> implements PagingService<P>{
+public abstract class AbstractJpaService<K ,P ,D extends JpaDao<K,P>> implements PagingService<P>{
     private D entityDao;
     @PersistenceContext
     private EntityManager em;

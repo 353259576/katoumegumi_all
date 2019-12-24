@@ -287,7 +287,7 @@ public class MybatisPlusAutoConfiguration implements InitializingBean {
             BeanWrapper beanWrapper = new BeanWrapperImpl(MapperScannerConfigurer.class);
             Stream.of(beanWrapper.getPropertyDescriptors())
                 // Need to mybatis-spring 2.0.2+
-                .filter(x -> x.getName().equals("lazyInitialization")).findAny()
+                .filter(x -> "lazyInitialization".equals(x.getName())).findAny()
                 .ifPresent(x -> builder.addPropertyValue("lazyInitialization", "${mybatis.lazy-initialization:false}"));
             registry.registerBeanDefinition(MapperScannerConfigurer.class.getName(), builder.getBeanDefinition());
         }
