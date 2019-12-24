@@ -53,7 +53,7 @@ public class SQLModelUtils {
         List<MySearch> orderSearches = mySearchList.getOrderSearches();
         List<String> list1 = new ArrayList<>();
         for(MySearch mySearch:orderSearches){
-            list1.add(createWhereColumn(baseTableName,mySearch) +"  "+ mySearch.getValue());
+            list1.add(createWhereColumn(baseTableName,mySearch) +" "+ mySearch.getValue());
         }
         if(list1.size() > 0){
             selectSql.append("order by ")
