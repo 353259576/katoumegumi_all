@@ -27,6 +27,8 @@ public class SQLModelUtils {
 
     public static Map<Class<?>,FieldColumnRelationMapper> mapperMap = new HashMap<>();
 
+    private Map<String,FieldColumnRelationMapper> map = new HashMap<>();
+
     public static void main(String[] args) {
         System.out.println(createJoinSql("nickName","id","jointable","joinnickname","id"));
     }
@@ -34,9 +36,9 @@ public class SQLModelUtils {
 
 
 
-    public static String searchListBaseSQLProcessor(MySearchList mySearchList){
+    public String searchListBaseSQLProcessor(MySearchList mySearchList){
         Map<String,FieldColumnRelationMapper> map = new HashMap<>();
-        StringBuilder selectSql = new StringBuilder(modelToSqlSelect(mySearchList.getMainClass(), map));
+        StringBuilder selectSql = new StringBuilder(modelToSqlSelect(mySearchList.getMainClass()));
         List<TableRelation> list = mySearchList.getJoins();
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mySearchList.getMainClass());
         String baseTableName = fieldColumnRelationMapper.getNickName();
@@ -45,86 +47,104 @@ public class SQLModelUtils {
         }
         if(!(mySearchList.getAll().isEmpty()&&mySearchList.getAnds().isEmpty()&&mySearchList.getOrs().isEmpty())){
             selectSql.append(" where ");
-            List<String> whereStrings = searchListWhereSqlProcessor(mySearchList,true,baseTableName,map);
+            List<String> whereStrings = searchListWhereSqlProcessor(mySearchList,baseTableName,map);
             selectSql.append(WsStringUtils.jointListString(whereStrings, " and "));
+        }
+        List<MySearch> orderSearches = mySearchList.getOrderSearches();
+        List<String> list1 = new ArrayList<>();
+        for(MySearch mySearch:orderSearches){
+            list1.add(createWhereColumn(baseTableName,mySearch) +" "+ mySearch.getValue());
+        }
+        if(list1.size() > 0){
+            selectSql.append("order by ")
+                    .append(WsStringUtils.jointListString(list1," and "));
         }
         return selectSql.toString();
 
     }
 
-    public static String createWhereColumn(String prefix,String value,Map<String,FieldColumnRelationMapper> map){
-        if(value.contains(".")){
+    public String createWhereColumn(String prefix,MySearch mySearch){
+        String tableColumn;
+        String prefixString;
+        String fieldName;
+        FieldColumnRelationMapper mapper;
+        if(mySearch.getFieldName().contains(".")){
             StringBuilder stringBuffer = new StringBuilder();
             stringBuffer.append('`');
             StringBuilder fieldPrefix = new StringBuilder();
                     fieldPrefix.append(prefix);
-            String[] strs = value.split("[.]");
+            String[] strs = mySearch.getFieldName().split("[.]");
             int i = 0;
             for(; i < strs.length - 1;i++){
                 fieldPrefix.append('.');
                 fieldPrefix.append(strs[i]);
             }
-            FieldColumnRelationMapper mapper = map.get(fieldPrefix.toString());
+            prefixString = fieldPrefix.toString();
+            fieldName = strs[i];
+            mapper = map.get(prefixString);
             stringBuffer.append(fieldPrefix);
             stringBuffer.append('`');
             stringBuffer.append('.')
                     .append('`')
-                    .append(mapper.getFieldColumnRelationByField(strs[i]).getColumnName())
+                    .append(mapper.getFieldColumnRelationByField(fieldName).getColumnName())
                     .append('`');
-            return stringBuffer.toString();
+            tableColumn = stringBuffer.toString();
         }else {
+            prefixString = prefix;
+            fieldName = mySearch.getFieldName();
             StringBuilder stringBuffer = new StringBuilder();
-            FieldColumnRelationMapper mapper = map.get(prefix);
+            mapper = map.get(prefixString);
             stringBuffer.append('`')
                     .append(prefix)
                     .append('`')
                     .append('.')
                     .append('`')
-                    .append(mapper.getFieldColumnRelationByField(value).getColumnName())
+                    .append(mapper.getFieldColumnRelationByField(fieldName).getColumnName())
                     .append('`');
-            return stringBuffer.toString();
+            tableColumn = stringBuffer.toString();
         }
+        return tableColumn;
     }
 
 
-    public static List<String> searchListWhereSqlProcessor(MySearchList mySearchList,boolean isAnd,String prefix,Map<String,FieldColumnRelationMapper> map){
+    public List<String> searchListWhereSqlProcessor(MySearchList mySearchList,String prefix,Map<String,FieldColumnRelationMapper> map){
         Iterator<MySearch> iterator = mySearchList.iterator();
         List<String> stringList = new ArrayList<>();
         while (iterator.hasNext()) {
             MySearch mySearch = iterator.next();
             switch (mySearch.getOperator()) {
                 case EQ:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " = ? ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " = ? ");
                     break;
                 case LIKE:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " = ? ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " = ? ");
                     break;
                 case GT:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " > ? ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " > ? ");
                     break;
                 case LT:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " < ? ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " < ? ");
                     break;
                 case GTE:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " >= ? ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " >= ? ");
                     break;
                 case LTE:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " <= ? ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " <= ? ");
                     break;
                 case IN:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " in(?) ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " in(?) ");
                     break;
                 case NIN:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " not in(?) ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " not in(?) ");
                     break;
                 case NULL:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " is null ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " is null ");
                     break;
                 case NOTNULL:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " is not null ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " is not null ");
                     break;
                 case NE:
-                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName(),map) + " != ? ");
+                    stringList.add(createWhereColumn(prefix,mySearch) + " != ? ");
                     break;
                 case SORT:
                     break;
@@ -136,7 +156,7 @@ public class SQLModelUtils {
         List<MySearchList> ands = mySearchList.getAnds();
         if(!WsListUtils.isEmpty(ands)){
             for(MySearchList searchList:ands){
-                List<String> andStrings = searchListWhereSqlProcessor(searchList,true,prefix,map);
+                List<String> andStrings = searchListWhereSqlProcessor(searchList,prefix,map);
                 if(andStrings.size() != 0) {
                     if (andStrings.size() == 1) {
                         stringList.add(WsStringUtils.jointListString(andStrings, " and "));
@@ -150,7 +170,7 @@ public class SQLModelUtils {
         List<MySearchList> ors = mySearchList.getOrs();
         if(!WsListUtils.isEmpty(ors)) {
             for (MySearchList searchList : ors) {
-                List<String> orStrings = searchListWhereSqlProcessor(searchList, false,prefix,map);
+                List<String> orStrings = searchListWhereSqlProcessor(searchList,prefix,map);
                 if(orStrings.size() != 0) {
                     if (orStrings.size() == 1) {
                         stringList.add(WsStringUtils.jointListString(orStrings, " or "));
@@ -207,7 +227,7 @@ public class SQLModelUtils {
     }
 
 
-    public static String modelToSqlSelect(Class<?> clazz,Map<String,FieldColumnRelationMapper> map){
+    public String modelToSqlSelect(Class<?> clazz){
 
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(clazz);
         assert fieldColumnRelationMapper != null;
@@ -217,7 +237,7 @@ public class SQLModelUtils {
         log.info("获取当前表名为："+tableName);
         List<String> list = new ArrayList<>();
         List<String> joinString = new ArrayList<>();
-        selectJoin(tableNickName,list,joinString,fieldColumnRelationMapper,map);
+        selectJoin(tableNickName,list,joinString,fieldColumnRelationMapper);
 
         return "select "+WsStringUtils.jointListString(list,",") + " from "+tableName+" "+fieldColumnRelationMapper.getNickName() + " "+WsStringUtils.jointListString(joinString," ");
 
@@ -227,7 +247,7 @@ public class SQLModelUtils {
     /**
      * 拼接查询
      */
-    private static void selectJoin(String tableNickName,List<String> selectString,List<String> joinString,FieldColumnRelationMapper fieldColumnRelationMapper,Map<String,FieldColumnRelationMapper> map){
+    private void selectJoin(String tableNickName,List<String> selectString,List<String> joinString,FieldColumnRelationMapper fieldColumnRelationMapper){
 
         for(FieldColumnRelation fieldColumnRelation:fieldColumnRelationMapper.getIdSet()){
             selectString.add(createOneSelectColumn(tableNickName,fieldColumnRelation.getColumnName(),fieldColumnRelation.getFieldName()));
@@ -243,7 +263,7 @@ public class SQLModelUtils {
                 map.put(lastTableNickName,mapper);
                 //joinString.add("inner join " + mapper.getTableName() + " `" + lastTableNickName + "` on `" + tableNickName + "`.`"+fieldJoinClass.getAnotherJoinColumn() + "` = `"+lastTableNickName+"`.`"+fieldJoinClass.getJoinColumn()+"`");
                 joinString.add(createJoinSql(tableNickName,fieldJoinClass.getAnotherJoinColumn(),mapper.getTableName(),lastTableNickName,fieldJoinClass.getJoinColumn()));
-                selectJoin(lastTableNickName,selectString,joinString,mapper,map);
+                selectJoin(lastTableNickName,selectString,joinString,mapper);
             }
         }
     }

@@ -159,7 +159,7 @@ public class IndexController implements IndexService {
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
                 .sort("userDetails.sex","DESC");
-        System.out.println(SQLModelUtils.searchListBaseSQLProcessor(mySearchList));
+        System.out.println(new SQLModelUtils().searchListBaseSQLProcessor(mySearchList));
         long startTime = System.currentTimeMillis();
         List<Integer> list = new ArrayList<>();
         List<Integer> list1 = new ArrayList<>();
