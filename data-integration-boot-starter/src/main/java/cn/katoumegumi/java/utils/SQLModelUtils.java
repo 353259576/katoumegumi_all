@@ -44,55 +44,84 @@ public class SQLModelUtils {
         }
         if(!(mySearchList.getAll().isEmpty()&&mySearchList.getAnds().isEmpty()&&mySearchList.getOrs().isEmpty())){
             selectSql += " where ";
-            List<String> whereStrings = searchListWhereSqlProcessor(mySearchList,true);
+            List<String> whereStrings = searchListWhereSqlProcessor(mySearchList,true,baseTableName);
             selectSql += WsStringUtils.jointListString(whereStrings," and ");
         }
         return selectSql;
 
     }
 
+    public static String createWhereColumn(String prefix,String value){
+        if(value.contains(".")){
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append('`')
+                    .append(prefix);
+            String strs[] = value.split("[.]");
+            int i = 0;
+            for(; i < strs.length - 1;i++){
+                stringBuffer.append('.');
+                stringBuffer.append(strs[i]);
+            }
+            stringBuffer.append('`');
+            stringBuffer.append('.')
+                    .append('`')
+                    .append(strs[i])
+                    .append('`');
+            return stringBuffer.toString();
+        }else {
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append('`')
+                    .append(prefix)
+                    .append('`')
+                    .append('.')
+                    .append('`')
+                    .append(value)
+                    .append('`');
+            return stringBuffer.toString();
+        }
+    }
 
-    public static List<String> searchListWhereSqlProcessor(MySearchList mySearchList,boolean isAnd){
+
+    public static List<String> searchListWhereSqlProcessor(MySearchList mySearchList,boolean isAnd,String prefix){
         Iterator<MySearch> iterator = mySearchList.iterator();
         List<String> stringList = new ArrayList<>();
         while (iterator.hasNext()) {
             MySearch mySearch = iterator.next();
             switch (mySearch.getOperator()) {
                 case EQ:
-                    stringList.add(mySearch.getFieldName() + " = ? ");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " = ? ");
                     break;
                 case LIKE:
-                    stringList.add(mySearch.getFieldName() + " = %?%");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " = ? ");
                     break;
                 case GT:
-                    stringList.add(mySearch.getFieldName() + " > " + "?");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " > ? ");
                     break;
                 case LT:
-                    stringList.add(mySearch.getFieldName() + " < " + "?");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " < ? ");
                     break;
                 case GTE:
-                    stringList.add(mySearch.getFieldName() + " >= " + "?");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " >= ? ");
                     break;
                 case LTE:
-                    stringList.add(mySearch.getFieldName() + " <= " + "?");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " <= ? ");
                     break;
                 case IN:
-                    stringList.add(mySearch.getFieldName() + " in (?)");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " in(?) ");
                     break;
                 case NIN:
-                    stringList.add(mySearch.getFieldName() + "not in (?)");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " not in(?) ");
                     break;
                 case NULL:
-                    stringList.add(mySearch.getFieldName() + "is null");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " is null ");
                     break;
                 case NOTNULL:
-                    stringList.add(mySearch.getFieldName() + "is not null");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " is not null ");
                     break;
                 case NE:
-                    stringList.add(mySearch.getFieldName() + " != ?");
+                    stringList.add(createWhereColumn(prefix,mySearch.getFieldName()) + " != ? ");
                     break;
                 case SORT:
-
                     break;
                 default:
                     break;
@@ -102,7 +131,7 @@ public class SQLModelUtils {
         List<MySearchList> ands = mySearchList.getAnds();
         if(!WsListUtils.isEmpty(ands)){
             for(MySearchList searchList:ands){
-                List<String> andStrings = searchListWhereSqlProcessor(searchList,true);
+                List<String> andStrings = searchListWhereSqlProcessor(searchList,true,prefix);
                 if(andStrings.size() != 0) {
                     if (andStrings.size() == 1) {
                         stringList.add(WsStringUtils.jointListString(andStrings, " and "));
@@ -116,7 +145,7 @@ public class SQLModelUtils {
         List<MySearchList> ors = mySearchList.getOrs();
         if(!WsListUtils.isEmpty(ors)) {
             for (MySearchList searchList : ors) {
-                List<String> orStrings = searchListWhereSqlProcessor(searchList, false);
+                List<String> orStrings = searchListWhereSqlProcessor(searchList, false,prefix);
                 if(orStrings.size() != 0) {
                     if (orStrings.size() == 1) {
                         stringList.add(WsStringUtils.jointListString(orStrings, " or "));
