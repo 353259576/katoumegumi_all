@@ -2,7 +2,9 @@ package cn.katoumegumi.java.utils;
 
 import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.hibernate.MySearch;
 import cn.katoumegumi.java.hibernate.MySearchList;
 import cn.katoumegumi.java.hibernate.TableRelation;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -11,12 +13,11 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author ws
@@ -33,14 +34,100 @@ public class SQLModelUtils {
 
 
 
-    public static void MySearchListBaseSQLProcessor(MySearchList mySearchList){
+    public static String searchListBaseSQLProcessor(MySearchList mySearchList){
         String selectSql = modelToSqlSelect(mySearchList.getMainClass());
         List<TableRelation> list = mySearchList.getJoins();
-        String baseTableName = mySearchList.getMainClass().getName();
-        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mySearchList.getMainClass().getName());
-        for(TableRelation tableRelation:list){
-            selectSql += " inner join  `"+ tableRelation.getJoinTableName()+"` `" + tableRelation.getJoinTableNickName()+"` on `";
+        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mySearchList.getMainClass());
+        String baseTableName = fieldColumnRelationMapper.getNickName();
+        for(TableRelation tableRelation:list) {
+            selectSql += createJoinSql(baseTableName+"."+tableRelation.getTableNickName(), tableRelation.getTableColumn(), baseTableName+"."+tableRelation.getJoinTableName(), tableRelation.getJoinTableNickName(), tableRelation.getJoinTableColumn());
         }
+        if(!(mySearchList.getAll().isEmpty()&&mySearchList.getAnds().isEmpty()&&mySearchList.getOrs().isEmpty())){
+            selectSql += " where ";
+            List<String> whereStrings = searchListWhereSqlProcessor(mySearchList,true);
+            selectSql += WsStringUtils.jointListString(whereStrings," and ");
+        }
+        return selectSql;
+
+    }
+
+
+    public static List<String> searchListWhereSqlProcessor(MySearchList mySearchList,boolean isAnd){
+        Iterator<MySearch> iterator = mySearchList.iterator();
+        List<String> stringList = new ArrayList<>();
+        while (iterator.hasNext()) {
+            MySearch mySearch = iterator.next();
+            switch (mySearch.getOperator()) {
+                case EQ:
+                    stringList.add(mySearch.getFieldName() + " = ? ");
+                    break;
+                case LIKE:
+                    stringList.add(mySearch.getFieldName() + " = %?%");
+                    break;
+                case GT:
+                    stringList.add(mySearch.getFieldName() + " > " + "?");
+                    break;
+                case LT:
+                    stringList.add(mySearch.getFieldName() + " < " + "?");
+                    break;
+                case GTE:
+                    stringList.add(mySearch.getFieldName() + " >= " + "?");
+                    break;
+                case LTE:
+                    stringList.add(mySearch.getFieldName() + " <= " + "?");
+                    break;
+                case IN:
+                    stringList.add(mySearch.getFieldName() + " in (?)");
+                    break;
+                case NIN:
+                    stringList.add(mySearch.getFieldName() + "not in (?)");
+                    break;
+                case NULL:
+                    stringList.add(mySearch.getFieldName() + "is null");
+                    break;
+                case NOTNULL:
+                    stringList.add(mySearch.getFieldName() + "is not null");
+                    break;
+                case NE:
+                    stringList.add(mySearch.getFieldName() + " != ?");
+                    break;
+                case SORT:
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        List<MySearchList> ands = mySearchList.getAnds();
+        if(!WsListUtils.isEmpty(ands)){
+            for(MySearchList searchList:ands){
+                List<String> andStrings = searchListWhereSqlProcessor(searchList,true);
+                if(andStrings.size() != 0) {
+                    if (andStrings.size() == 1) {
+                        stringList.add(WsStringUtils.jointListString(andStrings, " and "));
+                    } else {
+                        stringList.add("(" + WsStringUtils.jointListString(andStrings, " and ") + ")");
+                    }
+                }
+
+            }
+        }
+        List<MySearchList> ors = mySearchList.getOrs();
+        if(!WsListUtils.isEmpty(ors)) {
+            for (MySearchList searchList : ors) {
+                List<String> orStrings = searchListWhereSqlProcessor(searchList, false);
+                if(orStrings.size() != 0) {
+                    if (orStrings.size() == 1) {
+                        stringList.add(WsStringUtils.jointListString(orStrings, " or "));
+                    } else {
+                        stringList.add("(" + WsStringUtils.jointListString(orStrings, " or ") + ")");
+                    }
+                }
+
+            }
+        }
+        return stringList;
     }
 
 

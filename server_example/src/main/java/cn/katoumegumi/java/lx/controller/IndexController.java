@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import javax.persistence.criteria.JoinType;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.time.LocalDateTime;
@@ -98,7 +99,7 @@ public class IndexController implements IndexService {
                 .sort("userDetails.sex","DESC");
         //List<User> list = userService.selectList(mySearchList);
         //List list = new ArrayList();
-        List<User> list = hibernateDao.selectValueToList(mySearchList,User.class);
+        List<User> list = userService.selectList(mySearchList);
         list.get(0).setPassword("修改了一下");
         System.out.println(JSON.toJSONString(list));
 
@@ -149,7 +150,16 @@ public class IndexController implements IndexService {
         UserDetails userDetails = new UserDetails();
         user.setUserDetails(userDetails);
         System.out.println(WsFieldUtils.getFieldName(user.getUserDetails()::getId));*/
-        System.out.println(SQLModelUtils.modelToSqlSelect(User.class));
+        User user = new User();
+        MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class);
+        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
+                MySearchList.newMySearchList().eq(user::getPassword,"世界")
+        )
+                .eq(user::getId,1)
+                .lte(user::getCreateDate,"2019-12-13")
+                .sort("id","ASC")
+                .sort("userDetails.sex","DESC");
+        System.out.println(SQLModelUtils.searchListBaseSQLProcessor(mySearchList));
         long startTime = System.currentTimeMillis();
         List<Integer> list = new ArrayList<>();
         List<Integer> list1 = new ArrayList<>();
@@ -161,7 +171,7 @@ public class IndexController implements IndexService {
         }
         //Set<Integer> set = new HashSet<>(list1);
 
-        list = list.parallelStream().filter(num->{
+        /*list = list.parallelStream().filter(num->{
             //return !set.contains(num);
             return !list1.parallelStream().anyMatch(integer -> {
                 return num.equals(integer);
@@ -169,7 +179,7 @@ public class IndexController implements IndexService {
         }).collect(Collectors.toList());
         long endTime = System.currentTimeMillis();
         System.out.println(endTime - startTime);
-        System.out.println(JSON.toJSONString(list));
+        System.out.println(JSON.toJSONString(list));*/
 
     }
 }
