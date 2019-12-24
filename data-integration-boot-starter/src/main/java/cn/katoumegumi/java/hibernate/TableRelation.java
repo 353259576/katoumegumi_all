@@ -14,9 +14,13 @@ public class TableRelation {
 
     private String tableName;
 
+    private String tableNickName;
+
     private String tableColumn;
 
     private String joinTableName;
+
+    private String joinTableNickName;
 
     private String joinTableColumn;
 

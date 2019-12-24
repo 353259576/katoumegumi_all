@@ -27,4 +27,8 @@ public class UserDetails {
 
     @Column(name = "sex")
     private String sex;
+
+    @OneToOne
+    @JoinColumn(name = "id",referencedColumnName = "user_details_id")
+    private UserDetailsRemake userDetailsRemake;
 }
