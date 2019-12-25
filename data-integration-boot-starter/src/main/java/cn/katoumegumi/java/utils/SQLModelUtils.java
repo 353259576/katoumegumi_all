@@ -47,7 +47,18 @@ public class SQLModelUtils {
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mySearchList.getMainClass());
         String baseTableName = fieldColumnRelationMapper.getNickName();
         for(TableRelation tableRelation:list) {
-            selectSql.append(createJoinSql(baseTableName + "." + tableRelation.getTableNickName(), tableRelation.getTableColumn(), baseTableName + "." + tableRelation.getJoinTableName(), tableRelation.getJoinTableNickName(), tableRelation.getJoinTableColumn()));
+            String tableNickName;
+            FieldColumnRelationMapper mapper = analysisClassRelation(tableRelation.getJoinTableClass());
+            String joinTableNickName = baseTableName + "." + tableRelation.getJoinTableNickName();
+            map.put(joinTableNickName,mapper);
+            if(WsStringUtils.isBlank(tableRelation.getTableNickName())){
+                tableNickName = baseTableName;
+            }else {
+                tableNickName = baseTableName + "." + tableRelation.getTableNickName();
+            }
+            FieldColumnRelationMapper baseMapper = map.get(tableNickName);
+
+            selectSql.append(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName()));
         }
         if(!(mySearchList.getAll().isEmpty()&&mySearchList.getAnds().isEmpty()&&mySearchList.getOrs().isEmpty())){
             selectSql.append(" where ");
@@ -213,6 +224,9 @@ public class SQLModelUtils {
                 break;
             case SORT:
                 tableColumn.append(' ');
+                tableColumn.append(mySearch.getValue());
+                break;
+            case SQL:
                 tableColumn.append(mySearch.getValue());
                 break;
             default:

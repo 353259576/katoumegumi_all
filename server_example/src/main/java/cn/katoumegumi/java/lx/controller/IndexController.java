@@ -12,6 +12,7 @@ import cn.katoumegumi.java.lx.service.UserService;
 import cn.katoumegumi.java.utils.SQLModelUtils;
 import cn.katoumegumi.java.vertx.DruidDataSourceProvider;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import cn.katoumegumi.java.lx.service.IndexService;
@@ -37,6 +38,7 @@ import reactor.core.publisher.Flux;
 import javax.persistence.criteria.JoinType;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -162,10 +164,12 @@ public class IndexController implements IndexService {
 
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class);
+        mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
                 MySearchList.newMySearchList().eq(user::getPassword,"世界")
         )
                 .eq(user::getId,1)
+                .eq("userDetails11.sex","男")
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
                 .sort("userDetails.sex","DESC");
@@ -184,12 +188,15 @@ public class IndexController implements IndexService {
         long startTime = System.currentTimeMillis();
         List<Integer> list = new ArrayList<>();
         List<Integer> list1 = new ArrayList<>();
-        for(int i = 0 ; i < 100000; i++){
+        for(int i = 0 ; i < 100000; i++) {
             list.add(i);
-            if(i % 2== 0){
+            if (i % 2 == 0) {
                 list1.add(i);
             }
         }
+
+
+
         //Set<Integer> set = new HashSet<>(list1);
 
         /*list = list.parallelStream().filter(num->{
@@ -292,6 +299,12 @@ public class IndexController implements IndexService {
                                 ResultSet resultSet = event.result();
 
                                 System.out.println(resultSet.getNumRows());
+                                List<JsonObject> list = resultSet.getRows();
+                                for(JsonObject o:list){
+                                    Map map = o.getMap();
+                                    System.out.println(JSON.toJSONString(map));
+
+                                }
                                 System.out.println(JSON.toJSONString(resultSet.getColumnNames()));
                             }else {
                                 event.cause().printStackTrace();

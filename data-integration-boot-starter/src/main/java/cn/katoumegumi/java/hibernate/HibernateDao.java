@@ -90,15 +90,13 @@ public class HibernateDao {
         Integer firstResult = Integer.parseInt(Long.valueOf((pageVO.getCurrent() - 1) * pageVO.getSize()).toString());
         List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria, firstResult, Integer.parseInt(Long.valueOf(pageVO.getSize()).toString()));
         Integer count = Integer.valueOf(0);
-        if (list == null || list.size() == 0) {
+        if (list.size() == 0) {
             count = list.size();
         } else {
             detachedCriteria.setProjection(Projections.rowCount());
             List counts = hibernateTemplate.findByCriteria(detachedCriteria,0,1);
-            if (counts != null) {
-                count = Integer.parseInt(counts.get(0).toString());
-            }
-        }
+			count = Integer.parseInt(counts.get(0).toString());
+		}
 
         pageVO.setTotal(count);
         pageVO.setRecords(list);

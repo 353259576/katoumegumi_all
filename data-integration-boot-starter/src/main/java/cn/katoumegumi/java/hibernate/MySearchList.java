@@ -268,16 +268,19 @@ public class MySearchList {
         return this;
     }
 
-    public <T> MySearchList join(JoinType joinType,Class mainTable, Class joinTable, SupplierFunc<T> mainColumn, SupplierFunc<T> joinColumn) {
+    public <T> MySearchList join(String tableNickName,Class<?> joinTableClass,String joinTableNickName,String tableColumn,String joinColumn) {
         TableRelation tableRelation = new TableRelation();
-        tableRelation.setTableName(mainTable.getSimpleName());
-        tableRelation.setJoinTableName(joinTable.getSimpleName());
-        tableRelation.setTableColumn(WsFieldUtils.getFieldName(mainColumn));
-        tableRelation.setJoinTableColumn(WsFieldUtils.getFieldName(joinColumn));
-        tableRelation.setJoinType(joinType);
+        tableRelation.setJoinTableClass(joinTableClass);
+        tableRelation.setTableNickName(tableNickName);
+        tableRelation.setJoinTableNickName(joinTableNickName);
+        tableRelation.setTableColumn(tableColumn);
+        tableRelation.setJoinTableColumn(joinColumn);
         joins.add(tableRelation);
         return this;
     }
+
+
+
 
     public Map<Class, String> getTableAndNickNameMap() {
         return tableAndNickNameMap;

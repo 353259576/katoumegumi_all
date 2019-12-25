@@ -12,7 +12,7 @@ public class TableRelation {
 
     private JoinType joinType;
 
-    private String tableName;
+    private Class<?> joinTableClass;
 
     private String tableNickName;
 
