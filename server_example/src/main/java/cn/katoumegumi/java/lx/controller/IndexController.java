@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
+import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
@@ -9,12 +10,20 @@ import cn.katoumegumi.java.lx.mapper.UserMapper;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.service.UserService;
 import cn.katoumegumi.java.utils.SQLModelUtils;
+import cn.katoumegumi.java.vertx.DruidDataSourceProvider;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import cn.katoumegumi.java.lx.service.IndexService;
 import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.model.User;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.sql.*;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -150,6 +159,7 @@ public class IndexController implements IndexService {
         UserDetails userDetails = new UserDetails();
         user.setUserDetails(userDetails);
         System.out.println(WsFieldUtils.getFieldName(user.getUserDetails()::getId));*/
+
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class);
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
@@ -159,7 +169,18 @@ public class IndexController implements IndexService {
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
                 .sort("userDetails.sex","DESC");
-        System.out.println(new SQLModelUtils().searchListBaseSQLProcessor(mySearchList));
+        SQLModelUtils sqlModelUtils = new SQLModelUtils();
+        String str = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
+        System.out.println(str);
+        long start = System.nanoTime();
+        SQLModelUtils modelUtils = new SQLModelUtils();
+        str = modelUtils.searchListBaseSQLProcessor(mySearchList);
+        long end = System.nanoTime();
+        mysqlClientTest(mySearchList);
+        System.out.println(str);
+        System.out.println(end - start);
+
+
         long startTime = System.currentTimeMillis();
         List<Integer> list = new ArrayList<>();
         List<Integer> list1 = new ArrayList<>();
@@ -182,4 +203,146 @@ public class IndexController implements IndexService {
         System.out.println(JSON.toJSONString(list));*/
 
     }
+
+
+
+
+
+
+
+    public static void mysqlClientTest(MySearchList mySearchList){
+        /*Vertx vertx = VertUtils.vertx;
+        MySQLConnectOptions mySQLConnectOptions = new MySQLConnectOptions();
+        mySQLConnectOptions.setHost("localhost");
+        mySQLConnectOptions.setPort(3360);
+        mySQLConnectOptions.setUser("root");
+        mySQLConnectOptions.setPassword("199645");
+        mySQLConnectOptions.setDatabase("pigxx");
+        mySQLConnectOptions.setCharset("utf8mb4");
+        mySQLConnectOptions.setSsl(false);
+
+        Map<String,String> map = new HashMap<>();
+        map.put("zeroDateTimeBehavior","convertToNull");
+        map.put("useJDBCCompliantTimezoneShift","true");
+        map.put("useLegacyDatetimeCode","false");
+        map.put("serverTimezone","GMT%2B8");
+        map.put("allowMultiQueries","true");
+        map.put("allowPublicKeyRetrieval","true");
+        mySQLConnectOptions.setProperties(map);
+        PoolOptions poolOptions = new PoolOptions();
+
+        MySQLPool mySQLPool = MySQLPool.pool(vertx,mySQLConnectOptions,poolOptions);
+
+        mySQLPool.getConnection(new Handler<AsyncResult<SqlConnection>>() {
+            @Override
+            public void handle(AsyncResult<SqlConnection> event) {
+                if(event.succeeded()){
+                    SqlConnection sqlConnection = event.result();
+                    sqlConnection.query("select * from sys_user", new Handler<AsyncResult<RowSet<Row>>>() {
+                        @Override
+                        public void handle(AsyncResult<RowSet<Row>> event) {
+                            if(event.succeeded()){
+                                RowSet<Row> rows = event.result();
+                                System.out.println(rows.rowCount());
+                                System.out.println(JSON.toJSONString(rows.columnsNames()));
+                            }else {
+                                event.cause().printStackTrace();
+                            }
+                        }
+                    });
+                }else {
+                    event.cause().printStackTrace();
+                }
+            }
+        });*/
+
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.put("provider_class","cn.katoumegumi.java.vertx.DruidDataSourceProvider");
+        jsonObject.put("url","jdbc:mysql://127.0.0.1:3306/wslx?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&allowMultiQueries=true&allowPublicKeyRetrieval=true");
+        jsonObject.put("user","root");
+        jsonObject.put("password","199645");
+        jsonObject.put("driver_class","com.mysql.cj.jdbc.Driver");
+        SQLModelUtils sqlModelUtils = new SQLModelUtils();
+        String sql = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
+        Map<Integer,Object> valueMap = sqlModelUtils.getValueMap();
+        JsonArray jsonArray = new JsonArray();
+        for (Map.Entry<Integer,Object> entry:valueMap.entrySet()){
+            System.out.println(entry.getKey());
+            if(entry.getValue() instanceof LocalDateTime){
+                jsonArray.add(WsBeanUtis.objectToT(entry.getValue(),String.class));
+            }else {
+                jsonArray = jsonArray.add(entry.getValue());
+            }
+
+        }
+        Vertx vertx = Vertx.vertx();
+        SQLClient client = JDBCClient.createNonShared(vertx, jsonObject);
+
+        JsonArray finalJsonArray = jsonArray;
+        client.getConnection(new Handler<AsyncResult<SQLConnection>>() {
+            @Override
+            public void handle(AsyncResult<SQLConnection> event) {
+                if (event.succeeded()){
+                    SQLConnection sqlConnection = event.result();
+                    sqlConnection.queryWithParams(sql, finalJsonArray,new Handler<AsyncResult<ResultSet>>() {
+                        @Override
+                        public void handle(AsyncResult<ResultSet> event) {
+                            if(event.succeeded()){
+                                ResultSet resultSet = event.result();
+
+                                System.out.println(resultSet.getNumRows());
+                                System.out.println(JSON.toJSONString(resultSet.getColumnNames()));
+                            }else {
+                                event.cause().printStackTrace();
+                            }
+                        }
+                    });
+
+                    /*sqlConnection.queryStream(SQLModelUtils.modelToSqlSelect(User.class), new Handler<AsyncResult<SQLRowStream>>() {
+                        @Override
+                        public void handle(AsyncResult<SQLRowStream> event) {
+                            if(event.succeeded()){
+                                SQLRowStream sqlRowStream = event.result();
+                                sqlRowStream.handler(new Handler<JsonArray>() {
+                                    @Override
+                                    public void handle(JsonArray event) {
+                                        System.out.println(JSON.toJSONString(event));
+                                    }
+                                });
+                            }else {
+                                event.cause().printStackTrace();
+                            }
+                        }
+                    });*/
+
+
+                    sqlConnection.getTransactionIsolation(new Handler<AsyncResult<TransactionIsolation>>() {
+                        @Override
+                        public void handle(AsyncResult<TransactionIsolation> event) {
+                            if(event.succeeded()){
+                                TransactionIsolation transactionIsolation = event.result();
+
+                            }else {
+                                event.cause().printStackTrace();
+                            }
+                        }
+                    });
+
+
+                }else {
+                    event.cause().printStackTrace();
+                }
+            }
+        });
+
+
+
+
+    }
+
+
+
+
+
 }

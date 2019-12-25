@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.common;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class WsStringUtils {
@@ -331,7 +333,11 @@ public class WsStringUtils {
         }else if(object instanceof Date){
             Date date = (Date)object;
             return WsDateUtils.dateToString(date,WsDateUtils.LONGTIMESTRING);
-        } else {
+        }else if (object instanceof LocalDateTime){
+            return WsDateUtils.objectDateFormatString(object);
+        }else if (object instanceof LocalDate){
+            return WsDateUtils.objectDateFormatString(object);
+        }else {
             return null;
         }
     }
