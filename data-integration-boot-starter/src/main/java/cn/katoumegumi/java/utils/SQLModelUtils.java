@@ -33,18 +33,19 @@ public class SQLModelUtils {
     private AtomicInteger atomicInteger = new AtomicInteger(1);
 
     public static void main(String[] args) {
-
-
         System.out.println(createJoinSql("nickName","id","jointable","joinnickname","id"));
     }
 
 
-
-
+    /**
+     * 生成sql语句
+     * @param mySearchList
+     * @return
+     */
     public String searchListBaseSQLProcessor(MySearchList mySearchList){
         StringBuilder selectSql = new StringBuilder(modelToSqlSelect(mySearchList.getMainClass()));
         List<TableRelation> list = mySearchList.getJoins();
-        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mySearchList.getMainClass());
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
         String baseTableName = fieldColumnRelationMapper.getNickName();
         for(TableRelation tableRelation:list) {
             String tableNickName;
@@ -78,6 +79,12 @@ public class SQLModelUtils {
 
     }
 
+    /**
+     * 生成whereSql语句
+     * @param prefix
+     * @param mySearch
+     * @return
+     */
     public String createWhereColumn(String prefix,MySearch mySearch){
         StringBuilder tableColumn;
         String prefixString;
@@ -360,11 +367,11 @@ public class SQLModelUtils {
     }
 
 
-
-
-
-
-
+    /**
+     * 解析实体对象
+     * @param clazz
+     * @return
+     */
     public static FieldColumnRelationMapper analysisClassRelation(Class<?> clazz){
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(clazz);
         if(fieldColumnRelationMapper != null){
@@ -413,10 +420,33 @@ public class SQLModelUtils {
                     fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
                 }
             }else {
-                if(analysisClassRelation(field.getType()) != null) {
+                Class<?> joinClass = field.getType();
+                if(WsFieldUtils.classCompare(field.getType(),Collection.class)){
+                    String className = field.getGenericType().getTypeName();
+                    className = className.substring(className.indexOf("<") + 1,className.lastIndexOf(">"));
+                    try {
+                        joinClass = Class.forName(className);
+                    }catch (ClassNotFoundException e){
+                        e.printStackTrace();
+                        throw new RuntimeException("不存在的类");
+                    }
+
+                }else if(field.getType().isArray()){
+                    System.out.println(field.getGenericType().getTypeName());
+                    String className = field.getGenericType().getTypeName();
+                    className = className.substring(0,className.length() - 2);
+                    try {
+                        joinClass = Class.forName(className);
+                    }catch (ClassNotFoundException e){
+                        e.printStackTrace();
+                        throw new RuntimeException("不存在的类");
+                    }
+                }
+
+                if(analysisClassRelation(joinClass) != null) {
                     FieldJoinClass fieldJoinClass = new FieldJoinClass();
                     fieldJoinClass.setNickName(field.getName());
-                    fieldJoinClass.setJoinClass(field.getType());
+                    fieldJoinClass.setJoinClass(joinClass);
                     JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
                     if(joinColumn != null){
                         String name = joinColumn.name();
@@ -428,6 +458,7 @@ public class SQLModelUtils {
                 }
             }
         }
+        fieldColumnRelationMapper.setClazz(clazz);
         mapperMap.put(clazz,fieldColumnRelationMapper);
         return fieldColumnRelationMapper;
     }
@@ -464,10 +495,31 @@ public class SQLModelUtils {
                     fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
                 }
             } else {
-                if(analysisClassRelation(field.getType()) != null){
+                Class<?> joinClass = field.getType();
+                if(WsFieldUtils.classCompare(field.getType(),Collection.class)) {
+                    String className = field.getGenericType().getTypeName();
+                    className = className.substring(className.indexOf("<") + 1, className.lastIndexOf(">"));
+                    try {
+                        joinClass = Class.forName(className);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException("不存在的类");
+                    }
+                }else if(field.getType().isArray()){
+                    System.out.println(field.getGenericType().getTypeName());
+                    String className = field.getGenericType().getTypeName();
+                    className = className.substring(0,className.length() - 2);
+                    try {
+                        joinClass = Class.forName(className);
+                    }catch (ClassNotFoundException e){
+                        e.printStackTrace();
+                        throw new RuntimeException("不存在的类");
+                    }
+                }
+                if(analysisClassRelation(joinClass) != null){
                     FieldJoinClass fieldJoinClass = new FieldJoinClass();
                     fieldJoinClass.setNickName(field.getName());
-                    fieldJoinClass.setJoinClass(field.getType());
+                    fieldJoinClass.setJoinClass(joinClass);
                     fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
                 }
             }
@@ -479,6 +531,16 @@ public class SQLModelUtils {
     public Map<Integer, Object> getValueMap() {
         return valueMap;
     }
+
+
+
+    public  static <T> T loadingObject(Class clazz,Map<String,Object> map){
+
+        return null;
+
+    }
+
+
 }
 
 

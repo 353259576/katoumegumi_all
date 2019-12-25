@@ -197,6 +197,7 @@ public class IndexController implements IndexService {
 
 
 
+
         //Set<Integer> set = new HashSet<>(list1);
 
         /*list = list.parallelStream().filter(num->{

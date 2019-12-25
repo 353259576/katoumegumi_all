@@ -12,6 +12,7 @@ import java.util.*;
 public class FieldColumnRelationMapper {
     private String nickName;
     private String tableName;
+    private Class<?> clazz;
     private List<FieldColumnRelation> idSet = new ArrayList<>();
     private List<FieldColumnRelation> fieldColumnRelations = new ArrayList<>();
     private List<FieldJoinClass> fieldJoinClasses = new ArrayList<>();

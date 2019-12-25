@@ -8,6 +8,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "ws_user")
@@ -31,7 +32,7 @@ public class User {
     @TableField(value = "create_date")
     private LocalDateTime createDate;
 
-    @OneToOne
+    //@OneToMany
     @JoinColumn(name = "id",referencedColumnName = "user_id")
-    private UserDetails userDetails;
+    private UserDetails[] userDetails;
 }
