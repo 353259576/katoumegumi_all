@@ -408,6 +408,7 @@ public class SQLModelUtils {
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
                 fieldColumnRelation.setFieldClass(field.getType());
                 fieldColumnRelation.setFieldName(field.getName());
+                fieldColumnRelation.setField(field);
                 if(column == null){
                     fieldColumnRelation.setColumnName(WsStringUtils.camel_case(field.getName()));
                 }else {
@@ -420,6 +421,7 @@ public class SQLModelUtils {
                     fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
                 }
             }else {
+                boolean isArray = false;
                 Class<?> joinClass = field.getType();
                 if(WsFieldUtils.classCompare(field.getType(),Collection.class)){
                     String className = field.getGenericType().getTypeName();
@@ -430,7 +432,7 @@ public class SQLModelUtils {
                         e.printStackTrace();
                         throw new RuntimeException("不存在的类");
                     }
-
+                    isArray = true;
                 }else if(field.getType().isArray()){
                     System.out.println(field.getGenericType().getTypeName());
                     String className = field.getGenericType().getTypeName();
@@ -441,6 +443,7 @@ public class SQLModelUtils {
                         e.printStackTrace();
                         throw new RuntimeException("不存在的类");
                     }
+                    isArray = true;
                 }
 
                 if(analysisClassRelation(joinClass) != null) {
@@ -448,6 +451,8 @@ public class SQLModelUtils {
                     fieldJoinClass.setNickName(field.getName());
                     fieldJoinClass.setJoinClass(joinClass);
                     JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+                    fieldJoinClass.setArray(isArray);
+                    fieldJoinClass.setField(field);
                     if(joinColumn != null){
                         String name = joinColumn.name();
                         fieldJoinClass.setAnotherJoinColumn(name);
@@ -495,6 +500,7 @@ public class SQLModelUtils {
                     fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
                 }
             } else {
+                boolean isArray = false;
                 Class<?> joinClass = field.getType();
                 if(WsFieldUtils.classCompare(field.getType(),Collection.class)) {
                     String className = field.getGenericType().getTypeName();
@@ -505,6 +511,7 @@ public class SQLModelUtils {
                         e.printStackTrace();
                         throw new RuntimeException("不存在的类");
                     }
+                    isArray = true;
                 }else if(field.getType().isArray()){
                     System.out.println(field.getGenericType().getTypeName());
                     String className = field.getGenericType().getTypeName();
@@ -515,11 +522,13 @@ public class SQLModelUtils {
                         e.printStackTrace();
                         throw new RuntimeException("不存在的类");
                     }
+                    isArray = true;
                 }
                 if(analysisClassRelation(joinClass) != null){
                     FieldJoinClass fieldJoinClass = new FieldJoinClass();
                     fieldJoinClass.setNickName(field.getName());
                     fieldJoinClass.setJoinClass(joinClass);
+                    fieldJoinClass.setArray(isArray);
                     fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
                 }
             }

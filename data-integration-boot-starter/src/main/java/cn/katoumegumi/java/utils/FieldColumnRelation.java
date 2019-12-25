@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 public class FieldColumnRelation {
     private boolean id;
     private String fieldName;
+    private Field field;
     private String columnName;
     private Class fieldClass;
 }
