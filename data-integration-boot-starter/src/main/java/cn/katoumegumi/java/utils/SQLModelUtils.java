@@ -10,6 +10,8 @@ import cn.katoumegumi.java.hibernate.TableRelation;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
@@ -549,6 +551,25 @@ public class SQLModelUtils {
     public Map<Integer, Object> getValueMap() {
         return valueMap;
     }
+
+
+    public void loadingResult(ResultSet resultSet,String indexId){
+        Map<Object,List<Map>> objectListHashMap = new HashMap<>();
+        List<JsonObject> list = resultSet.getRows();
+        for(JsonObject jsonObject : list){
+            Map<String,Object> stringObjectMap = jsonObject.getMap();
+            Object indexO = stringObjectMap.get(indexId);
+            List<Map> maps = objectListHashMap.get(indexO);
+            if(maps == null){
+                maps = new ArrayList<>();
+                objectListHashMap.put(indexO,maps);
+            }
+            maps.add(stringObjectMap);
+        }
+
+    }
+
+
 
 
     public  static <T> T loadingObject(Class<?> clazz,Map<String,Object> map){

@@ -1,21 +1,35 @@
 package cn.katoumegumi.java.hibernate;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.annotation.Inherited;
+import java.lang.annotation.*;
 
 /**
  * @author ws
  * jpa与hibernate事务管理不兼容
  */
-@Transactional
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Transactional(transactionManager = "hibernateTransactionManager")
+@Documented
 public @interface HibernateTransactional {
 
 
-    String value() default "hibernateTransactionManager";
+
+    /**
+     * A <em>qualifier</em> value for the specified transaction.
+     * <p>May be used to determine the target transaction manager,
+     * matching the qualifier value (or the bean name) of a specific
+     * {@link org.springframework.transaction.PlatformTransactionManager}
+     * bean definition.
+     * @since 4.2
+     * @see #value
+     */
 
 
     /**
@@ -23,6 +37,7 @@ public @interface HibernateTransactional {
      * <p>Defaults to {@link Propagation#REQUIRED}.
      * @see org.springframework.transaction.interceptor.TransactionAttribute#getPropagationBehavior()
      */
+    @AliasFor(annotation = Transactional.class,value = "propagation")
     Propagation propagation() default Propagation.REQUIRED;
 
     /**
@@ -37,6 +52,7 @@ public @interface HibernateTransactional {
      * @see org.springframework.transaction.interceptor.TransactionAttribute#getIsolationLevel()
      * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setValidateExistingTransaction
      */
+    @AliasFor(annotation = Transactional.class,value = "isolation")
     Isolation isolation() default Isolation.DEFAULT;
 
     /**
@@ -47,6 +63,7 @@ public @interface HibernateTransactional {
      * transactions.
      * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
      */
+    @AliasFor(annotation = Transactional.class,value = "timeout")
     int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
 
     /**
@@ -61,6 +78,7 @@ public @interface HibernateTransactional {
      * @see org.springframework.transaction.interceptor.TransactionAttribute#isReadOnly()
      * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
      */
+    @AliasFor(annotation = Transactional.class,value = "readOnly")
     boolean readOnly() default false;
 
     /**
@@ -77,6 +95,7 @@ public @interface HibernateTransactional {
      * @see #rollbackForClassName
      * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
      */
+    @AliasFor(annotation = Transactional.class,value = "rollbackFor")
     Class<? extends Throwable>[] rollbackFor() default {};
 
     /**
@@ -97,6 +116,7 @@ public @interface HibernateTransactional {
      * @see #rollbackFor
      * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
      */
+    @AliasFor(annotation = Transactional.class,value = "rollbackForClassName")
     String[] rollbackForClassName() default {};
 
     /**
@@ -110,6 +130,7 @@ public @interface HibernateTransactional {
      * @see #noRollbackForClassName
      * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
      */
+    @AliasFor(annotation = Transactional.class,value = "noRollbackFor")
     Class<? extends Throwable>[] noRollbackFor() default {};
 
     /**
@@ -122,6 +143,7 @@ public @interface HibernateTransactional {
      * @see #noRollbackFor
      * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
      */
+    @AliasFor(annotation = Transactional.class,value = "noRollbackForClassName")
     String[] noRollbackForClassName() default {};
 
 

@@ -27,7 +27,9 @@ import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.*;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +55,7 @@ public class IndexController implements IndexService {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
+    @Qualifier(value = "hibernateTransactionManager")
     private PlatformTransactionManager platformTransactionManager;
 
 
@@ -71,9 +74,7 @@ public class IndexController implements IndexService {
 
     @Override
     @RequestMapping(value = "index")
-    @DataBase(dataBaseName = "master")
-    //@Cacheable(cacheNames = "index1")
-    //@GlobalTransactional
+    @DataBase(dataBaseName = "maste")
     @HibernateTransactional(rollbackFor = RuntimeException.class)
     @Path("/index")
     @GET
@@ -98,7 +99,7 @@ public class IndexController implements IndexService {
         user.setPassword("世界");
         hibernateTemplate.saveOrUpdate(user);*/
         //List<User> list = userJpaDao.selectUser();
-        LocalDateTime localDateTime = LocalDateTime.now();
+        /*LocalDateTime localDateTime = LocalDateTime.now();
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList();
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
@@ -110,37 +111,27 @@ public class IndexController implements IndexService {
                 .sort("userDetails.sex","DESC");
         //List<User> list = userService.selectList(mySearchList);
         //List list = new ArrayList();
-        List<User> list = userService.selectList(mySearchList);
-        list.get(0).setPassword("修改了一下");
-        System.out.println(JSON.toJSONString(list));
+        List<User> list = userService.selectList(mySearchList);*/
+        //list.get(0).setPassword("修改了一下");
+        //System.out.println(JSON.toJSONString(list));
 
                 //userJpaDao.findAll();
         //System.out.println(list.size());
+        User user = new User();
         user.setName("你好hibernate");
         user.setPassword("世界");
         //hibernateTemplate.insertObject(user);
-        //hibernateDao.insertObject(user);
+        hibernateDao.insertObject(user);
+        //userJpaDao.save(user);
         User user2 = new User();
         user2.setName("你好jpa");
         user2.setPassword("世界");
         //throw new RuntimeException("你好错误");\
         //userJpaDao.saveAndFlush(user2);
-        Iterator<User> iterator = list.iterator();
-        Flux.<User>create(userFluxSink -> {
-            while (iterator.hasNext()){
-                userFluxSink.next(iterator.next());
-            }
-            userFluxSink.complete();
-        }).map(user1 -> {
-            System.out.println(JSON.toJSONString(user1));
-            return user1;
-        }).subscribe(user1 -> {
-            System.out.println("?");
-        });
-        String str = JSON.toJSONString(list);
+
         //throw new RuntimeException("人为错误");
 
-        return str;
+        return "";
     }
 
 
@@ -283,7 +274,6 @@ public class IndexController implements IndexService {
                         public void handle(AsyncResult<ResultSet> event) {
                             if(event.succeeded()){
                                 ResultSet resultSet = event.result();
-                                resultSet.
                                 System.out.println(resultSet.getNumRows());
                                 List<JsonObject> list = resultSet.getRows();
                                 for(JsonObject o:list){

@@ -12,6 +12,8 @@ import org.springframework.cloud.client.SpringCloudApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +28,8 @@ import javax.sql.DataSource;
 @EnableDubboConfig
 @EnableDubbo(scanBasePackages = "cn.katoumegumi.java.lx")
 @MapperScan(basePackages = "cn.katoumegumi.java.lx.mapper")
+@EnableAspectJAutoProxy
+@ComponentScan(basePackages = "cn.*")
 public class Application {
 
     /*@Autowired

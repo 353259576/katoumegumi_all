@@ -13,16 +13,16 @@ import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
 import org.hibernate.sql.JoinType;
 import org.springframework.orm.hibernate5.HibernateTemplate;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
-//@Repository("hibernateDao")
-@HibernateTransactional
+@HibernateTransactional(rollbackFor = RuntimeException.class)
 public class HibernateDao {
-	
+
 	//@Resource
 	private HibernateTemplate hibernateTemplate;
 

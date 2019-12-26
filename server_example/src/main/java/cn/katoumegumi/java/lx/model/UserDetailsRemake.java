@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.lx.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import lombok.Data;
 
 import javax.persistence.*;
 
@@ -9,6 +10,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "user_details_remake")
+@Data
 public class UserDetailsRemake {
 
     @Id
