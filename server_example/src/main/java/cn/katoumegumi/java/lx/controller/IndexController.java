@@ -129,9 +129,9 @@ public class IndexController implements IndexService {
         //throw new RuntimeException("你好错误");\
         //userJpaDao.saveAndFlush(user2);
 
-        //throw new RuntimeException("人为错误");
+        throw new RuntimeException("人为错误");
 
-        return "";
+        //return "";
     }
 
 

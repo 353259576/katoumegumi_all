@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.util.*;
 
-@HibernateTransactional(rollbackFor = RuntimeException.class)
+@HibernateTransactional
 public class HibernateDao {
 
 	//@Resource

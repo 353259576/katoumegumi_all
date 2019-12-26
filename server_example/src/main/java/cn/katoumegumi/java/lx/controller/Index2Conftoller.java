@@ -52,7 +52,6 @@ public class Index2Conftoller {
             user.setName("你好"+i);
             user.setPassword("世界"+i);
             hibernateDao.insertObject(user);
-            userJpaDao.save(user);
             for(int k = 0; k < 10; k++){
                 UserDetails userDetails = new UserDetails();
                 userDetails.setSex(k%2==0?"男":"女");

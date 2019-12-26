@@ -28,8 +28,8 @@ import javax.sql.DataSource;
 @EnableDubboConfig
 @EnableDubbo(scanBasePackages = "cn.katoumegumi.java.lx")
 @MapperScan(basePackages = "cn.katoumegumi.java.lx.mapper")
-@EnableAspectJAutoProxy
-@ComponentScan(basePackages = "cn.*")
+//@EnableAspectJAutoProxy
+//@ComponentScan(basePackages = "cn.*")
 public class Application {
 
     /*@Autowired
