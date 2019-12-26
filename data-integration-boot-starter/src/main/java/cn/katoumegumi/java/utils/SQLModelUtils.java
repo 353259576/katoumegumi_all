@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -46,6 +47,12 @@ public class SQLModelUtils {
         StringBuilder selectSql = new StringBuilder(modelToSqlSelect(mySearchList.getMainClass()));
         List<TableRelation> list = mySearchList.getJoins();
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
+        if(fieldColumnRelationMapper.getMap() == null){
+            fieldColumnRelationMapper.setMap(map);
+        }else {
+            map = fieldColumnRelationMapper.getMap();
+        }
+
         String baseTableName = fieldColumnRelationMapper.getNickName();
         for(TableRelation tableRelation:list) {
             String tableNickName;
@@ -325,20 +332,22 @@ public class SQLModelUtils {
     }
 
 
-    public String modelToSqlSelect(Class<?> clazz){
+    public String modelToSqlSelect(Class<?> clazz) {
 
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(clazz);
         assert fieldColumnRelationMapper != null;
         String tableName = fieldColumnRelationMapper.getTableName();
         String tableNickName = fieldColumnRelationMapper.getNickName();
-        map.put(tableNickName,fieldColumnRelationMapper);
-        log.info("获取当前表名为："+tableName);
-        List<String> list = new ArrayList<>();
-        List<String> joinString = new ArrayList<>();
-        selectJoin(tableNickName,list,joinString,fieldColumnRelationMapper);
-
-        return "select "+WsStringUtils.jointListString(list,",") + " from "+tableName+" "+fieldColumnRelationMapper.getNickName() + " "+WsStringUtils.jointListString(joinString," ");
-
+        map.put(tableNickName, fieldColumnRelationMapper);
+        log.info("获取当前表名为：" + tableName);
+        if (fieldColumnRelationMapper.getBaseSql() == null) {
+            List<String> list = new ArrayList<>();
+            List<String> joinString = new ArrayList<>();
+            selectJoin(tableNickName, list, joinString, fieldColumnRelationMapper);
+            String baseSql = "select " + WsStringUtils.jointListString(list, ",") + " from " + tableName + " " + fieldColumnRelationMapper.getNickName() + " " + WsStringUtils.jointListString(joinString, " ");
+            fieldColumnRelationMapper.setBaseSql(baseSql);
+        }
+        return fieldColumnRelationMapper.getBaseSql();
     }
 
 
@@ -542,13 +551,74 @@ public class SQLModelUtils {
     }
 
 
+    public  static <T> T loadingObject(Class<?> clazz,Map<String,Object> map){
+        Map<String,Object> objectMap = new HashMap<>();
+        FieldColumnRelationMapper mapper = analysisClassRelation(clazz);
+        assert mapper != null;
+        Map<String,FieldColumnRelationMapper> mapperMap = mapper.getMap();
+        for(Map.Entry<String,Object> entry:map.entrySet()){
+            String str = entry.getKey();
+            int lastSymbol = str.lastIndexOf(".");
+            String prefixStr = str.substring(0,lastSymbol);
+            String fieldStr = str.substring(lastSymbol + 1);
+            List<String> prefixList = new ArrayList<>();
+            String[] prefixs = prefixStr.split("[.]");
+            Object o = null;
+            String s = null;
+            for(String prefix:prefixs){
+                prefixList.add(prefix);
+                s = WsStringUtils.jointListString(prefixList,".");
+                FieldColumnRelationMapper currentMapper = mapperMap.get(s);
+                o = objectMap.get(s);
+                if(o == null) {
+                    Class<?> c = currentMapper.getClazz();
+                    try {
+                        o = c.getConstructor().newInstance();
+                        objectMap.put(s, o);
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            FieldColumnRelationMapper relationMapper = mapperMap.get(s);
+            FieldColumnRelation relation = relationMapper.getFieldColumnRelationByField(fieldStr);
+            Field field = relation.getField();
+            field.setAccessible(true);
+            try {
+                field.set(o,WsBeanUtis.objectToT(entry.getValue(),field.getType()));
+            }catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        Object o = objectMap.get(mapper.getNickName());
+        List<FieldJoinClass> fieldJoinClass = mapper.getFieldJoinClasses();
+        for(FieldJoinClass fieldJoinClass1:fieldJoinClass){
+            meigeObject(o,objectMap,fieldJoinClass1,mapper.getNickName());
+        }
 
-    public  static <T> T loadingObject(Class clazz,Map<String,Object> map){
-
-        return null;
+        return (T)o;
 
     }
 
+    public static void meigeObject(Object o,Map<String,Object> objectMap,FieldJoinClass fieldJoinClass,String baseName){
+        String name = baseName + "." + fieldJoinClass.getNickName();
+        Field field = fieldJoinClass.getField();
+        field.setAccessible(true);
+        try {
+            field.set(o,objectMap.get(name));
+        }catch (IllegalAccessException e){
+            e.printStackTrace();
+        }
+        FieldColumnRelationMapper mapper = mapperMap.get(field.getType());
+        if(mapper != null){
+            List<FieldJoinClass> list = mapper.getFieldJoinClasses();
+            for(FieldJoinClass fieldJoinClass1:list){
+                meigeObject(objectMap.get(name),objectMap,fieldJoinClass1,name);
+            }
+
+        }
+
+    }
 
 }
 

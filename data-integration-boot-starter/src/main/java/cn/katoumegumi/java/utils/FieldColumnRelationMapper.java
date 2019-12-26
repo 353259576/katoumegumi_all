@@ -10,12 +10,14 @@ import java.util.*;
  */
 @Data
 public class FieldColumnRelationMapper {
+    private String baseSql;
     private String nickName;
     private String tableName;
     private Class<?> clazz;
     private List<FieldColumnRelation> idSet = new ArrayList<>();
     private List<FieldColumnRelation> fieldColumnRelations = new ArrayList<>();
     private List<FieldJoinClass> fieldJoinClasses = new ArrayList<>();
+    private Map<String,FieldColumnRelationMapper> map;
 
 
 
@@ -49,7 +51,8 @@ public class FieldColumnRelationMapper {
     }
 
 
-
-
-
+    @Override
+    public String toString() {
+        return baseSql;
+    }
 }

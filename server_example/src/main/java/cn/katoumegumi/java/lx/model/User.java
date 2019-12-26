@@ -32,7 +32,7 @@ public class User {
     @TableField(value = "create_date")
     private LocalDateTime createDate;
 
-    //@OneToMany
+    @OneToOne
     @JoinColumn(name = "id",referencedColumnName = "user_id")
-    private UserDetails[] userDetails;
+    private UserDetails userDetails;
 }

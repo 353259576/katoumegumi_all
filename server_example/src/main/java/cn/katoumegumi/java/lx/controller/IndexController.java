@@ -184,31 +184,16 @@ public class IndexController implements IndexService {
         System.out.println(str);
         System.out.println(end - start);
 
+        UserDetails userDetails = new UserDetails();
 
-        long startTime = System.currentTimeMillis();
-        List<Integer> list = new ArrayList<>();
-        List<Integer> list1 = new ArrayList<>();
-        for(int i = 0 ; i < 100000; i++) {
-            list.add(i);
-            if (i % 2 == 0) {
-                list1.add(i);
-            }
-        }
+        mySearchList = MySearchList.newMySearchList().setMainClass(UserDetails.class);
+        mySearchList.or(MySearchList.newMySearchList().eq("sex","男"),
+                MySearchList.newMySearchList().eq(userDetails::getNickName,"世界")
+        );
+        sqlModelUtils = new SQLModelUtils();
+        System.out.println(sqlModelUtils.searchListBaseSQLProcessor(mySearchList));
 
 
-
-
-        //Set<Integer> set = new HashSet<>(list1);
-
-        /*list = list.parallelStream().filter(num->{
-            //return !set.contains(num);
-            return !list1.parallelStream().anyMatch(integer -> {
-                return num.equals(integer);
-            });
-        }).collect(Collectors.toList());
-        long endTime = System.currentTimeMillis();
-        System.out.println(endTime - startTime);
-        System.out.println(JSON.toJSONString(list));*/
 
     }
 
@@ -298,12 +283,13 @@ public class IndexController implements IndexService {
                         public void handle(AsyncResult<ResultSet> event) {
                             if(event.succeeded()){
                                 ResultSet resultSet = event.result();
-
+                                resultSet.
                                 System.out.println(resultSet.getNumRows());
                                 List<JsonObject> list = resultSet.getRows();
                                 for(JsonObject o:list){
                                     Map map = o.getMap();
-                                    System.out.println(JSON.toJSONString(map));
+                                    User user = SQLModelUtils.loadingObject(User.class, (Map<String, Object>) map);
+                                    System.out.println(JSON.toJSONString(user));
 
                                 }
                                 System.out.println(JSON.toJSONString(resultSet.getColumnNames()));
