@@ -479,9 +479,9 @@ public class SQLModelUtils {
                     fieldJoinClass.setField(field);
                     if(joinColumn != null){
                         String name = joinColumn.name();
-                        fieldJoinClass.setAnotherJoinColumn(name);
-                        joinColumn.referencedColumnName();
-                        fieldJoinClass.setJoinColumn(joinColumn.referencedColumnName());
+                        String referenced = joinColumn.referencedColumnName();
+                        fieldJoinClass.setAnotherJoinColumn(referenced);
+                        fieldJoinClass.setJoinColumn(name);
                     }
                     fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
                 }
@@ -605,6 +605,8 @@ public class SQLModelUtils {
             Map m1 = maps.get(i);
             if (set.contains(m1)) {
                 continue;
+            }else {
+                set.add(m1);
             }
             for (int k = i; k < maps.size(); k++) {
                 Map m2 = maps.get(k);
@@ -622,7 +624,9 @@ public class SQLModelUtils {
             for(Map.Entry entry:entries){
                 if(entry.getValue() instanceof List){
                     List<Map> mapList = handleMapList((List<Map>) entry.getValue());
-                    map.put(entry.getKey(),mapList);
+                    if(mapList != null && mapList.size() != 0) {
+                        map.put(entry.getKey(), mapList);
+                    }
                 }
             }
         }

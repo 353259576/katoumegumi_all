@@ -75,7 +75,7 @@ public class IndexController implements IndexService {
     @Override
     @RequestMapping(value = "index")
     @DataBase(dataBaseName = "maste")
-    @HibernateTransactional(rollbackFor = RuntimeException.class)
+    @Transactional(rollbackFor = RuntimeException.class)
     @Path("/index")
     @GET
     public String index() throws Exception{
@@ -99,39 +99,43 @@ public class IndexController implements IndexService {
         user.setPassword("世界");
         hibernateTemplate.saveOrUpdate(user);*/
         //List<User> list = userJpaDao.selectUser();
-        /*LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime localDateTime = LocalDateTime.now();
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList();
-        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
+        /*mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
                 MySearchList.newMySearchList().eq(user::getPassword,"世界")
                 )
                 .eq(user::getId,1)
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
-                .sort("userDetails.sex","DESC");
+                .sort("userDetails.sex","DESC");*/
         //List<User> list = userService.selectList(mySearchList);
         //List list = new ArrayList();
-        List<User> list = userService.selectList(mySearchList);*/
+        long start = System.currentTimeMillis();
+        List<User> list = userService.selectList(mySearchList);
+        JSON.toJSONString(list);
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
         //list.get(0).setPassword("修改了一下");
         //System.out.println(JSON.toJSONString(list));
 
                 //userJpaDao.findAll();
         //System.out.println(list.size());
-        User user = new User();
-        user.setName("你好hibernate");
-        user.setPassword("世界");
+        //User user = new User();
+        //user.setName("你好hibernate");
+        //user.setPassword("世界");
         //hibernateTemplate.insertObject(user);
-        hibernateDao.insertObject(user);
+        //hibernateDao.insertObject(user);
         //userJpaDao.save(user);
-        User user2 = new User();
-        user2.setName("你好jpa");
-        user2.setPassword("世界");
+        //User user2 = new User();
+        //user2.setName("你好jpa");
+        //user2.setPassword("世界");
         //throw new RuntimeException("你好错误");\
         //userJpaDao.saveAndFlush(user2);
 
-        throw new RuntimeException("人为错误");
+        //throw new RuntimeException("人为错误");
 
-        //return "";
+        return "";
     }
 
 
@@ -307,8 +311,12 @@ public class IndexController implements IndexService {
 
                                 //System.out.println(JSON.toJSONString(resultSet.getColumnNames()));
                                 //System.out.println(JSON.toJSONString(maps));
+                                long start = System.currentTimeMillis();
                                 maps = SQLModelUtils.handleMapList(maps);
+                                JSON.toJSONString(maps);
+                                long end = System.currentTimeMillis();
                                 System.out.println(JSON.toJSONString(maps));
+                                System.out.println(end - start);
                             }else {
                                 event.cause().printStackTrace();
                             }

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "ws_user_details")
@@ -28,7 +29,7 @@ public class UserDetails {
     @Column(name = "sex")
     private String sex;
 
-    @OneToOne
-    @JoinColumn(name = "id",referencedColumnName = "user_details_id")
-    private UserDetailsRemake userDetailsRemake;
+    @OneToMany
+    @JoinColumn(name = "user_details_id",referencedColumnName = "id")
+    private List<UserDetailsRemake> userDetailsRemake;
 }
