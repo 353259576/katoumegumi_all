@@ -7,6 +7,7 @@ import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.hibernate.MySearch;
 import cn.katoumegumi.java.hibernate.MySearchList;
 import cn.katoumegumi.java.hibernate.TableRelation;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -36,6 +37,18 @@ public class SQLModelUtils {
     private AtomicInteger atomicInteger = new AtomicInteger(1);
 
     public static void main(String[] args) {
+        Map m1 = new HashMap();
+        Map m11 = new HashMap();
+        Map m2 = new HashMap();
+        Map m21 = new HashMap();
+        m1.put(1,1);
+        m2.put(1,1);
+        m11.put(11,11);
+        m21.put(21,21);
+        m1.put(3,m11);
+        m2.put(3,m21);
+        System.out.println(mapEquals(m1,m2));
+        System.out.println(JSON.toJSONString(m1));
         System.out.println(createJoinSql("nickName","id","jointable","joinnickname","id"));
     }
 
@@ -553,26 +566,75 @@ public class SQLModelUtils {
     }
 
 
-    public void loadingResult(ResultSet resultSet,String indexId){
-        Map<Object,List<Map>> objectListHashMap = new HashMap<>();
-        List<JsonObject> list = resultSet.getRows();
-        for(JsonObject jsonObject : list){
-            Map<String,Object> stringObjectMap = jsonObject.getMap();
-            Object indexO = stringObjectMap.get(indexId);
-            List<Map> maps = objectListHashMap.get(indexO);
-            if(maps == null){
-                maps = new ArrayList<>();
-                objectListHashMap.put(indexO,maps);
+    public static List<Map> mergeMap(List<Map> mapList){
+        List<Map> list = new ArrayList<>();
+        for(Map map:mapList){
+            Map<String,Map> stringMapMap = new HashMap<>();
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry:entries){
+                String keyString = (String)entry.getKey();
+                int lastSymbol = keyString.lastIndexOf(".");
+                String key = keyString.substring(lastSymbol + 1);
+                String keyPrefix = keyString.substring(0,lastSymbol);
+                String[] keyPrefixs = keyPrefix.split("[.]");
+                //List<String> keyPrefixList = new ArrayList<>();
+                Map valueMap = stringMapMap;
+                Map prevMap = valueMap;
+                for(String kp:keyPrefixs) {
+                    //keyPrefixList.add(kp);
+                    //String nowKeyPrefix = WsStringUtils.jointListString(keyPrefixList, ".");
+                    valueMap = (Map) prevMap.get(kp);
+                    if (valueMap == null) {
+                        valueMap = new HashMap();
+                        prevMap.put(kp,valueMap);
+                    }
+                    prevMap = valueMap;
+                }
+                valueMap.put(key,entry.getValue());
             }
-            maps.add(stringObjectMap);
+            list.add(stringMapMap);
         }
+        return list;
+    }
+
+
+    public static List<Map> handleMapList(List<Map> maps){
+        List<Map> newMaps =new ArrayList<>();
+        Set<Map> set = new HashSet<>();
+        for(int i = 0; i < maps.size(); i++) {
+            Map m1 = maps.get(i);
+            if (set.contains(m1)) {
+                continue;
+            }
+            for (int k = i; k < maps.size(); k++) {
+                Map m2 = maps.get(k);
+                if (set.contains(m2)) {
+                    continue;
+                }
+                if (SQLModelUtils.mapEquals(m1, m2)) {
+                    set.add(m2);
+                }
+            }
+            newMaps.add(m1);
+        }
+        for (Map map:newMaps){
+            Set<Map.Entry> entries = map.entrySet();
+            for(Map.Entry entry:entries){
+                if(entry.getValue() instanceof List){
+                    List<Map> mapList = handleMapList((List<Map>) entry.getValue());
+                    map.put(entry.getKey(),mapList);
+                }
+            }
+        }
+        return newMaps;
 
     }
 
 
-
-
-    public  static <T> T loadingObject(Class<?> clazz,Map<String,Object> map){
+    /**
+     *废弃的sql数据转换
+     */
+    /*public  static <T> T loadingObject(Class<?> clazz,Map<String,Object> map){
         Map<String,Object> objectMap = new HashMap<>();
         FieldColumnRelationMapper mapper = analysisClassRelation(clazz);
         assert mapper != null;
@@ -639,7 +701,76 @@ public class SQLModelUtils {
 
         }
 
+    }*/
+
+
+    public static boolean mapEquals(Map m1,Map m2){
+        List keys = new ArrayList<>();
+        boolean k = true;
+        if(m1.size() == m2.size()){
+            Set set = m1.keySet();
+            Object o1 = null;
+            Object o2 = null;
+            for(Object keyo:set){
+                o1 = m1.get(keyo);
+                o2 = m2.get(keyo);
+                if(o1 == null || o2 == null) {
+                    if(o1 == null && o2 == null){
+                        continue;
+                    }else {
+                        k = false;
+                        break;
+                    }
+                }
+                if(WsBeanUtis.isBaseType(o1.getClass()) && WsBeanUtis.isBaseType(o2.getClass())){
+                    if(!o1.equals(o2)){
+                        k = false;
+                        break;
+                    }
+                }else {
+                    if((o1 instanceof Map || o1 instanceof List)&&(o2 instanceof  Map || o2 instanceof List)){
+                        keys.add(keyo);
+                    }else {
+                        if(!o1.equals(o2)){
+                            k = false;
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }else {
+            k = false;
+        }
+        if(k){
+            for (Object key : keys){
+                Object o1 = m1.get(key);
+                Object o2 = m2.get(key);
+                if(o1 instanceof Map){
+                    if(o2 instanceof List){
+                        ((List) o2).add(o1);
+                    }else {
+                        List list = new ArrayList();
+                        list.add(o1);
+                        list.add(o2);
+                        o1 = list;
+                    }
+                }else if (o1 instanceof List){
+                    if(o2 instanceof List){
+                        ((List)o1).addAll((List)o2);
+                    }else {
+                        ((List)o1).add(o2);
+                    }
+                }
+                m1.put(key,o1);
+            }
+
+        }
+        return k;
     }
+
+
+
 
 }
 

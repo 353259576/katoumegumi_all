@@ -155,7 +155,7 @@ public class IndexController implements IndexService {
 
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class);
-        mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
+        /*mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
                 MySearchList.newMySearchList().eq(user::getPassword,"世界")
         )
@@ -163,7 +163,7 @@ public class IndexController implements IndexService {
                 .eq("userDetails11.sex","男")
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
-                .sort("userDetails.sex","DESC");
+                .sort("userDetails.sex","DESC");*/
         SQLModelUtils sqlModelUtils = new SQLModelUtils();
         String str = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
         System.out.println(str);
@@ -276,13 +276,39 @@ public class IndexController implements IndexService {
                                 ResultSet resultSet = event.result();
                                 System.out.println(resultSet.getNumRows());
                                 List<JsonObject> list = resultSet.getRows();
+                                List<Map> maps =new ArrayList<>();
                                 for(JsonObject o:list){
                                     Map map = o.getMap();
-                                    User user = SQLModelUtils.loadingObject(User.class, (Map<String, Object>) map);
-                                    System.out.println(JSON.toJSONString(user));
+                                    maps.add(map);
+                                    //User user = SQLModelUtils.loadingObject(User.class, (Map<String, Object>) map);
+                                    //System.out.println(JSON.toJSONString(user));
 
                                 }
-                                System.out.println(JSON.toJSONString(resultSet.getColumnNames()));
+
+                                maps = SQLModelUtils.mergeMap(maps);
+                                /*List<Map> newMaps =new ArrayList<>();
+                                Set<Map> set = new HashSet<>();
+                                for(int i = 0; i < maps.size(); i++) {
+                                    Map m1 = maps.get(i);
+                                    if (set.contains(m1)) {
+                                        continue;
+                                    }
+                                    for (int k = i; k < maps.size(); k++) {
+                                        Map m2 = maps.get(k);
+                                        if (set.contains(m2)) {
+                                            continue;
+                                        }
+                                        if (SQLModelUtils.mapEquals(m1, m2)) {
+                                            set.add(m2);
+                                        }
+                                    }
+                                    newMaps.add(m1);
+                                }*/
+
+                                //System.out.println(JSON.toJSONString(resultSet.getColumnNames()));
+                                //System.out.println(JSON.toJSONString(maps));
+                                maps = SQLModelUtils.handleMapList(maps);
+                                System.out.println(JSON.toJSONString(maps));
                             }else {
                                 event.cause().printStackTrace();
                             }
