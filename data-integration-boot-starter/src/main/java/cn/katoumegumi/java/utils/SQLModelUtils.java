@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class SQLModelUtils {
 
-    public static Map<Class<?>,FieldColumnRelationMapper> mapperMap = new HashMap<>();
+    public static Map<Class<?>,FieldColumnRelationMapper> mapperMap = new ConcurrentHashMap<>();
 
     private Map<String,FieldColumnRelationMapper> map = new HashMap<>();
 
@@ -47,7 +48,6 @@ public class SQLModelUtils {
         m21.put(21,21);
         m1.put(3,m11);
         m2.put(3,m21);
-        System.out.println(mapEquals(m1,m2));
         System.out.println(JSON.toJSONString(m1));
         System.out.println(createJoinSql("nickName","id","jointable","joinnickname","id"));
     }
@@ -418,7 +418,6 @@ public class SQLModelUtils {
         Table table = clazz.getAnnotation(Table.class);
         fieldColumnRelationMapper.setTableName(table.name());
         fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
-        log.info("表名为："+table.name());
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields){
@@ -432,6 +431,7 @@ public class SQLModelUtils {
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
                 fieldColumnRelation.setFieldClass(field.getType());
                 fieldColumnRelation.setFieldName(field.getName());
+                field.setAccessible(true);
                 fieldColumnRelation.setField(field);
                 if(column == null){
                     fieldColumnRelation.setColumnName(WsStringUtils.camel_case(field.getName()));
@@ -476,6 +476,7 @@ public class SQLModelUtils {
                     fieldJoinClass.setJoinClass(joinClass);
                     JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
                     fieldJoinClass.setArray(isArray);
+                    field.setAccessible(true);
                     fieldJoinClass.setField(field);
                     if(joinColumn != null){
                         String name = joinColumn.name();
@@ -498,7 +499,6 @@ public class SQLModelUtils {
         TableName table = clazz.getAnnotation(TableName.class);
         fieldColumnRelationMapper.setTableName(table.value());
         fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
-        log.info("表名为：" + table.value());
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields) {
@@ -566,7 +566,11 @@ public class SQLModelUtils {
     }
 
 
-    public List<Map> handleMap(List<Map> mapList){
+    /**
+     * 速度过慢
+     */
+
+    /*public List<Map> handleMap(List<Map> mapList){
         List<Map> list = new ArrayList<>();
         for(Map map:mapList){
             Map<String,Map> stringMapMap = new HashMap<>();
@@ -600,15 +604,15 @@ public class SQLModelUtils {
 
     public List<Map> mergeMapList(List<Map> maps){
         List<Map> newMaps =new ArrayList<>();
-        Set<Map> set = new HashSet<>();
+        HashSet<Map> set = new HashSet<>();
         for(int i = 0; i < maps.size(); i++) {
             Map m1 = maps.get(i);
             if (set.contains(m1)) {
                 continue;
-            }else {
+            } else {
                 set.add(m1);
             }
-            for (int k = i; k < maps.size(); k++) {
+            for (int k = i + 1; k < maps.size(); k++) {
                 Map m2 = maps.get(k);
                 if (set.contains(m2)) {
                     continue;
@@ -619,6 +623,7 @@ public class SQLModelUtils {
             }
             newMaps.add(m1);
         }
+        //set = null;
         for (Map map:newMaps){
             Set<Map.Entry> entries = map.entrySet();
             for(Map.Entry entry:entries){
@@ -674,6 +679,11 @@ public class SQLModelUtils {
                 FieldColumnRelationMapper nowMapper = map.get(nowPreFix);
                 nowObject = WsBeanUtis.createObject(nowMapper.getClazz());
                 loadingObject(nowObject,(Map) oValue,nowMapper,nowPreFix);
+                if(fieldJoinClass.isArray()){
+                    List list = new ArrayList();
+                    list.add(nowObject);
+                    nowObject = list;
+                }
             }else if(oValue instanceof List) {
                 FieldJoinClass fieldJoinClass = parentMapper.getFieldJoinClassByFieldName(key);
                 field = fieldJoinClass.getField();
@@ -692,8 +702,7 @@ public class SQLModelUtils {
                 nowObject = WsBeanUtis.objectToT(nowObject,relation.getFieldClass());
             }
             try {
-                assert field != null;
-                field.setAccessible(true);
+                //assert field != null;
                 field.set(parentObject,nowObject);
             }catch (IllegalAccessException e){
                 e.printStackTrace();
@@ -701,7 +710,139 @@ public class SQLModelUtils {
 
 
         }
+
+
+        public static boolean mapEquals(Map m1,Map m2){
+        List keys = new ArrayList<>();
+        boolean k = true;
+        if(m1.size() == m2.size()){
+            Set set = m1.keySet();
+            Object o1 = null;
+            Object o2 = null;
+            for(Object keyo:set){
+                o1 = m1.get(keyo);
+                o2 = m2.get(keyo);
+                if(o1 == null || o2 == null) {
+                    if(o1 == null && o2 == null){
+                        continue;
+                    }else {
+                        k = false;
+                        break;
+                    }
+                }
+                if(WsBeanUtis.isBaseType(o1.getClass()) && WsBeanUtis.isBaseType(o2.getClass())){
+                    if(!o1.equals(o2)){
+                        k = false;
+                        break;
+                    }
+                }else {
+                    if((o1 instanceof Map || o1 instanceof List)&&(o2 instanceof  Map || o2 instanceof List)){
+                        keys.add(keyo);
+                    }else {
+                        if(!o1.equals(o2)){
+                            k = false;
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }else {
+            k = false;
+        }
+        if(k){
+            for (Object key : keys){
+                Object o1 = m1.get(key);
+                Object o2 = m2.get(key);
+                if(o1 instanceof Map){
+                    if(o2 instanceof List){
+                        ((List) o2).add(o1);
+                    }else {
+                        List list = new ArrayList();
+                        list.add(o1);
+                        list.add(o2);
+                        o1 = list;
+                    }
+                }else if (o1 instanceof List){
+                    if(o2 instanceof List){
+                        ((List)o1).addAll((List)o2);
+                    }else {
+                        ((List)o1).add(o2);
+                    }
+                }
+                m1.put(key,o1);
+            }
+
+        }
+        return k;
     }
+public static boolean mapEquals(Map m1,Map m2){
+        List keys = new ArrayList<>();
+        boolean k = true;
+        if(m1.size() == m2.size()){
+            Set set = m1.keySet();
+            Object o1 = null;
+            Object o2 = null;
+            for(Object keyo:set){
+                o1 = m1.get(keyo);
+                o2 = m2.get(keyo);
+                if(o1 == null || o2 == null) {
+                    if(o1 == null && o2 == null){
+                        continue;
+                    }else {
+                        k = false;
+                        break;
+                    }
+                }
+                if(WsBeanUtis.isBaseType(o1.getClass()) && WsBeanUtis.isBaseType(o2.getClass())){
+                    if(!o1.equals(o2)){
+                        k = false;
+                        break;
+                    }
+                }else {
+                    if((o1 instanceof Map || o1 instanceof List)&&(o2 instanceof  Map || o2 instanceof List)){
+                        keys.add(keyo);
+                    }else {
+                        if(!o1.equals(o2)){
+                            k = false;
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }else {
+            k = false;
+        }
+        if(k){
+            for (Object key : keys){
+                Object o1 = m1.get(key);
+                Object o2 = m2.get(key);
+                if(o1 instanceof Map){
+                    if(o2 instanceof List){
+                        ((List) o2).add(o1);
+                    }else {
+                        List list = new ArrayList();
+                        list.add(o1);
+                        list.add(o2);
+                        o1 = list;
+                    }
+                }else if (o1 instanceof List){
+                    if(o2 instanceof List){
+                        ((List)o1).addAll((List)o2);
+                    }else {
+                        ((List)o1).add(o2);
+                    }
+                }
+                m1.put(key,o1);
+            }
+
+        }
+        return k;
+    }
+
+
+    }*/
 
     /**
      *废弃的sql数据转换
@@ -776,70 +917,6 @@ public class SQLModelUtils {
     }*/
 
 
-    public static boolean mapEquals(Map m1,Map m2){
-        List keys = new ArrayList<>();
-        boolean k = true;
-        if(m1.size() == m2.size()){
-            Set set = m1.keySet();
-            Object o1 = null;
-            Object o2 = null;
-            for(Object keyo:set){
-                o1 = m1.get(keyo);
-                o2 = m2.get(keyo);
-                if(o1 == null || o2 == null) {
-                    if(o1 == null && o2 == null){
-                        continue;
-                    }else {
-                        k = false;
-                        break;
-                    }
-                }
-                if(WsBeanUtis.isBaseType(o1.getClass()) && WsBeanUtis.isBaseType(o2.getClass())){
-                    if(!o1.equals(o2)){
-                        k = false;
-                        break;
-                    }
-                }else {
-                    if((o1 instanceof Map || o1 instanceof List)&&(o2 instanceof  Map || o2 instanceof List)){
-                        keys.add(keyo);
-                    }else {
-                        if(!o1.equals(o2)){
-                            k = false;
-                            break;
-                        }
-                    }
-
-                }
-            }
-        }else {
-            k = false;
-        }
-        if(k){
-            for (Object key : keys){
-                Object o1 = m1.get(key);
-                Object o2 = m2.get(key);
-                if(o1 instanceof Map){
-                    if(o2 instanceof List){
-                        ((List) o2).add(o1);
-                    }else {
-                        List list = new ArrayList();
-                        list.add(o1);
-                        list.add(o2);
-                        o1 = list;
-                    }
-                }else if (o1 instanceof List){
-                    if(o2 instanceof List){
-                        ((List)o1).addAll((List)o2);
-                    }else {
-                        ((List)o1).add(o2);
-                    }
-                }
-                m1.put(key,o1);
-            }
-
-        }
-        return k;
-    }
 
 
 

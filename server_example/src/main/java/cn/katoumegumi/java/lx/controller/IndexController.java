@@ -42,6 +42,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -244,6 +245,11 @@ public class IndexController implements IndexService {
             }
         });*/
 
+        /*try {
+            Thread.sleep(30000);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }*/
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.put("provider_class","cn.katoumegumi.java.vertx.DruidDataSourceProvider");
@@ -251,119 +257,66 @@ public class IndexController implements IndexService {
         jsonObject.put("user","root");
         jsonObject.put("password","199645");
         jsonObject.put("driver_class","com.mysql.cj.jdbc.Driver");
-        SQLModelUtils sqlModelUtils = new SQLModelUtils();
-        String sql = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
-        Map<Integer,Object> valueMap = sqlModelUtils.getValueMap();
-        JsonArray jsonArray = new JsonArray();
-        for (Map.Entry<Integer,Object> entry:valueMap.entrySet()){
-            System.out.println(entry.getKey());
-            if(entry.getValue() instanceof LocalDateTime){
-                jsonArray.add(WsBeanUtis.objectToT(entry.getValue(),String.class));
-            }else {
-                jsonArray = jsonArray.add(entry.getValue());
-            }
 
-        }
         Vertx vertx = Vertx.vertx();
         SQLClient client = JDBCClient.createNonShared(vertx, jsonObject);
 
-        JsonArray finalJsonArray = jsonArray;
-        client.getConnection(new Handler<AsyncResult<SQLConnection>>() {
-            @Override
-            public void handle(AsyncResult<SQLConnection> event) {
-                if (event.succeeded()){
-                    SQLConnection sqlConnection = event.result();
-                    sqlConnection.queryWithParams(sql, finalJsonArray,new Handler<AsyncResult<ResultSet>>() {
-                        @Override
-                        public void handle(AsyncResult<ResultSet> event) {
-                            if(event.succeeded()){
-                                ResultSet resultSet = event.result();
-                                System.out.println(resultSet.getNumRows());
-                                List<JsonObject> list = resultSet.getRows();
-                                List<Map> maps =new ArrayList<>();
-                                for(JsonObject o:list){
-                                    Map map = o.getMap();
-                                    maps.add(map);
-                                    //User user = SQLModelUtils.loadingObject(User.class, (Map<String, Object>) map);
-                                    //System.out.println(JSON.toJSONString(user));
+        for(int i = 0; i < 100; i++){
+            int finalI = i;
+            new Thread(()->{
+                SQLModelUtils sqlModelUtils = new SQLModelUtils();
+                String sql = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
+                Map<Integer,Object> valueMap = sqlModelUtils.getValueMap();
+                JsonArray jsonArray = new JsonArray();
+                for (Map.Entry<Integer,Object> entry:valueMap.entrySet()){
+                    System.out.println(entry.getKey());
+                    if(entry.getValue() instanceof LocalDateTime){
+                        jsonArray.add(WsBeanUtis.objectToT(entry.getValue(),String.class));
+                    }else {
+                        jsonArray = jsonArray.add(entry.getValue());
+                    }
 
-                                }
-
-                                maps = sqlModelUtils.handleMap(maps);
-                                /*List<Map> newMaps =new ArrayList<>();
-                                Set<Map> set = new HashSet<>();
-                                for(int i = 0; i < maps.size(); i++) {
-                                    Map m1 = maps.get(i);
-                                    if (set.contains(m1)) {
-                                        continue;
-                                    }
-                                    for (int k = i; k < maps.size(); k++) {
-                                        Map m2 = maps.get(k);
-                                        if (set.contains(m2)) {
-                                            continue;
-                                        }
-                                        if (SQLModelUtils.mapEquals(m1, m2)) {
-                                            set.add(m2);
-                                        }
-                                    }
-                                    newMaps.add(m1);
-                                }*/
-
-                                //System.out.println(JSON.toJSONString(resultSet.getColumnNames()));
-                                //System.out.println(JSON.toJSONString(maps));
-                                long start = System.currentTimeMillis();
-                                maps = sqlModelUtils.mergeMapList(maps);
-                                //JSON.toJSONString(maps);
-                                long end = System.currentTimeMillis();
-                                //System.out.println(JSON.toJSONString(maps));
-                                System.out.println("解析map花费时间为:"+(end - start));
-                                start = System.currentTimeMillis();
-                                List<User> users = sqlModelUtils.loadingObject(maps);
-                                end = System.currentTimeMillis();
-                                System.out.println(JSON.toJSONString(users));
-                                System.out.println(end - start);
-                            }else {
-                                event.cause().printStackTrace();
-                            }
-                        }
-                    });
-
-                    /*sqlConnection.queryStream(SQLModelUtils.modelToSqlSelect(User.class), new Handler<AsyncResult<SQLRowStream>>() {
-                        @Override
-                        public void handle(AsyncResult<SQLRowStream> event) {
-                            if(event.succeeded()){
-                                SQLRowStream sqlRowStream = event.result();
-                                sqlRowStream.handler(new Handler<JsonArray>() {
-                                    @Override
-                                    public void handle(JsonArray event) {
-                                        System.out.println(JSON.toJSONString(event));
-                                    }
-                                });
-                            }else {
-                                event.cause().printStackTrace();
-                            }
-                        }
-                    });*/
-
-
-                    sqlConnection.getTransactionIsolation(new Handler<AsyncResult<TransactionIsolation>>() {
-                        @Override
-                        public void handle(AsyncResult<TransactionIsolation> event) {
-                            if(event.succeeded()){
-                                TransactionIsolation transactionIsolation = event.result();
-
-                            }else {
-                                event.cause().printStackTrace();
-                            }
-                        }
-                    });
-
-
-                }else {
-                    event.cause().printStackTrace();
                 }
-            }
-        });
+                JsonArray finalJsonArray = jsonArray;
+                client.getConnection(new Handler<AsyncResult<SQLConnection>>() {
+                    @Override
+                    public void handle(AsyncResult<SQLConnection> event) {
+                        if (event.succeeded()){
+                            SQLConnection sqlConnection = event.result();
+                            sqlConnection.queryWithParams(sql, finalJsonArray,new Handler<AsyncResult<ResultSet>>() {
+                                @Override
+                                public void handle(AsyncResult<ResultSet> event) {
+                                    if(event.succeeded()){
+                                        ResultSet resultSet = event.result();
+                                        List<JsonObject> list = resultSet.getRows();
+                                        List<Map> maps = new ArrayList<>();
+                                        for(JsonObject o:list){
+                                            Map map = o.getMap();
+                                            maps.add(map);
+                                            //User user = SQLModelUtils.loadingObject(User.class, (Map<String, Object>) map);
+                                            //System.out.println(JSON.toJSONString(user));
+
+                                        }
+                                        long startTime = System.currentTimeMillis();
+                                        long endTime = System.currentTimeMillis();
+
+                                        System.out.println("线程"+ finalI+"完成，共耗时："+(endTime - startTime) +"毫秒");
+                                        sqlConnection.close();
+                                    }else {
+                                        event.cause().printStackTrace();
+                                    }
+                                }
+                            });
+
+                        }else {
+                            event.cause().printStackTrace();
+                        }
+                    }
+                });
+            }).start();
+        }
+
+
 
 
 

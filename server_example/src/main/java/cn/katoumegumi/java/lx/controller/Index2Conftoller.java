@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class Index2Conftoller {
             User user = new User();
             user.setName("你好"+i);
             user.setPassword("世界"+i);
+            user.setCreateDate(LocalDateTime.now());
             hibernateDao.insertObject(user);
             for(int k = 0; k < 10; k++){
                 UserDetails userDetails = new UserDetails();
