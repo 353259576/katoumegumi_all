@@ -566,7 +566,7 @@ public class SQLModelUtils {
     }
 
 
-    public static List<Map> mergeMap(List<Map> mapList){
+    public List<Map> handleMap(List<Map> mapList){
         List<Map> list = new ArrayList<>();
         for(Map map:mapList){
             Map<String,Map> stringMapMap = new HashMap<>();
@@ -598,7 +598,7 @@ public class SQLModelUtils {
     }
 
 
-    public static List<Map> handleMapList(List<Map> maps){
+    public List<Map> mergeMapList(List<Map> maps){
         List<Map> newMaps =new ArrayList<>();
         Set<Map> set = new HashSet<>();
         for(int i = 0; i < maps.size(); i++) {
@@ -623,7 +623,7 @@ public class SQLModelUtils {
             Set<Map.Entry> entries = map.entrySet();
             for(Map.Entry entry:entries){
                 if(entry.getValue() instanceof List){
-                    List<Map> mapList = handleMapList((List<Map>) entry.getValue());
+                    List<Map> mapList = mergeMapList((List<Map>) entry.getValue());
                     if(mapList != null && mapList.size() != 0) {
                         map.put(entry.getKey(), mapList);
                     }
@@ -660,7 +660,7 @@ public class SQLModelUtils {
     }
 
 
-    public void loadingObject(Object parentObject,Map parentMap,FieldColumnRelationMapper parentMapper,String prefix){
+    private void loadingObject(Object parentObject,Map parentMap,FieldColumnRelationMapper parentMapper,String prefix){
         Set<Map.Entry> entries = parentMap.entrySet();
         for(Map.Entry entry:entries){
             String key = (String) entry.getKey();

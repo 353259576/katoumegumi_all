@@ -289,7 +289,7 @@ public class IndexController implements IndexService {
 
                                 }
 
-                                maps = SQLModelUtils.mergeMap(maps);
+                                maps = sqlModelUtils.handleMap(maps);
                                 /*List<Map> newMaps =new ArrayList<>();
                                 Set<Map> set = new HashSet<>();
                                 for(int i = 0; i < maps.size(); i++) {
@@ -312,7 +312,7 @@ public class IndexController implements IndexService {
                                 //System.out.println(JSON.toJSONString(resultSet.getColumnNames()));
                                 //System.out.println(JSON.toJSONString(maps));
                                 long start = System.currentTimeMillis();
-                                maps = SQLModelUtils.handleMapList(maps);
+                                maps = sqlModelUtils.mergeMapList(maps);
                                 //JSON.toJSONString(maps);
                                 long end = System.currentTimeMillis();
                                 //System.out.println(JSON.toJSONString(maps));
@@ -320,6 +320,7 @@ public class IndexController implements IndexService {
                                 start = System.currentTimeMillis();
                                 List<User> users = sqlModelUtils.loadingObject(maps);
                                 end = System.currentTimeMillis();
+                                System.out.println(JSON.toJSONString(users));
                                 System.out.println(end - start);
                             }else {
                                 event.cause().printStackTrace();
