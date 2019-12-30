@@ -634,6 +634,74 @@ public class SQLModelUtils {
 
     }
 
+    public <T> List<T>  loadingObject(List<Map> list){
+        List<T> newList = new ArrayList<>();
+        for(Map childMap:list){
+            Set<Map.Entry> set = childMap.entrySet();
+            for(Map.Entry entry:set){
+                String prefix = (String) entry.getKey();
+                FieldColumnRelationMapper mapper = map.get(prefix);
+                if(entry.getValue() instanceof List){
+                    for(Object om:(List)entry.getValue()) {
+                        Object o = WsBeanUtis.createObject(mapper.getClazz());
+                        newList.add((T)o);
+                        loadingObject(o,(Map) om,mapper,prefix);
+                    }
+
+                }else if(entry.getValue() instanceof Map){
+                    Object o = WsBeanUtis.createObject(mapper.getClazz());
+                    newList.add((T)o);
+                    loadingObject(o,(Map) entry.getValue(),mapper,prefix);
+                }
+
+            }
+        }
+        return newList;
+    }
+
+
+    public void loadingObject(Object parentObject,Map parentMap,FieldColumnRelationMapper parentMapper,String prefix){
+        Set<Map.Entry> entries = parentMap.entrySet();
+        for(Map.Entry entry:entries){
+            String key = (String) entry.getKey();
+            Field field = null;
+            Object oValue = entry.getValue();
+            String nowPreFix = prefix + "." + key;
+            Object nowObject = oValue;
+            if(oValue instanceof Map){
+                FieldJoinClass fieldJoinClass = parentMapper.getFieldJoinClassByFieldName(key);
+                field = fieldJoinClass.getField();
+                FieldColumnRelationMapper nowMapper = map.get(nowPreFix);
+                nowObject = WsBeanUtis.createObject(nowMapper.getClazz());
+                loadingObject(nowObject,(Map) oValue,nowMapper,nowPreFix);
+            }else if(oValue instanceof List) {
+                FieldJoinClass fieldJoinClass = parentMapper.getFieldJoinClassByFieldName(key);
+                field = fieldJoinClass.getField();
+                FieldColumnRelationMapper nowMapper = map.get(nowPreFix);
+                List list = new ArrayList();
+                nowObject = list;
+                List mapList = (List) oValue;
+                for (Object o : mapList) {
+                    Object co = WsBeanUtis.createObject(nowMapper.getClazz());
+                    list.add(co);
+                    loadingObject(co, (Map) o, nowMapper, nowPreFix);
+                }
+            }else {
+                FieldColumnRelation relation = parentMapper.getFieldColumnRelationByField(key);
+                field = relation.getField();
+                nowObject = WsBeanUtis.objectToT(nowObject,relation.getFieldClass());
+            }
+            try {
+                assert field != null;
+                field.setAccessible(true);
+                field.set(parentObject,nowObject);
+            }catch (IllegalAccessException e){
+                e.printStackTrace();
+            }
+
+
+        }
+    }
 
     /**
      *废弃的sql数据转换

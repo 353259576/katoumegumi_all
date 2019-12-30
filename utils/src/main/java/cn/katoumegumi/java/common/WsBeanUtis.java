@@ -4,10 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
@@ -845,4 +842,14 @@ public class WsBeanUtis {
         return BaseTypeCommon.CLASS_SET.contains(clazz);
     }
 
+
+    public static  <T> T createObject(Class<T> clazz){
+        try {
+            return clazz.getConstructor().newInstance();
+        }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
 }

@@ -51,6 +51,25 @@ public class FieldColumnRelationMapper {
     }
 
 
+    public FieldJoinClass getFieldJoinClassByColumn(String column){
+        for(FieldJoinClass fieldJoinClass:fieldJoinClasses) {
+            if (fieldJoinClass.getAnotherJoinColumn().equals(column)) {
+                return fieldJoinClass;
+            }
+        }
+        return null;
+    }
+
+    public FieldJoinClass getFieldJoinClassByFieldName(String fieldName){
+        for(FieldJoinClass fieldJoinClass:fieldJoinClasses){
+            if(fieldJoinClass.getNickName().equals(fieldName)){
+                return fieldJoinClass;
+            }
+        }
+        return null;
+    }
+
+
     @Override
     public String toString() {
         return baseSql;

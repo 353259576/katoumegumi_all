@@ -313,9 +313,13 @@ public class IndexController implements IndexService {
                                 //System.out.println(JSON.toJSONString(maps));
                                 long start = System.currentTimeMillis();
                                 maps = SQLModelUtils.handleMapList(maps);
-                                JSON.toJSONString(maps);
+                                //JSON.toJSONString(maps);
                                 long end = System.currentTimeMillis();
-                                System.out.println(JSON.toJSONString(maps));
+                                //System.out.println(JSON.toJSONString(maps));
+                                System.out.println("解析map花费时间为:"+(end - start));
+                                start = System.currentTimeMillis();
+                                List<User> users = sqlModelUtils.loadingObject(maps);
+                                end = System.currentTimeMillis();
                                 System.out.println(end - start);
                             }else {
                                 event.cause().printStackTrace();
