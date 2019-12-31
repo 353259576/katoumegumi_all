@@ -106,6 +106,12 @@ public class WsStringUtils {
 
 
     public static String jointListString(List<String> strings,String sign){
+        if(strings == null){
+            return "";
+        }
+        if(strings.size() == 0){
+            return "";
+        }
         StringBuffer stringBuffer = new StringBuffer();
         for(int i = 0; i < strings.size(); i++){
             stringBuffer.append(strings.get(i));

@@ -262,60 +262,58 @@ public class IndexController implements IndexService {
 
         for(int i = 0; i < 100; i++){
             int finalI = i;
-            new Thread(()->{
-                SQLModelUtils sqlModelUtils = new SQLModelUtils();
-                String sql = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
-                Map<Integer,Object> valueMap = sqlModelUtils.getValueMap();
-                JsonArray jsonArray = new JsonArray();
-                for (Map.Entry<Integer,Object> entry:valueMap.entrySet()){
-                    System.out.println(entry.getKey());
-                    if(entry.getValue() instanceof LocalDateTime){
-                        jsonArray.add(WsBeanUtis.objectToT(entry.getValue(),String.class));
-                    }else {
-                        jsonArray = jsonArray.add(entry.getValue());
-                    }
-
+            SQLModelUtils sqlModelUtils = new SQLModelUtils();
+            String sql = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
+            Map<Integer,Object> valueMap = sqlModelUtils.getValueMap();
+            JsonArray jsonArray = new JsonArray();
+            for (Map.Entry<Integer,Object> entry:valueMap.entrySet()){
+                System.out.println(entry.getKey());
+                if(entry.getValue() instanceof LocalDateTime){
+                    jsonArray.add(WsBeanUtis.objectToT(entry.getValue(),String.class));
+                }else {
+                    jsonArray = jsonArray.add(entry.getValue());
                 }
-                JsonArray finalJsonArray = jsonArray;
-                client.getConnection(new Handler<AsyncResult<SQLConnection>>() {
-                    @Override
-                    public void handle(AsyncResult<SQLConnection> event) {
-                        if (event.succeeded()){
-                            SQLConnection sqlConnection = event.result();
-                            sqlConnection.queryWithParams(sql, finalJsonArray,new Handler<AsyncResult<ResultSet>>() {
-                                @Override
-                                public void handle(AsyncResult<ResultSet> event) {
-                                    if(event.succeeded()){
-                                        ResultSet resultSet = event.result();
-                                        List<JsonObject> list = resultSet.getRows();
-                                        List<Map> maps = new ArrayList<>();
-                                        for(JsonObject o:list){
-                                            Map map = o.getMap();
-                                            maps.add(map);
-                                            //User user = SQLModelUtils.loadingObject(User.class, (Map<String, Object>) map);
-                                            //System.out.println(JSON.toJSONString(user));
 
-                                        }
-                                        long startTime =System.currentTimeMillis();
-                                        maps = sqlModelUtils.handleMap(maps);
-                                        maps = sqlModelUtils.mergeMapList(maps);
-                                        List<User> users = sqlModelUtils.loadingObject(maps);
-                                        long endTime = System.currentTimeMillis();
+            }
+            JsonArray finalJsonArray = jsonArray;
+            client.getConnection(new Handler<AsyncResult<SQLConnection>>() {
+                @Override
+                public void handle(AsyncResult<SQLConnection> event) {
+                    if (event.succeeded()){
+                        SQLConnection sqlConnection = event.result();
+                        sqlConnection.queryWithParams(sql, finalJsonArray,new Handler<AsyncResult<ResultSet>>() {
+                            @Override
+                            public void handle(AsyncResult<ResultSet> event) {
+                                if(event.succeeded()){
+                                    ResultSet resultSet = event.result();
+                                    List<JsonObject> list = resultSet.getRows();
+                                    List<Map> maps = new ArrayList<>();
+                                    for(JsonObject o:list){
+                                        Map map = o.getMap();
+                                        maps.add(map);
+                                        //User user = SQLModelUtils.loadingObject(User.class, (Map<String, Object>) map);
+                                        //System.out.println(JSON.toJSONString(user));
 
-                                        System.out.println("线程"+ finalI+"完成，共耗时："+(endTime - startTime) +"毫秒，User数组大小为:"+users.size());
-                                        sqlConnection.close();
-                                    }else {
-                                        event.cause().printStackTrace();
                                     }
-                                }
-                            });
+                                    long startTime =System.currentTimeMillis();
+                                    maps = sqlModelUtils.handleMap(maps);
+                                    maps = sqlModelUtils.mergeMapList(maps);
+                                    List<User> users = sqlModelUtils.loadingObject(maps);
+                                    long endTime = System.currentTimeMillis();
 
-                        }else {
-                            event.cause().printStackTrace();
-                        }
+                                    System.out.println("线程"+ finalI+"完成，共耗时："+(endTime - startTime) +"毫秒，User数组大小为:"+users.size());
+                                    sqlConnection.close();
+                                }else {
+                                    event.cause().printStackTrace();
+                                }
+                            }
+                        });
+
+                    }else {
+                        event.cause().printStackTrace();
                     }
-                });
-            }).start();
+                }
+            });
         }
 
 
