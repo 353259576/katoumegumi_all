@@ -244,12 +244,11 @@ public class IndexController implements IndexService {
                 }
             }
         });*/
-
-        /*try {
+        try {
             Thread.sleep(30000);
         }catch (InterruptedException e){
             e.printStackTrace();
-        }*/
+        }
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.put("provider_class","cn.katoumegumi.java.vertx.DruidDataSourceProvider");
@@ -297,10 +296,13 @@ public class IndexController implements IndexService {
                                             //System.out.println(JSON.toJSONString(user));
 
                                         }
-                                        long startTime = System.currentTimeMillis();
+                                        long startTime =System.currentTimeMillis();
+                                        maps = sqlModelUtils.handleMap(maps);
+                                        maps = sqlModelUtils.mergeMapList(maps);
+                                        List<User> users = sqlModelUtils.loadingObject(maps);
                                         long endTime = System.currentTimeMillis();
 
-                                        System.out.println("线程"+ finalI+"完成，共耗时："+(endTime - startTime) +"毫秒");
+                                        System.out.println("线程"+ finalI+"完成，共耗时："+(endTime - startTime) +"毫秒，User数组大小为:"+users.size());
                                         sqlConnection.close();
                                     }else {
                                         event.cause().printStackTrace();
