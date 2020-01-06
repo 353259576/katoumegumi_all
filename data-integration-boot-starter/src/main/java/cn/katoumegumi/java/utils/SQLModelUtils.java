@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,8 @@ public class SQLModelUtils {
     private Map<Integer, Object> valueMap = new TreeMap<>();
 
     private AtomicInteger atomicInteger = new AtomicInteger(1);
+
+    private String searchSql;
 
     public static void main(String[] args) {
         Map m1 = new HashMap();
@@ -97,9 +100,23 @@ public class SQLModelUtils {
             selectSql.append(" order by ")
                     .append(WsStringUtils.jointListString(list1, ","));
         }
+        searchSql = selectSql.toString();
+        if(mySearchList.getPageVO() != null){
+            return mysqlPaging(mySearchList.getPageVO(),selectSql.toString());
+        }
         return selectSql.toString();
 
     }
+
+
+    public String mysqlPaging(Page page,String selectSql){
+        if(page.getCurrent() == 0L){
+            page.setCurrent(1L);
+        }
+        return selectSql + " limit " + (page.getCurrent() - 1)*page.getSize()+","+page.getSize();
+    }
+
+
 
     /**
      * 生成whereSql语句

@@ -255,7 +255,8 @@ public class WsStringUtils {
                                 i++;
                                 str += ch[i];
                             }
-                            char letter = (char) Integer.parseInt(str, 16); // 16进制parse整形字符串。
+                            // 16进制parse整形字符串。
+                            char letter = (char) Integer.parseInt(str, 16);
                             buffer.append(letter);
                         }
                     }

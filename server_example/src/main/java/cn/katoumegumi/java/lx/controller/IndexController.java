@@ -169,6 +169,10 @@ public class IndexController implements IndexService {
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
                 .sort("userDetails.sex","DESC");*/
+        Page page = new Page();
+        page.setCurrent(1);
+        page.setSize(10);
+        mySearchList.setPageVO(page);
         SQLModelUtils sqlModelUtils = new SQLModelUtils();
         String str = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
         System.out.println(str);
@@ -244,11 +248,11 @@ public class IndexController implements IndexService {
                 }
             }
         });*/
-        try {
+        /*try {
             Thread.sleep(30000);
         }catch (InterruptedException e){
             e.printStackTrace();
-        }
+        }*/
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.put("provider_class","cn.katoumegumi.java.vertx.DruidDataSourceProvider");
