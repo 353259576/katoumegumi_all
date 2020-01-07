@@ -30,7 +30,7 @@ import javax.sql.DataSource;
 @EnableDubboConfig
 @EnableDubbo(scanBasePackages = "cn.katoumegumi.java.lx")
 @MapperScan(basePackages = "cn.katoumegumi.java.lx.mapper")
-//@ComponentScan(value = "cn.katoumegumi")
+@ComponentScan(value = "cn.katoumegumi")
 public class Application {
 
     /*@Autowired

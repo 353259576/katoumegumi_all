@@ -24,7 +24,6 @@ import java.util.Properties;
 @ConditionalOnClass({DataSource.class,SessionFactory.class})
 @AutoConfigureAfter({DataSourceConfig.class})
 @EnableConfigurationProperties(value = {HibernateWsProperties.class})
-@ConditionalOnProperty(name = "megumi.hibernate", value = {"enable"},havingValue = "true")
 public class HibernateConfig {
     @Resource
     private DataSource dataSource;
@@ -56,7 +55,7 @@ public class HibernateConfig {
 
     //@Primary
     @Bean
-
+    @ConditionalOnProperty(name = "megumi.hibernate.enable",havingValue = "true")
     public LocalSessionFactoryBean localSessionFactoryBean(){
         LocalSessionFactoryBean localSessionFactoryBean = new LocalSessionFactoryBean();
         localSessionFactoryBean.setDataSource(dataSource);

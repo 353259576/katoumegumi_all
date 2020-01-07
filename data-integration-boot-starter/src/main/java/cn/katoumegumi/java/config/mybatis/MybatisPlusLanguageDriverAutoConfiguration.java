@@ -37,7 +37,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnClass(LanguageDriver.class)
-@ConditionalOnProperty(prefix = "megumi.mybatis", value = {"enable"}, havingValue = "true")
 public class MybatisPlusLanguageDriverAutoConfiguration {
 
     private static final String CONFIGURATION_PROPERTY_PREFIX = Constants.MYBATIS_PLUS + ".scripting-language-driver";
