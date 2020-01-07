@@ -4,6 +4,8 @@ import com.alibaba.cloud.dubbo.annotation.DubboTransported;
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubboConfig;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
@@ -28,14 +30,13 @@ import javax.sql.DataSource;
 @EnableDubboConfig
 @EnableDubbo(scanBasePackages = "cn.katoumegumi.java.lx")
 @MapperScan(basePackages = "cn.katoumegumi.java.lx.mapper")
+//@ComponentScan(value = "cn.katoumegumi")
 public class Application {
 
     /*@Autowired
     private DataSource dataSource;*/
 
     public static void main(String[] args) {
-
-
         SpringApplication.run(Application.class,args);
     }
 

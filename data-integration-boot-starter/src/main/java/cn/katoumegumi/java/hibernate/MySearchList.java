@@ -97,9 +97,6 @@ public class MySearchList {
     }
 
     public Page getPageVO() {
-        if(pageVO == null){
-            pageVO = new Page();
-        }
         return pageVO;
     }
 

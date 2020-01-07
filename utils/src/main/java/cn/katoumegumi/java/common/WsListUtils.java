@@ -54,6 +54,9 @@ public class WsListUtils {
     }
 
     public static <T> List<T> mergeList(List<T> l1,List<T> l2){
+        if(isEmpty(l1)&&isEmpty(l2)){
+            return null;
+        }
         if(isEmpty(l1)){
             return l2;
         }
@@ -72,18 +75,6 @@ public class WsListUtils {
 
 
 
-    public static <T,E> List<T>ListToList(List<E> list,Class<T> tClass){
-        try {
-            List<T> list1 = new ArrayList<>(list.size());
-            for(E o1:list){
-                Object o2 = (T)tClass.getConstructor(tClass).newInstance();
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
-
-    }
 
     public static <T> List<T> arrayToList(T[] array){
         List<T> list = new ArrayList<>();

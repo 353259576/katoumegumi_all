@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.katoumegumi.java</groupId>
-    <artifactId>ws_all</artifactId>
+    <artifactId>katoumegumi_all</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>${katoumegumi.version}</version>
     <modules>
         <module>data-integration-boot-starter</module>
         <module>utils</module>
@@ -36,6 +36,7 @@
     </scm>
 
     <properties>
+        <katoumegumi.version>1.0-SNAPSHOT</katoumegumi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>2.2.1.RELEASE</spring-boot.version>
         <spring-cloud.version>Hoxton.RC2</spring-cloud.version>
@@ -50,6 +51,26 @@
         <fastjson.version>1.2.47</fastjson.version>
         <spring-boot-admin.version>2.2.0-SNAPSHOT</spring-boot-admin.version>
         <dubbo-version>2.7.3</dubbo-version>
+
+        <netty-version>4.1.37.Final</netty-version>
+        <zxing.version>3.4.0</zxing.version>
+        <fastjson.version>1.2.59</fastjson.version>
+        <reactor.version>3.2.11.RELEASE</reactor.version>
+        <mail.version>1.6.2</mail.version>
+        <hadoop.version>3.2.0</hadoop.version>
+        <kafka.version>2.3.0</kafka.version>
+        <vertx.version>3.8.3</vertx.version>
+        <druid.version>1.1.21</druid.version>
+
+        <mysql.version>8.0.15</mysql.version>
+        <hibernate.version>5.4.10.Final</hibernate.version>
+        <seata.version>1.0.0</seata.version>
+        <mybatis.plus.version>3.2.0</mybatis.plus.version>
+        <mybatis.thymeleaf.version>1.0.1</mybatis.thymeleaf.version>
+        <mybatis.velocity.version>2.1.0</mybatis.velocity.version>
+        <mybatis.freemarker.version>1.2.0</mybatis.freemarker.version>
+
+
     </properties>
 
 
@@ -130,12 +151,6 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.43.Final</version>
         </dependency>
     </dependencies>
 

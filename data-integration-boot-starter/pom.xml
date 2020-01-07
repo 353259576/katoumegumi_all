@@ -12,12 +12,7 @@
     <artifactId>data-integration-boot-starter</artifactId>
 
     <properties>
-        <lombok.version>1.18.2</lombok.version>
-        <druid.version>1.1.21</druid.version>
-        <mysql.version>8.0.15</mysql.version>
-        <hibernate.version>5.4.10.Final</hibernate.version>
-        <seata.version>0.9.0</seata.version>
-        <spring-data-version>Moore-SR2</spring-data-version>
+
     </properties>
 
 
@@ -121,25 +116,30 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-extension</artifactId>
-            <version>3.2.0</version>
+            <version>${mybatis.plus.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.mybatis.scripting</groupId>
             <artifactId>mybatis-thymeleaf</artifactId>
-            <version>1.0.1</version>
+            <version>${mybatis.thymeleaf.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.mybatis.scripting</groupId>
             <artifactId>mybatis-velocity</artifactId>
-            <version>2.1.0</version>
+            <version>${mybatis.velocity.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.mybatis.scripting</groupId>
             <artifactId>mybatis-freemarker</artifactId>
-            <version>1.2.0</version>
+            <version>${mybatis.freemarker.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
         </dependency>
 
 

@@ -90,7 +90,7 @@ import java.util.stream.Stream;
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
 @ConditionalOnSingleCandidate(DataSource.class)
 @EnableConfigurationProperties(MybatisPlusProperties.class)
-@AutoConfigureAfter({DataSourceAutoConfiguration.class,MybatisPlusLanguageDriverAutoConfiguration.class})
+@AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisPlusLanguageDriverAutoConfiguration.class})
 @ConditionalOnProperty(prefix = "megumi.mybatis", value = {"enable"}, havingValue = "true")
 public class MybatisPlusAutoConfiguration implements InitializingBean {
 
@@ -154,7 +154,7 @@ public class MybatisPlusAutoConfiguration implements InitializingBean {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Bean
-    @Primary
+    //@Primary
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
         // TODO 使用 MybatisSqlSessionFactoryBean 而不是 SqlSessionFactoryBean

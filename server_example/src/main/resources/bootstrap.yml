@@ -69,11 +69,11 @@ megumi:
     #password: 199645
   hibernate:
     dialect: cn.katoumegumi.java.hibernate.ExtendedMySQLDialect
-    scan-package: cn.katoumegumi.java.lx
+    scan-package: cn.katoumegumi.java.lx.model
     enable: true
     show-sql: true
   jpa:
-    packages-to-scan: cn.katoumegumi.java.lx
+    packages-to-scan: cn.katoumegumi.java.lx.model
     generate-ddl: true
     enable: true
     mapping-resources: cn.katoumegumi.java.lx.jpa

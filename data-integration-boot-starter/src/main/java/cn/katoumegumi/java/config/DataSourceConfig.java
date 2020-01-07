@@ -28,7 +28,7 @@ import java.util.Map;
 @Slf4j
 @Configuration
 //@AutoConfigureAfter(DruidDBConfig.class)
-@ConditionalOnClass({DataSource.class, EmbeddedDatabaseType.class})
+@ConditionalOnClass({DataSource.class})
 //@AutoConfigureBefore({DataSourceAutoConfiguration.class})
 //@ConditionalOnExpression("'${ws.datasource.enable}'.equals('true')")
 @ConditionalOnProperty(prefix = "megumi.datasource",value = "enable",havingValue = "true")

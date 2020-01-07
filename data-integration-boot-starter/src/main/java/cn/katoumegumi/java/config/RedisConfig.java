@@ -117,17 +117,19 @@ public class RedisConfig {
         redisCacheManagerBuilder.cacheDefaults(redisCacheConfiguration);
 
         Map<String,Integer> caches = redisWsProperties.getCaches();
-        Set<Map.Entry<String,Integer>> set = caches.entrySet();
-        Iterator<Map.Entry<String,Integer>> iterator = set.iterator();
-        Set<String> cacheNames = new HashSet<>();
-        Map<String, RedisCacheConfiguration> configMap = new HashMap<>();
-        while (iterator.hasNext()){
-            Map.Entry<String,Integer> entry = iterator.next();
-            cacheNames.add(entry.getKey());
-            configMap.put(entry.getKey(),redisCacheConfiguration.entryTtl(Duration.ofSeconds(entry.getValue())));
+        if(caches != null) {
+            Set<Map.Entry<String, Integer>> set = caches.entrySet();
+            Iterator<Map.Entry<String, Integer>> iterator = set.iterator();
+            Set<String> cacheNames = new HashSet<>();
+            Map<String, RedisCacheConfiguration> configMap = new HashMap<>();
+            while (iterator.hasNext()) {
+                Map.Entry<String, Integer> entry = iterator.next();
+                cacheNames.add(entry.getKey());
+                configMap.put(entry.getKey(), redisCacheConfiguration.entryTtl(Duration.ofSeconds(entry.getValue())));
+            }
+            redisCacheManagerBuilder.initialCacheNames(cacheNames);
+            redisCacheManagerBuilder.withInitialCacheConfigurations(configMap);
         }
-        redisCacheManagerBuilder.initialCacheNames(cacheNames);
-        redisCacheManagerBuilder.withInitialCacheConfigurations(configMap);
         RedisCacheManager redisCacheManager = redisCacheManagerBuilder.build();
         return redisCacheManager;
     }
