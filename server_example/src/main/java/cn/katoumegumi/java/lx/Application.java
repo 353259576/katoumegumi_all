@@ -49,11 +49,11 @@ public class Application {
         return new JdbcTemplate(dataSource);
     }
 
-    @Bean
+    /*@Bean
     public GlobalTransactionScanner globalTransactionScanner(){
         GlobalTransactionScanner globalTransactionScanner = new GlobalTransactionScanner("lx-spring","my_test_tx_group");
         return globalTransactionScanner;
-    }
+    }*/
 
 
     @LoadBalanced

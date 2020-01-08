@@ -58,7 +58,7 @@ megumi:
           url: jdbc:mysql://localhost:3306/wslx?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
           username: root
           password: 199645
-    seata-enable: true
+    seata-enable: false
   redis:
     enable: true
     host: 127.0.0.1

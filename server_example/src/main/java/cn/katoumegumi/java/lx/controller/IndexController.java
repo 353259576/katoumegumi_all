@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import javax.persistence.EntityManager;
 import javax.persistence.criteria.JoinType;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -71,6 +72,9 @@ public class IndexController implements IndexService {
 
     @Autowired
     private HibernateDao hibernateDao;
+
+    @Autowired
+    private EntityManager entityManager;
 
 
     @Override

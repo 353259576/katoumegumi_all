@@ -4,6 +4,7 @@ import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.properties.HibernateWsProperties;
 import cn.katoumegumi.java.properties.JpaWsProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,12 +14,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Resource;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Properties;
 
 //import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
@@ -122,6 +126,19 @@ public class JpaConfig {
         /*WsPlatformTransactionManager wsPlatformTransactionManager = new WsPlatformTransactionManager();
         wsPlatformTransactionManager.setJpaTransactionManager(jpaTransactionManager);
         return wsPlatformTransactionManager;*/
+    }
+
+
+    @Bean
+    @Primary
+    public EntityManager sharedEntityManagerCreator(/*EntityManagerFactory entityManagerFactory*/ List<EntityManager> entityManagers){
+        //return SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
+        for(EntityManager entityManager:entityManagers){
+            if(entityManager.toString().contains("LocalContainerEntityManagerFactoryBean")){
+                return entityManager;
+            }
+        }
+        return entityManagers.get(0);
     }
 
 
