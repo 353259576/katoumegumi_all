@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-@Configuration
+/*@Configuration
 @Aspect
 @Order(1)
-@Slf4j
+@Slf4j*/
 public class DataBaseChoose {
 
 

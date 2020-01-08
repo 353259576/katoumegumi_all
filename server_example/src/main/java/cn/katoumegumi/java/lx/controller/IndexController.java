@@ -75,7 +75,7 @@ public class IndexController implements IndexService {
 
     @Override
     @RequestMapping(value = "index")
-    @DataBase(dataBaseName = "maste")
+    @DataBase(dataBaseName = "slave1")
     @Transactional(rollbackFor = RuntimeException.class)
     @Path("/index")
     @GET

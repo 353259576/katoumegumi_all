@@ -3,6 +3,7 @@ package cn.katoumegumi.java.config;
 import cn.katoumegumi.java.datasource.DruidDataSourceCreateFactory;
 import cn.katoumegumi.java.datasource.DynamicDataSource;
 import cn.katoumegumi.java.datasource.DynamicDataSourceHolder;
+import cn.katoumegumi.java.datasource.annotation.DynamicDataSourceAdvisor;
 import cn.katoumegumi.java.properties.DruidDataSourceProperties;
 import cn.katoumegumi.java.properties.DruidDataSourcePropertiesList;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.*;
+import org.springframework.core.Ordered;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
@@ -27,15 +29,10 @@ import java.util.Map;
 @Data
 @Slf4j
 @Configuration
-//@AutoConfigureAfter(DruidDBConfig.class)
 @ConditionalOnClass({DataSource.class})
-//@AutoConfigureBefore({DataSourceAutoConfiguration.class})
-//@ConditionalOnExpression("'${ws.datasource.enable}'.equals('true')")
 @ConditionalOnProperty(prefix = "megumi.datasource",value = "enable",havingValue = "true")
 @EnableTransactionManagement(proxyTargetClass = true)
 @EnableConfigurationProperties(value = {DruidDataSourcePropertiesList.class})
-@EnableAspectJAutoProxy
-@ComponentScan(basePackages = {"cn.katoumegumi.java"})
 public class DataSourceConfig {
 
     @Resource
@@ -94,6 +91,13 @@ public class DataSourceConfig {
     public JdbcTemplate jdbcTemplate(DataSource dataSource){
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         return jdbcTemplate;
+    }
+
+    @Bean
+    public DynamicDataSourceAdvisor dynamicDataSourceAdvisor(){
+        DynamicDataSourceAdvisor dynamicDataSourceAdvisor = new DynamicDataSourceAdvisor();
+        dynamicDataSourceAdvisor.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return dynamicDataSourceAdvisor;
     }
 
 
