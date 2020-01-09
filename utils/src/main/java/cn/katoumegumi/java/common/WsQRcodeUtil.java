@@ -14,9 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Hashtable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.ZipEntry;
@@ -26,7 +24,9 @@ import java.util.zip.ZipOutputStream;
 public class WsQRcodeUtil {
 
     public static void main(String[] args) {
-        Executor executor = Executors.newFixedThreadPool(4);
+        Executor executor = new ThreadPoolExecutor(4, 4,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),Executors.defaultThreadFactory());
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
         try {

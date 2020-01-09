@@ -1,16 +1,11 @@
 package cn.katoumegumi.java.http.reptile;
 
-import cn.katoumegumi.java.common.FileUtils;
 import cn.katoumegumi.java.common.WsImageUtils;
-import cn.katoumegumi.java.common.WsStreamUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.http.client.model.HttpRequestBody;
 import cn.katoumegumi.java.http.client.model.HttpResponseBody;
 import cn.katoumegumi.java.http.client.model.HttpResponseTask;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.nio.ByteBuffer;
 import java.util.UUID;
 import java.util.concurrent.*;
 

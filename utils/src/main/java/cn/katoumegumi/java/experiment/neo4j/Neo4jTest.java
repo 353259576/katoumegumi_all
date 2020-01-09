@@ -1,7 +1,5 @@
-package cn.katoumegumi.java.neo4j;
+package cn.katoumegumi.java.experiment.neo4j;
 
-
-import java.net.URI;
 
 /**
  * @author ws

@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -9,6 +11,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Slf4j
 public class WsStreamUtils {
 
 
@@ -147,7 +150,7 @@ public class WsStreamUtils {
             zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
             zipOutputStream.setLevel(7);
             zipOutputStream.setMethod(ZipOutputStream.DEFLATED);
-            zipOutputStream.setComment(new String("Java压缩".getBytes("utf-8"),"ASCII"));
+            //zipOutputStream.setComment(new String("Java压缩".getBytes("utf-8"),"ASCII"));
             writableByteChannel = Channels.newChannel(zipOutputStream);
             ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
             for(int i = 0; i < inputStreams.length; i++){
@@ -208,7 +211,7 @@ public class WsStreamUtils {
                 e.printStackTrace();
             }
             Long endTime = System.currentTimeMillis();
-            System.out.println("系统压缩文件需要："+(endTime-startTime)+"毫秒");
+            log.info("系统压缩文件需要："+(endTime-startTime)+"毫秒");
         }
 
     }

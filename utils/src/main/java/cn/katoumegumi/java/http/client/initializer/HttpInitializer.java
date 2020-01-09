@@ -32,7 +32,7 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
 
     public HttpRequestBody httpRequestBody;
 
-    private static final Http2FrameLogger logger = new Http2FrameLogger(INFO, HttpInitializer.class);
+    private static final Http2FrameLogger LOGGER = new Http2FrameLogger(INFO, HttpInitializer.class);
 
 
     public HttpInitializer(HttpRequestBody httpRequestBody, String id) {
@@ -68,7 +68,7 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
                                                     .maxContentLength(Integer.MAX_VALUE)
                                                     .propagateSettings(true)
                                                     .build()))
-                                    .frameLogger(logger)
+                                    .frameLogger(LOGGER)
                                     .connection(connection)
                                     .build();
                             HttpResponseHandler responseHandler = new HttpResponseHandler();

@@ -2,6 +2,8 @@ package cn.katoumegumi.java.common;
 
 
 
+import lombok.Data;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -10,9 +12,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class UnSafeUtils {
 
-    private volatile Integer k = 0;
+   /* private volatile Integer k = 0;
 
-    /*private static Unsafe unsafe;
+    private static Unsafe unsafe;
 
     static {
         try {
@@ -24,10 +26,15 @@ public class UnSafeUtils {
             e.printStackTrace();
         }
 
-    }*/
+    }
 
-    /*public static void main(String[] args) throws Exception{
+    public static Unsafe getUnsafe(){
+        return unsafe;
+    }
+
+    public static void main(String[] args) throws Exception{
         Unsafe unsafe = UnSafeUtils.getUnsafe();
+        System.out.println(unsafe.toString());
         System.out.println(unsafe);
         UnSafeUtils unSafeUtils = new UnSafeUtils();
         Field field = unSafeUtils.getClass().getDeclaredField("k");
@@ -60,7 +67,7 @@ public class UnSafeUtils {
         System.out.println(file);
     }*/
 
-    /*public int add(long address){
+   /* public int add(long address){
         int prev,next;
         do {
             prev = k;

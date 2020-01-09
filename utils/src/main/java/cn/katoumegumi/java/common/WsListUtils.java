@@ -77,6 +77,9 @@ public class WsListUtils {
 
 
     public static <T> List<T> arrayToList(T[] array){
+        if(array == null || array.length == 0){
+            return null;
+        }
         List<T> list = new ArrayList<>();
         for(int i = 0; i < array.length; i++){
             list.add(array[i]);

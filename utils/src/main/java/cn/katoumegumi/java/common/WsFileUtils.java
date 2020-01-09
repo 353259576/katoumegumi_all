@@ -1,12 +1,17 @@
 package cn.katoumegumi.java.common;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.channels.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
+
 @Slf4j
-public class FileUtils {
+public class WsFileUtils {
     public static void main(String[] args) {
         //DelayQueue delayQueue = new DelayQueue();
         /*try {
@@ -76,8 +81,8 @@ public class FileUtils {
         }
 */
 
-        try {
-            /*File file = createFile("F://1.jpg");
+        /*try {
+         *//*File file = createFile("F://1.jpg");
             FileOutputStream fileOutputStream = new FileOutputStream(file);
             FileChannel fileChannel = fileOutputStream.getChannel();
             byte bytes[] = Base64.getMimeDecoder().decode(str.getBytes());
@@ -85,7 +90,7 @@ public class FileUtils {
             fileChannel.write(byteBuffer);
             fileChannel.close();
             fileOutputStream.flush();
-            fileOutputStream.close();*/
+            fileOutputStream.close();*//*
             File file = new File("F:\\新建文件夹 (4)\\19.jpg");
             FileInputStream fileInputStream = new FileInputStream(file);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -106,15 +111,62 @@ public class FileUtils {
             fileOutputStream.close();
         }catch (IOException e){
             e.printStackTrace();
+        }*/
+        System.out.println(adjustFilePath("F:\\新建文件夹 (4)\\2.txt"));
+        System.out.println(JSON.toJSONString(getListDirectory("c://")));
+    }
+
+
+    public static String adjustFilePath(String oldFilePath){
+        oldFilePath = oldFilePath.replaceAll("\\\\","/");
+        return oldFilePath;
+    }
+
+
+    public static List<File> getListFile(String filePath){
+        filePath = adjustFilePath(filePath);
+        File file = new File(filePath);
+        return getListFile(file);
+    }
+
+
+    public static List<File> getListFile(File file){
+        if(file == null){
+            return null;
         }
+        if(!file.exists()){
+            return null;
+        }
+        if(file.isFile()){
+            return null;
+        }
+        File[] files = file.listFiles();
+        return WsListUtils.arrayToList(files);
+    }
 
 
+    public static List<String> getListDirectory(String path){
+
+        List<File> listFile = getListFile(path);
+        if(listFile == null || listFile.size() == 0){
+            return null;
+        }
+        List<String> folders = new ArrayList<>();
+        for(File f1:listFile){
+            if(f1.isDirectory()){
+                folders.add(f1.getName());
+            }
+        }
+        return folders;
     }
 
 
     public static File createFile(String filePath){
         File file = new File(filePath);
         if(file.exists()){
+            file.setReadable(true);
+            file.setWritable(true);
+            file.setExecutable(true);
             return file;
         }else {
             if(filePath.endsWith("/")||filePath.endsWith("\\")){
@@ -132,11 +184,17 @@ public class FileUtils {
                 }catch (IOException e){
                     e.printStackTrace();
                 }
+                file.setWritable(true);
+                file.setReadable(true);
+                file.setExecutable(true);
                 return file;
             }
         }
 
     }
+
+
+
 
 
 

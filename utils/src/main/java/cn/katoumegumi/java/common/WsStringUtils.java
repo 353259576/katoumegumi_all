@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class WsStringUtils {
-    public static final byte Trim = 32;
+    public static final byte TRIM = 32;
 
 
     public static void main(String[] args) {
@@ -194,7 +194,7 @@ public class WsStringUtils {
             return false;
         }
         for(int i = 0; i < bytes.length; i++){
-            if(bytes[i]==Trim){
+            if(bytes[i]==TRIM){
                 return false;
             }
         }
@@ -212,7 +212,7 @@ public class WsStringUtils {
         }
         List list = new ArrayList();
         for(int i = 0; i < bytes.length; i++){
-            if(bytes[i]!=Trim){
+            if(bytes[i]!=TRIM){
                 list.add(bytes[i]);
             }
         }

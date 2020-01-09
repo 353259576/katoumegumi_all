@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.common;
+package cn.katoumegumi.java.experiment;
 
 import java.io.*;
 import java.util.Comparator;
@@ -200,10 +200,10 @@ public class HufTree {
         }
         // 创建字符数组，保存字节
         byte[] bv = new byte[len];
-        bv[0] = new Integer(lastZero).byteValue();
+        bv[0] = Integer.valueOf(lastZero).byteValue();
         for (int i = 1; i < len; i++) {
             // 先将8位01字符串二进制数据转换为十进制整型数据，再转为一个byte
-            byte bytes = new Integer(changeString(codeAndFile.substring(0, 8))).byteValue();
+            byte bytes = Integer.valueOf(changeString(codeAndFile.substring(0, 8))).byteValue();
             bv[i] = bytes;
             codeAndFile = codeAndFile.substring(8);// 去除前8个字节
         }
