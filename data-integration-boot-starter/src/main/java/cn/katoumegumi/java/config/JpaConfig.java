@@ -118,7 +118,7 @@ public class JpaConfig {
 
 
     @Primary
-    @Bean(name = "jpaTransactionManager")
+    @Bean
     public PlatformTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory){
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactory);

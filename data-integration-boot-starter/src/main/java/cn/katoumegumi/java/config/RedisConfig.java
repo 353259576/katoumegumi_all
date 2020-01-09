@@ -4,6 +4,7 @@ package cn.katoumegumi.java.config;
 import cn.katoumegumi.java.properties.RedisWsProperties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
@@ -36,6 +37,7 @@ public class RedisConfig {
     private RedisWsProperties redisWsProperties;
 
     @Bean
+    @ConditionalOnMissingBean
     public RedisStandaloneConfiguration redisStandaloneConfiguration(Environment environment){
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(redisWsProperties.getHost());
@@ -52,18 +54,21 @@ public class RedisConfig {
      * @return
      */
     @Bean
+    @ConditionalOnMissingBean
     public RedisConnectionFactory lettuceConnectionFactory(RedisStandaloneConfiguration redisStandaloneConfiguration){
         LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration);
         return lettuceConnectionFactory;
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public StringRedisSerializer stringRedisSerializer(){
         StringRedisSerializer stringRedisSerializer = new StringRedisSerializer(StandardCharsets.UTF_8);
         return stringRedisSerializer;
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer(){
         GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer = new GenericJackson2JsonRedisSerializer();
         return genericJackson2JsonRedisSerializer;
@@ -75,6 +80,7 @@ public class RedisConfig {
 
 
     @Bean
+    @ConditionalOnMissingBean
     public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory, StringRedisSerializer stringRedisSerializer, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
         RedisTemplate redisTemplate = new RedisTemplate();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
@@ -88,6 +94,7 @@ public class RedisConfig {
 
 
     @Bean
+    @ConditionalOnMissingBean
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory, StringRedisSerializer stringRedisSerializer, GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer){
         StringRedisTemplate redisTemplate = new StringRedisTemplate();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
@@ -108,6 +115,7 @@ public class RedisConfig {
      * @return
      */
     @Bean
+    @ConditionalOnMissingBean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory){
 
         RedisCacheManager.RedisCacheManagerBuilder redisCacheManagerBuilder  = RedisCacheManager.builder(redisConnectionFactory);
