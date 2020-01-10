@@ -65,7 +65,6 @@ public class LuenceTest {
     public static void create() throws IOException {
         Analyzer analyzer = new SmartChineseAnalyzer();
         IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
-        indexWriterConfig.setIndexCreatedVersionMajor(Version.LUCENE_8_0_0.major);
         indexWriterConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         Path path = FileSystems.getDefault().getPath("test");
         Directory directory = FSDirectory.open(path);
