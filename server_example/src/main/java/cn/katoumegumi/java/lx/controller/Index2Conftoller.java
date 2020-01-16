@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
+import cn.katoumegumi.java.common.WsFileUtils;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
 import cn.katoumegumi.java.lx.jpa.UserJpaDao;
@@ -19,7 +20,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,6 +39,36 @@ public class Index2Conftoller {
     public static void main(String[] args) {
         String str = new BCryptPasswordEncoder().encode("nacos");
         System.out.println(str);
+        File file = WsFileUtils.createFile("C:\\Users\\Administrator\\Pictures\\Camera Roll\\39.png");
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            FileChannel fileChannel = fileInputStream.getChannel();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            WritableByteChannel writableByteChannel = Channels.newChannel(byteArrayOutputStream);
+            ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
+            int i = 0;
+            while ((i = fileChannel.read(byteBuffer)) != -1){
+                byteBuffer.flip();
+                while (byteBuffer.hasRemaining()) {
+                    writableByteChannel.write(byteBuffer);
+                }
+                byteBuffer.clear();
+            }
+            fileChannel.close();
+            writableByteChannel.close();
+            byte bytes[] = byteArrayOutputStream.toByteArray();
+            byte base64bytes[] = Base64.getEncoder().encode(bytes);
+            File file1 = WsFileUtils.createFile("C:\\Users\\Administrator\\Pictures\\Camera Roll\\39.txt");
+            FileOutputStream fileOutputStream = new FileOutputStream(file1);
+            fileChannel = fileOutputStream.getChannel();
+            fileChannel.write(ByteBuffer.wrap(base64bytes));
+            fileChannel.close();
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+
     }
 
     @Autowired

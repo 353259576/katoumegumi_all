@@ -268,10 +268,11 @@ public class IndexController implements IndexService {
         Vertx vertx = Vertx.vertx();
         SQLClient client = JDBCClient.createNonShared(vertx, jsonObject);
 
-        for(int i = 0; i < 100; i++){
+        for(int i = 0; i < 1; i++){
             int finalI = i;
             SQLModelUtils sqlModelUtils = new SQLModelUtils();
             String sql = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
+            System.out.println(sql);
             Map<Integer,Object> valueMap = sqlModelUtils.getValueMap();
             JsonArray jsonArray = new JsonArray();
             for (Map.Entry<Integer,Object> entry:valueMap.entrySet()){
@@ -294,6 +295,7 @@ public class IndexController implements IndexService {
                             public void handle(AsyncResult<ResultSet> event) {
                                 if(event.succeeded()){
                                     ResultSet resultSet = event.result();
+                                    System.out.println(resultSet.getNumRows());
                                     List<JsonObject> list = resultSet.getRows();
                                     List<Map> maps = new ArrayList<>();
                                     for(JsonObject o:list){
