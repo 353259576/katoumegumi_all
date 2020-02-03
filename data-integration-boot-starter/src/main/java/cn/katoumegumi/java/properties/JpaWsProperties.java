@@ -10,7 +10,7 @@ import org.springframework.orm.jpa.vendor.Database;
 @Data
 @ConfigurationProperties(prefix = "megumi.jpa",ignoreInvalidFields = true)
 public class JpaWsProperties {
-    private boolean enable;
+    private boolean enable = false;
     private String packagesToScan;
     private String mappingResources;
     private Boolean generateDdl = true;

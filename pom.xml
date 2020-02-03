@@ -37,20 +37,21 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>2.2.1.RELEASE</spring-boot.version>
-        <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
+        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
+        <spring-cloud.version>Hoxton.SR1</spring-cloud.version>
         <spring-cloud-alibaba.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-alibaba.version>
         <spring-cloud-netflix.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-netflix.version>
         <spring-cloud-openfeign.version>2.2.0.BUILD-SNAPSHOT</spring-cloud-openfeign.version>
+        <spring-boot-admin.version>2.2.0-SNAPSHOT</spring-boot-admin.version>
         <spring-data-version>Moore-SR4</spring-data-version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <lombok.version>1.18.2</lombok.version>
         <fastjson.version>1.2.47</fastjson.version>
-        <spring-boot-admin.version>2.2.0-SNAPSHOT</spring-boot-admin.version>
+
         <dubbo-version>2.7.3</dubbo-version>
 
-        <netty-version>4.1.37.Final</netty-version>
+        <netty-version>4.1.44.Final</netty-version>
         <zxing.version>3.4.0</zxing.version>
         <fastjson.version>1.2.59</fastjson.version>
         <reactor.version>3.2.11.RELEASE</reactor.version>
@@ -60,10 +61,10 @@
         <vertx.version>3.8.3</vertx.version>
         <druid.version>1.1.21</druid.version>
 
-        <mysql.version>8.0.15</mysql.version>
+        <mysql.version>8.0.18</mysql.version>
         <hibernate.version>5.4.10.Final</hibernate.version>
         <seata.version>1.0.0</seata.version>
-        <mybatis.plus.version>3.2.0</mybatis.plus.version>
+        <mybatis.plus.version>3.3.0</mybatis.plus.version>
         <mybatis.thymeleaf.version>1.0.1</mybatis.thymeleaf.version>
         <mybatis.velocity.version>2.1.0</mybatis.velocity.version>
         <mybatis.freemarker.version>1.2.0</mybatis.freemarker.version>

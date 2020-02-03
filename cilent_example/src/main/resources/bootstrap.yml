@@ -6,7 +6,7 @@ spring:
       config:
         server-addr: 127.0.0.1:8848
         file-extension: yml
-        shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+        #shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
   application:
     name: lxClient
   profiles:
@@ -47,9 +47,11 @@ management:
       exposure:
         include: "*"
 megumi:
-  hibernate:
+  datasource:
     enable: false
-    show-sql: true
   jpa:
     enable: false
-    show-sql: true
+  hibernate:
+    enable: false
+  redis:
+    enable: false

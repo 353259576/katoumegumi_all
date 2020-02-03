@@ -25,8 +25,8 @@ import java.util.Properties;
 @AutoConfigureAfter({DataSourceConfig.class})
 @EnableConfigurationProperties(value = {HibernateWsProperties.class})
 public class HibernateConfig {
-    @Resource
-    private DataSource dataSource;
+    /*@Resource
+    private DataSource dataSource;*/
 
     @Resource
     private HibernateWsProperties hibernateWsProperties;
@@ -56,7 +56,7 @@ public class HibernateConfig {
     //@Primary
     @Bean
     @ConditionalOnProperty(name = "megumi.hibernate.enable",havingValue = "true")
-    public LocalSessionFactoryBean localSessionFactoryBean(){
+    public LocalSessionFactoryBean localSessionFactoryBean(DataSource dataSource){
         LocalSessionFactoryBean localSessionFactoryBean = new LocalSessionFactoryBean();
         localSessionFactoryBean.setDataSource(dataSource);
         String scans[] = hibernateWsProperties.getScanPackage().toArray(new String[hibernateWsProperties.getScanPackage().size()]);

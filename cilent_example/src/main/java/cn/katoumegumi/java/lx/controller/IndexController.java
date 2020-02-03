@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
-import cn.katoumegumi.java.common.FileUtils;
+import cn.katoumegumi.java.common.WsFileUtils;
 import cn.katoumegumi.java.lx.service.IndexService;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -60,7 +60,7 @@ public class IndexController {
             ByteBuf byteBuf = (ByteBuf) list.get(1);
             byte[] bytes = ByteBufUtil.getBytes(byteBuf);
             try {
-                File file = FileUtils.createFile("C:\\Users\\Administrator\\Pictures\\1.jpg");
+                File file = WsFileUtils.createFile("C:\\Users\\Administrator\\Pictures\\1.jpg");
 
                 FileOutputStream fileInputStream = new FileOutputStream(file);
                 FileChannel fileChannel = fileInputStream.getChannel();

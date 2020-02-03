@@ -33,9 +33,9 @@ public class ClientApplication {
         return new RestTemplate();
     }
 
-    @Bean
+    /*@Bean
     public GlobalTransactionScanner globalTransactionScanner(){
         GlobalTransactionScanner globalTransactionScanner = new GlobalTransactionScanner("lx-client","my_test_tx_group");
         return globalTransactionScanner;
-    }
+    }*/
 }

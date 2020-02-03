@@ -6,6 +6,7 @@ import cn.katoumegumi.java.properties.JpaWsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -28,19 +29,15 @@ import java.util.Properties;
 //import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 
 @Configuration
-//@AutoConfigureBefore(DataSourceConfig.class)
-//@EnableTransactionManagement
-//@EntityScan(basePackages = {"${ws.jpa.}"})
 @Slf4j
 @ConditionalOnClass({DataSource.class,EntityManagerFactory.class})
 @AutoConfigureAfter({HibernateConfig.class})
 @EnableConfigurationProperties({JpaWsProperties.class})
 @ConditionalOnProperty(prefix = "megumi.jpa",name = "enable",havingValue = "true")
-//@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory",transactionManagerRef = "jpaTransactionManager",basePackages = "com.ws.java.lx.jpa")
 public class JpaConfig {
 
-    @Resource
-    private DataSource dataSource;
+    /*@Resource
+    private DataSource dataSource;*/
 
     @Resource
     private HibernateWsProperties hibernateWsProperties;
@@ -99,7 +96,7 @@ public class JpaConfig {
 
     @Primary
     @Bean(name = "entityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(){
+    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(DataSource dataSource){
         HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
         hibernateJpaVendorAdapter.setGenerateDdl(jpaWsProperties.getGenerateDdl());
         hibernateJpaVendorAdapter.setPrepareConnection(jpaWsProperties.getPrepareConnection());
