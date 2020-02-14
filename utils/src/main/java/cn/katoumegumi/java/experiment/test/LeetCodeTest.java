@@ -19,7 +19,8 @@ public class LeetCodeTest {
         int k = findBottomLeftValue1(treeNode);
         System.out.println(k);*/
         //System.out.println(climbStairs1(44));
-        System.out.println(JSON.toJSONString(countBits(5)));
+        //System.out.println(JSON.toJSONString(countBits(5)));
+        //longestPalindrome("qwerrewq");
     }
 
     /**
@@ -379,5 +380,13 @@ public class LeetCodeTest {
         }
         return dp[n - 1][m - 1];
     }
+
+    /**
+     * 5.最长回文子串
+     */
+    /*public static String longestPalindrome(String s) {
+    }*/
+
+
 
 }

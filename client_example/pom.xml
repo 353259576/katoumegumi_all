@@ -3,22 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>ws_all</artifactId>
+        <artifactId>katoumegumi_all</artifactId>
         <groupId>cn.katoumegumi.java</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
     <artifactId>cilent_example</artifactId>
-
-    <properties>
-        <fastjson.version>1.2.59</fastjson.version>
-        <spring-data-releasetrain.version>Fowler-SR2</spring-data-releasetrain.version>
-        <dubbo.version>2.7.4.1</dubbo.version>
-        <seata.version>0.9.0</seata.version>
-        <springdata.version>2.1.9.RELEASE</springdata.version>
-    </properties>
 
     <dependencies>
 
@@ -61,11 +53,13 @@
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
+            <version>${dubbo-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-spring-boot-starter</artifactId>
+            <version>${dubbo-version}</version>
         </dependency>
 
         <dependency>

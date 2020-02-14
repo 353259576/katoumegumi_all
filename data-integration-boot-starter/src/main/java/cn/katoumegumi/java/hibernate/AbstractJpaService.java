@@ -35,6 +35,22 @@ public abstract class AbstractJpaService<K ,P ,D extends JpaDao<K,P>> implements
         return entityDao;
     }
 
+
+    @Override
+    public <S extends P> S save(S var1) {
+        return getEntityDao().save(var1);
+    }
+
+    @Override
+    public <S extends P> List<S> saveAll(Iterable<S> var1) {
+        return getEntityDao().saveAll(var1);
+    }
+
+    @Override
+    public <S extends P> S saveAndFlush(S var1) {
+        return getEntityDao().saveAndFlush(var1);
+    }
+
     @Override
     public IPage<P> selectPage(MySearchList mySearchList) {
         Specification<P> specification = JpaDataHandle.getSpecification(mySearchList);
