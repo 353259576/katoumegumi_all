@@ -32,6 +32,9 @@ public class JpaDataHandle {
         }
     }
 
+
+
+
     public static <T> Specification<T> getSpecification(MySearchList mySearchList){
         Specification<T> specification = new Specification<T>() {
             @Override

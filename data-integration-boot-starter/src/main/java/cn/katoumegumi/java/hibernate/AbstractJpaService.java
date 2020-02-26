@@ -60,6 +60,11 @@ public abstract class AbstractJpaService<K ,P ,D extends JpaDao<K,P>> implements
         }
         Pageable pageable = PageRequest.of(Long.valueOf(pageVO.getCurrent()-1).intValue(),Long.valueOf(pageVO.getSize()).intValue());
         org.springframework.data.domain.Page<P> tPage = getEntityDao().findAll(specification,pageable);
+        return convertPage(pageVO,tPage);
+    }
+
+
+    public IPage<P> convertPage(Page<P> pageVO,org.springframework.data.domain.Page<P> tPage){
         if(tPage == null){
             return null;
         }
