@@ -3,6 +3,9 @@ package cn.katoumegumi.java.config;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.properties.HibernateWsProperties;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.model.naming.ImplicitNamingStrategy;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -18,6 +21,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 @Configuration
@@ -43,6 +47,9 @@ public class HibernateConfig {
         properties.setProperty("hibernate.show_sql",hibernateWsProperties.getShowSql().toString());
         properties.setProperty("hibernate.format_sql",hibernateWsProperties.getFormatSql().toString());
         properties.setProperty("hibernate.use_sql_comments",hibernateWsProperties.getUseSqlComments().toString());
+        properties.setProperty("hibernate.physical_naming_strategy",hibernateWsProperties.physicalStrategy.getName());
+        properties.setProperty("hibernate.implicit_naming_strategy",hibernateWsProperties.implicitStrategy.getName());
+        //properties.setProperty("implicit_naming_strategy",)
         if(hibernateWsProperties.getDefaultSchema() != null){
             properties.setProperty("hibernate.default_schema",hibernateWsProperties.getDefaultSchema());
         }
@@ -62,6 +69,19 @@ public class HibernateConfig {
         String scans[] = hibernateWsProperties.getScanPackage().toArray(new String[hibernateWsProperties.getScanPackage().size()]);
         localSessionFactoryBean.setPackagesToScan(scans);
         localSessionFactoryBean.setAnnotatedPackages(scans);
+        try {
+            localSessionFactoryBean.setPhysicalNamingStrategy((PhysicalNamingStrategy) hibernateWsProperties.getPhysicalStrategy().getConstructor().newInstance());
+            localSessionFactoryBean.setImplicitNamingStrategy((ImplicitNamingStrategy) hibernateWsProperties.getImplicitStrategy().getConstructor().newInstance());
+        }catch (NoSuchMethodException e){
+
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
         localSessionFactoryBean.setHibernateProperties(createProperties());;
         return localSessionFactoryBean;
     }

@@ -60,6 +60,8 @@ public class JpaConfig {
         properties.setProperty("hibernate.show_sql",hibernateWsProperties.getShowSql().toString());
         properties.setProperty("hibernate.format_sql",hibernateWsProperties.getFormatSql().toString());
         properties.setProperty("hibernate.use_sql_comments",hibernateWsProperties.getUseSqlComments().toString());
+        properties.setProperty("hibernate.physical_naming_strategy",hibernateWsProperties.physicalStrategy.getName());
+        properties.setProperty("hibernate.implicit_naming_strategy",hibernateWsProperties.implicitStrategy.getName());
         if(hibernateWsProperties.getDefaultSchema() != null){
             properties.setProperty("hibernate.default_schema",hibernateWsProperties.getDefaultSchema());
         }

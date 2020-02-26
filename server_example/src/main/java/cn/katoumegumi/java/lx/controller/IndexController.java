@@ -21,6 +21,7 @@ import cn.katoumegumi.java.lx.model.User;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
@@ -141,6 +142,17 @@ public class IndexController implements IndexService {
         //throw new RuntimeException("人为错误");
 
         return "";
+    }
+
+    @Transactional
+    @RequestMapping(value = "index5")
+    public String index2(){
+        User user = new User();
+        user.setName("你好啊");
+        user.setPassword("123456");
+        user.setCreateDate(LocalDateTime.now());
+        userJpaDao.save(user);
+        return JSON.toJSONString(user);
     }
 
 

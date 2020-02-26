@@ -9,9 +9,9 @@ spring:
     nacos:
       discovery:
         register-enabled: true
-        server-addr: 127.0.0.1:8848
+        server-addr: 192.168.1.91:8848
       config:
-        server-addr: 127.0.0.1:8848
+        server-addr: 192.168.1.91:8848
         file-extension: yml
         #shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
     discovery:
@@ -27,11 +27,11 @@ spring:
     database: mysql
     hibernate:
       ddl-auto: update
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
     show-sql: true
     open-in-view: true
-    properties:
-      hibernate.format_sql: true
-      hibernate.naming.physical-strategy: org.hibernate.scripts.model.naming.PhysicalNamingStrategyStandardImpl
 megumi:
   datasource:
     enable: true
@@ -72,6 +72,9 @@ megumi:
     scan-package: cn.katoumegumi.java.lx.model
     enable: true
     show-sql: true
+    physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+    hbm2ddl: update
+    implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
   jpa:
     packages-to-scan: cn.katoumegumi.java.lx.model
     generate-ddl: true
@@ -89,7 +92,7 @@ dubbo:
   application:
     name: lxSpring
   registry:
-    address: spring-cloud://127.0.0.1:8848
+    address: spring-cloud://192.168.1.91:8848
   protocols:
     dubbo:
       name: dubbo
