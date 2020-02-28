@@ -11,10 +11,10 @@
     <modules>
         <module>data-integration-boot-starter</module>
         <module>utils</module>
-        <!--<module>server_example</module>
+        <module>server_example</module>
         <module>client_example</module>
         <module>monitor</module>
-        <module>auth_server</module>-->
+        <module>auth_server</module>
     </modules>
 
     <licenses>
@@ -136,6 +136,8 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>-->
+
+
 
         </dependencies>
 

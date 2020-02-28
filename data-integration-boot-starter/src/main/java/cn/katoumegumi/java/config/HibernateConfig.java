@@ -56,6 +56,11 @@ public class HibernateConfig {
         if(hibernateWsProperties.getFactoryClass() != null){
             properties.setProperty("transaction.factory_class",hibernateWsProperties.getFactoryClass().getName());
         }
+        if(hibernateWsProperties.getOtherConfig().size() > 0) {
+            hibernateWsProperties.getOtherConfig().forEach((key,value)->{
+                properties.setProperty(key,value);
+            });
+        }
         return properties;
     }
 
@@ -70,8 +75,8 @@ public class HibernateConfig {
         localSessionFactoryBean.setPackagesToScan(scans);
         localSessionFactoryBean.setAnnotatedPackages(scans);
         try {
-            localSessionFactoryBean.setPhysicalNamingStrategy((PhysicalNamingStrategy) hibernateWsProperties.getPhysicalStrategy().getConstructor().newInstance());
-            localSessionFactoryBean.setImplicitNamingStrategy((ImplicitNamingStrategy) hibernateWsProperties.getImplicitStrategy().getConstructor().newInstance());
+            localSessionFactoryBean.setPhysicalNamingStrategy(hibernateWsProperties.getPhysicalStrategy().getConstructor().newInstance());
+            localSessionFactoryBean.setImplicitNamingStrategy(hibernateWsProperties.getImplicitStrategy().getConstructor().newInstance());
         }catch (NoSuchMethodException e){
 
         } catch (IllegalAccessException e) {

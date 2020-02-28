@@ -1,25 +1,19 @@
-package cn.katoumegumi.java.utils;
+package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
-import cn.katoumegumi.java.hibernate.MySearch;
-import cn.katoumegumi.java.hibernate.MySearchList;
-import cn.katoumegumi.java.hibernate.TableRelation;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -109,9 +103,9 @@ public class SQLModelUtils {
     }
 
 
-    public String mysqlPaging(Page page,String selectSql){
+    public String mysqlPaging(Page page, String selectSql){
         if(page.getCurrent() == 0L){
-            page.setCurrent(1L);
+            page.setCurrent(1);
         }
         return selectSql + " limit " + (page.getCurrent() - 1)*page.getSize()+","+page.getSize();
     }
@@ -396,7 +390,7 @@ public class SQLModelUtils {
                 FieldColumnRelationMapper mapper = mapperMap.get(fieldJoinClass.getJoinClass());
                 map.put(lastTableNickName, mapper);
                 //joinString.add("inner join " + mapper.getTableName() + " `" + lastTableNickName + "` on `" + tableNickName + "`.`"+fieldJoinClass.getAnotherJoinColumn() + "` = `"+lastTableNickName+"`.`"+fieldJoinClass.getJoinColumn()+"`");
-                joinString.add(createJoinSql(tableNickName, fieldJoinClass.getAnotherJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getJoinColumn()));
+                joinString.add(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn()));
                 selectJoin(lastTableNickName, selectString, joinString, mapper);
             }
         }
@@ -425,7 +419,6 @@ public class SQLModelUtils {
         return null;
     }
 
-
     public static FieldColumnRelationMapper hibernateAnalysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
         Table table = clazz.getAnnotation(Table.class);
@@ -446,7 +439,7 @@ public class SQLModelUtils {
                 fieldColumnRelation.setFieldName(field.getName());
                 field.setAccessible(true);
                 fieldColumnRelation.setField(field);
-                if (column == null) {
+                if (column == null || WsStringUtils.isBlank(column.name())) {
                     fieldColumnRelation.setColumnName(WsStringUtils.camel_case(field.getName()));
                 } else {
                     fieldColumnRelation.setColumnName(column.name());
@@ -482,7 +475,8 @@ public class SQLModelUtils {
                     isArray = true;
                 }
 
-                if (analysisClassRelation(joinClass) != null) {
+                FieldColumnRelationMapper mapper = analysisClassRelation(joinClass);
+                if (mapper != null) {
                     FieldJoinClass fieldJoinClass = new FieldJoinClass();
                     fieldJoinClass.setNickName(field.getName());
                     fieldJoinClass.setJoinClass(joinClass);
@@ -492,9 +486,22 @@ public class SQLModelUtils {
                     fieldJoinClass.setField(field);
                     if (joinColumn != null) {
                         String name = joinColumn.name();
+                        if(WsStringUtils.isBlank(name)){
+                            name = fieldColumnRelationMapper.getIdSet().get(0).getColumnName();
+                        }
                         String referenced = joinColumn.referencedColumnName();
-                        fieldJoinClass.setAnotherJoinColumn(referenced);
-                        fieldJoinClass.setJoinColumn(name);
+                        if(WsStringUtils.isBlank(referenced)){
+                            referenced = mapper.getIdSet().get(0).getColumnName();
+                        }
+                        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+                        if(oneToMany == null){
+                            fieldJoinClass.setAnotherJoinColumn(referenced);
+                            fieldJoinClass.setJoinColumn(name);
+                        }else {
+                            fieldJoinClass.setAnotherJoinColumn(name);
+                            fieldJoinClass.setJoinColumn(referenced);
+                        }
+
                     }
                     fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
                 }
@@ -524,7 +531,7 @@ public class SQLModelUtils {
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
                 fieldColumnRelation.setFieldClass(field.getType());
                 fieldColumnRelation.setFieldName(field.getName());
-                if (column == null) {
+                if (column == null || WsStringUtils.isBlank(column.value())) {
                     fieldColumnRelation.setColumnName(WsStringUtils.camel_case(field.getName()));
                 } else {
                     fieldColumnRelation.setColumnName(column.value());

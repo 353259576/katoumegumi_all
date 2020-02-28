@@ -68,6 +68,11 @@ public class JpaConfig {
         if(hibernateWsProperties.getFactoryClass() != null){
             properties.setProperty("transaction.factory_class",hibernateWsProperties.getFactoryClass().getName());
         }
+        if(hibernateWsProperties.getOtherConfig().size() > 0) {
+            hibernateWsProperties.getOtherConfig().forEach((key,value)->{
+                properties.setProperty(key,value);
+            });
+        }
         return properties;
     }
 

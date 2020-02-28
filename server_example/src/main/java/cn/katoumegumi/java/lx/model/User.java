@@ -33,6 +33,6 @@ public class User {
     private LocalDateTime createDate;
 
     @OneToMany
-    @JoinColumn(name = "user_id",referencedColumnName = "id")
+    @JoinColumn(name = "user_id")
     private List<UserDetails> userDetails;
 }

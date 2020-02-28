@@ -30,6 +30,6 @@ public class UserDetails {
     private String sex;
 
     @OneToMany
-    @JoinColumn(name = "user_details_id",referencedColumnName = "id")
+    @JoinColumn(name = "user_details_id")
     private List<UserDetailsRemake> userDetailsRemake;
 }

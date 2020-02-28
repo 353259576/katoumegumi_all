@@ -2,6 +2,9 @@ package cn.katoumegumi.java.hibernate;
 
 import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsDateUtils;
+import cn.katoumegumi.java.sql.MySearch;
+import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.SqlOperator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -10,27 +13,6 @@ import java.util.*;
 
 @Slf4j
 public class JpaDataHandle {
-
-    public static enum Operator{
-        EQ,
-        LIKE,
-        GT,
-        LT,
-        GTE,
-        LTE,
-        IN,
-        NIN,
-        NOTNULL,
-        NULL,
-        NE,
-        SQL,
-        SORT,
-        AND,
-        OR;
-        private Operator(){
-
-        }
-    }
 
 
 
@@ -138,7 +120,7 @@ public class JpaDataHandle {
                     continue;
                 }
                 if (path != null) {
-                    if (!mySearch.getOperator().equals(Operator.SORT)) {
+                    if (!mySearch.getOperator().equals(SqlOperator.SORT)) {
                         Class clazz = path.getJavaType();
                         if (Date.class.isAssignableFrom(clazz) && !mySearch.getValue().getClass().equals(clazz)) {
                             mySearch.setValue(WsDateUtils.stringToDate(WsDateUtils.objectDateFormatString(mySearch.getValue())));

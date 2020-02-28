@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.hibernate;
 
 import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.sql.MySearchList;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.data.domain.PageRequest;

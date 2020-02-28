@@ -3,8 +3,10 @@ package cn.katoumegumi.java.common;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class WsFieldUtils {
 
@@ -73,6 +75,7 @@ public class WsFieldUtils {
             for(int i = 0; i < fields.length; i++){
                 fieldSet.add(fields[i]);
             }
+            fieldSet = fieldSet.stream().filter(field -> (!Modifier.isStatic(field.getModifiers()))).collect(Collectors.toSet());
             /*for(;!(clazz==Object.class || clazz == null);clazz = clazz.getSuperclass()){
                 fields = clazz.getDeclaredFields();
                 if(!(fields == null || fields.length == 0)){

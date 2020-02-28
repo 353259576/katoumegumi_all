@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.utils;
+package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsBeanUtis;
 import lombok.Data;

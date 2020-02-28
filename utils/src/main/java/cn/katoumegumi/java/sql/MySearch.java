@@ -1,8 +1,8 @@
-package cn.katoumegumi.java.hibernate;
+package cn.katoumegumi.java.sql;
 
 public class MySearch {
     private String fieldName;
-    private JpaDataHandle.Operator operator;
+    private SqlOperator operator;
     private Object value;
     private String tableNickName;
     private Class tableClass;
@@ -11,13 +11,13 @@ public class MySearch {
 
     }
 
-    public MySearch(String fieldName, JpaDataHandle.Operator operator,Object value){
+    public MySearch(String fieldName, SqlOperator operator,Object value){
         this.fieldName = fieldName;
         this.operator = operator;
         this.value = value;
     }
 
-    public MySearch(Class tableClass,String tableNickName,String fieldName, JpaDataHandle.Operator operator,Object value){
+    public MySearch(Class tableClass,String tableNickName,String fieldName, SqlOperator operator,Object value){
         this.tableClass = tableClass;
         this.tableNickName = tableNickName;
         this.fieldName = fieldName;
@@ -34,11 +34,11 @@ public class MySearch {
         this.fieldName = fieldName;
     }
 
-    public JpaDataHandle.Operator getOperator() {
+    public SqlOperator getOperator() {
         return operator;
     }
 
-    public void setOperator(JpaDataHandle.Operator operator) {
+    public void setOperator(SqlOperator operator) {
         this.operator = operator;
     }
 

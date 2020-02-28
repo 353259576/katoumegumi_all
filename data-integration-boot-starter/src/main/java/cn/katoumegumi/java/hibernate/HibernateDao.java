@@ -4,6 +4,9 @@ import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.MySearch;
+import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.SqlOperator;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.hibernate.HibernateException;
@@ -13,9 +16,6 @@ import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
 import org.hibernate.sql.JoinType;
 import org.springframework.orm.hibernate5.HibernateTemplate;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -77,7 +77,7 @@ public class HibernateDao {
 		return "";
 	}
 
-	public <T> IPage<T> selectValueToPage(MySearchList mySearchList,Class<T> clazz) {
+	public <T> IPage<T> selectValueToPage(MySearchList mySearchList, Class<T> clazz) {
 		/*MySearch mySearch = null;
 		String fieldName = null;*/
         //Set<String> stringSet = new HashSet<>();
@@ -209,7 +209,7 @@ public class HibernateDao {
 					continue;
 				}
 			}
-			if(!mySearch.getOperator().equals(JpaDataHandle.Operator.SORT)){
+			if(!mySearch.getOperator().equals(SqlOperator.SORT)){
 				if (Date.class.isAssignableFrom(field.getType()) && !mySearch.getValue().getClass().equals(clazz)) {
 					mySearch.setValue(WsDateUtils.stringToDate(WsDateUtils.objectDateFormatString(mySearch.getValue())));
 				}

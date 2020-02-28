@@ -23,15 +23,6 @@ spring:
     name: lxSpring
   profiles:
     active: dev
-  jpa:
-    database: mysql
-    hibernate:
-      ddl-auto: update
-      naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
-    show-sql: true
-    open-in-view: true
 megumi:
   datasource:
     enable: true
@@ -75,6 +66,8 @@ megumi:
     physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
     hbm2ddl: update
     implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    other-config:
+      hibernate.globally_quoted_identifiers: true
   jpa:
     packages-to-scan: cn.katoumegumi.java.lx.model
     generate-ddl: true

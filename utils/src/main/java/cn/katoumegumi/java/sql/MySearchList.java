@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.hibernate;
+package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsFieldUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -48,8 +48,8 @@ public class MySearchList {
         return this;
     }
 
-    public MySearchList add(String fieldName, JpaDataHandle.Operator operator, Object value) {
-        if(operator.equals(JpaDataHandle.Operator.SORT)){
+    public MySearchList add(String fieldName, SqlOperator operator, Object value) {
+        if(operator.equals(SqlOperator.SORT)){
             orderSearches.add(new MySearch(fieldName,operator,value));
             return this;
         }
@@ -62,7 +62,7 @@ public class MySearchList {
 
         return this;
     }
-    public<T> MySearchList add(SupplierFunc<T> supplierFunc, JpaDataHandle.Operator operator, Object value) {
+    public<T> MySearchList add(SupplierFunc<T> supplierFunc, SqlOperator operator, Object value) {
         String name = WsFieldUtils.getFieldName(supplierFunc);
         return add(name,operator,value);
     }
@@ -148,49 +148,49 @@ public class MySearchList {
     }
 
     public <T> MySearchList eq(SupplierFunc<T> supplierFunc, Object value){
-        return add(supplierFunc, JpaDataHandle.Operator.EQ,value);
+        return add(supplierFunc, SqlOperator.EQ,value);
     }
 
     public <T> MySearchList like(SupplierFunc<T> supplierFunc,Object value){
-        return add(supplierFunc, JpaDataHandle.Operator.LIKE,value);
+        return add(supplierFunc, SqlOperator.LIKE,value);
     }
 
     public <T> MySearchList gt(SupplierFunc<T> supplierFunc,Object value){
-        return add(supplierFunc, JpaDataHandle.Operator.GT,value);
+        return add(supplierFunc, SqlOperator.GT,value);
     }
 
     public <T> MySearchList gte(SupplierFunc<T> supplierFunc,Object value){
-        return add(supplierFunc, JpaDataHandle.Operator.GTE,value);
+        return add(supplierFunc, SqlOperator.GTE,value);
     }
 
     public <T> MySearchList lt(SupplierFunc<T> supplierFunc,Object value){
-        return add(supplierFunc, JpaDataHandle.Operator.LT,value);
+        return add(supplierFunc, SqlOperator.LT,value);
     }
 
     public <T> MySearchList lte(SupplierFunc<T> supplierFunc,Object value){
-        return add(supplierFunc, JpaDataHandle.Operator.LTE,value);
+        return add(supplierFunc, SqlOperator.LTE,value);
     }
 
     public <T> MySearchList in(SupplierFunc<T> supplierFunc,Object value) {
-        return add(supplierFunc, JpaDataHandle.Operator.IN,value);
+        return add(supplierFunc, SqlOperator.IN,value);
     }
     public <T> MySearchList nin(SupplierFunc<T> supplierFunc,Object value) {
-        return add(supplierFunc, JpaDataHandle.Operator.NIN,value);
+        return add(supplierFunc, SqlOperator.NIN,value);
     }
     public <T> MySearchList notNull(SupplierFunc<T> supplierFunc,Object value) {
-        return add(supplierFunc, JpaDataHandle.Operator.NOTNULL,value);
+        return add(supplierFunc, SqlOperator.NOTNULL,value);
     }
     public <T> MySearchList isNull(SupplierFunc<T> supplierFunc,Object value) {
-        return add(supplierFunc, JpaDataHandle.Operator.NULL,value);
+        return add(supplierFunc, SqlOperator.NULL,value);
     }
     public <T> MySearchList ne(SupplierFunc<T> supplierFunc,Object value) {
-        return add(supplierFunc, JpaDataHandle.Operator.NE,value);
+        return add(supplierFunc, SqlOperator.NE,value);
     }
     public <T> MySearchList sql(SupplierFunc<T> supplierFunc,Object value) {
-        return add(supplierFunc, JpaDataHandle.Operator.SQL,value);
+        return add(supplierFunc, SqlOperator.SQL,value);
     }
     public <T> MySearchList sort(SupplierFunc<T> supplierFunc,Object value) {
-        return add(supplierFunc, JpaDataHandle.Operator.SORT,value);
+        return add(supplierFunc, SqlOperator.SORT,value);
     }
 
 
@@ -201,49 +201,49 @@ public class MySearchList {
 
 
     public <T> MySearchList eq(String column, Object value){
-        return add(column, JpaDataHandle.Operator.EQ,value);
+        return add(column, SqlOperator.EQ,value);
     }
 
     public <T> MySearchList like(String column,Object value){
-        return add(column, JpaDataHandle.Operator.LIKE,value);
+        return add(column, SqlOperator.LIKE,value);
     }
 
     public <T> MySearchList gt(String column,Object value){
-        return add(column, JpaDataHandle.Operator.GT,value);
+        return add(column, SqlOperator.GT,value);
     }
 
     public <T> MySearchList gte(String column,Object value){
-        return add(column, JpaDataHandle.Operator.GTE,value);
+        return add(column, SqlOperator.GTE,value);
     }
 
     public <T> MySearchList lt(String column,Object value){
-        return add(column, JpaDataHandle.Operator.LT,value);
+        return add(column, SqlOperator.LT,value);
     }
 
     public <T> MySearchList lte(String column,Object value){
-        return add(column, JpaDataHandle.Operator.LTE,value);
+        return add(column, SqlOperator.LTE,value);
     }
 
     public <T> MySearchList in(String column,Object value) {
-        return add(column, JpaDataHandle.Operator.IN,value);
+        return add(column, SqlOperator.IN,value);
     }
     public <T> MySearchList nin(String column,Object value) {
-        return add(column, JpaDataHandle.Operator.NIN,value);
+        return add(column, SqlOperator.NIN,value);
     }
     public <T> MySearchList notNull(String column,Object value) {
-        return add(column, JpaDataHandle.Operator.NOTNULL,value);
+        return add(column, SqlOperator.NOTNULL,value);
     }
     public <T> MySearchList isNull(String column,Object value) {
-        return add(column, JpaDataHandle.Operator.NULL,value);
+        return add(column, SqlOperator.NULL,value);
     }
     public <T> MySearchList ne(String column,Object value) {
-        return add(column, JpaDataHandle.Operator.NE,value);
+        return add(column, SqlOperator.NE,value);
     }
     public <T> MySearchList sql(String column,Object value) {
-        return add(column, JpaDataHandle.Operator.SQL,value);
+        return add(column, SqlOperator.SQL,value);
     }
     public <T> MySearchList sort(String column,Object value) {
-        return add(column, JpaDataHandle.Operator.SORT,value);
+        return add(column, SqlOperator.SORT,value);
     }
 
 

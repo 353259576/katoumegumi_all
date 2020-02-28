@@ -1,8 +1,7 @@
-package cn.katoumegumi.java.utils;
+package cn.katoumegumi.java.sql;
 
 import lombok.Data;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**

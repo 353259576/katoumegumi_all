@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.hibernate;
+package cn.katoumegumi.java.sql;
 
 import lombok.Data;
 

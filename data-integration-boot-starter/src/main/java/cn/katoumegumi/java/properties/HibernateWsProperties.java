@@ -9,7 +9,9 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.dialect.Dialect;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ws
@@ -29,5 +31,6 @@ public class HibernateWsProperties {
     private Class factoryClass;
     public Class<? extends PhysicalNamingStrategy> physicalStrategy = PhysicalNamingStrategyStandardImpl.class;
     public Class<? extends ImplicitNamingStrategy> implicitStrategy = ImplicitNamingStrategyComponentPathImpl.class;
+    public Map<String,String> otherConfig = new HashMap<>();
 
 }
