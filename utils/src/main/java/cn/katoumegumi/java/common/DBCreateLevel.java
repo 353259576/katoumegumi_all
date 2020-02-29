@@ -26,6 +26,29 @@ public class DBCreateLevel {
     private static PreparedStatement preparedStatement = null;
     private static ResultSet resultSet = null;
 
+    public static void prepare(String dbHost,String daName,String userName,String password,String tableName,String tableNick){
+        host = dbHost;
+        dataBaseName = daName;
+        name = userName;
+        DBCreateLevel.password = password;
+
+        Long start = System.currentTimeMillis();
+        String str1 = getMyResultMap(tableName);
+        String str2 = getJavaBean(tableName);
+        String str3 = getInsertSql(tableName);
+        String str4 = getBaseSQL(tableName,tableNick);
+        String str5 = getUpdate(tableName);
+        String str6 = getSelect(tableName);
+
+        System.out.println(str1);
+        System.out.println(str2);
+        System.out.println(str3);
+        System.out.println(str4);
+        System.out.println(str5);
+        System.out.println(str6);
+        System.out.println("执行完成一个用时："+(System.currentTimeMillis()-start)+"毫秒");
+    }
+
 
     private static Connection getConn(){
         try {
@@ -302,7 +325,7 @@ public class DBCreateLevel {
             column = map2.get(name);
             notes = map1.get(column);
             type = map3.get(column);
-            sb.append("@Column(name = \""+column+"\")\r\nprivate "+type+" "+name+"; "+"//"+notes+"\r\n");
+            sb.append("@Column(name = \""+column+"\")\r\n@TableName(value = \""+column+"\")\r\nprivate "+type+" "+name+"; "+"//"+notes+"\r\n\r\n");
         }
         return new String(sb);
 

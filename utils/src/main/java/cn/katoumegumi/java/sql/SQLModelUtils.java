@@ -365,7 +365,7 @@ public class SQLModelUtils {
             List<String> list = new ArrayList<>();
             List<String> joinString = new ArrayList<>();
             selectJoin(tableNickName, list, joinString, fieldColumnRelationMapper);
-            String baseSql = "select " + WsStringUtils.jointListString(list, ",") + " from " + tableName + " " + fieldColumnRelationMapper.getNickName() + " " + WsStringUtils.jointListString(joinString, " ");
+            String baseSql = "select " + WsStringUtils.jointListString(list, ",") + " from `" + tableName + "` `" + fieldColumnRelationMapper.getNickName() + "` " + WsStringUtils.jointListString(joinString, " ");
             fieldColumnRelationMapper.setBaseSql(baseSql);
         }
         return fieldColumnRelationMapper.getBaseSql();

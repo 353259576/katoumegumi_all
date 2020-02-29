@@ -403,6 +403,11 @@ public class WsStringUtils {
         return str + i;
     }
 
+    /**
+     * 驼峰法则
+     * @param str
+     * @return
+     */
     public static String camel_case(String str){
         char g = '_';
         char chars[] = str.toCharArray();
@@ -426,6 +431,11 @@ public class WsStringUtils {
         return stringBuffer.toString();
     }
 
+    /**
+     * 驼峰法则
+     * @param str
+     * @return
+     */
     public static String camelCase(String str){
         char g = '_';
         str = str.toLowerCase();
@@ -451,7 +461,12 @@ public class WsStringUtils {
     }
 
 
-    public static String fristCharToLowerCase(String str){
+    /**
+     * 首字母小写
+     * @param str
+     * @return
+     */
+    public static String firstCharToLowerCase(String str){
         if(WsStringUtils.isBlank(str)){
             return null;
         }

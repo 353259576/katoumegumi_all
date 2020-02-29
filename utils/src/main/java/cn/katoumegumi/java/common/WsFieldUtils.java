@@ -185,9 +185,9 @@ public class WsFieldUtils {
 
     public static String methodToFieldName(String methodName){
         if(methodName.startsWith(METHOD_NAME_GET)){
-            return WsStringUtils.fristCharToLowerCase(methodName.substring(3));
+            return WsStringUtils.firstCharToLowerCase(methodName.substring(3));
         }else if(methodName.startsWith(METHOD_NAME_IS)){
-            return WsStringUtils.fristCharToLowerCase(methodName.substring(2));
+            return WsStringUtils.firstCharToLowerCase(methodName.substring(2));
         }else {
             return methodName;
         }
