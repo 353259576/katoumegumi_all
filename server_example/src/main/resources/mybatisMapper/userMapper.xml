@@ -2,24 +2,49 @@
 <mapper namespace="cn.katoumegumi.java.lx.mapper.UserMapper">
 
 
-    <resultMap id="userBaseResultMap" type="user">
-        <id property="name" column="name"/>
-        <result property="password" column="password"/>
+    <resultMap id="userBaseResultMap" type="cn.katoumegumi.java.lx.model.User">
+        <id property="id" column="uid"/>
+        <result property="name" column="uname"/>
+        <result property="password" column="upassword"/>
+        <result property="createDate" column="ucreate_date"/>
+        <collection property="userDetails" ofType="cn.katoumegumi.java.lx.model.UserDetails">
+            <id property="userId" column="uduser_id"/>
+            <result property="id" column="udid"/>
+            <result property="nickName" column="udnick_name"/>
+            <result property="sex" column="udsex"/>
+            <collection property="userDetailsRemake" ofType="cn.katoumegumi.java.lx.model.UserDetailsRemake">
+                <id property="userDetailsId" column="udruser_details_id"/>
+                <result property="id" column="udrid"/>
+                <result property="remake" column="udrremake"/>
+            </collection>
+        </collection>
     </resultMap>
 
 
     <sql id="baseUserSql">
+        u.id,
         u.name,
-        u.password
+        u.password,
+        u.create_date,
     </sql>
 
-    <select id="selectUserList" resultMap="userBaseResultMap" parameterType="user">
+    <select id="selectUserList" resultMap="userBaseResultMap">
         select
-        <include refid="baseUserSql"></include>
+            u.id as uid,
+            u.name as uname,
+            u.password as upassword,
+            u.create_date as ucreate_date,
+            ud.id as udid,
+            ud.nick_name as udnick_name,
+            ud.sex as udsex,
+            ud.user_id as uduser_id,
+            udr.id as udrid,
+            udr.remake as udrremake,
+            udr.user_details_id as udruser_details_id
         from ws_user u
-        <where>
-            u.name = #{user.name}
-        </where>
+        inner join ws_user_details ud on ud.user_id = u.id
+        inner join user_details_remake udr on udr.user_details_id = ud.id
+        inner join user_details_remake udr1 on udr.user_details_id = ud.id
     </select>
 
 

@@ -7,10 +7,11 @@ import cn.katoumegumi.java.lx.model.User;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Transactional
 public interface UserMapper extends BaseMapper<User> {
 
-    public IPage<User> selectUserList(Page<User> page,@Param("user") User user);
+    public List<User> selectUserList();
 }

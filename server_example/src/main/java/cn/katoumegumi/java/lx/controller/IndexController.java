@@ -3,6 +3,7 @@ package cn.katoumegumi.java.lx.controller;
 import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
+import cn.katoumegumi.java.lx.model.UserDetailsRemake;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.lx.mapper.UserMapper;
 import cn.katoumegumi.java.lx.model.UserDetails;
@@ -36,6 +37,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @Service(version = "1.0.0",protocol = {"dubbo","rest"})
 @RestController
@@ -152,8 +156,25 @@ public class IndexController implements IndexService {
         user.setName("你好");
         Page<User> page = new Page();
         page.setCurrent(1L);
-        IPage<User> iPage = userMapper.selectUserList(page,user);
-        return JSON.toJSONString(iPage);
+        Executor executor = Executors.newFixedThreadPool(8);
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < 1; i++){
+            executor.execute(()->{
+                List<User> iPage = userMapper.selectUserList();
+                countDownLatch.countDown();
+            });
+
+        }
+        try {
+            countDownLatch.await();
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("使用mybatis一共花费时间为"+(endTime - startTime));
+        return "你好世界";
     }
 
 
@@ -165,6 +186,9 @@ public class IndexController implements IndexService {
 
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class);
+        mySearchList.join(null,UserDetails.class,"UserDetails","id","userId")
+                .join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
+                //.eq("userDetails.sex","男").sort("id","desc");
         /*mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
                 MySearchList.newMySearchList().eq(user::getPassword,"世界")
@@ -266,11 +290,14 @@ public class IndexController implements IndexService {
         jsonObject.put("password","199645");
         jsonObject.put("driver_class","com.mysql.cj.jdbc.Driver");
 
+
         Vertx vertx = Vertx.vertx();
         SQLClient client = JDBCClient.createNonShared(vertx, jsonObject);
-
+        long timeStart = System.currentTimeMillis();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         for(int i = 0; i < 1; i++){
             int finalI = i;
+            long startTime = System.currentTimeMillis();
             SQLModelUtils sqlModelUtils = new SQLModelUtils();
             String sql = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
             System.out.println(sql);
@@ -286,6 +313,8 @@ public class IndexController implements IndexService {
 
             }
             JsonArray finalJsonArray = jsonArray;
+            long endTime = System.currentTimeMillis();
+            System.out.println("解析sql语句花费时间：" + (endTime - startTime));
             client.getConnection(new Handler<AsyncResult<SQLConnection>>() {
                 @Override
                 public void handle(AsyncResult<SQLConnection> event) {
@@ -295,6 +324,7 @@ public class IndexController implements IndexService {
                             @Override
                             public void handle(AsyncResult<ResultSet> event) {
                                 if(event.succeeded()){
+                                    long start = System.currentTimeMillis();
                                     ResultSet resultSet = event.result();
                                     System.out.println(resultSet.getNumRows());
                                     List<JsonObject> list = resultSet.getRows();
@@ -308,12 +338,20 @@ public class IndexController implements IndexService {
                                     }
                                     long startTime =System.currentTimeMillis();
                                     maps = sqlModelUtils.handleMap(maps);
-                                    maps = sqlModelUtils.mergeMapList(maps);
-                                    List<User> users = sqlModelUtils.loadingObject(maps);
                                     long endTime = System.currentTimeMillis();
-
-                                    System.out.println("线程"+ finalI+"完成，共耗时："+(endTime - startTime) +"毫秒，User数组大小为:"+users.size());
+                                    System.out.println("处理数据花费时间:"+(endTime - startTime));
+                                    startTime = System.currentTimeMillis();
+                                    maps = sqlModelUtils.mergeMapList(maps);
+                                    endTime = System.currentTimeMillis();
+                                    System.out.println("合并数据："+(endTime - startTime));
+                                    startTime = System.currentTimeMillis();
+                                    List<User> users = sqlModelUtils.loadingObject(maps);
+                                    endTime = System.currentTimeMillis();
+                                    System.out.println("将map转换为对象花了："+ (endTime - startTime));
                                     sqlConnection.close();
+                                    long end = System.currentTimeMillis();
+                                    System.out.println("线程"+ finalI+"完成，共耗时："+(end -  start) +"毫秒，User数组大小为:"+users.size());
+                                    countDownLatch.countDown();
                                 }else {
                                     event.cause().printStackTrace();
                                 }
@@ -326,6 +364,14 @@ public class IndexController implements IndexService {
                 }
             });
         }
+
+        try {
+            countDownLatch.await();
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("总共花费时间为："+(end - timeStart));
 
 
 

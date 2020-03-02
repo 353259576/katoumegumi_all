@@ -477,4 +477,32 @@ public class WsStringUtils {
         return str.substring(0,1).toLowerCase() + str.substring(1,length);
     }
 
+    public static List<String> split(String str, char c){
+        char[] cs = str.toCharArray();
+        List<String> list = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < cs.length; i++){
+            if(cs[i] != c){
+                sb.append(cs[i]);
+            }else {
+                list.add(sb.toString());
+                sb = new StringBuilder();
+            }
+        }
+        if(sb.length() > 0){
+            list.add(sb.toString());
+        }
+        return list;
+    }
+
+    public static String[] splitArray(String str, char c){
+       List<String> list =WsStringUtils.split(str,c);
+       if(list == null){
+           return null;
+       }else {
+           return list.toArray(new String[list.size()]);
+       }
+    }
+
+
 }

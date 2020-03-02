@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.StringUtils;
 
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
@@ -32,7 +33,11 @@ public class SQLModelUtils {
 
     private AtomicInteger atomicInteger = new AtomicInteger(1);
 
+    private Class<?> mainClass;
+
     private String searchSql;
+
+    private MySearchList mySearchList;
 
     public static void main(String[] args) {
         Map m1 = new HashMap();
@@ -57,48 +62,56 @@ public class SQLModelUtils {
      * @return
      */
     public String searchListBaseSQLProcessor(MySearchList mySearchList) {
-        StringBuilder selectSql = new StringBuilder(modelToSqlSelect(mySearchList.getMainClass()));
-        List<TableRelation> list = mySearchList.getJoins();
-        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
-        if (fieldColumnRelationMapper.getMap() == null) {
-            fieldColumnRelationMapper.setMap(map);
-        } else {
-            map = fieldColumnRelationMapper.getMap();
-        }
-        String baseTableName = fieldColumnRelationMapper.getNickName();
-        for (TableRelation tableRelation : list) {
-            String tableNickName;
-            FieldColumnRelationMapper mapper = analysisClassRelation(tableRelation.getJoinTableClass());
-            String joinTableNickName = baseTableName + "." + tableRelation.getJoinTableNickName();
-            map.put(joinTableNickName, mapper);
-            if (WsStringUtils.isBlank(tableRelation.getTableNickName())) {
-                tableNickName = baseTableName;
+        this.mySearchList = mySearchList;
+        StringBuilder selectSql = new StringBuilder();
+        if(WsStringUtils.isBlank(searchSql)) {
+            mainClass = mySearchList.getMainClass();
+            selectSql.append(modelToSqlSelect(mySearchList.getMainClass()));
+            List<TableRelation> list = mySearchList.getJoins();
+            FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
+            if (fieldColumnRelationMapper.getMap() == null) {
+                fieldColumnRelationMapper.setMap(map);
             } else {
-                tableNickName = baseTableName + "." + tableRelation.getTableNickName();
+                map = fieldColumnRelationMapper.getMap();
             }
-            FieldColumnRelationMapper baseMapper = map.get(tableNickName);
+            String baseTableName = fieldColumnRelationMapper.getNickName();
+            for (TableRelation tableRelation : list) {
+                String tableNickName;
+                FieldColumnRelationMapper mapper = analysisClassRelation(tableRelation.getJoinTableClass());
+                String joinTableNickName = baseTableName + "." + tableRelation.getJoinTableNickName();
+                map.put(joinTableNickName, mapper);
+                if (WsStringUtils.isBlank(tableRelation.getTableNickName())) {
+                    tableNickName = baseTableName;
+                } else {
+                    tableNickName = baseTableName + "." + tableRelation.getTableNickName();
+                }
+                FieldColumnRelationMapper baseMapper = map.get(tableNickName);
 
-            selectSql.append(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName()));
+                selectSql.append(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName()));
+            }
+            if (!(mySearchList.getAll().isEmpty() && mySearchList.getAnds().isEmpty() && mySearchList.getOrs().isEmpty())) {
+                selectSql.append(" where ");
+                List<String> whereStrings = searchListWhereSqlProcessor(mySearchList, baseTableName);
+                selectSql.append(WsStringUtils.jointListString(whereStrings, " and "));
+            }
+            List<MySearch> orderSearches = mySearchList.getOrderSearches();
+            List<String> list1 = new ArrayList<>();
+            for (MySearch mySearch : orderSearches) {
+                list1.add(createWhereColumn(baseTableName, mySearch));
+            }
+            if (list1.size() > 0) {
+                selectSql.append(" order by ")
+                        .append(WsStringUtils.jointListString(list1, ","));
+            }
+            searchSql = selectSql.toString();
         }
-        if (!(mySearchList.getAll().isEmpty() && mySearchList.getAnds().isEmpty() && mySearchList.getOrs().isEmpty())) {
-            selectSql.append(" where ");
-            List<String> whereStrings = searchListWhereSqlProcessor(mySearchList, baseTableName);
-            selectSql.append(WsStringUtils.jointListString(whereStrings, " and "));
-        }
-        List<MySearch> orderSearches = mySearchList.getOrderSearches();
-        List<String> list1 = new ArrayList<>();
-        for (MySearch mySearch : orderSearches) {
-            list1.add(createWhereColumn(baseTableName, mySearch));
-        }
-        if (list1.size() > 0) {
-            selectSql.append(" order by ")
-                    .append(WsStringUtils.jointListString(list1, ","));
-        }
-        searchSql = selectSql.toString();
+        selectSql.append(searchSql);
+
         if(mySearchList.getPageVO() != null){
-            return mysqlPaging(mySearchList.getPageVO(),selectSql.toString());
+            return mysqlPaging(mySearchList.getPageVO(),searchSql);
         }
-        return selectSql.toString();
+
+        return searchSql;
 
     }
 
@@ -130,7 +143,7 @@ public class SQLModelUtils {
             stringBuffer.append('`');
             StringBuilder fieldPrefix = new StringBuilder();
             fieldPrefix.append(prefix);
-            String[] strs = mySearch.getFieldName().split("[.]");
+            String[] strs = WsStringUtils.splitArray(mySearch.getFieldName(),'.');
             int i = 0;
             for (; i < strs.length - 1; i++) {
                 fieldPrefix.append('.');
@@ -386,12 +399,27 @@ public class SQLModelUtils {
         String lastTableNickName;
         if (!fieldColumnRelationMapper.getFieldJoinClasses().isEmpty()) {
             for (FieldJoinClass fieldJoinClass : fieldColumnRelationMapper.getFieldJoinClasses()) {
-                lastTableNickName = tableNickName + '.' + fieldJoinClass.getNickName();
-                FieldColumnRelationMapper mapper = mapperMap.get(fieldJoinClass.getJoinClass());
-                map.put(lastTableNickName, mapper);
-                //joinString.add("inner join " + mapper.getTableName() + " `" + lastTableNickName + "` on `" + tableNickName + "`.`"+fieldJoinClass.getAnotherJoinColumn() + "` = `"+lastTableNickName+"`.`"+fieldJoinClass.getJoinColumn()+"`");
-                joinString.add(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn()));
-                selectJoin(lastTableNickName, selectString, joinString, mapper);
+                if(WsStringUtils.isBlank(fieldJoinClass.getJoinColumn())){
+                    Iterator<TableRelation> iterator = mySearchList.getJoins().iterator();
+                    while (iterator.hasNext()){
+                        TableRelation tableRelation = iterator.next();
+                        if(fieldJoinClass.getJoinClass().equals(tableRelation.getJoinTableClass())){
+                            FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
+                            fieldJoinClass.setJoinColumn(mapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName());
+                            fieldJoinClass.setAnotherJoinColumn(mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName());
+                            iterator.remove();
+                            break;
+                        }
+
+                    }
+                }
+                if(WsStringUtils.isNotBlank(fieldJoinClass.getJoinColumn())){
+                    lastTableNickName = tableNickName + '.' + fieldJoinClass.getNickName();
+                    FieldColumnRelationMapper mapper = mapperMap.get(fieldJoinClass.getJoinClass());
+                    map.put(lastTableNickName, mapper);
+                    joinString.add(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn()));
+                    selectJoin(lastTableNickName, selectString, joinString, mapper);
+                }
             }
         }
     }
@@ -508,7 +536,10 @@ public class SQLModelUtils {
             }
         }
         fieldColumnRelationMapper.setClazz(clazz);
-        mapperMap.put(clazz, fieldColumnRelationMapper);
+        if(fieldColumnRelationMapper != null){
+            mapperMap.put(clazz, fieldColumnRelationMapper);
+        }
+
         return fieldColumnRelationMapper;
     }
 
@@ -575,7 +606,9 @@ public class SQLModelUtils {
                 }
             }
         }
-        mapperMap.put(clazz, fieldColumnRelationMapper);
+        if(fieldColumnRelationMapper != null){
+            mapperMap.put(clazz, fieldColumnRelationMapper);
+        }
         return fieldColumnRelationMapper;
     }
 
@@ -585,20 +618,19 @@ public class SQLModelUtils {
 
 
     public List<Map> handleMap(List<Map> mapList) {
-        List<Map> list = new ArrayList<>();
+        List<Map> list = new ArrayList<>(mapList.size());
         for (Map map : mapList) {
             Map<String, Map> stringMapMap = new HashMap<>();
             Set<Map.Entry> entries = map.entrySet();
             for (Map.Entry entry : entries) {
                 String keyString = (String) entry.getKey();
-                int lastSymbol = keyString.lastIndexOf(".");
-                String key = keyString.substring(lastSymbol + 1);
-                String keyPrefix = keyString.substring(0, lastSymbol);
-                String[] keyPrefixs = keyPrefix.split("[.]");
-                //List<String> keyPrefixList = new ArrayList<>();
+                List<String> keyPrefixs = WsStringUtils.split(keyString,'.');
                 Map valueMap = stringMapMap;
                 Map prevMap = valueMap;
-                for (String kp : keyPrefixs) {
+                String kp;
+                int length = keyPrefixs.size();
+                for (int i = 1; i < length - 1; i++) {
+                    kp = keyPrefixs.get(i);
                     //keyPrefixList.add(kp);
                     //String nowKeyPrefix = WsStringUtils.jointListString(keyPrefixList, ".");
                     valueMap = (Map) prevMap.get(kp);
@@ -608,7 +640,7 @@ public class SQLModelUtils {
                     }
                     prevMap = valueMap;
                 }
-                valueMap.put(key, entry.getValue());
+                valueMap.put(keyPrefixs.get(length - 1), entry.getValue());
             }
             list.add(stringMapMap);
             map.clear();
@@ -619,14 +651,15 @@ public class SQLModelUtils {
 
 
     public List<Map> mergeMapList(List<Map> maps) {
-        //List<Map> newMaps = new ArrayList<>();
         HashMap<ResultMapIds, Map> set = new HashMap<>();
+        Set<String> nameSet = new HashSet<>();
         Iterator<Map> iterator = maps.iterator();
-        //for (int i = 0; i < maps.size(); i++) {
+        ResultMapIds resultMapIds;
+        Map m1,m2;
         while (iterator.hasNext()) {
-            Map m1 = iterator.next();
-            ResultMapIds resultMapIds = new ResultMapIds(m1);
-            Map m2 = set.get(resultMapIds);
+            m1 = iterator.next();
+            resultMapIds = new ResultMapIds(m1);
+            m2 = set.get(resultMapIds);
             if (m2 == null) {
                 set.put(resultMapIds, m1);
                 //newMaps.add(m1);
@@ -639,14 +672,33 @@ public class SQLModelUtils {
                         list.add(entry.getValue());
                         list.add(m1.get(entry.getKey()));
                         entry.setValue(list);
+                        nameSet.add((String) entry.getKey());
                     } else if (entry.getValue() instanceof List) {
+                        nameSet.add((String) entry.getKey());
                         ((List) entry.getValue()).add(m1.get(entry.getKey()));
                     }
                 }
             }
         }
+        set.clear();
         set = null;
-        for (Map map : maps) {
+        if(nameSet.size() > 0){
+            for(Map map:maps){
+                for (String name:nameSet){
+                    Object o = map.get(name);
+                    if(o instanceof List){
+                        List<Map> mapList = mergeMapList((List<Map>) o);
+                        if (mapList != null && mapList.size() != 0) {
+                            map.put(name, mapList);
+                        }
+                    }
+                }
+            }
+        }
+        nameSet = null;
+
+
+        /*for (Map map : maps) {
             Set<Map.Entry> entries = map.entrySet();
             for (Map.Entry entry : entries) {
                 if (entry.getValue() instanceof List) {
@@ -656,14 +708,23 @@ public class SQLModelUtils {
                     }
                 }
             }
-        }
+        }*/
         return maps;
 
     }
 
 
     public <T> List<T> loadingObject(List<Map> list) {
-        List<T> newList = new ArrayList<>();
+        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mainClass);
+        String prefix = fieldColumnRelationMapper.getNickName();
+        List<T> newList = new ArrayList<>(list.size());
+        for(Map childMap:list){
+            Object o = WsBeanUtis.createObject(mainClass);
+            newList.add((T)o);
+            loadingObject(o,childMap,fieldColumnRelationMapper,prefix);
+        }
+        return newList;
+        /*List<T> newList = new ArrayList<>(list.size());
         for (Map childMap : list) {
             Set<Map.Entry> set = childMap.entrySet();
             for (Map.Entry entry : set) {
@@ -684,7 +745,7 @@ public class SQLModelUtils {
 
             }
         }
-        return newList;
+        return newList;*/
     }
 
 

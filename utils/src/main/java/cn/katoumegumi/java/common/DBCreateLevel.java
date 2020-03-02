@@ -27,10 +27,11 @@ public class DBCreateLevel {
     private static ResultSet resultSet = null;
 
     public static void prepare(String dbHost,String daName,String userName,String password,String tableName,String tableNick){
-        host = dbHost;
-        dataBaseName = daName;
-        name = userName;
+        DBCreateLevel.host = dbHost;
+        DBCreateLevel.dataBaseName = daName;
+        DBCreateLevel.name = userName;
         DBCreateLevel.password = password;
+        DBCreateLevel.url = "jdbc:mysql://"+host+"/"+dataBaseName+"?useUnicode=true&characterEncoding=utf-8&useSSL=false&tinyInt1isBit=false&serverTimezone=GMT%2B8";
 
         Long start = System.currentTimeMillis();
         String str1 = getMyResultMap(tableName);

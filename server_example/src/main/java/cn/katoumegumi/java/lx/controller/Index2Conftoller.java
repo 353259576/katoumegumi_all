@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
+import cn.katoumegumi.java.common.DBCreateLevel;
 import cn.katoumegumi.java.common.WsFileUtils;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
@@ -7,6 +8,7 @@ import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -37,7 +39,7 @@ import java.util.List;
 public class Index2Conftoller {
 
     public static void main(String[] args) {
-        String str = new BCryptPasswordEncoder().encode("nacos");
+        /*String str = new BCryptPasswordEncoder().encode("nacos");
         System.out.println(str);
         File file = WsFileUtils.createFile("C:\\Users\\Administrator\\Pictures\\Camera Roll\\39.png");
         try {
@@ -66,7 +68,9 @@ public class Index2Conftoller {
 
         }catch (IOException e){
             e.printStackTrace();
-        }
+        }*/
+
+        DBCreateLevel.prepare("localhost:3306","wslx","root","199645","user_details_remake","udr");
 
 
     }

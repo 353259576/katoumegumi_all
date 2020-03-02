@@ -11,10 +11,10 @@
     <modules>
         <module>data-integration-boot-starter</module>
         <module>utils</module>
-        <!--<module>server_example</module>
+        <module>server_example</module>
         <module>client_example</module>
         <module>monitor</module>
-        <module>auth_server</module>-->
+        <module>auth_server</module>
     </modules>
 
     <licenses>
@@ -68,6 +68,7 @@
         <mybatis.thymeleaf.version>1.0.1</mybatis.thymeleaf.version>
         <mybatis.velocity.version>2.1.0</mybatis.velocity.version>
         <mybatis.freemarker.version>1.2.0</mybatis.freemarker.version>
+        <poi.version>4.1.2</poi.version>
 
 
     </properties>

@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
@@ -46,7 +47,8 @@ public class FieldColumnRelationMapper {
                 return fieldColumnRelation;
             }
         }
-        return null;
+        throw new RuntimeException("未发现对象含有属性："+fieldName);
+        //return null;
     }
 
 
