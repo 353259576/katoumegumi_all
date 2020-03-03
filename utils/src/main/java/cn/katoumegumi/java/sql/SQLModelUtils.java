@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.StringUtils;
 
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
@@ -39,36 +38,25 @@ public class SQLModelUtils {
 
     private MySearchList mySearchList;
 
-    public static void main(String[] args) {
-        Map m1 = new HashMap();
-        Map m11 = new HashMap();
-        Map m2 = new HashMap();
-        Map m21 = new HashMap();
-        m1.put(1, 1);
-        m2.put(1, 1);
-        m11.put(11, 11);
-        m21.put(21, 21);
-        m1.put(3, m11);
-        m2.put(3, m21);
-        System.out.println(JSON.toJSONString(m1));
-        System.out.println(createJoinSql("nickName", "id", "jointable", "joinnickname", "id"));
+    public SQLModelUtils(MySearchList mySearchList){
+        this.mySearchList = mySearchList;
     }
 
 
     /**
-     * 生成sql语句
+     * 生成sql语句s
      *
-     * @param mySearchList
      * @return
      */
-    public String searchListBaseSQLProcessor(MySearchList mySearchList) {
+    public String searchListBaseSQLProcessor() {
         this.mySearchList = mySearchList;
         StringBuilder selectSql = new StringBuilder();
+        FieldColumnRelationMapper fieldColumnRelationMapper;
         if(WsStringUtils.isBlank(searchSql)) {
             mainClass = mySearchList.getMainClass();
             selectSql.append(modelToSqlSelect(mySearchList.getMainClass()));
             List<TableRelation> list = mySearchList.getJoins();
-            FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
+            fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
             if (fieldColumnRelationMapper.getMap() == null) {
                 fieldColumnRelationMapper.setMap(map);
             } else {
@@ -94,25 +82,40 @@ public class SQLModelUtils {
                 List<String> whereStrings = searchListWhereSqlProcessor(mySearchList, baseTableName);
                 selectSql.append(WsStringUtils.jointListString(whereStrings, " and "));
             }
-            List<MySearch> orderSearches = mySearchList.getOrderSearches();
-            List<String> list1 = new ArrayList<>();
-            for (MySearch mySearch : orderSearches) {
-                list1.add(createWhereColumn(baseTableName, mySearch));
-            }
-            if (list1.size() > 0) {
-                selectSql.append(" order by ")
-                        .append(WsStringUtils.jointListString(list1, ","));
-            }
-            searchSql = selectSql.toString();
-        }
-        selectSql.append(searchSql);
 
+            //缓存sql查询语句
+            searchSql = selectSql.toString();
+        }else {
+            fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
+            selectSql.append(searchSql);
+        }
+
+
+        List<MySearch> orderSearches = mySearchList.getOrderSearches();
+        List<String> list1 = new ArrayList<>();
+        for (MySearch mySearch : orderSearches) {
+            list1.add(createWhereColumn(fieldColumnRelationMapper.getNickName(), mySearch));
+        }
+        if (list1.size() > 0) {
+            selectSql.append(" order by ")
+                    .append(WsStringUtils.jointListString(list1, ","));
+        }
         if(mySearchList.getPageVO() != null){
             return mysqlPaging(mySearchList.getPageVO(),searchSql);
         }
 
-        return searchSql;
+        return selectSql.toString();
 
+    }
+
+
+    public String searchListBaseCountSQLProcessor(){
+        if(searchSql == null){
+            searchListBaseSQLProcessor();
+        }
+        StringBuilder stringBuilder = new StringBuilder("select count(*) from (");
+        stringBuilder.append(searchSql).append(" ) as searchCount");
+        return stringBuilder.toString();
     }
 
 
@@ -327,7 +330,7 @@ public class SQLModelUtils {
     }
 
 
-    public static String createOneSelectColumn(String nickName, String columnName, String fieldName) {
+    public String createOneSelectColumn(String nickName, String columnName, String fieldName) {
         return '`' +
                 nickName +
                 '`' +
@@ -343,7 +346,7 @@ public class SQLModelUtils {
                 '`';
     }
 
-    public static String createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn) {
+    public String createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn) {
         return " inner join `" +
                 joinTableName +
                 '`' +
@@ -431,7 +434,7 @@ public class SQLModelUtils {
      * @param clazz
      * @return
      */
-    public static FieldColumnRelationMapper analysisClassRelation(Class<?> clazz) {
+    public FieldColumnRelationMapper analysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(clazz);
         if (fieldColumnRelationMapper != null) {
             return fieldColumnRelationMapper;
@@ -447,7 +450,7 @@ public class SQLModelUtils {
         return null;
     }
 
-    public static FieldColumnRelationMapper hibernateAnalysisClassRelation(Class<?> clazz) {
+    public FieldColumnRelationMapper hibernateAnalysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
         Table table = clazz.getAnnotation(Table.class);
         fieldColumnRelationMapper.setTableName(table.name());
@@ -544,7 +547,7 @@ public class SQLModelUtils {
     }
 
 
-    public static FieldColumnRelationMapper myatisPlusAnalysisClassRelation(Class<?> clazz) {
+    public FieldColumnRelationMapper myatisPlusAnalysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
         TableName table = clazz.getAnnotation(TableName.class);
         fieldColumnRelationMapper.setTableName(table.value());

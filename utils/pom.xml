@@ -160,7 +160,7 @@
             <version>1.7.5</version>
         </dependency>-->
 
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>${poi.version}</version>
@@ -178,7 +178,11 @@
             <version>${poi.version}</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-scratchpad</artifactId>
+            <version>${poi.version}</version>
+        </dependency>-->
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>

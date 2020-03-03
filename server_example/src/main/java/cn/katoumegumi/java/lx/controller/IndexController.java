@@ -186,8 +186,8 @@ public class IndexController implements IndexService {
 
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class);
-        mySearchList.join(null,UserDetails.class,"UserDetails","id","userId")
-                .join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
+        //mySearchList/*.join(null,UserDetails.class,"UserDetails1","id","userId")*/
+                //.join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
                 //.eq("userDetails.sex","男").sort("id","desc");
         /*mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
@@ -202,12 +202,14 @@ public class IndexController implements IndexService {
         page.setCurrent(1);
         page.setSize(10);
         mySearchList.setPageVO(page);*/
-        SQLModelUtils sqlModelUtils = new SQLModelUtils();
-        String str = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        String str = sqlModelUtils.searchListBaseSQLProcessor();
+        System.out.println(str);
+        str = sqlModelUtils.searchListBaseCountSQLProcessor();
         System.out.println(str);
         long start = System.nanoTime();
-        SQLModelUtils modelUtils = new SQLModelUtils();
-        str = modelUtils.searchListBaseSQLProcessor(mySearchList);
+        SQLModelUtils modelUtils = new SQLModelUtils(mySearchList);
+        str = modelUtils.searchListBaseSQLProcessor();
         long end = System.nanoTime();
         mysqlClientTest(mySearchList);
         System.out.println(str);
@@ -219,8 +221,8 @@ public class IndexController implements IndexService {
         mySearchList.or(MySearchList.newMySearchList().eq("sex","男"),
                 MySearchList.newMySearchList().eq(userDetails::getNickName,"世界")
         );
-        sqlModelUtils = new SQLModelUtils();
-        System.out.println(sqlModelUtils.searchListBaseSQLProcessor(mySearchList));
+        sqlModelUtils = new SQLModelUtils(mySearchList);
+        System.out.println(sqlModelUtils.searchListBaseSQLProcessor());
 
 
 
@@ -298,8 +300,8 @@ public class IndexController implements IndexService {
         for(int i = 0; i < 1; i++){
             int finalI = i;
             long startTime = System.currentTimeMillis();
-            SQLModelUtils sqlModelUtils = new SQLModelUtils();
-            String sql = sqlModelUtils.searchListBaseSQLProcessor(mySearchList);
+            SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+            String sql = sqlModelUtils.searchListBaseSQLProcessor();
             System.out.println(sql);
             Map<Integer,Object> valueMap = sqlModelUtils.getValueMap();
             JsonArray jsonArray = new JsonArray();
