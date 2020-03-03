@@ -202,8 +202,11 @@ public class IndexController implements IndexService {
         page.setCurrent(1);
         page.setSize(10);
         mySearchList.setPageVO(page);*/
+        long startTIme = System.currentTimeMillis();
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         String str = sqlModelUtils.searchListBaseSQLProcessor();
+        long endTime = System.currentTimeMillis();
+        System.out.println("初次解析sql语句花费时间为："+(endTime - startTIme));
         System.out.println(str);
         str = sqlModelUtils.searchListBaseCountSQLProcessor();
         System.out.println(str);
