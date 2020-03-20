@@ -185,7 +185,8 @@ public class IndexController implements IndexService {
         System.out.println(WsFieldUtils.getFieldName(user.getUserDetails()::getId));*/
 
         User user = new User();
-        MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class);
+        MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class)
+                .join(null,UserDetails.class,"userDetails1","id","userId");
         //mySearchList/*.join(null,UserDetails.class,"UserDetails1","id","userId")*/
                 //.join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
                 //.eq("userDetails.sex","男").sort("id","desc");
@@ -202,7 +203,7 @@ public class IndexController implements IndexService {
         page.setCurrent(1);
         page.setSize(10);
         mySearchList.setPageVO(page);*/
-        long startTIme = System.currentTimeMillis();
+        /*long startTIme = System.currentTimeMillis();
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         String str = sqlModelUtils.searchListBaseSQLProcessor();
         long endTime = System.currentTimeMillis();
@@ -221,12 +222,31 @@ public class IndexController implements IndexService {
         UserDetails userDetails = new UserDetails();
 
         mySearchList = MySearchList.newMySearchList().setMainClass(UserDetails.class);
-        mySearchList.or(MySearchList.newMySearchList().eq("sex","男"),
-                MySearchList.newMySearchList().eq(userDetails::getNickName,"世界")
-        );
+        mySearchList.or(MySearchList.newMySearchList().eq("sex","男"), MySearchList.newMySearchList().eq(userDetails::getNickName,"世界"));
         sqlModelUtils = new SQLModelUtils(mySearchList);
-        System.out.println(sqlModelUtils.searchListBaseSQLProcessor());
+        System.out.println(sqlModelUtils.searchListBaseSQLProcessor());*/
+        MySearchList mySearchList1 = MySearchList.newMySearchList();
+        mySearchList1.setMainClass(User.class)
+                .eq(user::getName,"你好");
+        SQLModelUtils sqlModelUtils1 = new SQLModelUtils(mySearchList1);
+        String str = sqlModelUtils1.searchListBaseSQLProcessor();
+        String countStr = sqlModelUtils1.searchListBaseCountSQLProcessor();
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < 1000000; i++){
+            mySearchList1 = MySearchList.newMySearchList();
+            mySearchList1.setMainClass(User.class)
+                    .join(null,UserDetails.class,"UserDetails","id","userId")
+                    .eq(user::getName,"你好");
+            sqlModelUtils1 = new SQLModelUtils(mySearchList1);
+            sqlModelUtils1.getValueMap();
+            str = sqlModelUtils1.searchListBaseSQLProcessor();
+            countStr = sqlModelUtils1.searchListBaseCountSQLProcessor();
 
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println(endTime - startTime);
+        System.out.println(str);
+        System.out.println(countStr);
 
 
     }

@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.experiment;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
+/*import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.Callback;
@@ -8,7 +8,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.common.serialization.StringSerializer;*/
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KafkaExperiment {
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         Thread thread = new Thread(()->{
             inputKafkaProducer();
         });
@@ -80,14 +80,14 @@ public class KafkaExperiment {
 
     public static void printfKafkaConsumer(){
         Map<String,Object> map = new HashMap<>();
-        /*map.put("bootstrap.servers","192.168.0.111:9092");
+        *//*map.put("bootstrap.servers","192.168.0.111:9092");
         map.put("acks","all");
         map.put("retries",0);
         map.put("batch.size",16384);
         map.put("linger.ms",1);
         map.put("buffer.momory",1024l*1024l*1024l);
         map.put("key.serializer", StringSerializer.class.getName());
-        map.put("value.serializer",StringSerializer.class.getName());*/
+        map.put("value.serializer",StringSerializer.class.getName());*//*
         map.put("bootstrap.servers", "192.168.0.111:9092");
         map.put("group.id", "wstest");
         map.put("enable.auto.commit", "true");
@@ -106,5 +106,5 @@ public class KafkaExperiment {
             }
 
         }
-    }
+    }*/
 }

@@ -445,7 +445,7 @@ public class WsStringUtils {
         char c = chars[0];
         boolean nextToUp = false;
         stringBuffer.append(c);
-        for(int i = 0; i < length; i++){
+        for(int i = 1; i < length; i++){
             c = chars[i];
             if(c == g){
                 nextToUp = true;

@@ -24,6 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class SQLModelUtils {
 
+    /**
+     * 缓存实体对应的对象属性与列名的关联
+     */
     public static Map<Class<?>, FieldColumnRelationMapper> mapperMap = new ConcurrentHashMap<>();
 
     private Map<String, FieldColumnRelationMapper> map = new HashMap<>();
@@ -49,7 +52,6 @@ public class SQLModelUtils {
      * @return
      */
     public String searchListBaseSQLProcessor() {
-        this.mySearchList = mySearchList;
         StringBuilder selectSql = new StringBuilder();
         FieldColumnRelationMapper fieldColumnRelationMapper;
         if(WsStringUtils.isBlank(searchSql)) {
@@ -377,13 +379,11 @@ public class SQLModelUtils {
         String tableName = fieldColumnRelationMapper.getTableName();
         String tableNickName = fieldColumnRelationMapper.getNickName();
         map.put(tableNickName, fieldColumnRelationMapper);
-        if (fieldColumnRelationMapper.getBaseSql() == null) {
-            List<String> list = new ArrayList<>();
-            List<String> joinString = new ArrayList<>();
-            selectJoin(tableNickName, list, joinString, fieldColumnRelationMapper);
-            String baseSql = "select " + WsStringUtils.jointListString(list, ",") + " from `" + tableName + "` `" + fieldColumnRelationMapper.getNickName() + "` " + WsStringUtils.jointListString(joinString, " ");
-            fieldColumnRelationMapper.setBaseSql(baseSql);
-        }
+        List<String> list = new ArrayList<>();
+        List<String> joinString = new ArrayList<>();
+        selectJoin(tableNickName, list, joinString, fieldColumnRelationMapper);
+        String baseSql = "select " + WsStringUtils.jointListString(list, ",") + " from `" + tableName + "` `" + fieldColumnRelationMapper.getNickName() + "` " + WsStringUtils.jointListString(joinString, " ");
+        fieldColumnRelationMapper.setBaseSql(baseSql);
         return fieldColumnRelationMapper.getBaseSql();
     }
 
@@ -410,6 +410,7 @@ public class SQLModelUtils {
                             FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
                             fieldJoinClass.setJoinColumn(mapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName());
                             fieldJoinClass.setAnotherJoinColumn(mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName());
+                            fieldJoinClass.setNickName(tableRelation.getJoinTableNickName());
                             iterator.remove();
                             break;
                         }

@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.common;
 
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -11,10 +10,9 @@ import java.nio.channels.WritableByteChannel;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-@Slf4j
 public class WsStreamUtils {
 
-
+    //public static Logger log = LoggerFactory.getLogger(WsStreamUtils.class);
 
     public static ByteBuffer InputStreamToByteBuffer(InputStream inputStream){
         if(inputStream instanceof FileInputStream){
@@ -140,7 +138,6 @@ public class WsStreamUtils {
 
 
     public static byte[] encodeFileToZip(InputStream inputStreams[],String fileNames[]){
-        Long startTime = System.currentTimeMillis();
         ZipOutputStream zipOutputStream = null;
         ByteArrayOutputStream byteArrayOutputStream = null;
         WritableByteChannel writableByteChannel = null;
@@ -210,8 +207,6 @@ public class WsStreamUtils {
             }catch (Exception e){
                 e.printStackTrace();
             }
-            Long endTime = System.currentTimeMillis();
-            log.info("系统压缩文件需要："+(endTime-startTime)+"毫秒");
         }
 
     }

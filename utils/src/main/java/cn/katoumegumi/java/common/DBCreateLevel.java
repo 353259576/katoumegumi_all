@@ -14,24 +14,33 @@ import java.util.Map;
  * 自用数据库处理类
  */
 public class DBCreateLevel {
-    private static String host = "localhost:3306";//47.100.63.240:3306
-    private static String dataBaseName = "db_ymm";
-    private static String url = "jdbc:mysql://"+host+"/"+dataBaseName+"?useUnicode=true&characterEncoding=utf-8&useSSL=false&tinyInt1isBit=false&serverTimezone=GMT%2B8";
-    //private static String url1 = "jdbc:mysql://116.62.144.206:3306/qupu1?useUnicode=true&characterEncoding=utf-8&useSSL=false";
-    //private static String url = "jdbc:sqlserver://localhost:1433; DatabaseName=myblog";
-    private static String driver = "com.mysql.cj.jdbc.Driver";
-    private static String name = "root";
-    private static String password = "199645";//zms@lsapp123456
-    private static Connection conn = null;
-    private static PreparedStatement preparedStatement = null;
-    private static ResultSet resultSet = null;
+    private  String host = "localhost:3306";//47.100.63.240:3306
+    private  String dataBaseName = "db_ymm";
+    private  String url = "jdbc:mysql://"+host+"/"+dataBaseName+"?useUnicode=true&characterEncoding=utf-8&useSSL=false&tinyInt1isBit=false&serverTimezone=GMT%2B8";
+    //private  String url1 = "jdbc:mysql://116.62.144.206:3306/qupu1?useUnicode=true&characterEncoding=utf-8&useSSL=false";
+    //private  String url = "jdbc:sqlserver://localhost:1433; DatabaseName=myblog";
+    private  String driver = "com.mysql.cj.jdbc.Driver";
+    private  String name = "root";
+    private  String password = "199645";//zms@lsapp123456
+    private  Connection conn = null;
+    private  PreparedStatement preparedStatement = null;
+    private  ResultSet resultSet = null;
 
-    public static void prepare(String dbHost,String daName,String userName,String password,String tableName,String tableNick){
-        DBCreateLevel.host = dbHost;
-        DBCreateLevel.dataBaseName = daName;
-        DBCreateLevel.name = userName;
-        DBCreateLevel.password = password;
-        DBCreateLevel.url = "jdbc:mysql://"+host+"/"+dataBaseName+"?useUnicode=true&characterEncoding=utf-8&useSSL=false&tinyInt1isBit=false&serverTimezone=GMT%2B8";
+    public DBCreateLevel(String dbHost,String daName,String userName,String password){
+        this.host = dbHost;
+        this.dataBaseName = daName;
+        this.name = userName;
+        this.password = password;
+        this.url = "jdbc:mysql://"+host+"/"+dataBaseName+"?useUnicode=true&characterEncoding=utf-8&useSSL=false&tinyInt1isBit=false&serverTimezone=GMT%2B8";
+    }
+
+
+    public  void prepare(String dbHost,String daName,String userName,String password,String tableName,String tableNick){
+        this.host = dbHost;
+        this.dataBaseName = daName;
+        this.name = userName;
+        this.password = password;
+        this.url = "jdbc:mysql://"+host+"/"+dataBaseName+"?useUnicode=true&characterEncoding=utf-8&useSSL=false&tinyInt1isBit=false&serverTimezone=GMT%2B8";
 
         Long start = System.currentTimeMillis();
         String str1 = getMyResultMap(tableName);
@@ -51,7 +60,7 @@ public class DBCreateLevel {
     }
 
 
-    private static Connection getConn(){
+    private  Connection getConn(){
         try {
             Class.forName(driver);
             try {
@@ -67,7 +76,7 @@ public class DBCreateLevel {
         }
         return conn;
     }
-    public static void getClose(){
+    public  void getClose(){
 
         try {
             if(resultSet != null){
@@ -91,7 +100,7 @@ public class DBCreateLevel {
      * @param str
      * @return
      */
-    public static String DBStringChange(String str){
+    public  String DBStringChange(String str){
         str = str.toLowerCase();
         Boolean k = false;
         String strs[] = str.split("_");
@@ -148,7 +157,7 @@ public class DBCreateLevel {
      * @param tableName
      * @return
      */
-    public static Map<String,String> getColumnNameAndNotes(String  tableName){
+    public  Map<String,String> getColumnNameAndNotes(String  tableName){
         getConn();
         Map<String,String> map = new HashMap<>();
         try {
@@ -176,7 +185,7 @@ public class DBCreateLevel {
      * @param tableName
      * @return
      */
-    public static Map<String,String> getColumnNameAndType(String tableName){
+    public  Map<String,String> getColumnNameAndType(String tableName){
         getConn();
         Map<String,String> map = new HashMap<>();
         try {
@@ -223,7 +232,7 @@ public class DBCreateLevel {
      * @param tableName
      * @return
      */
-    public static Map<String,String> getColumnNameAndField(String tableName){
+    public  Map<String,String> getColumnNameAndField(String tableName){
         getConn();
         Map<String,String> map = new HashMap<>();
         try {
@@ -253,7 +262,7 @@ public class DBCreateLevel {
      * 生成java的属性
      * @return
      */
-    public static List<String> getJavaTypeList(String tableName){
+    public  List<String> getJavaTypeList(String tableName){
         getConn();
         List<String> list = new ArrayList<>();
         try{
@@ -278,7 +287,7 @@ public class DBCreateLevel {
      * @param tableName
      * @return
      */
-    public static String getMyResultMap(String tableName){
+    public  String getMyResultMap(String tableName){
         StringBuffer sb = new StringBuffer();
         List<String> list = getJavaTypeList(tableName);
         Map<String,String> map = getColumnNameAndField(tableName);
@@ -311,7 +320,7 @@ public class DBCreateLevel {
      * @param tableName
      * @return
      */
-    public static String getJavaBean(String tableName){
+    public  String getJavaBean(String tableName){
         StringBuffer sb = new StringBuffer();
         List<String> list = getJavaTypeList(tableName);
         Map<String,String> map1 = getColumnNameAndNotes(tableName);
@@ -337,7 +346,7 @@ public class DBCreateLevel {
      * @param tableName
      * @return
      */
-    public static String getInsertSql(String tableName){
+    public  String getInsertSql(String tableName){
         StringBuffer sb = new StringBuffer();
         StringBuffer sb2 = new StringBuffer();
         List<String> list = getJavaTypeList(tableName);
@@ -361,7 +370,7 @@ public class DBCreateLevel {
      * @param biaoji
      * @return
      */
-    public static String getBaseSQL(String tableName,String biaoji){
+    public  String getBaseSQL(String tableName,String biaoji){
         StringBuffer sb = new StringBuffer();
         List<String> list = getJavaTypeList(tableName);
         Map<String,String> map = getColumnNameAndField(tableName);
@@ -380,7 +389,7 @@ public class DBCreateLevel {
      * @param tableName
      * @return
      */
-    public static String getUpdate(String tableName){
+    public  String getUpdate(String tableName){
         StringBuffer sb = new StringBuffer();
         List<String> list = getJavaTypeList(tableName);
         Map<String,String> map = getColumnNameAndField(tableName);
@@ -401,7 +410,7 @@ public class DBCreateLevel {
      * @param tableName
      * @return
      */
-    public static String getSelect(String tableName){
+    public  String getSelect(String tableName){
         StringBuffer sb = new StringBuffer();
         List<String> list = getJavaTypeList(tableName);
         Map<String,String> map = getColumnNameAndField(tableName);
@@ -417,7 +426,7 @@ public class DBCreateLevel {
     }
 
 
-    public static List<String> getAllTableName(){
+    public  List<String> getAllTableName(){
         List<String> list = new ArrayList<>();
         getConn();
         try {
@@ -441,7 +450,7 @@ public class DBCreateLevel {
      * @param text
      * @param path
      */
-    public static void makeFile(String text,String path){
+    public  void makeFile(String text,String path){
         try {
             File file = new File(path);
             if(!file.exists()){
@@ -462,7 +471,7 @@ public class DBCreateLevel {
     }
 
 
-    public static List<String> selectTableName(){
+    public  List<String> selectTableName(){
         try {
             List<String> list = new ArrayList<>();
             String sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES\n" +
@@ -484,7 +493,7 @@ public class DBCreateLevel {
 
 
 
-    public static void main(String args[]){
+    public  void main(String args[]){
 
         /*List<String> list = selectTableName();
         for(String string:list){

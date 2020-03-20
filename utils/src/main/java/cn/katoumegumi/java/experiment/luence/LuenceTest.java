@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.experiment.luence;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.analysis.Analyzer;
+/*import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.document.Document;
@@ -17,7 +17,7 @@ import org.apache.lucene.store.BaseDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SimpleFSDirectory;
-import org.apache.lucene.util.Version;
+import org.apache.lucene.util.Version;*/
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.nio.file.Paths;
 public class LuenceTest {
 
 
-    public static void main(String[] args) throws IOException, ParseException {
+/*    public static void main(String[] args) throws IOException, ParseException {
         create();
         //search();
     }
@@ -91,7 +91,7 @@ public class LuenceTest {
         indexWriter.commit();
         indexWriter.close();
         directory.close();
-    }
+    }*/
 
 
 

@@ -53,7 +53,6 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("收到消息");
         try {
             String channelId  = ctx.channel().id().asLongText();
             if(msg instanceof FullHttpResponse){

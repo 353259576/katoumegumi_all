@@ -7,6 +7,7 @@ import java.util.*;
 
 /**
  * @author ws
+ * 对象数据库列名关系集合
  */
 @Data
 public class FieldColumnRelationMapper {

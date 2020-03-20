@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-@Slf4j
 public class WsFileUtils {
     public static void main(String[] args) {
         //DelayQueue delayQueue = new DelayQueue();

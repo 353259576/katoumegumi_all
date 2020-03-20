@@ -70,7 +70,6 @@ public class Index2Conftoller {
             e.printStackTrace();
         }*/
 
-        DBCreateLevel.prepare("localhost:3306","wslx","root","199645","user_details_remake","udr");
 
 
     }
