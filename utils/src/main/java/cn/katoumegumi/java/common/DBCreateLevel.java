@@ -5,10 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 自用数据库处理类
@@ -244,7 +241,7 @@ public class DBCreateLevel {
             String column;
             for(int i = 0; i < resultSetMetaData.getColumnCount(); i++){
                 column = resultSetMetaData.getColumnName(i+1);
-                typename = DBStringChange(column);
+                typename = WsStringUtils.camelCase(column);
                 map.put(typename,column);
             }
 
@@ -257,6 +254,29 @@ public class DBCreateLevel {
         return map;
 
     }
+
+
+    public Set<String> getColumnPrimaryKey(String tableName){
+        getConn();
+        Set<String> strings = new HashSet<>();
+        try {
+            String sql = "SELECT TABLE_NAME,COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME='"+tableName+"'";
+            preparedStatement = conn.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                String id = resultSet.getString(2);
+                if(WsStringUtils.isNotBlank(id)){
+                    strings.add(id);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }finally {
+            getClose();
+        }
+        return strings;
+    }
+
 
     /**
      * 生成java的属性
@@ -271,7 +291,7 @@ public class DBCreateLevel {
             resultSet = preparedStatement.executeQuery();
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             for(int i = 0; i < resultSetMetaData.getColumnCount(); i++){
-                list.add(DBStringChange(resultSetMetaData.getColumnName(i+1)));
+                list.add(WsStringUtils.camelCase(resultSetMetaData.getColumnName(i+1)));
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -326,16 +346,27 @@ public class DBCreateLevel {
         Map<String,String> map1 = getColumnNameAndNotes(tableName);
         Map<String,String> map2 = getColumnNameAndField(tableName);
         Map<String,String> map3 = getColumnNameAndType(tableName);
+        Set<String> strings = getColumnPrimaryKey(tableName);
         String type;
         String name;
         String notes;
         String column;
+
         for(int i = 0; i < list.size(); i++){
             name = list.get(i);
             column = map2.get(name);
             notes = map1.get(column);
             type = map3.get(column);
-            sb.append("@Column(name = \""+column+"\")\r\n@TableName(value = \""+column+"\")\r\nprivate "+type+" "+name+"; "+"//"+notes+"\r\n\r\n");
+            if(strings.contains(column)){
+                sb.append("@Id\r\n");
+                sb.append("@Column(name = \""+column+"\")\r\n");
+                sb.append("@GeneratedValue(strategy = GenerationType.IDENTITY)\r\n");
+                sb.append("@TableId(value = \""+column+"\",type = IdType.AUTO)\r\n");
+                sb.append("private "+type+" "+name+"; "+"//"+notes+"\r\n\r\n");
+            }else {
+                sb.append("@Column(name = \""+column+"\")\r\n@TableField(value = \""+column+"\")\r\nprivate "+type+" "+name+"; "+"//"+notes+"\r\n\r\n");
+            }
+
         }
         return new String(sb);
 
@@ -493,52 +524,40 @@ public class DBCreateLevel {
 
 
 
-    public  void main(String args[]){
-
-        /*List<String> list = selectTableName();
-        for(String string:list){
-            Map<String,String> map = getColumnNameAndType(string);
-            if(map.get("user_id") != null){
-                System.out.println(string);
-            }
-        }
-        System.out.println(JSON.toJSONString(list));*/
-        Long start = System.currentTimeMillis();
-        String tablename = "ym_user_distributor_report";
-		String str1 = getMyResultMap(tablename);
-		String str2 = getJavaBean(tablename);
-		String str3 = getInsertSql(tablename);
-		String str4 = getBaseSQL(tablename,"g");
-		String str5 = getUpdate(tablename);
-		String str6 = getSelect(tablename);
-
-		System.out.println(str1);
-		System.out.println(str2);
-		System.out.println(str3);
-		System.out.println(str4);
-		System.out.println(str5);
-        System.out.println(str6);
-		//String str = str1 + str2 + str3 + str4 + str5;
-
-
-       /* List<String> list = getAllTableName();
-        for(int i = 0; i < list.size(); i++){
-
-            String str1 = getMyResultMap(list.get(i));
-            String str2 = getJavaBean(list.get(i));
-            String str3 = getInsertSql(list.get(i));
-            String str4 = getBaseSQL(list.get(i),"m");
-            String str5 = getUpdate(list.get(i));
-
-            System.out.println(str1);
-            System.out.println(str2);
-            System.out.println(str3);
-            System.out.println(str4);
-            System.out.println(str5);
-            String str = str1 + str2 + str3 + str4 + str5;
-            makeFile(str,"C:\\Users\\ws\\项目\\文件\\"+list.get(i)+".txt");
-        }
-*/
-        System.out.println("执行完成一个用时："+(System.currentTimeMillis()-start)+"毫秒");
+    public static void main(String args[]){
+        String url = "jdbc:mysql://47.96.119.77:3306/zs_jym_ms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true";
+        String name = "root";
+        String password = "Qq123456789.";
+        DBCreateLevel dbCreateLevel = new DBCreateLevel("47.96.119.77","zs_jym_ms",name,password);
+        //List<String> list = dbCreateLevel.getAllTableName();
+        List<String> list = new ArrayList<>();
+        list.add("jym_shelve");
+        String improtStr = "import com.baomidou.mybatisplus.annotation.IdType;\n" +
+                "import com.baomidou.mybatisplus.annotation.TableField;\n" +
+                "import com.baomidou.mybatisplus.annotation.TableId;\n" +
+                "import com.baomidou.mybatisplus.annotation.TableName;\n" +
+                "import lombok.Data;\n" +
+                "\n" +
+                "import javax.persistence.*;\n" +
+                "import java.util.Date;\r\n";
+        list.stream().forEach(str->{
+            String beanName = WsStringUtils.camelCase(str);
+            String s1 = beanName.substring(0,1).toUpperCase();
+            String s2 = beanName.substring(1);
+            beanName = s1 + s2;
+            String s = dbCreateLevel.getJavaBean(str);
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(improtStr);
+            stringBuilder.append("@TableName(\""+str+"\")\n" +
+                    "@Data\n" +
+                    "@Entity\n" +
+                    "@Table(name = \""+str+"\")\r\n");
+            stringBuilder.append("public class ");
+            stringBuilder.append(beanName);
+            stringBuilder.append("{ \r\n");
+            stringBuilder.append(s);
+            stringBuilder.append("}");
+            WsImageUtils.byteToFile(stringBuilder.toString().getBytes(),beanName,"java","D://网页//");
+        });
     }
 }

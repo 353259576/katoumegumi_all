@@ -57,7 +57,6 @@ public class WsStringUtils {
         System.out.println(camelCase("d_d_f_s_d_fgd"));
     }
 
-
     public static byte[] byteListToArray(List<Byte> bytes){
         if(bytes==null||bytes.size()==0){
             return null;
@@ -437,6 +436,9 @@ public class WsStringUtils {
      * @return
      */
     public static String camelCase(String str){
+        if(!str.contains("_")){
+            return str;
+        }
         char g = '_';
         str = str.toLowerCase();
         char chars[] = str.toCharArray();
