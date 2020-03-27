@@ -531,7 +531,7 @@ public class DBCreateLevel {
         DBCreateLevel dbCreateLevel = new DBCreateLevel("47.96.119.77","zs_jym_ms",name,password);
         //List<String> list = dbCreateLevel.getAllTableName();
         List<String> list = new ArrayList<>();
-        list.add("jym_shelve");
+        list.add("jym_house_purchase");
         String improtStr = "import com.baomidou.mybatisplus.annotation.IdType;\n" +
                 "import com.baomidou.mybatisplus.annotation.TableField;\n" +
                 "import com.baomidou.mybatisplus.annotation.TableId;\n" +

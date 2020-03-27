@@ -1,9 +1,6 @@
 package cn.katoumegumi.java.hibernate;
 
-import cn.katoumegumi.java.common.WsBeanUtis;
-import cn.katoumegumi.java.common.WsDateUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SqlOperator;
@@ -75,6 +72,27 @@ public class HibernateDao {
 		}
 
 		return "";
+	}
+
+	public <T> T insertT(T t){
+		hibernateTemplate.saveOrUpdate(t);
+		hibernateTemplate.flush();
+		return t;
+	}
+
+	public <T> List<T> insertList(List<T> list){
+		if(WsListUtils.isNotEmpty(list)){
+			for(T t:list){
+				hibernateTemplate.saveOrUpdate(t);
+			}
+			hibernateTemplate.flush();
+		}
+		return null;
+	}
+
+	public <T> T updateT(T t){
+		hibernateTemplate.merge(t);
+		return t;
 	}
 
 	public <T> IPage<T> selectValueToPage(MySearchList mySearchList, Class<T> clazz) {

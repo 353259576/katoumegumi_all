@@ -77,14 +77,8 @@ public class HibernateConfig {
         try {
             localSessionFactoryBean.setPhysicalNamingStrategy(hibernateWsProperties.getPhysicalStrategy().getConstructor().newInstance());
             localSessionFactoryBean.setImplicitNamingStrategy(hibernateWsProperties.getImplicitStrategy().getConstructor().newInstance());
-        }catch (NoSuchMethodException e){
-
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        }catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException ignored){
+            ignored.printStackTrace();
         }
 
         localSessionFactoryBean.setHibernateProperties(createProperties());;
@@ -119,8 +113,7 @@ public class HibernateConfig {
     @Bean(name = "hibernateTransactionManager")
     @ConditionalOnBean({LocalSessionFactoryBean.class})
     public HibernateTransactionManager hibernateTransactionManager(SessionFactory sessionFactory) {
-        HibernateTransactionManager hibernateTransactionManager = new HibernateTransactionManager(sessionFactory);
-        return hibernateTransactionManager;
+        return new HibernateTransactionManager(sessionFactory);
     }
 
 }
