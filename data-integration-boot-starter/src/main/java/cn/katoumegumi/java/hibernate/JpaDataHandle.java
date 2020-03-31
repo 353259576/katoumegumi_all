@@ -2,6 +2,8 @@ package cn.katoumegumi.java.hibernate;
 
 import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsDateUtils;
+import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SqlOperator;
@@ -23,16 +25,14 @@ public class JpaDataHandle {
             public Predicate toPredicate(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
                Map<String,From> nameMap = new HashMap<>();
                 Predicate predicate =  analysisPredicate(root,criteriaQuery,criteriaBuilder,mySearchList,true,nameMap);
-                Iterator<MySearch> iterator = mySearchList.getOrderSearches().iterator();
-                MySearch mySearch = null;
                 Path path = null;
                 List<Order> orders = new ArrayList<>();
-                while (iterator.hasNext()){
-                    mySearch = iterator.next();
-                    String mySearchFieldName  = mySearch.getFieldName();
+                for (MySearch mySearch:mySearchList.getOrderSearches()) {
+
+                    /*String mySearchFieldName  = mySearch.getFieldName();
                     if(mySearchFieldName.contains(".")){
-                        String fieldPaths[] = mySearchFieldName.split("[.]");
-                        if(fieldPaths.length < 2){
+                        List<String> fieldPaths = WsStringUtils.split(mySearchFieldName,',');
+                        if(fieldPaths.size() < 2){
                             log.error("输入错误的参数:"+mySearchFieldName);
                             continue;
                         }
@@ -40,22 +40,23 @@ public class JpaDataHandle {
                         int i = 0;
                         StringBuffer nickName = new StringBuffer();
                         From last = root;
-                        for (;i < fieldPaths.length - 1; i++){
+                        for (;i < fieldPaths.size() - 1; i++){
                             if(i != 0){
                                 nickName.append("_");
                             }
-                            nickName.append(fieldPaths[i]);
+                            nickName.append(fieldPaths.get(i));
                             if(nameMap.containsKey(nickName.toString())){
                                 last = nameMap.get(nickName.toString());
                             }else {
-                                last = last.join(fieldPaths[i]);
+                                last = last.join(fieldPaths.get(i));
                                 nameMap.put(nickName.toString(),last);
                             }
                         }
-                        path = last.get(fieldPaths[i]);
+                        path = last.get(fieldPaths.get(i));
                     }else {
                         path = root.get(mySearch.getFieldName());
-                    }
+                    }*/
+                    path = getPath(root,nameMap,mySearch.getFieldName());
                     if ("asc".equals(mySearch.getValue()) || "ASC".equals(mySearch.getValue())) {
                         orders.add(criteriaBuilder.asc(path));
                     } else {
@@ -71,6 +72,25 @@ public class JpaDataHandle {
         return specification;
     }
 
+    public static Path getPath(Root root,Map<String,From> nameMap,String fieldName){
+        From from = root;
+        List<String> strings = WsStringUtils.split(fieldName,'.');
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int i = 0; i < strings.size() - 1; i++){
+            if(i != 0){
+                stringBuilder.append('.');
+            }
+            stringBuilder.append(strings.get(i));
+            if(nameMap.get(stringBuilder.toString()) == null){
+                from = from.join(strings.get(i));
+                nameMap.put(stringBuilder.toString(),from);
+            }else {
+                from = nameMap.get(stringBuilder.toString());
+            }
+        }
+        return from.get(strings.get(strings.size() - 1));
+    }
+
 
     public static <T> Predicate analysisPredicate(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder,MySearchList mySearchList,boolean isAnd,Map<String,From> nameMap){
 
@@ -84,41 +104,44 @@ public class JpaDataHandle {
             MySearch mySearch = null;
             while (mySearchIterator.hasNext()) {
                 mySearch = mySearchIterator.next();
-                try {
-                    String mySearchFieldName  = mySearch.getFieldName();
-                    if(mySearchFieldName.contains(".")){
-                        String fieldPaths[] = mySearchFieldName.split("[.]");
-                        if(fieldPaths.length < 2){
-                            log.error("输入错误的参数:"+mySearchFieldName);
-                            continue;
-                        }
-                        Join join = null;
-                        int i = 0;
-                        StringBuffer nickName = new StringBuffer();
-                        From last = root;
-                        for (;i < fieldPaths.length - 1; i++){
-                            if(i != 0){
-                                nickName.append("_");
-                            }
-                            nickName.append(fieldPaths[i]);
-                            if(nameMap.containsKey(nickName.toString())){
-                                last = nameMap.get(nickName.toString());
-                            }else {
-                                last = last.join(fieldPaths[i],mySearchList.getDefaultJoinType());
-                                nameMap.put(nickName.toString(), last);
-                            }
 
-                        }
-                        path = last.get(fieldPaths[i]);
-                    }else {
-                        path = root.get(mySearch.getFieldName());
+
+                String fieldName = mySearch.getFieldName();
+
+
+                path = getPath(root,nameMap,fieldName);
+
+
+                /*String mySearchFieldName  = mySearch.getFieldName();
+                if(mySearchFieldName.contains(".")){
+                    String fieldPaths[] = mySearchFieldName.split("[.]");
+                    if(fieldPaths.length < 2){
+                        log.error("输入错误的参数:"+mySearchFieldName);
+                        continue;
                     }
+                    Join join = null;
+                    int i = 0;
+                    StringBuffer nickName = new StringBuffer();
+                    From last = root;
+                    for (;i < fieldPaths.length - 1; i++){
+                        if(i != 0){
+                            nickName.append("_");
+                        }
+                        nickName.append(fieldPaths[i]);
+                        if(nameMap.containsKey(nickName.toString())){
+                            last = nameMap.get(nickName.toString());
+                        }else {
+                            last = last.join(fieldPaths[i],mySearchList.getDefaultJoinType());
+                            nameMap.put(nickName.toString(), last);
+                        }
 
-                }catch (Exception e){
-                    e.printStackTrace();
-                    log.error(mySearch.getFieldName()+"不存在");
-                    continue;
-                }
+                    }
+                    path = last.get(fieldPaths[i]);
+                }else {
+                    path = root.get(mySearch.getFieldName());
+                }*/
+
+
                 if (path != null) {
                     if (!mySearch.getOperator().equals(SqlOperator.SORT)) {
                         Class clazz = path.getJavaType();
@@ -131,6 +154,7 @@ public class JpaDataHandle {
                             if(mySearch.getValue() == null){
                                 break;
                             }
+
                             predicates.add(criteriaBuilder.equal(path, mySearch.getValue()));
                             break;
                         case LIKE:
@@ -259,6 +283,24 @@ public class JpaDataHandle {
                             } else {
                                 orders.add(criteriaBuilder.desc(path));
                             }
+                            break;
+                        case EQP:
+                            predicates.add(criteriaBuilder.equal(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            break;
+                        case GTP:
+                            predicates.add(criteriaBuilder.gt(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            break;
+                        case LTP:
+                            predicates.add(criteriaBuilder.le(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            break;
+                        case GTEP:
+                            predicates.add(criteriaBuilder.greaterThan(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            break;
+                        case LTEP:
+                            predicates.add(criteriaBuilder.lessThan(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            break;
+                        case NEP:
+                            predicates.add(criteriaBuilder.notEqual(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
                             break;
                         default:break;
                     }

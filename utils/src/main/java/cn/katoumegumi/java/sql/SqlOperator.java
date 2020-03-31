@@ -10,6 +10,7 @@ public enum SqlOperator {
      * 等于
      */
     EQ,
+    EQP,
     /**
      * 模糊查询
      */
@@ -18,18 +19,22 @@ public enum SqlOperator {
      * 大于
      */
     GT,
+    GTP,
     /**
      * 小于
      */
     LT,
+    LTP,
     /**
      * 大于等于
      */
     GTE,
+    GTEP,
     /**
      * 小于等于
      */
     LTE,
+    LTEP,
     /**
      * in
      */
@@ -50,6 +55,7 @@ public enum SqlOperator {
      * 不等于
      */
     NE,
+    NEP,
     /**
      * 嵌入sql 只有hibernate支持
      */

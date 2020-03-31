@@ -16,12 +16,15 @@ import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @HibernateTransactional
 public class HibernateDao {
 
 	//@Resource
 	private HibernateTemplate hibernateTemplate;
+
+	private Map<Class<?>,Map<String,Class<?>>> classAndFieldClassNameMap = new ConcurrentHashMap<>();
 
 	
 	public HibernateTemplate getHibernateTemplate() {
@@ -100,6 +103,7 @@ public class HibernateDao {
 		String fieldName = null;*/
         //Set<String> stringSet = new HashSet<>();
 
+
         DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz,mySearchList);
         Page pageVO = mySearchList.getPageVO();
         if (pageVO == null) {
@@ -133,6 +137,9 @@ public class HibernateDao {
     }
 
 	private <T> DetachedCriteria myDetachedCriteriaCreate(Class<T> clazz, MySearchList mySearchList) {
+
+
+
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(clazz);
         Map<String,DetachedCriteria> map = new HashMap<>();
         Conjunction conjunction = myDetachedCriteriaCreate(mySearchList,clazz,true,detachedCriteria,map);
@@ -140,7 +147,7 @@ public class HibernateDao {
         Iterator<MySearch> iterator = mySearchList.getOrderSearches().iterator();
 		MySearch mySearch = null;
 		while (iterator.hasNext()){
-			mySearch = iterator.next();
+			/*mySearch = iterator.next();
 			String fieldName = mySearch.getFieldName();
 			if(fieldName.contains(".")){
 				String strings[] = fieldName.split("[.]");
@@ -161,7 +168,39 @@ public class HibernateDao {
 					last = criteria;
 				}
 				fieldName = nickName.append(".").append(strings[strings.length - 1]).toString();
+			}*/
+
+			mySearch = iterator.next();
+			String fieldName = mySearch.getFieldName();
+			Field field = null;
+
+			DetachedCriteria last = detachedCriteria;
+
+			List<String> strings = WsStringUtils.split(fieldName,'.');
+			StringBuilder stringBuilder = new StringBuilder();
+			Class<?> lastc = clazz;
+			for(int i = 0; i < strings.size() - 1; i++){
+				if(i != 0){
+					stringBuilder.append('.');
+				}
+				stringBuilder.append(strings.get(i));
+				field = WsFieldUtils.getFieldForClass(strings.get(i),lastc);
+				if(field == null){
+					throw new RuntimeException(strings.get(i)+"不存在");
+				}
+				lastc = WsFieldUtils.getClassListType(field);
+				if(map.get(stringBuilder.toString())== null){
+					last = detachedCriteria.createCriteria(strings.get(i),strings.get(i));
+					map.put(stringBuilder.toString(),last);
+				}else {
+					last = map.get(stringBuilder.toString());
+				}
 			}
+			if(stringBuilder.length() > 0) {
+				fieldName = stringBuilder.append(".").append(strings.get(strings.size() - 1)).toString();
+			}
+
+
 			if ("asc".equals(mySearch.getValue()) || "ASC".equals(mySearch.getValue())) {
 				Order order = Order.asc(fieldName);
 				detachedCriteria.addOrder(order);
@@ -184,21 +223,56 @@ public class HibernateDao {
 			default:joinType = JoinType.INNER_JOIN;
 		}
 
+
 		List<MySearch> mySearches = mySearchList.getAll();
-		MySearch mySearch;
+		//MySearch mySearch;
 		String fieldName;
 		List<Criterion> criterionList = new ArrayList<>();
-		for(int i = 0; i < mySearches.size(); i++) {
-			mySearch = mySearches.get(i);
+
+
+
+		for(MySearch mySearch:mySearches) {
+			//mySearch = mySearches.get(i);
 			fieldName = mySearch.getFieldName();
 			Field field = null;
-			if(fieldName.contains(".")){
-				String[] strings = fieldName.split("[.]");
-				Field ffield = WsFieldUtils.getFieldForClass(strings[0],clazz);
+
+			DetachedCriteria last = detachedCriteria;
+
+			List<String> strings = WsStringUtils.split(fieldName,'.');
+			StringBuilder stringBuilder = new StringBuilder();
+			Class<?> lastc = clazz;
+			for(int i = 0; i < strings.size() - 1; i++){
+				if(i != 0){
+					stringBuilder.append('.');
+				}
+				stringBuilder.append(strings.get(i));
+				field = WsFieldUtils.getFieldForClass(strings.get(i),lastc);
+				if(field == null){
+					throw new RuntimeException(strings.get(i)+"不存在");
+				}
+				lastc = WsFieldUtils.getClassListType(field);
+				if(nameMap.get(stringBuilder.toString())== null){
+					last = detachedCriteria.createCriteria(strings.get(i),strings.get(i),joinType);
+					nameMap.put(stringBuilder.toString(),last);
+				}else {
+					last = nameMap.get(stringBuilder.toString());
+				}
+			}
+			if(stringBuilder.length() > 0){
+				fieldName = stringBuilder.append(".").append(strings.get(strings.size() - 1)).toString();
+			}
+			Class<?> type = WsFieldUtils.getFieldForClass(strings.get(strings.size() - 1),lastc).getType();
+
+
+
+
+			/*if(fieldName.contains(".")){
+				List<String> strings = WsStringUtils.split(fieldName,'.');
+				Field ffield = WsFieldUtils.getFieldForClass(strings.get(0),clazz);
 				if(ffield == null){
 					continue;
 				}else {
-					Field lfield = WsFieldUtils.getFieldForClass(strings[1],ffield.getType());
+					Field lfield = WsFieldUtils.getFieldForClass(strings.get(1),ffield.getType());
 					if(lfield == null) {
 						continue;
 					}
@@ -207,28 +281,31 @@ public class HibernateDao {
 				StringBuffer nickName = new StringBuffer();
 				DetachedCriteria last = detachedCriteria;
 				DetachedCriteria criteria = null;
-				for(int k = 0; k < strings.length -1; k++){
+				for(int k = 0; k < strings.size() -1; k++){
 					if(k != 0){
 						nickName.append("_");
 					}
-					nickName.append(strings[k]);
+					nickName.append(strings.get(k));
 					if(!nameMap.containsKey(nickName.toString())){
-						criteria = last.createCriteria(strings[k],nickName.toString(),joinType);
+						criteria = last.createCriteria(strings.get(k),nickName.toString(),joinType);
 						nameMap.put(nickName.toString(),criteria);
 					}else {
 						criteria = nameMap.get(nickName.toString());
 					}
 					last = criteria;
 				}
-				fieldName = nickName.append(".").append(strings[strings.length - 1]).toString();
+				fieldName = nickName.append(".").append(strings.get(strings.size() - 1)).toString();
 			}else {
 				field = WsFieldUtils.getFieldForClass(fieldName, clazz);
 				if (field == null) {
 					continue;
 				}
-			}
+			}*/
+
+
+
 			if(!mySearch.getOperator().equals(SqlOperator.SORT)){
-				if (Date.class.isAssignableFrom(field.getType()) && !mySearch.getValue().getClass().equals(clazz)) {
+				if (Date.class.isAssignableFrom(type) && !mySearch.getValue().getClass().equals(clazz)) {
 					mySearch.setValue(WsDateUtils.stringToDate(WsDateUtils.objectDateFormatString(mySearch.getValue())));
 				}
 			}
@@ -242,10 +319,10 @@ public class HibernateDao {
 					break;
 				case EQ:
 
-					criterionList.add(Restrictions.eq(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
+					criterionList.add(Restrictions.eq(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),type)));
 					break;
 				case NE:
-					criterionList.add(Restrictions.ne(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
+					criterionList.add(Restrictions.ne(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),type)));
 					break;
 				case LIKE:
 					String value = WsStringUtils.anyToString(mySearch.getValue());
@@ -262,16 +339,16 @@ public class HibernateDao {
 					}
 					break;
 				case GT:
-					criterionList.add(Restrictions.gt(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
+					criterionList.add(Restrictions.gt(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),type)));
 					break;
 				case GTE:
-					criterionList.add(Restrictions.ge(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
+					criterionList.add(Restrictions.ge(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),type)));
 					break;
 				case LT:
-					criterionList.add(Restrictions.lt(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
+					criterionList.add(Restrictions.lt(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),type)));
 					break;
 				case LTE:
-					criterionList.add(Restrictions.le(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),field.getType())));
+					criterionList.add(Restrictions.le(fieldName, WsBeanUtis.objectToT(mySearch.getValue(),type)));
 					break;
 				case NULL:
 					criterionList.add(Restrictions.isNull(fieldName));
@@ -285,7 +362,26 @@ public class HibernateDao {
 						criterionList.add(Restrictions.sqlRestriction(k));
 					}
 					break;
-				default:break;
+				case EQP:
+					criterionList.add(Restrictions.eqProperty(fieldName,WsStringUtils.anyToString(mySearch.getValue())));
+					break;
+				case GTP:
+					criterionList.add(Restrictions.gtProperty(fieldName,WsStringUtils.anyToString(mySearch.getValue())));
+					break;
+				case LTP:
+					criterionList.add(Restrictions.leProperty(fieldName,WsStringUtils.anyToString(mySearch.getValue())));
+					break;
+				case GTEP:
+					criterionList.add(Restrictions.gtProperty(fieldName,WsStringUtils.anyToString(mySearch.getValue())));
+					break;
+				case LTEP:
+					criterionList.add(Restrictions.leProperty(fieldName,WsStringUtils.anyToString(mySearch.getValue())));
+					break;
+				case NEP:
+					criterionList.add(Restrictions.neProperty(fieldName,WsStringUtils.anyToString(mySearch.getValue())));
+					break;
+				default:
+					break;
 
 			}
 		}
@@ -378,7 +474,7 @@ public class HibernateDao {
 	}
 
 
-	public Integer update(String hql,Map map){
+	public Object update(String hql,Map map){
 		/*hibernateTemplate.execute(new HibernateCallback<T>() {
 			@Override
 			public T doInHibernate(Session session) throws HibernateException {

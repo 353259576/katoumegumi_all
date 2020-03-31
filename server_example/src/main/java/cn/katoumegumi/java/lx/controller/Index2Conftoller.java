@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.lx.controller;
 
 import cn.katoumegumi.java.common.DBCreateLevel;
+import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsFileUtils;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
@@ -8,6 +9,8 @@ import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
+import cn.katoumegumi.java.sql.MySearchList;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -23,6 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -71,6 +75,10 @@ public class Index2Conftoller {
         }*/
 
 
+        Field field = WsFieldUtils.getFieldByName(User.class,"userDetails");
+        Class c = WsFieldUtils.getClassListType(field);
+        System.out.println(c);
+
 
     }
 
@@ -79,6 +87,19 @@ public class Index2Conftoller {
 
     @Autowired
     private HibernateDao hibernateDao;
+
+
+
+    @RequestMapping(value = "hibernateTest")
+    @ResponseBody
+    public String hibernateTest(){
+        User user = new User();
+        MySearchList mySearchList = MySearchList.newMySearchList().sort("userDetails.id","desc");
+                /*.eq(user::getName,"你好")
+                .eq("userDetails.id",1);*/
+        List<User> users = hibernateDao.selectValueToList(mySearchList,User.class);
+        return JSON.toJSONString(user);
+    }
 
 
     @RequestMapping(value = "index2")

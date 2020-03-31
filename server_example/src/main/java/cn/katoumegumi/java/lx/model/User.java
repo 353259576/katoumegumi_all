@@ -20,19 +20,19 @@ public class User {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    //@Column(name = "name")
+    @Column(name = "name")
     @TableField(value = "name")
     private String name;
 
-    //@Column(name = "password")
+    @Column(name = "password")
     @TableField(value = "password")
     private String password;
 
-    //@Column(name = "create_date")
+    @Column(name = "create_date")
     @TableField(value = "create_date")
     private LocalDateTime createDate;
 
-    /*@OneToMany
-    @JoinColumn(name = "user_id")*/
+    @OneToMany
+    @JoinColumn(name = "user_id")
     private List<UserDetails> userDetails;
 }

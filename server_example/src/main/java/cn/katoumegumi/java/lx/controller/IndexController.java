@@ -101,13 +101,13 @@ public class IndexController implements IndexService {
         LocalDateTime localDateTime = LocalDateTime.now();
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList();
-        /*mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
+        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
                 MySearchList.newMySearchList().eq(user::getPassword,"世界")
                 )
                 .eq(user::getId,1)
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
-                .sort("userDetails.sex","DESC");*/
+                .sort("userDetails.sex","DESC");
         //List<User> list = userService.selectList(mySearchList);
         //List list = new ArrayList();
         long start = System.currentTimeMillis();

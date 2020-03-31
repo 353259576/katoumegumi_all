@@ -194,6 +194,37 @@ public class WsFieldUtils {
     }
 
 
+    public static <T> Field getFieldByName(Class<T> tClass,String fieldName){
+
+        try {
+
+            List<String> stringList = WsStringUtils.split(fieldName,'.');
+            Iterator<String> iterator = stringList.iterator();
+            String nowName;
+            Class<?> nowC = tClass;
+            Field nowField = null;
+            while (iterator.hasNext()){
+                nowName = iterator.next();
+                nowField= nowC.getDeclaredField(nowName);
+                if(nowField == null){
+                    nowField = tClass.getField(nowName);
+                    if(nowField == null){
+                        return null;
+                    }
+                }
+                nowC = nowField.getType();
+            }
+            return nowField;
+
+        }catch (NoSuchFieldException e){
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+
+
     public static Field getFieldByType(Type type,Class clazz){
         Field[] fields = getFieldAll(clazz);
         for(Field field:fields){
@@ -203,6 +234,25 @@ public class WsFieldUtils {
         }
         return null;
     }
+
+
+    public static <T> Class<?>  getClassListType(Field field){
+        Class<?> tClass = field.getType();
+        if(tClass.isArray() || WsFieldUtils.classCompare(tClass,Collection.class)){
+            String listClassName = field.getGenericType().getTypeName();
+            String className = listClassName.substring(listClassName.indexOf("<") + 1,listClassName.lastIndexOf(">"));
+            try {
+                return Class.forName(className);
+            }catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }else {
+            return tClass;
+        }
+
+    }
+
 
 }
 
