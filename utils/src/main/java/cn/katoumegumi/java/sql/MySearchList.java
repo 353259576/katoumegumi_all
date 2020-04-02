@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsFileUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import cn.katoumegumi.java.common.SupplierFunc;
 
@@ -53,6 +55,11 @@ public class MySearchList {
             orderSearches.add(new MySearch(fieldName,operator,value));
             return this;
         }
+
+        if(value instanceof SupplierFunc) {
+            value = WsFieldUtils.getFieldName((SupplierFunc<?>) value);
+        }
+
         if(mainClass != null){
             String tableName = tableAndNickNameMap.get(mainClass);
             mySearches.add(new MySearch(mainClass,tableName,fieldName,operator,value));
@@ -190,9 +197,26 @@ public class MySearchList {
         return add(supplierFunc, SqlOperator.SQL,value);
     }
     public <T> MySearchList sort(SupplierFunc<T> supplierFunc,Object value) {
-        return add(supplierFunc, SqlOperator.SORT,value);
+        return add(supplierFunc, SqlOperator.SORT, value);
     }
-
+    public <T> MySearchList eqp(SupplierFunc<?> supplierFunc,SupplierFunc<?> value){
+        return add(supplierFunc,SqlOperator.EQP,WsFieldUtils.getFieldName(value));
+    }
+    public <T> MySearchList nep(SupplierFunc<?> supplierFunc,SupplierFunc<?> value){
+        return add(supplierFunc,SqlOperator.NEP,WsFieldUtils.getFieldName(value));
+    }
+    public <T> MySearchList gtp(SupplierFunc<?> supplierFunc,SupplierFunc<?> value){
+        return add(supplierFunc,SqlOperator.GTP,WsFieldUtils.getFieldName(value));
+    }
+    public <T> MySearchList ltp(SupplierFunc<?> supplierFunc,SupplierFunc<?> value){
+        return add(supplierFunc,SqlOperator.LTP,WsFieldUtils.getFieldName(value));
+    }
+    public <T> MySearchList gtep(SupplierFunc<?> supplierFunc,SupplierFunc<?> value){
+        return add(supplierFunc,SqlOperator.GTEP,WsFieldUtils.getFieldName(value));
+    }
+    public <T> MySearchList ltep(SupplierFunc<?> supplierFunc,SupplierFunc<?> value){
+        return add(supplierFunc,SqlOperator.LTEP,WsFieldUtils.getFieldName(value));
+    }
 
 
 
@@ -244,6 +268,25 @@ public class MySearchList {
     }
     public <T> MySearchList sort(String column,Object value) {
         return add(column, SqlOperator.SORT,value);
+    }
+
+    public <T> MySearchList eqp(String column,String value){
+        return add(column,SqlOperator.EQP,value);
+    }
+    public <T> MySearchList nep(String column,String value){
+        return add(column,SqlOperator.NEP,value);
+    }
+    public <T> MySearchList gtp(String column,String value){
+        return add(column,SqlOperator.GTP,value);
+    }
+    public <T> MySearchList ltp(String column,String value){
+        return add(column,SqlOperator.LTP,value);
+    }
+    public <T> MySearchList gtep(String column,String value){
+        return add(column,SqlOperator.GTEP,value);
+    }
+    public <T> MySearchList ltep(String column,String value){
+        return add(column,SqlOperator.LTEP,value);
     }
 
 
@@ -308,5 +351,6 @@ public class MySearchList {
         this.defaultJoinType = defaultJoinType;
         return this;
     }
+
 }
 

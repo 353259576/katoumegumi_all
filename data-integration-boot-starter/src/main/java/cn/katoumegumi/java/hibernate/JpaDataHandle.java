@@ -105,11 +105,10 @@ public class JpaDataHandle {
             while (mySearchIterator.hasNext()) {
                 mySearch = mySearchIterator.next();
 
-
                 String fieldName = mySearch.getFieldName();
 
 
-                path = getPath(root,nameMap,fieldName);
+                path = getPath(root, nameMap, fieldName);
 
 
                 /*String mySearchFieldName  = mySearch.getFieldName();
@@ -151,73 +150,73 @@ public class JpaDataHandle {
                     }
                     switch (mySearch.getOperator()) {
                         case EQ:
-                            if(mySearch.getValue() == null){
+                            if (mySearch.getValue() == null) {
                                 break;
                             }
 
                             predicates.add(criteriaBuilder.equal(path, mySearch.getValue()));
                             break;
                         case LIKE:
-                            if(mySearch.getValue() == null){
+                            if (mySearch.getValue() == null) {
                                 break;
                             }
                             predicates.add(criteriaBuilder.like(path, "%" + mySearch.getValue() + "%"));
                             break;
                         case GT:
-                            if(mySearch.getValue() == null){
+                            if (mySearch.getValue() == null) {
                                 break;
                             }
                             predicates.add(criteriaBuilder.greaterThan(path, (Comparable) mySearch.getValue()));
                             break;
                         case LT:
-                            if(mySearch.getValue() == null){
+                            if (mySearch.getValue() == null) {
                                 break;
                             }
-                            predicates.add(criteriaBuilder.lessThan(path, (Comparable) WsBeanUtis.objectToT(mySearch.getValue(),path.getJavaType())));
+                            predicates.add(criteriaBuilder.lessThan(path, (Comparable) WsBeanUtis.objectToT(mySearch.getValue(), path.getJavaType())));
                             break;
                         case GTE:
-                            if(mySearch.getValue() == null){
+                            if (mySearch.getValue() == null) {
                                 break;
                             }
-                            predicates.add(criteriaBuilder.greaterThanOrEqualTo(path, (Comparable) WsBeanUtis.objectToT(mySearch.getValue(),path.getJavaType())));
+                            predicates.add(criteriaBuilder.greaterThanOrEqualTo(path, (Comparable) WsBeanUtis.objectToT(mySearch.getValue(), path.getJavaType())));
                             break;
                         case LTE:
-                            if(mySearch.getValue() == null){
+                            if (mySearch.getValue() == null) {
                                 break;
                             }
-                            predicates.add(criteriaBuilder.lessThanOrEqualTo(path, (Comparable) WsBeanUtis.objectToT(mySearch.getValue(),path.getJavaType())));
+                            predicates.add(criteriaBuilder.lessThanOrEqualTo(path, (Comparable) WsBeanUtis.objectToT(mySearch.getValue(), path.getJavaType())));
                             break;
                         case IN:
-                            if(mySearch.getValue() == null){
+                            if (mySearch.getValue() == null) {
                                 break;
                             }
                             if (mySearch.getValue() instanceof List) {
                                 List list = (List) mySearch.getValue();
-                                if(list.isEmpty()){
+                                if (list.isEmpty()) {
                                     break;
                                 }
                                 predicates.add(criteriaBuilder.and(new Predicate[]{path.in(list.toArray())}));
                             } else if (mySearch.getValue() instanceof Set) {
                                 Set set = (Set) mySearch.getValue();
-                                if(set.isEmpty()){
+                                if (set.isEmpty()) {
                                     break;
                                 }
                                 predicates.add(criteriaBuilder.and(new Predicate[]{path.in(set.toArray())}));
                             } else if (mySearch.getValue().getClass().isArray()) {
-                                if(((Object[])mySearch.getValue()).length == 0 ) {
+                                if (((Object[]) mySearch.getValue()).length == 0) {
                                     break;
                                 }
                                 predicates.add(criteriaBuilder.and(new Predicate[]{path.in((Object[]) mySearch.getValue())}));
                             }
                             break;
                         case NIN:
-                            if(mySearch.getValue() == null){
+                            if (mySearch.getValue() == null) {
                                 break;
                             }
                             CriteriaBuilder.In in = criteriaBuilder.in(path);
                             if (mySearch.getValue() instanceof List) {
                                 List list = (List) mySearch.getValue();
-                                if(list.isEmpty()){
+                                if (list.isEmpty()) {
                                     break;
                                 }
                                 Iterator iterator = list.iterator();
@@ -225,8 +224,8 @@ public class JpaDataHandle {
                                 Object value = null;
                                 while (iterator.hasNext()) {
                                     object = iterator.next();
-                                    value = WsBeanUtis.objectToT(object,path.getJavaType());
-                                    if(value != null){
+                                    value = WsBeanUtis.objectToT(object, path.getJavaType());
+                                    if (value != null) {
                                         in.value(value);
                                     }
 
@@ -234,7 +233,7 @@ public class JpaDataHandle {
                                 predicates.add(criteriaBuilder.not(in));
                             } else if (mySearch.getValue() instanceof Set) {
                                 Set set = (Set) mySearch.getValue();
-                                if(set.isEmpty()){
+                                if (set.isEmpty()) {
                                     break;
                                 }
                                 Iterator iterator = set.iterator();
@@ -242,22 +241,22 @@ public class JpaDataHandle {
                                 Object value = null;
                                 while (iterator.hasNext()) {
                                     object = iterator.next();
-                                    value = WsBeanUtis.objectToT(object,path.getJavaType());
-                                    if(value != null){
+                                    value = WsBeanUtis.objectToT(object, path.getJavaType());
+                                    if (value != null) {
                                         in.value(value);
                                     }
                                 }
                                 predicates.add(criteriaBuilder.not(in));
                             } else if (mySearch.getValue().getClass().isArray()) {
                                 Object objects[] = (Object[]) mySearch.getValue();
-                                if(objects.length == 0){
+                                if (objects.length == 0) {
                                     break;
                                 }
                                 Object value = null;
                                 for (int i = 0; i < objects.length; i++) {
                                     //in.value(RestTempLateUtil.objectToT(objects[i],path.getJavaType()));
-                                    value = WsBeanUtis.objectToT(objects[i],path.getJavaType());
-                                    if(value != null){
+                                    value = WsBeanUtis.objectToT(objects[i], path.getJavaType());
+                                    if (value != null) {
                                         in.value(value);
                                     }
                                 }
@@ -272,7 +271,7 @@ public class JpaDataHandle {
                             predicates.add(criteriaBuilder.isNotNull(path));
                             break;
                         case NE:
-                            if(mySearch.getValue() == null){
+                            if (mySearch.getValue() == null) {
                                 break;
                             }
                             predicates.add(criteriaBuilder.notEqual(path, mySearch.getValue()));
@@ -285,24 +284,25 @@ public class JpaDataHandle {
                             }
                             break;
                         case EQP:
-                            predicates.add(criteriaBuilder.equal(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            predicates.add(criteriaBuilder.equal(path, getPath(root, nameMap, WsStringUtils.anyToString(mySearch.getValue()))));
                             break;
                         case GTP:
-                            predicates.add(criteriaBuilder.gt(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            predicates.add(criteriaBuilder.gt(path, getPath(root, nameMap, WsStringUtils.anyToString(mySearch.getValue()))));
                             break;
                         case LTP:
-                            predicates.add(criteriaBuilder.le(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            predicates.add(criteriaBuilder.le(path, getPath(root, nameMap, WsStringUtils.anyToString(mySearch.getValue()))));
                             break;
                         case GTEP:
-                            predicates.add(criteriaBuilder.greaterThan(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            predicates.add(criteriaBuilder.greaterThan(path, getPath(root, nameMap, WsStringUtils.anyToString(mySearch.getValue()))));
                             break;
                         case LTEP:
-                            predicates.add(criteriaBuilder.lessThan(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            predicates.add(criteriaBuilder.lessThan(path, getPath(root, nameMap, WsStringUtils.anyToString(mySearch.getValue()))));
                             break;
                         case NEP:
-                            predicates.add(criteriaBuilder.notEqual(path,getPath(root,nameMap,WsStringUtils.anyToString(mySearch.getValue()))));
+                            predicates.add(criteriaBuilder.notEqual(path, getPath(root, nameMap, WsStringUtils.anyToString(mySearch.getValue()))));
                             break;
-                        default:break;
+                        default:
+                            break;
                     }
                 }
             }
@@ -310,35 +310,34 @@ public class JpaDataHandle {
             List<Predicate> andList = new ArrayList<>();
             List<Predicate> orList = new ArrayList<>();
             List<MySearchList> ands = mySearchList.getAnds();
-            for(MySearchList searchList:ands){
-                Predicate predicate = analysisPredicate(root, criteriaQuery, criteriaBuilder, searchList, true,nameMap);
+            for (MySearchList searchList : ands) {
+                Predicate predicate = analysisPredicate(root, criteriaQuery, criteriaBuilder, searchList, true, nameMap);
                 andList.add(predicate);
             }
             List<MySearchList> ors = mySearchList.getOrs();
-            for (MySearchList searchList:ors){
-                Predicate predicate = analysisPredicate(root, criteriaQuery, criteriaBuilder, searchList, false,nameMap);
+            for (MySearchList searchList : ors) {
+                Predicate predicate = analysisPredicate(root, criteriaQuery, criteriaBuilder, searchList, false, nameMap);
                 orList.add(predicate);
             }
 
-            if(andList.size() != 0){
-                predicates.add(criteriaBuilder.and((Predicate[]) andList.toArray(new Predicate[andList.size()])));
+            if (andList.size() != 0) {
+                predicates.add(criteriaBuilder.and(andList.toArray(new Predicate[andList.size()])));
             }
-            if(orList.size() != 0){
-                predicates.add(criteriaBuilder.or((Predicate[]) orList.toArray(new Predicate[orList.size()])));
+            if (orList.size() != 0) {
+                predicates.add(criteriaBuilder.or(orList.toArray(new Predicate[orList.size()])));
             }
 
             criteriaQuery.orderBy(orders);
-            if(predicates.size() > 0){
+            if (predicates.size() > 0) {
                 /*if(isAnd){
                     return criteriaBuilder.and((Predicate[]) predicates.toArray(new Predicate[predicates.size()]));
                 }else {
                     return criteriaBuilder.or((Predicate[]) predicates.toArray(new Predicate[predicates.size()]));
                 }*/
-                return criteriaBuilder.and((Predicate[]) predicates.toArray(new Predicate[predicates.size()]));
-            }else {
+                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+            } else {
                 return criteriaBuilder.conjunction();
             }
-
         }
         return criteriaBuilder.conjunction();
 

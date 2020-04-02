@@ -95,8 +95,14 @@ public class Index2Conftoller {
     public String hibernateTest(){
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList().sort("userDetails.id","desc");
-                /*.eq(user::getName,"你好")
-                .eq("userDetails.id",1);*/
+        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
+                MySearchList.newMySearchList().eq(user::getPassword,"世界")
+        )
+                .eq(user::getId,1)
+                .lte(user::getCreateDate,"2019-12-13")
+                .eqp(user::getName,user::getPassword)
+                .sort("id","ASC")
+                .sort("userDetails.sex","DESC");
         List<User> users = hibernateDao.selectValueToList(mySearchList,User.class);
         return JSON.toJSONString(user);
     }

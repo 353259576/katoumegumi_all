@@ -37,9 +37,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 @Service(version = "1.0.0",protocol = {"dubbo","rest"})
 @RestController
@@ -106,6 +104,7 @@ public class IndexController implements IndexService {
                 )
                 .eq(user::getId,1)
                 .lte(user::getCreateDate,"2019-12-13")
+                .eqp(user::getName,user::getPassword)
                 .sort("id","ASC")
                 .sort("userDetails.sex","DESC");
         //List<User> list = userService.selectList(mySearchList);
@@ -231,22 +230,36 @@ public class IndexController implements IndexService {
         SQLModelUtils sqlModelUtils1 = new SQLModelUtils(mySearchList1);
         String str = sqlModelUtils1.searchListBaseSQLProcessor();
         String countStr = sqlModelUtils1.searchListBaseCountSQLProcessor();
-        long startTime = System.currentTimeMillis();
-        for (int i = 0; i < 1000000; i++){
-            mySearchList1 = MySearchList.newMySearchList();
-            mySearchList1.setMainClass(User.class)
-                    .join(null,UserDetails.class,"UserDetails","id","userId")
-                    .eq(user::getName,"你好");
-            sqlModelUtils1 = new SQLModelUtils(mySearchList1);
-            sqlModelUtils1.getValueMap();
-            str = sqlModelUtils1.searchListBaseSQLProcessor();
-            countStr = sqlModelUtils1.searchListBaseCountSQLProcessor();
 
+        ThreadPoolExecutor threadPoolExecutor =  new ThreadPoolExecutor(4,8,200, TimeUnit.SECONDS,new LinkedBlockingQueue<>());
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < 2; i++){
+            threadPoolExecutor.execute(()->{
+                MySearchList mySearchList2 = MySearchList.newMySearchList();
+                mySearchList2.setMainClass(User.class)
+                        .join(null,UserDetails.class,"UserDetails","id","userId")
+                        .eq(user::getName,"你好");
+                SQLModelUtils sqlModelUtils2 = new SQLModelUtils(mySearchList2);
+                sqlModelUtils2.getValueMap();
+                String str1 = sqlModelUtils2.searchListBaseSQLProcessor();
+                String countStr1 = sqlModelUtils2.searchListBaseCountSQLProcessor();
+                System.out.println(str1);
+                System.out.println(countStr1);
+                countDownLatch.countDown();
+            });
+
+
+        }
+        try {
+            countDownLatch.await();
+        }catch (InterruptedException e){
+            e.printStackTrace();
         }
         long endTime = System.currentTimeMillis();
         System.out.println(endTime - startTime);
-        System.out.println(str);
-        System.out.println(countStr);
+        //System.out.println(str);
+        //System.out.println(countStr);
 
 
     }

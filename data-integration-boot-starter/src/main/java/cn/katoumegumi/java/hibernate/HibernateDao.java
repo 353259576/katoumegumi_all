@@ -12,6 +12,7 @@ import org.hibernate.criterion.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
 import org.hibernate.sql.JoinType;
+import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import java.lang.reflect.Field;
@@ -23,8 +24,6 @@ public class HibernateDao {
 
 	//@Resource
 	private HibernateTemplate hibernateTemplate;
-
-	private Map<Class<?>,Map<String,Class<?>>> classAndFieldClassNameMap = new ConcurrentHashMap<>();
 
 	
 	public HibernateTemplate getHibernateTemplate() {
