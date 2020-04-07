@@ -14,7 +14,7 @@
     <properties>
         <springboot.version>2.1.6.RELEASE</springboot.version>
         <lombok.version>1.18.2</lombok.version>
-        <spring-data-releasetrain.version>Fowler-SR2</spring-data-releasetrain.version>
+        <spring-data-releasetrain.version>Moore-SR6</spring-data-releasetrain.version>
         <springdata.version>2.1.9.RELEASE</springdata.version>
         <fastjson.version>1.2.59</fastjson.version>
         <hibernate.version>5.4.4.Final</hibernate.version>
@@ -221,11 +221,11 @@
             <version>3.9.1.Final</version>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
-        </dependency>
+        </dependency>-->
 
 
 

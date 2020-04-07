@@ -9,11 +9,12 @@ import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+/*import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;*/
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Mono;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-//@RefreshScope
+@RefreshScope
 public class IndexController {
     @Autowired
     private RestTemplate restTemplate;
@@ -37,9 +38,9 @@ public class IndexController {
     @Value("${jasypt.encryptor.password:0}")
     private String value;
 
-    @RequestMapping(value = "index")
-    @GlobalTransactional(name = "index")
-    public Mono<String> index(/*@AuthenticationPrincipal Authentication authentication*/ServerHttpRequest request){
+    /*@RequestMapping(value = "index")
+    //@GlobalTransactional(name = "index")
+    public Mono<String> index(@AuthenticationPrincipal Authentication authenticationServerHttpRequest request){
         List<String> strings = new ArrayList<>();
         return Mono.zip(ReactiveSecurityContextHolder.getContext(),request.getBody().collectList()).filter(objects -> {
           return objects.getT1().getAuthentication() != null;
@@ -78,5 +79,12 @@ public class IndexController {
             String str = indexFeign.index();
             return str;
         });
+    }*/
+
+
+    @RequestMapping(value = "index2")
+    @ResponseBody
+    public String index2(){
+        return indexFeign.index();
     }
 }
