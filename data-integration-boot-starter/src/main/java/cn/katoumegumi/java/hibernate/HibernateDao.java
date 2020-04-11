@@ -98,11 +98,6 @@ public class HibernateDao {
 	}
 
 	public <T> IPage<T> selectValueToPage(MySearchList mySearchList, Class<T> clazz) {
-		/*MySearch mySearch = null;
-		String fieldName = null;*/
-        //Set<String> stringSet = new HashSet<>();
-
-
         DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz,mySearchList);
         Page pageVO = mySearchList.getPageVO();
         if (pageVO == null) {
@@ -110,7 +105,7 @@ public class HibernateDao {
         }
         Integer firstResult = Integer.parseInt(Long.valueOf((pageVO.getCurrent() - 1) * pageVO.getSize()).toString());
         List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria, firstResult, Integer.parseInt(Long.valueOf(pageVO.getSize()).toString()));
-        Integer count = Integer.valueOf(0);
+        Integer count = 0;
         if (list.size() == 0) {
             count = list.size();
         } else {
@@ -125,10 +120,6 @@ public class HibernateDao {
     }
 
     public <T> List<T> selectValueToList(MySearchList mySearchList,Class<T> clazz){
-
-		/*MySearch mySearch = null;
-		String fieldName = null;*/
-        //Set<String> stringSet = new HashSet<>();
         DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz,mySearchList);
 
         List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria);
@@ -146,29 +137,6 @@ public class HibernateDao {
         Iterator<MySearch> iterator = mySearchList.getOrderSearches().iterator();
 		MySearch mySearch = null;
 		while (iterator.hasNext()){
-			/*mySearch = iterator.next();
-			String fieldName = mySearch.getFieldName();
-			if(fieldName.contains(".")){
-				String strings[] = fieldName.split("[.]");
-				StringBuffer nickName = new StringBuffer();
-				DetachedCriteria last = detachedCriteria;
-				DetachedCriteria criteria = null;
-				for(int k = 0; k < strings.length -1; k++){
-					if(k != 0){
-						nickName.append("_");
-					}
-					nickName.append(strings[k]);
-					if(!map.containsKey(nickName.toString())){
-						criteria = last.createCriteria(strings[k],nickName.toString());
-						map.put(nickName.toString(),criteria);
-					}else {
-						criteria = map.get(nickName.toString());
-					}
-					last = criteria;
-				}
-				fieldName = nickName.append(".").append(strings[strings.length - 1]).toString();
-			}*/
-
 			mySearch = iterator.next();
 			String fieldName = mySearch.getFieldName();
 			Field field = null;
@@ -261,48 +229,6 @@ public class HibernateDao {
 				fieldName = stringBuilder.append(".").append(strings.get(strings.size() - 1)).toString();
 			}
 			Class<?> type = WsFieldUtils.getFieldForClass(strings.get(strings.size() - 1),lastc).getType();
-
-
-
-
-			/*if(fieldName.contains(".")){
-				List<String> strings = WsStringUtils.split(fieldName,'.');
-				Field ffield = WsFieldUtils.getFieldForClass(strings.get(0),clazz);
-				if(ffield == null){
-					continue;
-				}else {
-					Field lfield = WsFieldUtils.getFieldForClass(strings.get(1),ffield.getType());
-					if(lfield == null) {
-						continue;
-					}
-					field = lfield;
-				}
-				StringBuffer nickName = new StringBuffer();
-				DetachedCriteria last = detachedCriteria;
-				DetachedCriteria criteria = null;
-				for(int k = 0; k < strings.size() -1; k++){
-					if(k != 0){
-						nickName.append("_");
-					}
-					nickName.append(strings.get(k));
-					if(!nameMap.containsKey(nickName.toString())){
-						criteria = last.createCriteria(strings.get(k),nickName.toString(),joinType);
-						nameMap.put(nickName.toString(),criteria);
-					}else {
-						criteria = nameMap.get(nickName.toString());
-					}
-					last = criteria;
-				}
-				fieldName = nickName.append(".").append(strings.get(strings.size() - 1)).toString();
-			}else {
-				field = WsFieldUtils.getFieldForClass(fieldName, clazz);
-				if (field == null) {
-					continue;
-				}
-			}*/
-
-
-
 			if(!mySearch.getOperator().equals(SqlOperator.SORT)){
 				if (Date.class.isAssignableFrom(type) && !mySearch.getValue().getClass().equals(clazz)) {
 					mySearch.setValue(WsDateUtils.stringToDate(WsDateUtils.objectDateFormatString(mySearch.getValue())));

@@ -89,7 +89,7 @@ public class WsSSLContext {
                 SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
                 SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
                 sslContextBuilder.sslProvider(provider);
-                /*ApplicationProtocolConfig applicationProtocolConfig = new ApplicationProtocolConfig(
+                ApplicationProtocolConfig applicationProtocolConfig = new ApplicationProtocolConfig(
                         ApplicationProtocolConfig.Protocol.ALPN,
                         // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
                         ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
@@ -97,7 +97,7 @@ public class WsSSLContext {
                         ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
                         ApplicationProtocolNames.HTTP_2,
                         ApplicationProtocolNames.HTTP_1_1);
-                sslContextBuilder.applicationProtocolConfig(applicationProtocolConfig);*/
+                sslContextBuilder.applicationProtocolConfig(applicationProtocolConfig);
                 sslContextBuilder.keyStoreType("TLSv1.2");
                 sslContextBuilder.ciphers(Http2SecurityUtil.CIPHERS,SupportedCipherSuiteFilter.INSTANCE);
                 sslContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE);

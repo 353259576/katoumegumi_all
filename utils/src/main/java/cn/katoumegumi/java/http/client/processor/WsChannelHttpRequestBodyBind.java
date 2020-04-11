@@ -15,30 +15,55 @@ import java.util.concurrent.*;
 
 @Slf4j
 public class WsChannelHttpRequestBodyBind {
-
-    public static volatile Map<String, HttpRequestBody> httpRequestBodyMap = new ConcurrentHashMap<>();//id与request的绑定
-
-    public static volatile ConcurrentMap<String,CountDownLatch> countDownLatchMap = new ConcurrentHashMap<>();//id与门闩的绑定
-
-    public static volatile Map<String, HttpResponseBody> httpResponseBodyMap = new ConcurrentHashMap<>();//id与response的绑定
-
-    public static volatile Map<String,ConcurrentLinkedQueue<String>> channelsStringMap = new ConcurrentHashMap<>();//储存可以复用的通道id
+    /**
+     * id与request的绑定
+     */
+    public static volatile Map<String, HttpRequestBody> httpRequestBodyMap = new ConcurrentHashMap<>();
+    /**
+     * id与门闩的绑定
+     */
+    public static volatile ConcurrentMap<String,CountDownLatch> countDownLatchMap = new ConcurrentHashMap<>();
+    /**
+     * id与response的绑定
+     */
+    public static volatile Map<String, HttpResponseBody> httpResponseBodyMap = new ConcurrentHashMap<>();
+    /**
+     * 储存可以复用的通道id
+     */
+    public static volatile Map<String,ConcurrentLinkedQueue<String>> channelsStringMap = new ConcurrentHashMap<>();
 
     public static volatile Map<String,Channel> notCloseChannel = new ConcurrentHashMap<>();
 
     public static volatile Map<String, ByteBuf> stringByteBufMap = new ConcurrentHashMap<>();
 
-    public static volatile Map<String,Channel> channelMap = new ConcurrentHashMap<>();//可以被重新使用的通道
+    /**
+     * 可以被重新使用的通道
+     */
+    public static volatile Map<String,Channel> channelMap = new ConcurrentHashMap<>();
 
-    //public static volatile Map<String,HttpRequestBody> stringHttpRequestBodyMap = new ConcurrentHashMap<>();
-
+    /**
+     * 超时通道记录
+     */
     public static volatile Map<String, ChannelTimeoutEntry> idChannelTimeoutEntryMap = new ConcurrentHashMap<>();
 
-    public static DelayQueue<ChannelTimeoutEntry> delayQueue = new DelayQueue<>();//延时队列
+    /**
+     * 延时队列
+     */
+    public static DelayQueue<ChannelTimeoutEntry> delayQueue = new DelayQueue<>();
 
-    public static ExecutorService executorService = Executors.newSingleThreadExecutor();//延时队列处理线程池
+    /**
+     * 延时队列处理线程池
+     */
+    public static ExecutorService executorService = Executors.newSingleThreadExecutor();
+    /**
+     * 超时队列处理线程
+     */
+    public static ExecutorService closeExecutorService = Executors.newCachedThreadPool();
 
-    public static volatile Semaphore semaphore = new Semaphore(200);//处理数量限制器
+    /**
+     * 处理数量限制器
+     */
+    public static volatile Semaphore semaphore = new Semaphore(200);
 
     public static volatile Map<String,String> idStreamIdMap = new ConcurrentHashMap<>();
 
@@ -48,21 +73,21 @@ public class WsChannelHttpRequestBodyBind {
 
     static {
         executorService.submit(()->{
-            while (true){
+            while (true) {
                 ChannelTimeoutEntry channelTimeoutEntry = delayQueue.take();
                 channelTimeoutEntry.setTimeout(true);
                 //log.info("{}开始重连，{}",channelTimeoutEntry.getId(),channelTimeoutEntry.getHttpRequestBody().getUrl());
-                if(idChannelTimeoutEntryMap.get(channelTimeoutEntry.getId()) != null) {
-                    new Thread(() -> {
+                if (idChannelTimeoutEntryMap.get(channelTimeoutEntry.getId()) != null) {
+                    closeExecutorService.submit(() -> {
                         HttpRequestBody httpRequestBody = channelTimeoutEntry.getHttpRequestBody();
                         Channel channel = channelTimeoutEntry.getChannel();
                         log.info("通道是否打开：{}，通道是否活动：{}，通道是否注册：{}", channel.isOpen(), channel.isActive(), channel.isRegistered());
                         WsChannelHttpRequestBodyBind.removeChannelAndHttpRequestBodyBind(channelTimeoutEntry.getId());
-                        WsChannelHttpRequestBodyBind.removeResumableChannel(httpRequestBody,channelTimeoutEntry.getChannel());
-                        WsChannelHttpRequestBodyBind.reconnectLink(httpRequestBody,channelTimeoutEntry.getId(),channelTimeoutEntry.getChannel());
+                        WsChannelHttpRequestBodyBind.removeResumableChannel(httpRequestBody, channelTimeoutEntry.getChannel());
+                        WsChannelHttpRequestBodyBind.reconnectLink(httpRequestBody, channelTimeoutEntry.getId(), channelTimeoutEntry.getChannel());
                         channel.close();
                         log.info("{}超时关闭{}", channelTimeoutEntry.getId(), httpRequestBody.getUrl());
-                    }).start();
+                    });
                 }
             }
         });

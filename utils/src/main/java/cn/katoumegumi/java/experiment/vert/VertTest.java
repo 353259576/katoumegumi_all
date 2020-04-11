@@ -1,25 +1,13 @@
 package cn.katoumegumi.java.experiment.vert;
 
-import com.alibaba.fastjson.JSON;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.vertx.core.*;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.*;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.client.HttpRequest;
-import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.WebClientOptions;
 
 public class VertTest {
 
 
     public static void main(String[] args) {
-        VertxOptions vertxOptions = new VertxOptions();
+        /*VertxOptions vertxOptions = new VertxOptions();
         vertxOptions.setWorkerPoolSize(50);
-        Vertx vertx = Vertx.vertx(vertxOptions);
+        Vertx vertx = Vertx.vertx(vertxOptions);*/
         /*WebClient webClient = WebClient.create(vertx);
         HttpRequest<Buffer> httpRequest = webClient.get(443,"www.baidu.com","/");
         httpRequest.method(HttpMethod.GET);
@@ -44,7 +32,7 @@ public class VertTest {
         webClient.close();*/
 
         //HttpServerOptions httpServerOptions = new HttpServerOptions();
-        HttpServer httpServer = vertx.createHttpServer();
+        /*HttpServer httpServer = vertx.createHttpServer();
         Router router = Router.router(vertx);
         router.route("/").handler(new Handler<RoutingContext>() {
             @Override
@@ -56,7 +44,7 @@ public class VertTest {
                 httpServerResponse.end();
             }
         });
-        httpServer.requestHandler(router).listen(1234);
+        httpServer.requestHandler(router).listen(1234);*/
 
     }
 

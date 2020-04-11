@@ -11,7 +11,7 @@
 
     <artifactId>server_example</artifactId>
 
-    <properties>
+    <!--<properties>
         <springboot.version>2.1.6.RELEASE</springboot.version>
         <lombok.version>1.18.2</lombok.version>
         <spring-data-releasetrain.version>Moore-SR6</spring-data-releasetrain.version>
@@ -19,7 +19,7 @@
         <fastjson.version>1.2.59</fastjson.version>
         <hibernate.version>5.4.4.Final</hibernate.version>
         <dubbo.version>2.7.4.1</dubbo.version>
-    </properties>
+    </properties>-->
 
 
 
@@ -229,14 +229,14 @@
 
 
 
-        <!--<dependency>
+        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
             <version>2.1.1</version>
         </dependency>
 
 
-        <dependency>
+        <!--<dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-netty4</artifactId>
             <version>4.4.1.Final</version>
@@ -276,17 +276,14 @@
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-spring</artifactId>
             <version>4.4.1.Final</version>
-        </dependency>-->
+        </dependency>
 
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
             <version>4.2.0</version>
         </dependency>
-
-
-
-    </dependencies>
+-->    </dependencies>
 
 
 </project>

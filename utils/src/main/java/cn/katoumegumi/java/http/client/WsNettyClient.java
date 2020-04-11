@@ -115,8 +115,8 @@ public class WsNettyClient {
         AtomicInteger errorNum = new AtomicInteger(0);
         CountDownLatch countDownLatch = new CountDownLatch(10000);
         Semaphore semaphore = new Semaphore(200);
-        ExecutorService executorService = Executors.newFixedThreadPool(200);
-        for (int i = 0; i < 10000; i++) {
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        for (int i = 0; i < 1; i++) {
             try {
                 semaphore.acquire();
             }catch (InterruptedException e){
@@ -128,7 +128,7 @@ public class WsNettyClient {
             String str = strs[k];
             //System.out.println(str);
             HttpRequestBody httpRequestBody = HttpRequestBody.createHttpRequestBody();
-            httpRequestBody.setUrl(str)
+            httpRequestBody.setUrl("https://www.ustc.edu.cn/")
                     .setMethod("GET")
                     .setGZIP(true)
                     .setUseChunked(true);

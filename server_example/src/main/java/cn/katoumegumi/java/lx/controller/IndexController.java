@@ -232,7 +232,7 @@ public class IndexController implements IndexService {
         String countStr = sqlModelUtils1.searchListBaseCountSQLProcessor();
 
         ThreadPoolExecutor threadPoolExecutor =  new ThreadPoolExecutor(4,8,200, TimeUnit.SECONDS,new LinkedBlockingQueue<>());
-        CountDownLatch countDownLatch = new CountDownLatch(1);
+        CountDownLatch countDownLatch = new CountDownLatch(2);
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 2; i++){
             threadPoolExecutor.execute(()->{
@@ -244,6 +244,8 @@ public class IndexController implements IndexService {
                 sqlModelUtils2.getValueMap();
                 String str1 = sqlModelUtils2.searchListBaseSQLProcessor();
                 String countStr1 = sqlModelUtils2.searchListBaseCountSQLProcessor();
+                String insertSql = sqlModelUtils2.insertSql(100);
+                System.out.println(insertSql);
                 System.out.println(str1);
                 System.out.println(countStr1);
                 countDownLatch.countDown();
@@ -330,7 +332,7 @@ public class IndexController implements IndexService {
 
 
         Vertx vertx = Vertx.vertx();
-        SQLClient client = JDBCClient.createNonShared(vertx, jsonObject);
+        SQLClient client = JDBCClient.create(vertx, jsonObject);
         long timeStart = System.currentTimeMillis();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         for(int i = 0; i < 1; i++){

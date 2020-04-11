@@ -129,7 +129,6 @@ public class SQLModelUtils {
     }
 
 
-
     /**
      * 生成whereSql语句
      *
@@ -819,6 +818,67 @@ public class SQLModelUtils {
 
         }
     }
+
+    public String insertSql(Integer size) {
+        return insertSql(size, mainClass);
+    }
+
+
+    public String insertSql(Integer size,Class<?> tClass){
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(tClass);
+        List<FieldColumnRelation> list = fieldColumnRelationMapper.getFieldColumnRelations();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("insert info ")
+                .append(fieldColumnRelationMapper.getTableName())
+                .append("(");
+
+        for (FieldColumnRelation fieldColumnRelation : list) {
+            stringBuilder.append("`");
+            stringBuilder.append(fieldColumnRelation.getColumnName());
+            stringBuilder.append("`");
+        }
+        stringBuilder.append(")");
+        stringBuilder.append(" values");
+        for(int k = 0; k < size; k++){
+            stringBuilder.append("(");
+            stringBuilder.append("?");
+            for(int i = 1; i < list.size(); i++){
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(")");
+        }
+
+        return stringBuilder.toString();
+    }
+
+    public List insertValueList(List list){
+        List newList = new ArrayList();
+        for (Object o:list) {
+            newList.addAll(insertValue(o));
+        }
+        return newList;
+    }
+
+    public List insertValue(Object o){
+        if(!o.getClass().equals(mainClass)){
+            throw new IllegalStateException("对象类型不正确，需要:"+mainClass.getName());
+        }
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
+        List<FieldColumnRelation> list = fieldColumnRelationMapper.getFieldColumnRelations();
+        List valueList = new ArrayList();
+        try {
+            for (FieldColumnRelation fieldColumnRelation:list){
+                Object value = fieldColumnRelation.getField().get(o);
+                valueList.add(value);
+            }
+        }catch (IllegalAccessException e){
+            e.printStackTrace();
+        }
+        return valueList;
+    }
+
+
+
 
 
         /**
