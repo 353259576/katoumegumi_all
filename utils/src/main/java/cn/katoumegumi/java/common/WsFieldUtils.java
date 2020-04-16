@@ -14,65 +14,65 @@ public class WsFieldUtils {
     private static final String METHOD_NAME_IS = "is";
 
 
-    public static Field getFieldForObject(String name,Object object){
+    public static Field getFieldForObject(String name, Object object) {
         Class clazz = object.getClass();
-        return getFieldForClass(name,clazz);
+        return getFieldForClass(name, clazz);
     }
 
 
-    public static Field getFieldForClass(String name,Class clazz){
+    public static Field getFieldForClass(String name, Class clazz) {
         Field field = null;
 
-            for(;!(clazz == Object.class || clazz == null);clazz = clazz.getSuperclass()){
-                try {
-                    field = clazz.getDeclaredField(name);
-                    if(field != null){
-                        break;
-                    }
-                }catch (Exception e){
-                    //e.printStackTrace();
+        for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
+            try {
+                field = clazz.getDeclaredField(name);
+                if (field != null) {
+                    break;
                 }
+            } catch (Exception e) {
+                //e.printStackTrace();
             }
+        }
 
         return field;
     }
 
-    public static boolean setFieldValueForName(Field field,Object object,Object value){
+    public static boolean setFieldValueForName(Field field, Object object, Object value) {
         field.setAccessible(true);
         try {
-            field.set(object,value);
-        }catch (Exception e){
+            field.set(object, value);
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
-        }finally {
+        } finally {
             field.setAccessible(false);
         }
         return true;
     }
 
-    public static Object getFieldValueForName(Field field,Object object){
+    public static Object getFieldValueForName(Field field, Object object) {
         Object value = null;
         field.setAccessible(true);
         try {
             value = field.get(object);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             field.setAccessible(false);
         }
         return value;
     }
 
-    public static Field[] getFieldAll(Class clazz){
+    public static Field[] getFieldAll(Class clazz) {
         Set<Field> fieldSet = new HashSet<>();
         try {
             Field fields[];
             fields = clazz.getFields();
-            for(int i = 0; i < fields.length; i++){
+            for (int i = 0; i < fields.length; i++) {
                 fieldSet.add(fields[i]);
             }
             fields = clazz.getDeclaredFields();
-            for(int i = 0; i < fields.length; i++){
+            for (int i = 0; i < fields.length; i++) {
                 fieldSet.add(fields[i]);
             }
             fieldSet = fieldSet.stream().filter(field -> (!Modifier.isStatic(field.getModifiers()))).collect(Collectors.toSet());
@@ -85,31 +85,31 @@ public class WsFieldUtils {
                 }
 
             }*/
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        if(fieldSet.isEmpty()){
+        if (fieldSet.isEmpty()) {
             return null;
-        }else {
+        } else {
             return fieldSet.toArray(new Field[fieldSet.size()]);
         }
     }
 
 
-    public static Method[] getObjectMethodByName(String methodName,Class clazz){
+    public static Method[] getObjectMethodByName(String methodName, Class clazz) {
         Method methods[] = null;
         Set<Method> methodSet = new HashSet<>();
         methods = clazz.getDeclaredMethods();
-        for(int i = 0; i < methods.length; i++){
+        for (int i = 0; i < methods.length; i++) {
             methodSet.add(methods[i]);
         }
         methods = clazz.getMethods();
-        for(int i = 0; i < methods.length; i++){
+        for (int i = 0; i < methods.length; i++) {
             methodSet.add(methods[i]);
         }
         List<Method> methodList = new ArrayList<>();
         methodSet.parallelStream().forEach(method -> {
-            if(method.getName().equals(methodName)){
+            if (method.getName().equals(methodName)) {
                 methodList.add(method);
             }
         });
@@ -117,7 +117,7 @@ public class WsFieldUtils {
 
     }
 
-    public static boolean classCompare(Class child,Class parent) {
+    public static boolean classCompare(Class child, Class parent) {
         if (parent == null || child == null) {
             return false;
         }
@@ -172,10 +172,10 @@ public class WsFieldUtils {
         try {
             Method method = supplierFunc.getClass().getDeclaredMethod("writeReplace");
             method.setAccessible(true);
-            SerializedLambda serializedLambda = (SerializedLambda)method.invoke(supplierFunc);
+            SerializedLambda serializedLambda = (SerializedLambda) method.invoke(supplierFunc);
             String name = serializedLambda.getImplMethodName();
             return methodToFieldName(name);
-        }catch (ReflectiveOperationException e){
+        } catch (ReflectiveOperationException e) {
             e.printStackTrace();
             return null;
         }
@@ -183,32 +183,32 @@ public class WsFieldUtils {
     }
 
 
-    public static String methodToFieldName(String methodName){
-        if(methodName.startsWith(METHOD_NAME_GET)){
+    public static String methodToFieldName(String methodName) {
+        if (methodName.startsWith(METHOD_NAME_GET)) {
             return WsStringUtils.firstCharToLowerCase(methodName.substring(3));
-        }else if(methodName.startsWith(METHOD_NAME_IS)){
+        } else if (methodName.startsWith(METHOD_NAME_IS)) {
             return WsStringUtils.firstCharToLowerCase(methodName.substring(2));
-        }else {
+        } else {
             return methodName;
         }
     }
 
 
-    public static <T> Field getFieldByName(Class<T> tClass,String fieldName){
+    public static <T> Field getFieldByName(Class<T> tClass, String fieldName) {
 
         try {
 
-            List<String> stringList = WsStringUtils.split(fieldName,'.');
+            List<String> stringList = WsStringUtils.split(fieldName, '.');
             Iterator<String> iterator = stringList.iterator();
             String nowName;
             Class<?> nowC = tClass;
             Field nowField = null;
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 nowName = iterator.next();
-                nowField= nowC.getDeclaredField(nowName);
-                if(nowField == null){
+                nowField = nowC.getDeclaredField(nowName);
+                if (nowField == null) {
                     nowField = tClass.getField(nowName);
-                    if(nowField == null){
+                    if (nowField == null) {
                         return null;
                     }
                 }
@@ -216,7 +216,7 @@ public class WsFieldUtils {
             }
             return nowField;
 
-        }catch (NoSuchFieldException e){
+        } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
         return null;
@@ -224,11 +224,10 @@ public class WsFieldUtils {
     }
 
 
-
-    public static Field getFieldByType(Type type,Class clazz){
+    public static Field getFieldByType(Type type, Class clazz) {
         Field[] fields = getFieldAll(clazz);
-        for(Field field:fields){
-            if(field.getType().equals(type)){
+        for (Field field : fields) {
+            if (field.getType().equals(type)) {
                 return field;
             }
         }
@@ -236,20 +235,26 @@ public class WsFieldUtils {
     }
 
 
-    public static <T> Class<?>  getClassListType(Field field){
+    public static <T> Class<?> getClassListType(Field field) {
         Class<?> tClass = field.getType();
-        if(tClass.isArray() || WsFieldUtils.classCompare(tClass,Collection.class)){
+        if (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class)) {
             String listClassName = field.getGenericType().getTypeName();
-            String className = listClassName.substring(listClassName.indexOf("<") + 1,listClassName.lastIndexOf(">"));
+            String className = listClassName.substring(listClassName.indexOf("<") + 1, listClassName.lastIndexOf(">"));
             try {
                 return Class.forName(className);
-            }catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 return null;
             }
-        }else {
+        } else {
             return tClass;
         }
+
+    }
+
+    public static boolean isArrayType(Field field) {
+        Class<?> tClass = field.getType();
+        return (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class));
 
     }
 

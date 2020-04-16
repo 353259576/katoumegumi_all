@@ -21,7 +21,7 @@ public class TestWebFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
-        log.info("当前请求连接为:{}",request.getURI().getPath());
+        log.info("当前请求连接为:{}", request.getURI().getPath());
         log.info("当前url带入参数为:{}", JSON.toJSONString(request.getQueryParams()));
         Flux<DataBuffer> flux = request.getBody();
         flux.subscribe(dataBuffer -> {

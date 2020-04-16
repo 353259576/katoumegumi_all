@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
  * @author ws
  */
 @Service
-public class IndexServiceImpl extends AbstractJpaService<Long, User,UserJpaDao> implements UserService {
+public class IndexServiceImpl extends AbstractJpaService<Long, User, UserJpaDao> implements UserService {
 
     @Autowired
     private UserJpaDao userJpaDao;

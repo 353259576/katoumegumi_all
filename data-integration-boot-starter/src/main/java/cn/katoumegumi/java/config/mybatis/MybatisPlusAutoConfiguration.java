@@ -55,7 +55,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandi
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -79,7 +82,6 @@ import java.util.stream.Stream;
  * otherwise this auto-configuration will attempt to register mappers based on
  * the interface definitions in or under the root auto-configuration package.
  * </p>
- *
  *
  * @author Eddú Meléndez
  * @author Josh Long
@@ -286,9 +288,9 @@ public class MybatisPlusAutoConfiguration implements InitializingBean {
             builder.addPropertyValue("basePackage", StringUtils.collectionToCommaDelimitedString(packages));
             BeanWrapper beanWrapper = new BeanWrapperImpl(MapperScannerConfigurer.class);
             Stream.of(beanWrapper.getPropertyDescriptors())
-                // Need to mybatis-spring 2.0.2+
-                .filter(x -> "lazyInitialization".equals(x.getName())).findAny()
-                .ifPresent(x -> builder.addPropertyValue("lazyInitialization", "${mybatis.lazy-initialization:false}"));
+                    // Need to mybatis-spring 2.0.2+
+                    .filter(x -> "lazyInitialization".equals(x.getName())).findAny()
+                    .ifPresent(x -> builder.addPropertyValue("lazyInitialization", "${mybatis.lazy-initialization:false}"));
             registry.registerBeanDefinition(MapperScannerConfigurer.class.getName(), builder.getBeanDefinition());
         }
 
@@ -310,7 +312,7 @@ public class MybatisPlusAutoConfiguration implements InitializingBean {
         @Override
         public void afterPropertiesSet() {
             logger.debug(
-                "Not found configuration for registering mapper bean using @MapperScan, MapperFactoryBean and MapperScannerConfigurer.");
+                    "Not found configuration for registering mapper bean using @MapperScan, MapperFactoryBean and MapperScannerConfigurer.");
         }
     }
 }

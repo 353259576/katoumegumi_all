@@ -4,12 +4,12 @@ import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
@@ -21,27 +21,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author ws
  */
-@Slf4j
 public class SQLModelUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(SQLModelUtils.class);
 
     /**
      * 缓存实体对应的对象属性与列名的关联
      */
     public static Map<Class<?>, FieldColumnRelationMapper> mapperMap = new ConcurrentHashMap<>();
-
+    public volatile boolean fieldNameChange = true;
     private Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
-
     private Map<Integer, Object> valueMap = new TreeMap<>();
-
     private AtomicInteger atomicInteger = new AtomicInteger(1);
-
     private Class<?> mainClass;
-
     private String searchSql;
-
     private MySearchList mySearchList;
 
-    public SQLModelUtils(MySearchList mySearchList){
+
+    public SQLModelUtils(MySearchList mySearchList) {
         this.mySearchList = mySearchList;
     }
 
@@ -54,7 +51,7 @@ public class SQLModelUtils {
     public String searchListBaseSQLProcessor() {
         StringBuilder selectSql = new StringBuilder();
         FieldColumnRelationMapper fieldColumnRelationMapper;
-        if(WsStringUtils.isBlank(searchSql)) {
+        if (WsStringUtils.isBlank(searchSql)) {
             mainClass = mySearchList.getMainClass();
             selectSql.append(modelToSqlSelect(mySearchList.getMainClass()));
             List<TableRelation> list = mySearchList.getJoins();
@@ -62,7 +59,7 @@ public class SQLModelUtils {
             if (fieldColumnRelationMapper.getMap() == null) {
                 fieldColumnRelationMapper.setMap(localMapperMap);
             } else {
-                localMapperMap= fieldColumnRelationMapper.getMap();
+                localMapperMap = fieldColumnRelationMapper.getMap();
             }
             String baseTableName = fieldColumnRelationMapper.getNickName();
             for (TableRelation tableRelation : list) {
@@ -87,7 +84,7 @@ public class SQLModelUtils {
 
             //缓存sql查询语句
             searchSql = selectSql.toString();
-        }else {
+        } else {
             fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
             selectSql.append(searchSql);
         }
@@ -102,8 +99,8 @@ public class SQLModelUtils {
             selectSql.append(" order by ")
                     .append(WsStringUtils.jointListString(list1, ","));
         }
-        if(mySearchList.getPageVO() != null){
-            return mysqlPaging(mySearchList.getPageVO(),searchSql);
+        if (mySearchList.getPageVO() != null) {
+            return mysqlPaging(mySearchList.getPageVO(), searchSql);
         }
 
         return selectSql.toString();
@@ -111,8 +108,8 @@ public class SQLModelUtils {
     }
 
 
-    public String searchListBaseCountSQLProcessor(){
-        if(searchSql == null){
+    public String searchListBaseCountSQLProcessor() {
+        if (searchSql == null) {
             searchListBaseSQLProcessor();
         }
         StringBuilder stringBuilder = new StringBuilder("select count(*) from (");
@@ -121,11 +118,11 @@ public class SQLModelUtils {
     }
 
 
-    public String mysqlPaging(Page page, String selectSql){
-        if(page.getCurrent() == 0L){
+    public String mysqlPaging(Page page, String selectSql) {
+        if (page.getCurrent() == 0L) {
             page.setCurrent(1);
         }
-        return selectSql + " limit " + (page.getCurrent() - 1)*page.getSize()+","+page.getSize();
+        return selectSql + " limit " + (page.getCurrent() - 1) * page.getSize() + "," + page.getSize();
     }
 
 
@@ -147,7 +144,7 @@ public class SQLModelUtils {
             stringBuffer.append('`');
             StringBuilder fieldPrefix = new StringBuilder();
             fieldPrefix.append(prefix);
-            String[] strs = WsStringUtils.splitArray(mySearch.getFieldName(),'.');
+            String[] strs = WsStringUtils.splitArray(mySearch.getFieldName(), '.');
             int i = 0;
             for (; i < strs.length - 1; i++) {
                 fieldPrefix.append('.');
@@ -285,17 +282,23 @@ public class SQLModelUtils {
                 tableColumn.append(mySearch.getValue());
                 break;
             case EQP:
-                tableColumn.append(" = ").append(mySearch.getValue());break;
+                tableColumn.append(" = ").append(mySearch.getValue());
+                break;
             case NEP:
-                tableColumn.append(" != ").append(mySearch.getValue());break;
+                tableColumn.append(" != ").append(mySearch.getValue());
+                break;
             case GTP:
-                tableColumn.append(" > ").append(mySearch.getValue());break;
+                tableColumn.append(" > ").append(mySearch.getValue());
+                break;
             case LTP:
-                tableColumn.append(" < ").append(mySearch.getValue());break;
+                tableColumn.append(" < ").append(mySearch.getValue());
+                break;
             case GTEP:
-                tableColumn.append(" >= ").append(mySearch.getValue());break;
+                tableColumn.append(" >= ").append(mySearch.getValue());
+                break;
             case LTEP:
-                tableColumn.append(" <= ").append(mySearch.getValue());break;
+                tableColumn.append(" <= ").append(mySearch.getValue());
+                break;
             default:
                 throw new RuntimeException("未知的方式");
         }
@@ -414,11 +417,11 @@ public class SQLModelUtils {
         String lastTableNickName;
         if (!fieldColumnRelationMapper.getFieldJoinClasses().isEmpty()) {
             for (FieldJoinClass fieldJoinClass : fieldColumnRelationMapper.getFieldJoinClasses()) {
-                if(WsStringUtils.isBlank(fieldJoinClass.getJoinColumn())){
+                if (WsStringUtils.isBlank(fieldJoinClass.getJoinColumn())) {
                     Iterator<TableRelation> iterator = mySearchList.getJoins().iterator();
-                    while (iterator.hasNext()){
+                    while (iterator.hasNext()) {
                         TableRelation tableRelation = iterator.next();
-                        if(fieldJoinClass.getJoinClass().equals(tableRelation.getJoinTableClass())){
+                        if (fieldJoinClass.getJoinClass().equals(tableRelation.getJoinTableClass())) {
                             FieldJoinClass oldFieldJoinClass = fieldJoinClass;
                             fieldJoinClass = new FieldJoinClass();
                             fieldJoinClass.setJoinType(oldFieldJoinClass.getJoinType());
@@ -436,7 +439,7 @@ public class SQLModelUtils {
 
                     }
                 }
-                if(WsStringUtils.isNotBlank(fieldJoinClass.getJoinColumn())){
+                if (WsStringUtils.isNotBlank(fieldJoinClass.getJoinColumn())) {
                     lastTableNickName = tableNickName + '.' + fieldJoinClass.getNickName();
                     FieldColumnRelationMapper mapper = mapperMap.get(fieldJoinClass.getJoinClass());
                     localMapperMap.put(lastTableNickName, mapper);
@@ -463,17 +466,19 @@ public class SQLModelUtils {
         if (annotation != null) {
             return hibernateAnalysisClassRelation(clazz);
         }
-        annotation = clazz.getAnnotation(TableName.class);
-        if (annotation != null) {
-            return myatisPlusAnalysisClassRelation(clazz);
-        }
-        return null;
+        //annotation = clazz.getAnnotation(TableName.class);
+        return mybatisPlusAnalysisClassRelation(clazz);
     }
 
     public FieldColumnRelationMapper hibernateAnalysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
         Table table = clazz.getAnnotation(Table.class);
-        fieldColumnRelationMapper.setTableName(table.name());
+        if (WsStringUtils.isBlank(table.name())) {
+            fieldColumnRelationMapper.setTableName(getChangeColumnName(table.name()));
+        } else {
+            fieldColumnRelationMapper.setTableName(table.name());
+        }
+
         fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
@@ -485,13 +490,15 @@ public class SQLModelUtils {
                     isId = true;
                 }
                 Column column = field.getAnnotation(Column.class);
+
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
                 fieldColumnRelation.setFieldClass(field.getType());
                 fieldColumnRelation.setFieldName(field.getName());
-                field.setAccessible(true);
+                //field.setAccessible(true);
                 fieldColumnRelation.setField(field);
+                fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
                 if (column == null || WsStringUtils.isBlank(column.name())) {
-                    fieldColumnRelation.setColumnName(WsStringUtils.camel_case(field.getName()));
+                    fieldColumnRelation.setColumnName(getChangeColumnName(field.getName()));
                 } else {
                     fieldColumnRelation.setColumnName(column.name());
                 }
@@ -533,22 +540,22 @@ public class SQLModelUtils {
                     fieldJoinClass.setJoinClass(joinClass);
                     JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
                     fieldJoinClass.setArray(isArray);
-                    field.setAccessible(true);
+                    //field.setAccessible(true);
                     fieldJoinClass.setField(field);
                     if (joinColumn != null) {
                         String name = joinColumn.name();
-                        if(WsStringUtils.isBlank(name)){
+                        if (WsStringUtils.isBlank(name)) {
                             name = fieldColumnRelationMapper.getIdSet().get(0).getColumnName();
                         }
                         String referenced = joinColumn.referencedColumnName();
-                        if(WsStringUtils.isBlank(referenced)){
+                        if (WsStringUtils.isBlank(referenced)) {
                             referenced = mapper.getIdSet().get(0).getColumnName();
                         }
                         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-                        if(oneToMany == null){
+                        if (oneToMany == null) {
                             fieldJoinClass.setAnotherJoinColumn(referenced);
                             fieldJoinClass.setJoinColumn(name);
-                        }else {
+                        } else {
                             fieldJoinClass.setAnotherJoinColumn(name);
                             fieldJoinClass.setJoinColumn(referenced);
                         }
@@ -559,7 +566,7 @@ public class SQLModelUtils {
             }
         }
         fieldColumnRelationMapper.setClazz(clazz);
-        if(fieldColumnRelationMapper != null){
+        if (fieldColumnRelationMapper != null) {
             mapperMap.put(clazz, fieldColumnRelationMapper);
         }
 
@@ -567,34 +574,48 @@ public class SQLModelUtils {
     }
 
 
-    public FieldColumnRelationMapper myatisPlusAnalysisClassRelation(Class<?> clazz) {
+    public FieldColumnRelationMapper mybatisPlusAnalysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
         TableName table = clazz.getAnnotation(TableName.class);
-        fieldColumnRelationMapper.setTableName(table.value());
-        fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
+        if (table == null) {
+            fieldColumnRelationMapper.setTableName(getChangeColumnName(clazz.getSimpleName()));
+            fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
+        } else {
+            if (WsStringUtils.isBlank(table.value())) {
+                fieldColumnRelationMapper.setTableName(getChangeColumnName(clazz.getSimpleName()));
+                fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
+            } else {
+                fieldColumnRelationMapper.setTableName(table.value());
+                fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
+            }
+        }
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields) {
             if (WsBeanUtis.isBaseType(field.getType())) {
-                boolean isId = false;
                 TableId id = field.getAnnotation(TableId.class);
-                if (id != null) {
-                    isId = true;
-                }
-                TableField column = field.getAnnotation(TableField.class);
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
                 fieldColumnRelation.setFieldClass(field.getType());
                 fieldColumnRelation.setFieldName(field.getName());
-                if (column == null || WsStringUtils.isBlank(column.value())) {
-                    fieldColumnRelation.setColumnName(WsStringUtils.camel_case(field.getName()));
-                } else {
-                    fieldColumnRelation.setColumnName(column.value());
-                }
-                fieldColumnRelation.setId(isId);
-                if (isId) {
-                    fieldColumnRelationMapper.getIdSet().add(fieldColumnRelation);
-                } else {
+                fieldColumnRelation.setField(field);
+                fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
+                if (id == null) {
+                    TableField column = field.getAnnotation(TableField.class);
+                    if (column == null || WsStringUtils.isBlank(column.value())) {
+                        fieldColumnRelation.setColumnName(getChangeColumnName(field.getName()));
+                    } else {
+                        fieldColumnRelation.setColumnName(column.value());
+                    }
+                    fieldColumnRelation.setId(false);
                     fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
+                } else {
+                    if (WsStringUtils.isBlank(id.value())) {
+                        fieldColumnRelation.setColumnName(getChangeColumnName(getChangeColumnName(field.getName())));
+                    } else {
+                        fieldColumnRelation.setColumnName(id.value());
+                    }
+
+                    fieldColumnRelationMapper.getIdSet().add(fieldColumnRelation);
                 }
             } else {
                 boolean isArray = false;
@@ -625,14 +646,18 @@ public class SQLModelUtils {
                     fieldJoinClass.setNickName(field.getName());
                     fieldJoinClass.setJoinClass(joinClass);
                     fieldJoinClass.setArray(isArray);
+                    fieldJoinClass.setField(field);
                     fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
                 }
             }
         }
-        if(fieldColumnRelationMapper != null){
-            mapperMap.put(clazz, fieldColumnRelationMapper);
-        }
+        mapperMap.put(clazz, fieldColumnRelationMapper);
         return fieldColumnRelationMapper;
+    }
+
+
+    public String getChangeColumnName(String fieldName) {
+        return fieldNameChange ? WsStringUtils.camel_case(fieldName) : fieldName;
     }
 
     public Map<Integer, Object> getValueMap() {
@@ -642,20 +667,26 @@ public class SQLModelUtils {
 
     public List<Map> handleMap(List<Map> mapList) {
         List<Map> list = new ArrayList<>(mapList.size());
+
+        Map<String, List<String>> stringListMap = new HashMap<>();
+
         for (Map map : mapList) {
             Map<String, Map> stringMapMap = new HashMap<>();
             Set<Map.Entry> entries = map.entrySet();
             for (Map.Entry entry : entries) {
                 String keyString = (String) entry.getKey();
-                List<String> keyPrefixs = WsStringUtils.split(keyString,'.');
+                List<String> keyPrefixs = stringListMap.get(keyString);
+                if (keyPrefixs == null) {
+                    keyPrefixs = WsStringUtils.split(keyString, '.');
+                    stringListMap.put(keyString, keyPrefixs);
+                }
+
                 Map valueMap = stringMapMap;
                 Map prevMap = valueMap;
                 String kp;
                 int length = keyPrefixs.size();
                 for (int i = 1; i < length - 1; i++) {
                     kp = keyPrefixs.get(i);
-                    //keyPrefixList.add(kp);
-                    //String nowKeyPrefix = WsStringUtils.jointListString(keyPrefixList, ".");
                     valueMap = (Map) prevMap.get(kp);
                     if (valueMap == null) {
                         valueMap = new HashMap();
@@ -672,16 +703,46 @@ public class SQLModelUtils {
         return list;
     }
 
-
     public List<Map> mergeMapList(List<Map> maps) {
+        return mergeMapList(maps, mainClass);
+    }
+
+    public List<Map> mergeMapList(List<Map> maps, Class<?> tClass) {
+        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(tClass);
+
+        List<FieldJoinClass> fieldJoinClassList = fieldColumnRelationMapper.getFieldJoinClasses();
+
+        if (WsListUtils.isEmpty(fieldJoinClassList)) {
+            return maps;
+        }
+
+        Map<String, Class<?>> objectMap = new HashMap<>();
+        Set<String> objectTypeSet = new HashSet<>();
+        for (FieldJoinClass fieldJoinClass : fieldJoinClassList) {
+            if (WsFieldUtils.isArrayType(fieldJoinClass.getField())) {
+                objectMap.put(fieldJoinClass.getNickName(), WsFieldUtils.getClassListType(fieldJoinClass.getField()));
+            } else {
+                objectTypeSet.add(fieldJoinClass.getNickName());
+                objectMap.put(fieldJoinClass.getNickName(), fieldJoinClass.getField().getType());
+            }
+        }
+        List<String> idSet = null;
+        List<FieldColumnRelation> idFieldColumnRelationList = fieldColumnRelationMapper.getIdSet();
+        if (WsListUtils.isNotEmpty(idFieldColumnRelationList)) {
+            idSet = new LinkedList<>();
+            for (FieldColumnRelation fieldColumnRelation : idFieldColumnRelationList) {
+                idSet.add(fieldColumnRelation.getFieldName());
+            }
+        }
+
         HashMap<ResultMapIds, Map> set = new HashMap<>();
         Set<String> nameSet = new HashSet<>();
         Iterator<Map> iterator = maps.iterator();
         ResultMapIds resultMapIds;
-        Map m1,m2;
+        Map m1, m2;
         while (iterator.hasNext()) {
             m1 = iterator.next();
-            resultMapIds = new ResultMapIds(m1);
+            resultMapIds = new ResultMapIds(m1, idSet);
             m2 = set.get(resultMapIds);
             if (m2 == null) {
                 set.put(resultMapIds, m1);
@@ -705,12 +766,12 @@ public class SQLModelUtils {
         }
         set.clear();
         set = null;
-        if(nameSet.size() > 0){
-            for(Map map:maps){
-                for (String name:nameSet){
+        if (nameSet.size() > 0) {
+            for (Map map : maps) {
+                for (String name : nameSet) {
                     Object o = map.get(name);
-                    if(o instanceof List){
-                        List<Map> mapList = mergeMapList((List<Map>) o);
+                    if (o instanceof List) {
+                        List<Map> mapList = mergeMapList((List<Map>) o, objectMap.get(name));
                         if (mapList != null && mapList.size() != 0) {
                             map.put(name, mapList);
                         }
@@ -741,11 +802,14 @@ public class SQLModelUtils {
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mainClass);
         String prefix = fieldColumnRelationMapper.getNickName();
         List<T> newList = new ArrayList<>(list.size());
-        for(Map childMap:list){
+
+        for (Map childMap : list) {
             Object o = WsBeanUtis.createObject(mainClass);
-            newList.add((T)o);
-            loadingObject(o,childMap,fieldColumnRelationMapper,prefix);
+            newList.add((T) o);
+            loadingObject(o, childMap, fieldColumnRelationMapper, prefix);
         }
+
+
         return newList;
         /*List<T> newList = new ArrayList<>(list.size());
         for (Map childMap : list) {
@@ -810,7 +874,9 @@ public class SQLModelUtils {
             }
             try {
                 //assert field != null;
+                field.setAccessible(true);
                 field.set(parentObject, nowObject);
+                field.setAccessible(false);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -824,7 +890,7 @@ public class SQLModelUtils {
     }
 
 
-    public String insertSql(Integer size,Class<?> tClass){
+    public String insertSql(Integer size, Class<?> tClass) {
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(tClass);
         List<FieldColumnRelation> list = fieldColumnRelationMapper.getFieldColumnRelations();
         StringBuilder stringBuilder = new StringBuilder();
@@ -839,10 +905,10 @@ public class SQLModelUtils {
         }
         stringBuilder.append(")");
         stringBuilder.append(" values");
-        for(int k = 0; k < size; k++){
+        for (int k = 0; k < size; k++) {
             stringBuilder.append("(");
             stringBuilder.append("?");
-            for(int i = 1; i < list.size(); i++){
+            for (int i = 1; i < list.size(); i++) {
                 stringBuilder.append(",?");
             }
             stringBuilder.append(")");
@@ -851,39 +917,79 @@ public class SQLModelUtils {
         return stringBuilder.toString();
     }
 
-    public List insertValueList(List list){
+    public List insertValueList(List list) {
         List newList = new ArrayList();
-        for (Object o:list) {
+        for (Object o : list) {
             newList.addAll(insertValue(o));
         }
         return newList;
     }
 
-    public List insertValue(Object o){
-        if(!o.getClass().equals(mainClass)){
-            throw new IllegalStateException("对象类型不正确，需要:"+mainClass.getName());
+    public List insertValue(Object o) {
+        if (!o.getClass().equals(mainClass)) {
+            throw new IllegalStateException("对象类型不正确，需要:" + mainClass.getName());
         }
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
         List<FieldColumnRelation> list = fieldColumnRelationMapper.getFieldColumnRelations();
         List valueList = new ArrayList();
         try {
-            for (FieldColumnRelation fieldColumnRelation:list){
+            for (FieldColumnRelation fieldColumnRelation : list) {
                 Object value = fieldColumnRelation.getField().get(o);
                 valueList.add(value);
             }
-        }catch (IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
         return valueList;
     }
 
+    public <T> List<T> oneLoopMargeMap(List<Map> mapList) {
+        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mainClass);
+        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
+        List<FieldJoinClass> joinClasses = fieldColumnRelationMapper.getFieldJoinClasses();
+        Map<String, List<String>> cacheNameList = new HashMap<>();
+        List tList = new ArrayList();
+        for (Map map : mapList) {
+
+            Object o = WsBeanUtis.createObject(mainClass);
+            tList.add(o);
 
 
+            Map<String, Object> objectMap = new HashMap<>();
+            Map<Class<?>, Object> classObjectMap = new HashMap<>();
+            classObjectMap.put(mainClass, o);
+            objectMap.put(fieldColumnRelationMapper.getNickName(), o);
+
+            Set<Map.Entry> entrySet = map.entrySet();
+            for (Map.Entry entry : entrySet) {
+                String keyName = (String) entry.getKey();
+                List<String> keyNameList = cacheNameList.get(keyName);
+                if (keyNameList == null) {
+                    keyNameList = WsStringUtils.split(keyName, '.');
+                    cacheNameList.put(keyName, keyNameList);
+                }
+                Object nowObject = objectMap.get(keyNameList.get(0));
+                FieldColumnRelation fieldColumnRelation = fieldColumnRelationMapper.getFieldColumnRelationByField(keyNameList.get(keyNameList.size() - 1));
+                Field field = fieldColumnRelation.getField();
+                if (WsBeanUtis.isBaseType(field.getType())) {
+
+                }
+                try {
+                    field.setAccessible(true);
+                    field.set(nowObject, WsBeanUtis.objectToT(entry.getValue(), field.getType()));
+                    field.setAccessible(false);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return (List<T>) tList;
+    }
 
 
-        /**
-         * 速度过慢
-         */
+    /**
+     * 速度过慢
+     */
 
     /*public List<Map> handleMap(List<Map> mapList){
         List<Map> list = new ArrayList<>();
@@ -1159,9 +1265,9 @@ public static boolean mapEquals(Map m1,Map m2){
 
     }*/
 
-        /**
-         *废弃的sql数据转换
-         */
+    /**
+     *废弃的sql数据转换
+     */
     /*public  static <T> T loadingObject(Class<?> clazz,Map<String,Object> map){
         Map<String,Object> objectMap = new HashMap<>();
         FieldColumnRelationMapper mapper = analysisClassRelation(clazz);

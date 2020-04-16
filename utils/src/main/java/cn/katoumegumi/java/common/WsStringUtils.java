@@ -57,37 +57,34 @@ public class WsStringUtils {
         System.out.println(camelCase("d_d_f_s_d_fgd"));
     }
 
-    public static byte[] byteListToArray(List<Byte> bytes){
-        if(bytes==null||bytes.size()==0){
+    public static byte[] byteListToArray(List<Byte> bytes) {
+        if (bytes == null || bytes.size() == 0) {
             return null;
         }
         byte bys[] = new byte[bytes.size()];
-        for(int i = 0; i < bytes.size(); i++){
+        for (int i = 0; i < bytes.size(); i++) {
             bys[i] = bytes.get(i).byteValue();
         }
         return bys;
     }
 
 
-
-
-
-    public static <T> T[] mergeList(T[] list1,T[] list2){
-        if(list1==null||list2==null||list1.length==0||list2.length==0){
-            if(!(list1 == null || list1.length == 0)){
+    public static <T> T[] mergeList(T[] list1, T[] list2) {
+        if (list1 == null || list2 == null || list1.length == 0 || list2.length == 0) {
+            if (!(list1 == null || list1.length == 0)) {
                 return list1;
             }
-            if(!(list2 == null || list2.length == 0)){
+            if (!(list2 == null || list2.length == 0)) {
                 return list2;
             }
         }
-        T[] list = (T[])new Object[list1.length+list2.length];
+        T[] list = (T[]) new Object[list1.length + list2.length];
         int k = 0;
-        for(int i = 0; i < list1.length; i++){
+        for (int i = 0; i < list1.length; i++) {
             list[k] = list1[i];
             k++;
         }
-        for(int i = 0; i < list2.length; i++){
+        for (int i = 0; i < list2.length; i++) {
             list[k] = list2[i];
             k++;
         }
@@ -95,28 +92,24 @@ public class WsStringUtils {
     }
 
 
-    public static String jointListString(String strings[],String sign){
-        return jointListString(Arrays.asList(strings),sign);
+    public static String jointListString(String strings[], String sign) {
+        return jointListString(Arrays.asList(strings), sign);
     }
 
 
-
-
-
-
-    public static String jointListString(List<String> strings,String sign){
-        if(strings == null){
+    public static String jointListString(List<String> strings, String sign) {
+        if (strings == null) {
             return "";
         }
-        if(strings.size() == 0){
+        if (strings.size() == 0) {
             return "";
         }
         StringBuffer stringBuffer = new StringBuffer();
-        for(int i = 0; i < strings.size(); i++){
+        for (int i = 0; i < strings.size(); i++) {
             stringBuffer.append(strings.get(i));
             stringBuffer.append(sign);
         }
-        stringBuffer.delete(stringBuffer.length()- sign.length(),stringBuffer.length());
+        stringBuffer.delete(stringBuffer.length() - sign.length(), stringBuffer.length());
         return stringBuffer.toString();
     }
 
@@ -148,28 +141,28 @@ public class WsStringUtils {
     }
 
 
-    public static boolean isNumber(String str){
-        if(str==null){
+    public static boolean isNumber(String str) {
+        if (str == null) {
             return false;
         }
         char chars[] = str.toCharArray();
-        if(str.length()==0){
+        if (str.length() == 0) {
             return false;
         }
         boolean isHave = false;
         int i = 0;
-        if(chars[0]=='-'||chars[0]=='+'){
+        if (chars[0] == '-' || chars[0] == '+') {
             i++;
         }
-        for(; i < chars.length; i++){
-            if(chars[i]<48||chars[i]>58){
-                if(chars[i] == '.'){
-                    if(i==0||i==chars.length-1||isHave==true){
+        for (; i < chars.length; i++) {
+            if (chars[i] < 48 || chars[i] > 58) {
+                if (chars[i] == '.') {
+                    if (i == 0 || i == chars.length - 1 || isHave == true) {
                         return false;
-                    }else {
+                    } else {
                         isHave = true;
                     }
-                }else {
+                } else {
                     return false;
                 }
             }
@@ -178,22 +171,22 @@ public class WsStringUtils {
     }
 
 
-    public static boolean stringNotHaveTrim(String str){
-        if(str==null){
+    public static boolean stringNotHaveTrim(String str) {
+        if (str == null) {
             return false;
         }
         byte bytes[] = null;
         try {
             bytes = str.getBytes("utf-8");
-        }catch (Exception e){
+        } catch (Exception e) {
             bytes = str.getBytes();
         }
 
-        if(bytes.length==0){
+        if (bytes.length == 0) {
             return false;
         }
-        for(int i = 0; i < bytes.length; i++){
-            if(bytes[i]==TRIM){
+        for (int i = 0; i < bytes.length; i++) {
+            if (bytes[i] == TRIM) {
                 return false;
             }
         }
@@ -201,53 +194,52 @@ public class WsStringUtils {
 
     }
 
-    public static String stringTrim(String str){
-        if(str == null){
+    public static String stringTrim(String str) {
+        if (str == null) {
             return str;
         }
         byte bytes[] = str.getBytes();
-        if(bytes.length==0){
+        if (bytes.length == 0) {
             return null;
         }
         List list = new ArrayList();
-        for(int i = 0; i < bytes.length; i++){
-            if(bytes[i]!=TRIM){
+        for (int i = 0; i < bytes.length; i++) {
+            if (bytes[i] != TRIM) {
                 list.add(bytes[i]);
             }
         }
         bytes = new byte[list.size()];
-        for(int i = 0; i < list.size(); i++){
+        for (int i = 0; i < list.size(); i++) {
             bytes[i] = (byte) list.get(i);
         }
-        if(bytes.length==0){
+        if (bytes.length == 0) {
             return null;
-        }else {
+        } else {
             return new String(bytes);
         }
     }
 
 
-
-
     /**
      * unicode转码
+     *
      * @param dataStr
      * @return
      */
     public static String decodeUnicode(String dataStr) {
 
         StringBuffer buffer = new StringBuffer();
-        char unicodeChar[] = new char[]{'\\', 'u','U'};
+        char unicodeChar[] = new char[]{'\\', 'u', 'U'};
         char ch[] = dataStr.toCharArray();
         for (int i = 0; i < ch.length; i++) {
             if (ch[i] == unicodeChar[0]) {
                 if (i + 1 < ch.length) {
-                    if(ch[i+1] == unicodeChar[0]){
+                    if (ch[i + 1] == unicodeChar[0]) {
                         i++;
                     }
-                    if(i + 4 < ch.length){
+                    if (i + 4 < ch.length) {
                         i++;
-                        if (ch[i] == unicodeChar[1]||ch[i] == unicodeChar[2]) {
+                        if (ch[i] == unicodeChar[1] || ch[i] == unicodeChar[2]) {
                             //i++;
                             String str = "";
                             for (int j = 0; j < 4; j++) {
@@ -259,18 +251,18 @@ public class WsStringUtils {
                             buffer.append(letter);
                         }
                     }
-                }else {
+                } else {
                     buffer.append(ch[i]);
                 }
-            }else if(ch[i]=='%'){
-                if(i+3 > ch.length){
+            } else if (ch[i] == '%') {
+                if (i + 3 > ch.length) {
                     buffer.append(ch[i]);
                     //i++;
-                }else {
+                } else {
                     List<String> strings = new ArrayList<>();
                     String str = "";
                     StringBuffer stringBuffer = new StringBuffer();
-                    for(int j = 0; j < 2; j++){
+                    for (int j = 0; j < 2; j++) {
                         i++;
                         //str += ch[i];
                         stringBuffer.append(ch[i]);
@@ -279,10 +271,10 @@ public class WsStringUtils {
                     str = str.toUpperCase();
                     strings.add(str);
                     i++;
-                    while (i+2<ch.length&&ch[i]=='%'){
+                    while (i + 2 < ch.length && ch[i] == '%') {
                         //str = "";
                         stringBuffer = new StringBuffer();
-                        for(int j = 0; j < 2; j++){
+                        for (int j = 0; j < 2; j++) {
                             i++;
                             //str += ch[i];
                             stringBuffer.append(ch[i]);
@@ -294,18 +286,18 @@ public class WsStringUtils {
                     }
                     i--;
                     byte by[] = new byte[strings.size()];
-                    for(int j = 0; j < strings.size(); j++){
-                        by[j] = (byte)Integer.parseInt(strings.get(j),16);
+                    for (int j = 0; j < strings.size(); j++) {
+                        by[j] = (byte) Integer.parseInt(strings.get(j), 16);
                     }
                     try {
-                        buffer.append(new String(by,"utf-8"));
-                    }catch (Exception e){
+                        buffer.append(new String(by, "utf-8"));
+                    } catch (Exception e) {
                         e.printStackTrace();
                         buffer.append(new String(by));
                     }
 
                 }
-            }else {
+            } else {
                 buffer.append(ch[i]);
             }
         }
@@ -313,114 +305,97 @@ public class WsStringUtils {
     }
 
 
-
-
-
-
-
-
-
-
-
-    public static String anyToString(Object object){
-        if(object == null){
+    public static String anyToString(Object object) {
+        if (object == null) {
             return null;
         }
-        if(object.getClass().isPrimitive()){
+        if (object.getClass().isPrimitive()) {
             return String.valueOf(object);
-        }else if(object instanceof Number){
+        } else if (object instanceof Number) {
             return object.toString();
-        }else if (object instanceof String){
-            return (String)object;
-        }else if(object instanceof Character){
+        } else if (object instanceof String) {
+            return (String) object;
+        } else if (object instanceof Character) {
             return object.toString();
-        }else if(object instanceof Boolean){
+        } else if (object instanceof Boolean) {
             return object.toString();
-        }else if(object instanceof Date){
-            Date date = (Date)object;
-            return WsDateUtils.dateToString(date,WsDateUtils.LONGTIMESTRING);
-        }else if (object instanceof LocalDateTime){
+        } else if (object instanceof Date) {
+            Date date = (Date) object;
+            return WsDateUtils.dateToString(date, WsDateUtils.LONGTIMESTRING);
+        } else if (object instanceof LocalDateTime) {
             return WsDateUtils.objectDateFormatString(object);
-        }else if (object instanceof LocalDate){
+        } else if (object instanceof LocalDate) {
             return WsDateUtils.objectDateFormatString(object);
-        }else {
+        } else {
             return null;
         }
     }
 
 
-    public static String dateToDate(String date){
+    public static String dateToDate(String date) {
         char chars[] = date.toCharArray();
         List<String> strings = new ArrayList<>();
-        for(int i = 0; i < chars.length; i++){
+        for (int i = 0; i < chars.length; i++) {
             StringBuffer stringBuffer = new StringBuffer();
-            while (i<chars.length&&chars[i]>47&&chars[i]<58){
+            while (i < chars.length && chars[i] > 47 && chars[i] < 58) {
                 stringBuffer.append(chars[i]);
                 i++;
             }
-            if(stringBuffer.length()>0){
+            if (stringBuffer.length() > 0) {
                 strings.add(stringBuffer.toString());
             }
         }
-        if(strings.size()>5){
-            return strings.get(0)+"-"+strings.get(1)+"-"+strings.get(2)+" "+strings.get(3)+":"+strings.get(4)+":"+strings.get(5);
+        if (strings.size() > 5) {
+            return strings.get(0) + "-" + strings.get(1) + "-" + strings.get(2) + " " + strings.get(3) + ":" + strings.get(4) + ":" + strings.get(5);
         }
-        if(strings.size()>2){
-            return strings.get(0)+"-"+strings.get(1)+"-"+strings.get(2)+" 00:00:00";
+        if (strings.size() > 2) {
+            return strings.get(0) + "-" + strings.get(1) + "-" + strings.get(2) + " 00:00:00";
         }
         return null;
     }
 
-
-    public boolean isChinese(char c) {
-        if (c >= 19968 && c <= 40869) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static String hideString(String string){
-        if(isBlank(string)){
+    public static String hideString(String string) {
+        if (isBlank(string)) {
             return "**";
         }
-        if(string.length() == 1){
-            return string+"**"+string;
+        if (string.length() == 1) {
+            return string + "**" + string;
         }
-        return string.charAt(0)+"**"+string.charAt(string.length()-1);
+        return string.charAt(0) + "**" + string.charAt(string.length() - 1);
     }
 
-    public static String createRandomStr(){
-        String str = WsDateUtils.dateToString(new Date(),WsDateUtils.LONGTIMESTRINGCOMPACT);
-        Integer i = new Random().nextInt(90000)+10000;
+    public static String createRandomStr() {
+        String str = WsDateUtils.dateToString(new Date(), WsDateUtils.LONGTIMESTRINGCOMPACT);
+        Integer i = new Random().nextInt(90000) + 10000;
         return str + i;
     }
 
-    public static String createRandomStr(String type,Integer size){
-        String str = WsDateUtils.dateToString(new Date(),WsDateUtils.LONGTIMESTRINGCOMPACT);
-        Integer i = new Random().nextInt(size*1000*9)+100*size;
+    public static String createRandomStr(String type, Integer size) {
+        String str = WsDateUtils.dateToString(new Date(), WsDateUtils.LONGTIMESTRINGCOMPACT);
+        Integer i = new Random().nextInt(size * 1000 * 9) + 100 * size;
         return str + i;
     }
 
     /**
      * 驼峰法则
+     *
      * @param str
      * @return
      */
-    public static String camel_case(String str){
+    public static String camel_case(String str) {
         char g = '_';
         char chars[] = str.toCharArray();
         StringBuffer stringBuffer = new StringBuffer();
         int length = str.length();
         char c = chars[0];
 
-        if(c >= 'A' && c <= 'Z'){
+        if (c >= 'A' && c <= 'Z') {
             c += 32;
         }
         stringBuffer.append(c);
-        for(int i = 1; i < length; i++){
+        for (int i = 1; i < length; i++) {
             c = chars[i];
-            if(c >= 'A' && c <= 'Z'){
+            if (c >= 'A' && c <= 'Z') {
                 c += 32;
                 stringBuffer.append(g);
             }
@@ -432,11 +407,12 @@ public class WsStringUtils {
 
     /**
      * 驼峰法则
+     *
      * @param str
      * @return
      */
-    public static String camelCase(String str){
-        if(!str.contains("_")){
+    public static String camelCase(String str) {
+        if (!str.contains("_")) {
             return str;
         }
         char g = '_';
@@ -447,12 +423,12 @@ public class WsStringUtils {
         char c = chars[0];
         boolean nextToUp = false;
         stringBuffer.append(c);
-        for(int i = 1; i < length; i++){
+        for (int i = 1; i < length; i++) {
             c = chars[i];
-            if(c == g){
+            if (c == g) {
                 nextToUp = true;
-            }else {
-                if(nextToUp) {
+            } else {
+                if (nextToUp) {
                     c -= 32;
                     nextToUp = false;
                 }
@@ -462,48 +438,56 @@ public class WsStringUtils {
         return stringBuffer.toString();
     }
 
-
     /**
      * 首字母小写
+     *
      * @param str
      * @return
      */
-    public static String firstCharToLowerCase(String str){
-        if(WsStringUtils.isBlank(str)){
+    public static String firstCharToLowerCase(String str) {
+        if (WsStringUtils.isBlank(str)) {
             return null;
         }
         int length = str.length();
-        if(length == 1){
+        if (length == 1) {
             return str.toLowerCase();
         }
-        return str.substring(0,1).toLowerCase() + str.substring(1,length);
+        return str.substring(0, 1).toLowerCase() + str.substring(1, length);
     }
 
-    public static List<String> split(String str, char c){
+    public static List<String> split(String str, char c) {
         char[] cs = str.toCharArray();
         List<String> list = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < cs.length; i++){
-            if(cs[i] != c){
+        for (int i = 0; i < cs.length; i++) {
+            if (cs[i] != c) {
                 sb.append(cs[i]);
-            }else {
+            } else {
                 list.add(sb.toString());
                 sb = new StringBuilder();
             }
         }
-        if(sb.length() > 0){
+        if (sb.length() > 0) {
             list.add(sb.toString());
         }
         return list;
     }
 
-    public static String[] splitArray(String str, char c){
-       List<String> list =WsStringUtils.split(str,c);
-       if(list == null){
-           return null;
-       }else {
-           return list.toArray(new String[list.size()]);
-       }
+    public static String[] splitArray(String str, char c) {
+        List<String> list = WsStringUtils.split(str, c);
+        if (list == null) {
+            return null;
+        } else {
+            return list.toArray(new String[list.size()]);
+        }
+    }
+
+    public boolean isChinese(char c) {
+        if (c >= 19968 && c <= 40869) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 

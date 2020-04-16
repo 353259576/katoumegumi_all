@@ -2,32 +2,28 @@ package cn.katoumegumi.java.hibernate;
 
 import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsDateUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SqlOperator;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
 import java.util.*;
 
-@Slf4j
+
 public class JpaDataHandle {
 
 
-
-
-    public static <T> Specification<T> getSpecification(MySearchList mySearchList){
+    public static <T> Specification<T> getSpecification(MySearchList mySearchList) {
         Specification<T> specification = new Specification<T>() {
             @Override
             public Predicate toPredicate(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
-               Map<String,From> nameMap = new HashMap<>();
-                Predicate predicate =  analysisPredicate(root,criteriaQuery,criteriaBuilder,mySearchList,true,nameMap);
+                Map<String, From> nameMap = new HashMap<>();
+                Predicate predicate = analysisPredicate(root, criteriaQuery, criteriaBuilder, mySearchList, true, nameMap);
                 Path path = null;
                 List<Order> orders = new ArrayList<>();
-                for (MySearch mySearch:mySearchList.getOrderSearches()) {
+                for (MySearch mySearch : mySearchList.getOrderSearches()) {
 
                     /*String mySearchFieldName  = mySearch.getFieldName();
                     if(mySearchFieldName.contains(".")){
@@ -56,14 +52,14 @@ public class JpaDataHandle {
                     }else {
                         path = root.get(mySearch.getFieldName());
                     }*/
-                    path = getPath(root,nameMap,mySearch.getFieldName());
+                    path = getPath(root, nameMap, mySearch.getFieldName());
                     if ("asc".equals(mySearch.getValue()) || "ASC".equals(mySearch.getValue())) {
                         orders.add(criteriaBuilder.asc(path));
                     } else {
                         orders.add(criteriaBuilder.desc(path));
                     }
                 }
-                if(!orders.isEmpty()){
+                if (!orders.isEmpty()) {
                     criteriaQuery.orderBy(orders);
                 }
                 return predicate;
@@ -72,19 +68,19 @@ public class JpaDataHandle {
         return specification;
     }
 
-    public static Path getPath(Root root,Map<String,From> nameMap,String fieldName){
+    public static Path getPath(Root root, Map<String, From> nameMap, String fieldName) {
         From from = root;
-        List<String> strings = WsStringUtils.split(fieldName,'.');
+        List<String> strings = WsStringUtils.split(fieldName, '.');
         StringBuilder stringBuilder = new StringBuilder();
-        for(int i = 0; i < strings.size() - 1; i++){
-            if(i != 0){
+        for (int i = 0; i < strings.size() - 1; i++) {
+            if (i != 0) {
                 stringBuilder.append('.');
             }
             stringBuilder.append(strings.get(i));
-            if(nameMap.get(stringBuilder.toString()) == null){
+            if (nameMap.get(stringBuilder.toString()) == null) {
                 from = from.join(strings.get(i));
-                nameMap.put(stringBuilder.toString(),from);
-            }else {
+                nameMap.put(stringBuilder.toString(), from);
+            } else {
                 from = nameMap.get(stringBuilder.toString());
             }
         }
@@ -92,11 +88,11 @@ public class JpaDataHandle {
     }
 
 
-    public static <T> Predicate analysisPredicate(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder,MySearchList mySearchList,boolean isAnd,Map<String,From> nameMap){
+    public static <T> Predicate analysisPredicate(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder, MySearchList mySearchList, boolean isAnd, Map<String, From> nameMap) {
 
-        if(mySearchList == null || mySearchList.isEmpty()){
+        if (mySearchList == null || mySearchList.isEmpty()) {
             criteriaBuilder.conjunction();
-        }else {
+        } else {
             Iterator<MySearch> mySearchIterator = mySearchList.iterator();
             List<Predicate> predicates = new ArrayList<>();
             List<Order> orders = new ArrayList<>();
@@ -342,14 +338,7 @@ public class JpaDataHandle {
         return criteriaBuilder.conjunction();
 
 
-
-
-
-
     }
-
-
-
 
 
 }

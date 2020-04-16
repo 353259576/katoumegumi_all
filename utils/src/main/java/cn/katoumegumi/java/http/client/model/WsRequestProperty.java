@@ -4,7 +4,7 @@ public class WsRequestProperty {
     private String key;
     private String value;
 
-    public static WsRequestProperty createWsRequestProPerty(String key, String value){
+    public static WsRequestProperty createWsRequestProPerty(String key, String value) {
         WsRequestProperty wsRequestProperty = new WsRequestProperty();
         wsRequestProperty.setKey(key);
         wsRequestProperty.setValue(value);

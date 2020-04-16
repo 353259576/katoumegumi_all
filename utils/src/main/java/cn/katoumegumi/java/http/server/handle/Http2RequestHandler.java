@@ -2,9 +2,7 @@ package cn.katoumegumi.java.http.server.handle;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http2.*;
@@ -16,13 +14,29 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 public class Http2RequestHandler extends ChannelInboundHandlerAdapter implements Http2FrameListener {
 
+    static final ByteBuf RESPONSE_BYTES = unreleasableBuffer(copiedBuffer("Hello World", CharsetUtil.UTF_8));
     private Http2ConnectionEncoder encoder;
     private Http2ConnectionDecoder decoder;
 
-    static final ByteBuf RESPONSE_BYTES = unreleasableBuffer(copiedBuffer("Hello World", CharsetUtil.UTF_8));
+    public Http2RequestHandler() {
 
-    public Http2RequestHandler(){
+    }
 
+    public Http2RequestHandler(Http2ConnectionEncoder encoder, Http2ConnectionDecoder decoder) {
+        this.encoder = encoder;
+        this.decoder = decoder;
+    }
+
+    private static Http2Headers http1HeadersToHttp2Headers(FullHttpRequest request) {
+        CharSequence host = request.headers().get(HttpHeaderNames.HOST);
+        Http2Headers http2Headers = new DefaultHttp2Headers()
+                .method(HttpMethod.GET.asciiName())
+                .path(request.uri())
+                .scheme(HttpScheme.HTTP.name());
+        if (host != null) {
+            http2Headers.authority(host);
+        }
+        return http2Headers;
     }
 
     public Http2ConnectionEncoder getEncoder() {
@@ -41,25 +55,6 @@ public class Http2RequestHandler extends ChannelInboundHandlerAdapter implements
         this.decoder = decoder;
     }
 
-    public Http2RequestHandler(Http2ConnectionEncoder encoder, Http2ConnectionDecoder decoder){
-        this.encoder = encoder;
-        this.decoder = decoder;
-    }
-
-
-    private static Http2Headers http1HeadersToHttp2Headers(FullHttpRequest request) {
-        CharSequence host = request.headers().get(HttpHeaderNames.HOST);
-        Http2Headers http2Headers = new DefaultHttp2Headers()
-                .method(HttpMethod.GET.asciiName())
-                .path(request.uri())
-                .scheme(HttpScheme.HTTP.name());
-        if (host != null) {
-            http2Headers.authority(host);
-        }
-        return http2Headers;
-    }
-
-
     private void sendResponse(ChannelHandlerContext ctx, int streamId, ByteBuf payload) {
         // Send a frame for the response status
         Http2Headers headers = new DefaultHttp2Headers().status(OK.codeAsText());
@@ -74,7 +69,7 @@ public class Http2RequestHandler extends ChannelInboundHandlerAdapter implements
         if (evt instanceof HttpServerUpgradeHandler.UpgradeEvent) {
             HttpServerUpgradeHandler.UpgradeEvent upgradeEvent =
                     (HttpServerUpgradeHandler.UpgradeEvent) evt;
-            onHeadersRead(ctx, 1, http1HeadersToHttp2Headers(upgradeEvent.upgradeRequest()), 0 , true);
+            onHeadersRead(ctx, 1, http1HeadersToHttp2Headers(upgradeEvent.upgradeRequest()), 0, true);
         }
         super.userEventTriggered(ctx, evt);
     }

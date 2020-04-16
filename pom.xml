@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.katoumegumi.java</groupId>
     <artifactId>katoumegumi_all</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <modules>
         <module>data-integration-boot-starter</module>
         <module>utils</module>
         <module>server_example</module>
         <module>client_example</module>
         <module>monitor</module>
-        <!--<module>auth_server</module>-->
+        <module>auth_server</module>
     </modules>
 
     <licenses>
@@ -72,9 +72,6 @@
     </properties>
 
 
-
-
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -110,23 +107,20 @@
             </dependency>
 
 
-
         </dependencies>
 
     </dependencyManagement>
 
 
-
     <dependencies>
 
-        <dependency>
+        <!--<dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
     </dependencies>
-
 
 
     <pluginRepositories>
@@ -327,8 +321,6 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-
-
 
 
 </project>

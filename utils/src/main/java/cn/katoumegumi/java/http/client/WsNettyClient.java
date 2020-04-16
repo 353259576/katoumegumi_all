@@ -19,7 +19,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Queue;
@@ -28,15 +29,14 @@ import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Slf4j
-public class WsNettyClient {
 
+public class WsNettyClient {
+    private static final Logger log = LoggerFactory.getLogger(WsNettyClient.class);
 
     public static volatile EventLoopGroup workEventExecutors = new NioEventLoopGroup();
-    private static volatile ExecutorService executor = Executors.newFixedThreadPool(200);
     public static AtomicInteger atomicInteger = new AtomicInteger(0);
     public static AtomicInteger atomicInteger1 = new AtomicInteger(0);
-
+    private static volatile ExecutorService executor = Executors.newFixedThreadPool(200);
 
     public static void main(String[] args) {
         System.setProperty("http.proxyHost", "localhost");
@@ -46,7 +46,7 @@ public class WsNettyClient {
 
         try {
             Thread.sleep(2000);
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         long startTime = System.currentTimeMillis();
@@ -101,8 +101,8 @@ public class WsNettyClient {
             log.info("当前CountDownLatch数量为：{}", map.size());
             log.info("当前Channel的数量{}", WsChannelHttpRequestBodyBind.channelMap.size());
             log.info("当前ChannelString的数量{}", WsChannelHttpRequestBodyBind.channelsStringMap.size());
-            log.info("当前限制器：{}",WsChannelHttpRequestBodyBind.semaphore.availablePermits());
-            log.info("超时检测队列大小：{}",WsChannelHttpRequestBodyBind.delayQueue.size());
+            log.info("当前限制器：{}", WsChannelHttpRequestBodyBind.semaphore.availablePermits());
+            log.info("超时检测队列大小：{}", WsChannelHttpRequestBodyBind.delayQueue.size());
             /*Set<Map.Entry<String, CountDownLatch>> set = map.entrySet();
             Iterator<Map.Entry<String, CountDownLatch>> iterator = set.iterator();
             while (iterator.hasNext()) {
@@ -119,7 +119,7 @@ public class WsNettyClient {
         for (int i = 0; i < 1; i++) {
             try {
                 semaphore.acquire();
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
@@ -133,26 +133,26 @@ public class WsNettyClient {
                     .setGZIP(true)
                     .setUseChunked(true);
             //.addRequestProperty("Range","bytes=512000-5120000");
-            httpRequestBody.setRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36");
+            httpRequestBody.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36");
             HttpResponseTask httpResponseTask = httpRequestBody.nettyBuild();
             executorService.execute(() -> {
 
                 list.add(httpResponseTask);
                 try {
                     HttpResponseBody httpResponseBody = httpResponseTask.call();
-                    if (httpResponseBody != null){
+                    if (httpResponseBody != null) {
                         log.info(httpResponseBody.getCode() + httpResponseBody.getHttpVersion());
                         //log.info(httpResponseBody.getHeaderProperty("Content-Length").get(0));
                         //log.info(httpResponseBody.getResponseBodyToString());
-                        if(httpResponseBody.getCode()==200){
+                        if (httpResponseBody.getCode() == 200) {
                             System.out.println(httpResponseBody.getContentType());
-                            WsImageUtils.byteToFile(httpResponseBody.getReturnBytes(),httpRequestBody.getUri().getHost()+ i1,"txt","D:/网页/");
-                        }else {
-                            WsImageUtils.byteToFile(httpResponseBody.getErrorReturnBytes(),httpRequestBody.getUri().getHost()+ i1,"txt","D:/网页/");
+                            WsImageUtils.byteToFile(httpResponseBody.getReturnBytes(), httpRequestBody.getUri().getHost() + i1, "txt", "D:/网页/");
+                        } else {
+                            WsImageUtils.byteToFile(httpResponseBody.getErrorReturnBytes(), httpRequestBody.getUri().getHost() + i1, "txt", "D:/网页/");
                         }
 
                         successNum.getAndAdd(1);
-                    }else {
+                    } else {
                         errorNum.getAndAdd(1);
                     }
 
@@ -230,9 +230,8 @@ public class WsNettyClient {
         });*/
 
 
-
         long endTime = System.currentTimeMillis();
-        log.info("执行完成，共花费：{}毫秒,其中成功：{}，失败：{},占用线程数为：{}",endTime-startTime,successNum.get(),errorNum.get(),WsChannelHttpRequestBodyBind.semaphore.availablePermits());
+        log.info("执行完成，共花费：{}毫秒,其中成功：{}，失败：{},占用线程数为：{}", endTime - startTime, successNum.get(), errorNum.get(), WsChannelHttpRequestBodyBind.semaphore.availablePermits());
         //close();
         /*wsNettyClient.clientStart(httpRequestBody);
         endTime = System.currentTimeMillis();
@@ -244,10 +243,6 @@ public class WsNettyClient {
         //wsNettyClient.clientStart(httpRequestBody);
 
     }
-
-
-
-
 
 
     public static HttpResponseTask clientStart(HttpRequestBody httpRequestBody) {
@@ -270,7 +265,7 @@ public class WsNettyClient {
         WsChannelHttpRequestBodyBind.channelAndHttpRequestBodyBind(id, httpRequestBody);
         try {
             WsChannelHttpRequestBodyBind.semaphore.acquire();
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         executor.execute(() -> {
@@ -299,13 +294,13 @@ public class WsNettyClient {
                     channelFuture.channel().closeFuture().sync().addListener(new GenericFutureListener<Future<? super Void>>() {
                         @Override
                         public void operationComplete(Future<? super Void> future) throws Exception {
-                            if(future.isSuccess()){
+                            if (future.isSuccess()) {
                                 System.out.println("关闭成功");
                             }
                         }
                     });
                     atomicInteger.getAndAdd(1);
-                    log.info("{}结束{}",id,httpRequestBody.getUrl());
+                    log.info("{}结束{}", id, httpRequestBody.getUrl());
                 }
 
             } catch (Exception e) {
@@ -321,7 +316,7 @@ public class WsNettyClient {
         return id;
     }
 
-    public static void close(){
+    public static void close() {
         workEventExecutors.shutdownGracefully();
         executor.shutdownNow();
         WsChannelHttpRequestBodyBind.executorService.shutdownNow();

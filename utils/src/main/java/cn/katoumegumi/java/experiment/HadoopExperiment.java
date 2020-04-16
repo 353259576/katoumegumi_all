@@ -1,19 +1,11 @@
 package cn.katoumegumi.java.experiment;
 
 
-import java.net.URI;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
-
 public class HadoopExperiment {
 
     public static final String HDFS_PATH = "hdfs://192.168.0.111:9000";//9866
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         /*Configuration configuration = new Configuration();
         configuration.set("fs.hdfs.impl",org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
         configuration.set("dfs.replication","1");

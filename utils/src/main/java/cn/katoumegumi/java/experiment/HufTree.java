@@ -15,21 +15,6 @@ public class HufTree {
         }
     });
 
-    // 成员内部类
-    private static class hufNode {
-        private hufNode lchild;// 左分支
-        private hufNode rchild;// 右分支
-        private String str;// 记录字符
-        private int count;// 统计次数
-
-        // 构造方法
-        public hufNode(String str, int count) {
-            super();
-            this.str = str;
-            this.count = count;
-        }
-    }
-
     // 主函数
     public static void main(String[] args) {
         /*File file = new File("file\\003.txt");
@@ -39,7 +24,7 @@ public class HufTree {
         System.out.println("压缩文件大小：" + file2.length()/1000 + "kb");*/
         String str = "世Aカ";
         byte[] bytes = str.getBytes();
-        for (byte b:bytes){
+        for (byte b : bytes) {
             System.out.println(b);
         }
     }
@@ -177,7 +162,7 @@ public class HufTree {
 
             //----------汉字判断处理部分-----------
             if (bs[i] < 0) {
-                sb.append(charCode[LEN+ bs[i]]);
+                sb.append(charCode[LEN + bs[i]]);
             } else {
                 sb.append(charCode[bs[i]]);
             }
@@ -225,6 +210,21 @@ public class HufTree {
                 System.out.println("(" + i + "," + (char) i + "," + byteCount[i] + "," + charCode[i] + ","
                         + charCode[i].length() + ")");
             }
+        }
+    }
+
+    // 成员内部类
+    private static class hufNode {
+        private hufNode lchild;// 左分支
+        private hufNode rchild;// 右分支
+        private String str;// 记录字符
+        private int count;// 统计次数
+
+        // 构造方法
+        public hufNode(String str, int count) {
+            super();
+            this.str = str;
+            this.count = count;
         }
     }
 }

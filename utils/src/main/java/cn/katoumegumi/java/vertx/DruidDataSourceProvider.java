@@ -14,8 +14,8 @@ import java.sql.SQLException;
 public class DruidDataSourceProvider implements DataSourceProvider {
     @Override
     public int maximumPoolSize(DataSource dataSource, JsonObject config) throws SQLException {
-        if(dataSource instanceof DruidDataSource){
-            DruidDataSource druidDataSource = (DruidDataSource)dataSource;
+        if (dataSource instanceof DruidDataSource) {
+            DruidDataSource druidDataSource = (DruidDataSource) dataSource;
             return druidDataSource.getMaxActive();
         }
         return -1;
@@ -35,31 +35,31 @@ public class DruidDataSourceProvider implements DataSourceProvider {
         Integer maxStatements = config.getInteger("max_statements");
         Integer maxStatementsPerConnection = config.getInteger("max_statements_per_connection");
 
-        if(WsStringUtils.isNotBlank(url)){
+        if (WsStringUtils.isNotBlank(url)) {
             druidDataSource.setUrl(url);
         }
-        if(WsStringUtils.isNotBlank(user)){
+        if (WsStringUtils.isNotBlank(user)) {
             druidDataSource.setUsername(user);
         }
-        if(WsStringUtils.isNotBlank(password)){
+        if (WsStringUtils.isNotBlank(password)) {
             druidDataSource.setPassword(password);
         }
-        if(WsStringUtils.isNotBlank(driverClass)){
+        if (WsStringUtils.isNotBlank(driverClass)) {
             druidDataSource.setDriverClassName(driverClass);
         }
-        if(maxPoolSize != null){
+        if (maxPoolSize != null) {
             druidDataSource.setMaxActive(maxPoolSize);
         }
-        if(initialPoolSize != null){
+        if (initialPoolSize != null) {
             druidDataSource.setInitialSize(initialPoolSize);
         }
-        if(maxPoolSize != null){
+        if (maxPoolSize != null) {
             druidDataSource.setMinIdle(minPoolSize);
         }
-        if(maxStatements != null){
+        if (maxStatements != null) {
             druidDataSource.setMaxOpenPreparedStatements(maxStatements);
         }
-        if(maxStatementsPerConnection != null){
+        if (maxStatementsPerConnection != null) {
             druidDataSource.setMaxPoolPreparedStatementPerConnectionSize(maxStatementsPerConnection);
         }
         druidDataSource.init();
@@ -68,7 +68,7 @@ public class DruidDataSourceProvider implements DataSourceProvider {
 
     @Override
     public void close(DataSource dataSource) throws SQLException {
-        if(dataSource instanceof DruidDataSource){
+        if (dataSource instanceof DruidDataSource) {
             ((DruidDataSource) dataSource).close();
         }
     }

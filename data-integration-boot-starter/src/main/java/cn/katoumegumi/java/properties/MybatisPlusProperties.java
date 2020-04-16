@@ -17,10 +17,7 @@ package cn.katoumegumi.java.properties;
 
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
-import lombok.Data;
-import lombok.experimental.Accessors;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.ExecutorType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -40,15 +37,12 @@ import java.util.stream.Stream;
  * @author Eddú Meléndez
  * @author Kazuki Shimizu
  */
-@Data
-@Accessors(chain = true)
 @ConfigurationProperties(prefix = "megumi.mybatis")
 public class MybatisPlusProperties {
 
-    private boolean enable;
 
     private static final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
-
+    private boolean enable;
     /**
      * Location of MyBatis xml config file.
      */
@@ -118,6 +112,9 @@ public class MybatisPlusProperties {
     @NestedConfigurationProperty
     private GlobalConfig globalConfig = GlobalConfigUtils.defaults();
 
+    public static ResourcePatternResolver getResourceResolver() {
+        return resourceResolver;
+    }
 
     public Resource[] resolveMapperLocations() {
         return Stream.of(Optional.ofNullable(this.mapperXmlLocations).orElse(new String[0]))
@@ -131,5 +128,109 @@ public class MybatisPlusProperties {
         } catch (IOException e) {
             return new Resource[0];
         }
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
+
+    public String getConfigLocation() {
+        return configLocation;
+    }
+
+    public void setConfigLocation(String configLocation) {
+        this.configLocation = configLocation;
+    }
+
+    public String[] getMapperXmlLocations() {
+        return mapperXmlLocations;
+    }
+
+    public void setMapperXmlLocations(String[] mapperXmlLocations) {
+        this.mapperXmlLocations = mapperXmlLocations;
+    }
+
+    public String getTypeAliasesPackage() {
+        return typeAliasesPackage;
+    }
+
+    public void setTypeAliasesPackage(String typeAliasesPackage) {
+        this.typeAliasesPackage = typeAliasesPackage;
+    }
+
+    public Class<?> getTypeAliasesSuperType() {
+        return typeAliasesSuperType;
+    }
+
+    public void setTypeAliasesSuperType(Class<?> typeAliasesSuperType) {
+        this.typeAliasesSuperType = typeAliasesSuperType;
+    }
+
+    public String getTypeHandlersPackage() {
+        return typeHandlersPackage;
+    }
+
+    public void setTypeHandlersPackage(String typeHandlersPackage) {
+        this.typeHandlersPackage = typeHandlersPackage;
+    }
+
+    public boolean isCheckConfigLocation() {
+        return checkConfigLocation;
+    }
+
+    public void setCheckConfigLocation(boolean checkConfigLocation) {
+        this.checkConfigLocation = checkConfigLocation;
+    }
+
+    public ExecutorType getExecutorType() {
+        return executorType;
+    }
+
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
+    }
+
+    public Class<? extends LanguageDriver> getDefaultScriptingLanguageDriver() {
+        return defaultScriptingLanguageDriver;
+    }
+
+    public void setDefaultScriptingLanguageDriver(Class<? extends LanguageDriver> defaultScriptingLanguageDriver) {
+        this.defaultScriptingLanguageDriver = defaultScriptingLanguageDriver;
+    }
+
+    public Properties getConfigurationProperties() {
+        return configurationProperties;
+    }
+
+    public void setConfigurationProperties(Properties configurationProperties) {
+        this.configurationProperties = configurationProperties;
+    }
+
+    public MybatisConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(MybatisConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
+    public String getTypeEnumsPackage() {
+        return typeEnumsPackage;
+    }
+
+    public void setTypeEnumsPackage(String typeEnumsPackage) {
+        this.typeEnumsPackage = typeEnumsPackage;
+    }
+
+    public GlobalConfig getGlobalConfig() {
+        return globalConfig;
+    }
+
+    public void setGlobalConfig(GlobalConfig globalConfig) {
+        this.globalConfig = globalConfig;
     }
 }

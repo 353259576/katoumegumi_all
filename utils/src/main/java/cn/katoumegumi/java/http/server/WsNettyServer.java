@@ -9,10 +9,13 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
+
 public class WsNettyServer {
+
+    private static final Logger log = LoggerFactory.getLogger(WsNettyServer.class);
 
     public static void main(String[] args) {
         WsNettyServer wsNettyServer = new WsNettyServer();
@@ -21,23 +24,23 @@ public class WsNettyServer {
     }
 
 
-    public void nettyStart(Integer port){
+    public void nettyStart(Integer port) {
         log.info("netty服务启动开始");
         EventLoopGroup bossEventExecutors = new NioEventLoopGroup(1);
         EventLoopGroup workEventExecutors = new NioEventLoopGroup(3);
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(bossEventExecutors,workEventExecutors);
+            serverBootstrap.group(bossEventExecutors, workEventExecutors);
             serverBootstrap.channel(NioServerSocketChannel.class);
             serverBootstrap.handler(new LoggingHandler(LogLevel.WARN));
             serverBootstrap.childHandler(new WebSocketInitializer());
             serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024);
-            serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE,true);
+            serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
             ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
             channelFuture.channel().closeFuture().sync();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             log.info("netty结束");
             workEventExecutors.shutdownGracefully();
             bossEventExecutors.shutdownGracefully();

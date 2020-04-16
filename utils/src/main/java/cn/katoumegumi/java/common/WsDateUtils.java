@@ -21,60 +21,27 @@ public class WsDateUtils {
         System.out.println(chinaWeek(1));
     }
 
-
-
-
-    public enum  WsDateUtilsEnum{
-        YEAR(1),MONTH(2),DAY(3),HOUR(4),MINUTE(5),SECOND(6);
-        private int code;
-        WsDateUtilsEnum(int code){
-            this.code = code;
-        }
-
-        public int getCode() {
-            return code;
-        }
-    }
-
-
-
-
-
-
-
-    public Date changeDate(Date date,int addNum,int type){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(type,addNum);
-        return calendar.getTime();
-    }
-
-
-
-
-
-
-    public static String dateStringFormat(String date){
+    public static String dateStringFormat(String date) {
         char chars[] = date.toCharArray();
         List<String> strings = new ArrayList<>();
-        for(int i = 0; i < chars.length; i++){
+        for (int i = 0; i < chars.length; i++) {
             StringBuffer stringBuffer = new StringBuffer();
-            while (i<chars.length&&chars[i]>47&&chars[i]<58){
+            while (i < chars.length && chars[i] > 47 && chars[i] < 58) {
                 stringBuffer.append(chars[i]);
                 i++;
             }
-            if(stringBuffer.length()>0){
+            if (stringBuffer.length() > 0) {
                 strings.add(stringBuffer.toString());
             }
         }
-        if(strings.size()>5){
-            return strings.get(0)+"-"+strings.get(1)+"-"+strings.get(2)+" "+strings.get(3)+":"+strings.get(4)+":"+strings.get(5);
+        if (strings.size() > 5) {
+            return strings.get(0) + "-" + strings.get(1) + "-" + strings.get(2) + " " + strings.get(3) + ":" + strings.get(4) + ":" + strings.get(5);
         }
-        if(strings.size()>2){
-            return strings.get(0)+"-"+strings.get(1)+"-"+strings.get(2)+" 00:00:00";
+        if (strings.size() > 2) {
+            return strings.get(0) + "-" + strings.get(1) + "-" + strings.get(2) + " 00:00:00";
         }
-        if(strings.size() == 1){
-            if(WsStringUtils.isNumber(strings.get(0))){
+        if (strings.size() == 1) {
+            if (WsStringUtils.isNumber(strings.get(0))) {
                 Date date1 = new Date(Long.parseLong(strings.get(0)));
                 return WsDateUtils.dateToString(date1, WsDateUtils.LONGTIMESTRING);
             }
@@ -83,8 +50,7 @@ public class WsDateUtils {
         return null;
     }
 
-
-    public static Date stringToDate(String date,String mode) {
+    public static Date stringToDate(String date, String mode) {
         try {
             date = dateStringFormat(date);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mode);
@@ -96,29 +62,26 @@ public class WsDateUtils {
 
     }
 
-    public static Date stringToDate(String date){
-        return stringToDate(date,LONGTIMESTRING);
+    public static Date stringToDate(String date) {
+        return stringToDate(date, LONGTIMESTRING);
     }
 
-
-    public static Date objectToDate(Object date){
+    public static Date objectToDate(Object date) {
         try {
             String dateString = objectDateFormatString(date);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(LONGTIMESTRING);
             return simpleDateFormat.parse(dateString);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
 
     }
 
-
-    public static String dateToString(Date date,String dateType){
+    public static String dateToString(Date date, String dateType) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateType);
         return simpleDateFormat.format(date);
     }
-
 
     public static String objectDateFormatString(Object object) {
         try {
@@ -135,9 +98,9 @@ public class WsDateUtils {
                 return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
             } else if (object instanceof Number) {
                 return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
-            }  else if(object instanceof LocalDate){
+            } else if (object instanceof LocalDate) {
                 return ((LocalDate) object).format(DateTimeFormatter.ofPattern(LONGTIMESTRING));
-            } else if(object instanceof LocalDateTime){
+            } else if (object instanceof LocalDateTime) {
                 return ((LocalDateTime) object).format(DateTimeFormatter.ofPattern(LONGTIMESTRING));
             } else {
                 return null;
@@ -149,12 +112,32 @@ public class WsDateUtils {
 
     }
 
-
-    public static int chinaWeek(int westWeek){
+    public static int chinaWeek(int westWeek) {
         int chinaWeek = westWeek - 1;
-        if(chinaWeek == 0){
+        if (chinaWeek == 0) {
             chinaWeek = 7;
         }
         return chinaWeek;
+    }
+
+    public Date changeDate(Date date, int addNum, int type) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(type, addNum);
+        return calendar.getTime();
+    }
+
+
+    public enum WsDateUtilsEnum {
+        YEAR(1), MONTH(2), DAY(3), HOUR(4), MINUTE(5), SECOND(6);
+        private int code;
+
+        WsDateUtilsEnum(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
     }
 }

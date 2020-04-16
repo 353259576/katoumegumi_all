@@ -17,7 +17,8 @@ import io.netty.handler.codec.http2.*;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,14 +26,12 @@ import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static io.netty.handler.logging.LogLevel.INFO;
 
-@Slf4j
 public class HttpInitializer extends ChannelInitializer<SocketChannel> {
 
-    String id;
-
-    public HttpRequestBody httpRequestBody;
-
+    private static final Logger log = LoggerFactory.getLogger(HttpInitializer.class);
     private static final Http2FrameLogger LOGGER = new Http2FrameLogger(INFO, HttpInitializer.class);
+    public HttpRequestBody httpRequestBody;
+    String id;
 
 
     public HttpInitializer(HttpRequestBody httpRequestBody, String id) {
@@ -41,13 +40,12 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
     }
 
 
-
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
-        WsChannelHttpRequestBodyBind.notCloseChannel.put(socketChannel.pipeline().channel().id().asLongText(),socketChannel.pipeline().channel());
+        WsChannelHttpRequestBodyBind.notCloseChannel.put(socketChannel.pipeline().channel().id().asLongText(), socketChannel.pipeline().channel());
         long startTime = System.currentTimeMillis();
-        socketChannel.pipeline().addLast(new HttpCloseHandler(id,httpRequestBody));
-        if(httpRequestBody.isHttps()) {
+        socketChannel.pipeline().addLast(new HttpCloseHandler(id, httpRequestBody));
+        if (httpRequestBody.isHttps()) {
             if (httpRequestBody.getPkcsPath() == null) {
                 socketChannel.pipeline().addLast(WsSSLContext.createNettySslContext(false, null).newHandler(socketChannel.alloc()));
                 socketChannel.pipeline().addLast(new ApplicationProtocolNegotiationHandler("") {
@@ -77,17 +75,17 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
                             socketChannel.pipeline().addLast(connectionHandler);
                             socketChannel.pipeline().addLast(settingsHandler, responseHandler);
 
-                            new Thread(()->{
+                            new Thread(() -> {
                                 try {
                                     settingsHandler.awaitSettings(5, TimeUnit.SECONDS);
-                                }catch (Exception e){
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
 
                                 int streamId = 3;
 
 
-                                for(int i = 0; i < 1; i++){
+                                for (int i = 0; i < 1; i++) {
                                     FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, httpRequestBody.getUri().getPath(), Unpooled.EMPTY_BUFFER);
                                     request.headers().add(HttpHeaderNames.HOST, httpRequestBody.getUri().getHost());
                                     request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), HttpScheme.HTTPS);
@@ -104,10 +102,9 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
                             }).start();
 
 
-
                         } else {
                             //包含编码器和解码器
-                            httpInitializer(socketChannel,httpRequestBody,id,false);
+                            httpInitializer(socketChannel, httpRequestBody, id, false);
                             //httpInitializer(socketChannel, httpRequestBody, id);
 
 
@@ -116,11 +113,11 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
                 });
             } else {
                 socketChannel.pipeline().addLast(WsSSLContext.createNettySslContext(false, WsSSLContext.keyManagerFactory(httpRequestBody.getPkcsPath(), httpRequestBody.getPkcsPassword(), "PKCS12")).newHandler(socketChannel.alloc()));
-                httpInitializer(socketChannel,httpRequestBody,id,true);
+                httpInitializer(socketChannel, httpRequestBody, id, true);
             }
 
-        }else {
-            httpInitializer(socketChannel,httpRequestBody,id,true);
+        } else {
+            httpInitializer(socketChannel, httpRequestBody, id, true);
         }
 
         long endTime = System.currentTimeMillis();
@@ -129,20 +126,20 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
     }
 
 
-    public void httpInitializer(SocketChannel socketChannel, HttpRequestBody httpRequestBody, String id, boolean sendHttp){
+    public void httpInitializer(SocketChannel socketChannel, HttpRequestBody httpRequestBody, String id, boolean sendHttp) {
         socketChannel.pipeline().addLast(new HttpClientCodec());
-        if(!httpRequestBody.isUseChunked()){
+        if (!httpRequestBody.isUseChunked()) {
             //聚合
-            socketChannel.pipeline().addLast(new HttpObjectAggregator(1024*1024*64));
+            socketChannel.pipeline().addLast(new HttpObjectAggregator(1024 * 1024 * 64));
         }
         //解压
         //socketChannel.pipeline().addLast(new HttpContentDecompressor());
         socketChannel.pipeline().addLast(new ChunkedWriteHandler());
         //socketChannel.pipeline().addLast(new IdleStateHandler(0,0,60, TimeUnit.SECONDS));
         // 自定义处理handler
-        socketChannel.pipeline().addLast("http-server", new NettyHttpClientResponseHandler(httpRequestBody,id,sendHttp));
-        if(!sendHttp){
-            WsNettyClientUtils.sendHttpRequest(socketChannel.pipeline().channel(),httpRequestBody,id);
+        socketChannel.pipeline().addLast("http-server", new NettyHttpClientResponseHandler(httpRequestBody, id, sendHttp));
+        if (!sendHttp) {
+            WsNettyClientUtils.sendHttpRequest(socketChannel.pipeline().channel(), httpRequestBody, id);
         }
     }
 }

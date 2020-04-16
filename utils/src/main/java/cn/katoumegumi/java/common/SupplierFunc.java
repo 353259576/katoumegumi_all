@@ -6,5 +6,5 @@ import java.util.function.Supplier;
 /**
  * @author ws
  */
-public interface SupplierFunc<T> extends Supplier<T>, Serializable{
+public interface SupplierFunc<T> extends Supplier<T>, Serializable {
 }

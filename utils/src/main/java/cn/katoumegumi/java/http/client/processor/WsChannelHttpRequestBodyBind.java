@@ -7,14 +7,18 @@ import cn.katoumegumi.java.http.client.model.HttpRequestBody;
 import cn.katoumegumi.java.http.client.model.HttpResponseBody;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.*;
 
-@Slf4j
+
 public class WsChannelHttpRequestBodyBind {
+
+    private static final Logger log = LoggerFactory.getLogger(WsChannelHttpRequestBodyBind.class);
+
     /**
      * id与request的绑定
      */
@@ -22,7 +26,7 @@ public class WsChannelHttpRequestBodyBind {
     /**
      * id与门闩的绑定
      */
-    public static volatile ConcurrentMap<String,CountDownLatch> countDownLatchMap = new ConcurrentHashMap<>();
+    public static volatile ConcurrentMap<String, CountDownLatch> countDownLatchMap = new ConcurrentHashMap<>();
     /**
      * id与response的绑定
      */
@@ -30,16 +34,16 @@ public class WsChannelHttpRequestBodyBind {
     /**
      * 储存可以复用的通道id
      */
-    public static volatile Map<String,ConcurrentLinkedQueue<String>> channelsStringMap = new ConcurrentHashMap<>();
+    public static volatile Map<String, ConcurrentLinkedQueue<String>> channelsStringMap = new ConcurrentHashMap<>();
 
-    public static volatile Map<String,Channel> notCloseChannel = new ConcurrentHashMap<>();
+    public static volatile Map<String, Channel> notCloseChannel = new ConcurrentHashMap<>();
 
     public static volatile Map<String, ByteBuf> stringByteBufMap = new ConcurrentHashMap<>();
 
     /**
      * 可以被重新使用的通道
      */
-    public static volatile Map<String,Channel> channelMap = new ConcurrentHashMap<>();
+    public static volatile Map<String, Channel> channelMap = new ConcurrentHashMap<>();
 
     /**
      * 超时通道记录
@@ -65,14 +69,14 @@ public class WsChannelHttpRequestBodyBind {
      */
     public static volatile Semaphore semaphore = new Semaphore(200);
 
-    public static volatile Map<String,String> idStreamIdMap = new ConcurrentHashMap<>();
+    public static volatile Map<String, String> idStreamIdMap = new ConcurrentHashMap<>();
 
-    public static volatile Map<String,Channel> http2ChannelMap = new ConcurrentHashMap<>();
+    public static volatile Map<String, Channel> http2ChannelMap = new ConcurrentHashMap<>();
 
     public static volatile Map<String, HttpResponseHandler> stringHttpResponseHandlerMap = new ConcurrentHashMap<>();
 
     static {
-        executorService.submit(()->{
+        executorService.submit(() -> {
             while (true) {
                 ChannelTimeoutEntry channelTimeoutEntry = delayQueue.take();
                 channelTimeoutEntry.setTimeout(true);
@@ -94,63 +98,63 @@ public class WsChannelHttpRequestBodyBind {
     }
 
 
-    public static void channelAndHttpRequestBodyBind(String channelId, HttpRequestBody httpRequestBody){
+    public static void channelAndHttpRequestBodyBind(String channelId, HttpRequestBody httpRequestBody) {
         //log.info("添加一个request成功");
-        httpRequestBodyMap.put(channelId,httpRequestBody);
+        httpRequestBodyMap.put(channelId, httpRequestBody);
     }
 
-    public static void removeChannelAndHttpRequestBodyBind(String channelId){
+    public static void removeChannelAndHttpRequestBodyBind(String channelId) {
         httpRequestBodyMap.remove(channelId);
     }
 
 
-    public static void putHttpResponseBody(String channelId, HttpResponseBody httpResponseBody){
+    public static void putHttpResponseBody(String channelId, HttpResponseBody httpResponseBody) {
         HttpRequestBody httpRequestBody = httpRequestBodyMap.get(channelId);
-        if(httpRequestBody != null){
-            httpResponseBodyMap.put(channelId,httpResponseBody);
+        if (httpRequestBody != null) {
+            httpResponseBodyMap.put(channelId, httpResponseBody);
             countDownCountDownLatch(channelId);
         }
     }
 
-    public static void countDownCountDownLatch(String channelId){
+    public static void countDownCountDownLatch(String channelId) {
         CountDownLatch countDownLatch = null;
         int i = 0;
-        while (countDownLatch == null){
+        while (countDownLatch == null) {
             countDownLatch = countDownLatchMap.get(channelId);
 
-            if(countDownLatch == null){
+            if (countDownLatch == null) {
                 i++;
-                if(i > 10){
+                if (i > 10) {
                     break;
                 }
                 try {
                     Thread.sleep(100);
-                }catch (InterruptedException e){
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
 
         }
-        if(countDownLatch != null){
+        if (countDownLatch != null) {
             countDownLatch.countDown();
         }
     }
 
-    public static void createCountDownLatch(String channelId){
+    public static void createCountDownLatch(String channelId) {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        countDownLatchMap.put(channelId,countDownLatch);
+        countDownLatchMap.put(channelId, countDownLatch);
     }
 
 
-    public static HttpResponseBody takeHttpResponseBody(String channelId){
+    public static HttpResponseBody takeHttpResponseBody(String channelId) {
         CountDownLatch countDownLatch = null;
-        while (countDownLatch == null){
+        while (countDownLatch == null) {
             countDownLatch = countDownLatchMap.get(channelId);
-            if(countDownLatch == null){
+            if (countDownLatch == null) {
                 try {
                     log.info("线程沉睡");
                     Thread.sleep(10);
-                }catch (InterruptedException e){
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -160,7 +164,7 @@ public class WsChannelHttpRequestBodyBind {
             countDownLatch.await();
             countDownLatchMap.remove(channelId);
             return httpResponseBodyMap.remove(channelId);
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return null;
         }
@@ -168,26 +172,26 @@ public class WsChannelHttpRequestBodyBind {
     }
 
 
-    public static void putChannelString(String url,String id){
+    public static void putChannelString(String url, String id) {
         ConcurrentLinkedQueue<String> queue = channelsStringMap.get(url);
-        if(queue == null){
+        if (queue == null) {
             queue = new ConcurrentLinkedQueue<>();
-            channelsStringMap.put(url,queue);
+            channelsStringMap.put(url, queue);
         }
         queue.add(id);
     }
 
-    public static synchronized Channel getChannelString(String url){
+    public static synchronized Channel getChannelString(String url) {
         ConcurrentLinkedQueue<String> queue = channelsStringMap.get(url);
-        if(queue == null){
+        if (queue == null) {
             return null;
         }
         String id = queue.poll();
-        if(id == null){
+        if (id == null) {
             return null;
         }
         Channel channel = channelMap.get(id);
-        if(channel != null){
+        if (channel != null) {
             channelMap.remove(id);
         }
         return channel;
@@ -195,100 +199,102 @@ public class WsChannelHttpRequestBodyBind {
     }
 
 
-    public static void putChannel(String id,Channel channel){
-        channelMap.put(id,channel);
+    public static void putChannel(String id, Channel channel) {
+        channelMap.put(id, channel);
     }
 
-    public static Channel getChannel(String id){
+    public static Channel getChannel(String id) {
         return channelMap.get(id);
     }
 
 
     /**
      * 插入一个可回收的channel
+     *
      * @param httpRequestBody
      * @param channel
      */
-    public static void addResumableChannel(HttpRequestBody httpRequestBody, Channel channel){
+    public static void addResumableChannel(HttpRequestBody httpRequestBody, Channel channel) {
         String channelId = channel.id().asLongText();
-        String searchName = httpRequestBody.getUri().getHost()+":"+httpRequestBody.getPort();
+        String searchName = httpRequestBody.getUri().getHost() + ":" + httpRequestBody.getPort();
         Queue<String> queue = WsChannelHttpRequestBodyBind.channelsStringMap.get(searchName);
-        if(queue != null && queue.size() > 1&& WsChannelHttpRequestBodyBind.channelMap.size() > 100){
+        if (queue != null && queue.size() > 1 && WsChannelHttpRequestBodyBind.channelMap.size() > 100) {
             //log.info("{}超过阈值，不缓存当前的channel",searchName);
             channel.close();
             return;
         }
-        WsChannelHttpRequestBodyBind.putChannel(channelId,channel);
-        WsChannelHttpRequestBodyBind.putChannelString(searchName,channelId);
+        WsChannelHttpRequestBodyBind.putChannel(channelId, channel);
+        WsChannelHttpRequestBodyBind.putChannelString(searchName, channelId);
     }
 
     /**
      * channel关闭，在可重复利用列表里删除该条数据
+     *
      * @param httpRequestBody
      */
-    public static void removeResumableChannel(HttpRequestBody httpRequestBody, Channel channel){
+    public static void removeResumableChannel(HttpRequestBody httpRequestBody, Channel channel) {
         String channelId = channel.id().asLongText();
-        if(channelMap.containsKey(channelId)){
+        if (channelMap.containsKey(channelId)) {
             channelMap.remove(channelId);
         }
-        ConcurrentLinkedQueue<String> queue = WsChannelHttpRequestBodyBind.channelsStringMap.get(httpRequestBody.getUri().getHost()+":"+httpRequestBody.getPort());
-        if(queue != null){
+        ConcurrentLinkedQueue<String> queue = WsChannelHttpRequestBodyBind.channelsStringMap.get(httpRequestBody.getUri().getHost() + ":" + httpRequestBody.getPort());
+        if (queue != null) {
             /*WsChannelHttpRequestBodyBind.channelsStringMap.remove(httpRequestBody.getUri().getHost()+":"+httpRequestBody.getPort());
             while (!queue.isEmpty()) {
                 WsChannelHttpRequestBodyBind.channelMap.remove(queue.poll());
             }*/
-            if(queue.contains(channelId)){
+            if (queue.contains(channelId)) {
                 queue.remove(channelId);
             }
-            if(queue.size() == 0){
-                WsChannelHttpRequestBodyBind.channelsStringMap.remove(httpRequestBody.getUri().getHost()+":"+httpRequestBody.getPort());
+            if (queue.size() == 0) {
+                WsChannelHttpRequestBodyBind.channelsStringMap.remove(httpRequestBody.getUri().getHost() + ":" + httpRequestBody.getPort());
             }
         }
 
     }
 
-    public static void reconnectLink(HttpRequestBody httpRequestBody, String id, Channel channel){
+    public static void reconnectLink(HttpRequestBody httpRequestBody, String id, Channel channel) {
         CountDownLatch countDownLatch = WsChannelHttpRequestBodyBind.countDownLatchMap.get(id);
-        if(countDownLatch != null){
-            if(countDownLatch.getCount() > 0){
+        if (countDownLatch != null) {
+            if (countDownLatch.getCount() > 0) {
                 semaphore.release();
-                if(WsChannelHttpRequestBodyBind.stringByteBufMap.containsKey(id)){
+                if (WsChannelHttpRequestBodyBind.stringByteBufMap.containsKey(id)) {
                     ByteBuf byteBuf = WsChannelHttpRequestBodyBind.stringByteBufMap.remove(id);
                     byteBuf.release();
                 }
                 ChannelTimeoutEntry channelTimeoutEntry = WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.get(id);
-                if(channelTimeoutEntry != null){
+                if (channelTimeoutEntry != null) {
                     //WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.remove(id);
-                    if(channelTimeoutEntry.getCount() > httpRequestBody.getRetryNuumber()){
+                    if (channelTimeoutEntry.getCount() > httpRequestBody.getRetryNuumber()) {
                         countDownLatch.countDown();
                         WsChannelHttpRequestBodyBind.httpResponseBodyMap.remove(id);
                         WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.remove(id);
-                        if(channelTimeoutEntry.isTimeout()){
-                            log.info("Channel:{}连接超时，解除countdownlatch，链接为：{}",channel.id().asLongText(),httpRequestBody.getUrl());
-                        }else {
-                            log.info("Channel:{}连接错误，解除countdownlatch，链接为：{}",channel.id().asLongText(),httpRequestBody.getUrl());
+                        if (channelTimeoutEntry.isTimeout()) {
+                            log.info("Channel:{}连接超时，解除countdownlatch，链接为：{}", channel.id().asLongText(), httpRequestBody.getUrl());
+                        } else {
+                            log.info("Channel:{}连接错误，解除countdownlatch，链接为：{}", channel.id().asLongText(), httpRequestBody.getUrl());
                         }
 
-                    }else {
+                    } else {
                         channelTimeoutEntry.setCount(channelTimeoutEntry.getCount() + 1);
-                        if(channelTimeoutEntry.isTimeout()){
+                        if (channelTimeoutEntry.isTimeout()) {
                             log.info("超时重连");
-                        }else {
+                        } else {
                             log.info("错误重连");
                         }
 
-                        WsNettyClient.clientStart(httpRequestBody,id);
+                        WsNettyClient.clientStart(httpRequestBody, id);
                     }
-                }else {
+                } else {
                     channelTimeoutEntry = new ChannelTimeoutEntry();
                     channelTimeoutEntry.setCount(1);
                     channelTimeoutEntry.setHttpRequestBody(httpRequestBody);
                     channelTimeoutEntry.setId(id);
                     channelTimeoutEntry.setChannel(channel);
                     channelTimeoutEntry.setTimeout(false);
-                    WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.put(id,channelTimeoutEntry);
+                    WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.put(id, channelTimeoutEntry);
                     log.info("错误重连");
-                    WsNettyClient.clientStart(httpRequestBody,id);
+                    WsNettyClient.clientStart(httpRequestBody, id);
                 }
 
             }
@@ -296,25 +302,25 @@ public class WsChannelHttpRequestBodyBind {
     }
 
 
-
     /**
      * 插入一个监控channel超时的记录
+     *
      * @param channel
      * @param httpRequestBody
      * @param id
      */
-    public static void putChannelDelay(Channel channel, HttpRequestBody httpRequestBody, String id){
+    public static void putChannelDelay(Channel channel, HttpRequestBody httpRequestBody, String id) {
         ChannelTimeoutEntry channelTimeoutEntry = WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.get(id);
-        if(channelTimeoutEntry == null){
+        if (channelTimeoutEntry == null) {
             channelTimeoutEntry = new ChannelTimeoutEntry();
-            channelTimeoutEntry.setExpirationTime(System.currentTimeMillis()+httpRequestBody.getExpirationTime());
+            channelTimeoutEntry.setExpirationTime(System.currentTimeMillis() + httpRequestBody.getExpirationTime());
             channelTimeoutEntry.setChannel(channel);
             channelTimeoutEntry.setCount(1);
             channelTimeoutEntry.setId(id);
             channelTimeoutEntry.setHttpRequestBody(httpRequestBody);
-            WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.put(id,channelTimeoutEntry);
-        }else {
-            channelTimeoutEntry.setExpirationTime(System.currentTimeMillis()+httpRequestBody.getExpirationTime());
+            WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.put(id, channelTimeoutEntry);
+        } else {
+            channelTimeoutEntry.setExpirationTime(System.currentTimeMillis() + httpRequestBody.getExpirationTime());
             channelTimeoutEntry.setChannel(channel);
             channelTimeoutEntry.setCount(channelTimeoutEntry.getCount() + 1);
             channelTimeoutEntry.setId(id);

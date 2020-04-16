@@ -2,17 +2,19 @@ package cn.katoumegumi.java.http.server.handle;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
 
-@Slf4j
 public class OutServerHandle extends ChannelOutboundHandlerAdapter {
+    private static final Logger log = LoggerFactory.getLogger(OutServerHandle.class);
+
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        ByteBuf byteBuf = (ByteBuf)msg;
+        ByteBuf byteBuf = (ByteBuf) msg;
         log.info("进入了write了");
-        String str =  "HTTP/1.1 200\n" +
+        String str = "HTTP/1.1 200\n" +
                 "Date: Wed, 21 Nov 2018 07:39:48 GMT\n" +
                 "Content-Type: text/html; charset=UTF-8\n" +
                 "Connection: close\n" +
@@ -22,7 +24,7 @@ public class OutServerHandle extends ChannelOutboundHandlerAdapter {
                 "你好世界";
         byteBuf.writeBytes(str.getBytes());
         //Thread.sleep(10000);
-        ChannelFuture channelFuture = ctx.write(byteBuf,promise);
+        ChannelFuture channelFuture = ctx.write(byteBuf, promise);
         channelFuture.addListener(ChannelFutureListener.CLOSE);
        /* channelFuture.addListener(new ChannelFutureListener() {
             @Override

@@ -14,13 +14,13 @@ public class WsStreamUtils {
 
     //public static Logger log = LoggerFactory.getLogger(WsStreamUtils.class);
 
-    public static ByteBuffer InputStreamToByteBuffer(InputStream inputStream){
-        if(inputStream instanceof FileInputStream){
-            FileInputStream fileInputStream = (FileInputStream)inputStream;
+    public static ByteBuffer InputStreamToByteBuffer(InputStream inputStream) {
+        if (inputStream instanceof FileInputStream) {
+            FileInputStream fileInputStream = (FileInputStream) inputStream;
             FileChannel fileChannel = fileInputStream.getChannel();
             try {
                 long size = fileChannel.size();
-                if(size > Long.parseLong(Integer.MAX_VALUE + "")){
+                if (size > Long.parseLong(Integer.MAX_VALUE + "")) {
                     throw new RuntimeException("文件过大");
                 }
                 ByteBuffer byteBuffer = ByteBuffer.allocateDirect((int) size);
@@ -28,21 +28,21 @@ public class WsStreamUtils {
                 byteBuffer.flip();
                 fileChannel.close();
                 return byteBuffer;
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
                 try {
                     inputStream.close();
-                }catch (IOException e1){
+                } catch (IOException e1) {
                     e1.printStackTrace();
                 }
 
             }
 
-        }else {
+        } else {
             ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
             try {
                 long size = inputStream.available();
-                if(size > Long.parseLong(Integer.MAX_VALUE + "")){
+                if (size > Long.parseLong(Integer.MAX_VALUE + "")) {
                     throw new RuntimeException("文件过大");
                 }
                 ByteBuffer byteBuffer = ByteBuffer.allocateDirect((int) size);
@@ -50,11 +50,11 @@ public class WsStreamUtils {
                 byteBuffer.flip();
                 readableByteChannel.close();
                 return byteBuffer;
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
                 try {
                     inputStream.close();
-                }catch (IOException e1){
+                } catch (IOException e1) {
                     e1.printStackTrace();
                 }
             }
@@ -64,25 +64,24 @@ public class WsStreamUtils {
     }
 
 
-
-    public static void inputToOutput(InputStream inputStream,OutputStream outputStream){
-        if(inputStream instanceof FileInputStream && outputStream instanceof FileOutputStream){
-            FileInputStream fileInputStream = (FileInputStream)inputStream;
-            FileOutputStream fileOutputStream = (FileOutputStream)outputStream;
+    public static void inputToOutput(InputStream inputStream, OutputStream outputStream) {
+        if (inputStream instanceof FileInputStream && outputStream instanceof FileOutputStream) {
+            FileInputStream fileInputStream = (FileInputStream) inputStream;
+            FileOutputStream fileOutputStream = (FileOutputStream) outputStream;
             FileChannel fileInputChannel = fileInputStream.getChannel();
             FileChannel fileOutputChannel = fileOutputStream.getChannel();
             try {
-                fileInputChannel.transferTo(fileInputChannel.position(),fileInputChannel.size(),fileOutputChannel);
-            }catch (IOException e){
+                fileInputChannel.transferTo(fileInputChannel.position(), fileInputChannel.size(), fileOutputChannel);
+            } catch (IOException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 try {
                     fileOutputChannel.close();
                     fileInputChannel.close();
                     outputStream.flush();
                     outputStream.close();
                     inputStream.close();
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
 
@@ -93,21 +92,21 @@ public class WsStreamUtils {
             WritableByteChannel writableByteChannel = Channels.newChannel(outputStream);
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
             try {
-                while (readableByteChannel.read(byteBuffer) != -1){
+                while (readableByteChannel.read(byteBuffer) != -1) {
                     byteBuffer.flip();
                     writableByteChannel.write(byteBuffer);
                     byteBuffer.clear();
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 try {
                     writableByteChannel.close();
                     readableByteChannel.close();
                     outputStream.flush();
                     outputStream.close();
                     inputStream.close();
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
 
@@ -118,18 +117,16 @@ public class WsStreamUtils {
     }
 
 
-
-
-    public static byte[] encodeFileToZip(File...files){
+    public static byte[] encodeFileToZip(File... files) {
         try {
             InputStream inputStreams[] = new InputStream[files.length];
             String fileNames[] = new String[files.length];
-            for(int i = 0; i < files.length; i++){
+            for (int i = 0; i < files.length; i++) {
                 inputStreams[i] = new FileInputStream(files[i]);
                 fileNames[i] = files[i].getName();
             }
-            return encodeFileToZip(inputStreams,fileNames);
-        }catch (Exception e){
+            return encodeFileToZip(inputStreams, fileNames);
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -137,7 +134,7 @@ public class WsStreamUtils {
     }
 
 
-    public static byte[] encodeFileToZip(InputStream inputStreams[],String fileNames[]){
+    public static byte[] encodeFileToZip(InputStream inputStreams[], String fileNames[]) {
         ZipOutputStream zipOutputStream = null;
         ByteArrayOutputStream byteArrayOutputStream = null;
         WritableByteChannel writableByteChannel = null;
@@ -150,10 +147,10 @@ public class WsStreamUtils {
             //zipOutputStream.setComment(new String("Java压缩".getBytes("utf-8"),"ASCII"));
             writableByteChannel = Channels.newChannel(zipOutputStream);
             ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-            for(int i = 0; i < inputStreams.length; i++){
-                ZipEntry zipEntry  = new ZipEntry(fileNames[i]);
+            for (int i = 0; i < inputStreams.length; i++) {
+                ZipEntry zipEntry = new ZipEntry(fileNames[i]);
                 zipOutputStream.putNextEntry(zipEntry);
-                ReadableByteChannel readableByteChannel= Channels.newChannel(inputStreams[i]);
+                ReadableByteChannel readableByteChannel = Channels.newChannel(inputStreams[i]);
                 while (readableByteChannel.read(byteBuffer) != -1) {
                     byteBuffer.flip();
                     while (byteBuffer.hasRemaining()) {
@@ -167,44 +164,44 @@ public class WsStreamUtils {
             }
             zipOutputStream.finish();
             return byteArrayOutputStream.toByteArray();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
-        }finally {
+        } finally {
             try {
-                if(writableByteChannel != null){
+                if (writableByteChannel != null) {
                     writableByteChannel.close();
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
             try {
-                if(zipOutputStream != null){
+                if (zipOutputStream != null) {
                     zipOutputStream.flush();
                     zipOutputStream.close();
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
 
             try {
-                if(byteArrayOutputStream != null){
+                if (byteArrayOutputStream != null) {
                     byteArrayOutputStream.flush();
                     byteArrayOutputStream.close();
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
             try {
-                if(inputStreams != null){
-                    for(int i = 0; i < inputStreams.length; i++){
+                if (inputStreams != null) {
+                    for (int i = 0; i < inputStreams.length; i++) {
                         inputStreams[i].close();
                     }
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

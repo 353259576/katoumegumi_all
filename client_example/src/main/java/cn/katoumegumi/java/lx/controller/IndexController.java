@@ -1,29 +1,17 @@
 package cn.katoumegumi.java.lx.controller;
 
-import cn.katoumegumi.java.common.WsFileUtils;
 import cn.katoumegumi.java.lx.service.IndexService;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
-import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
 /*import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;*/
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
-import reactor.core.publisher.Mono;
-
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RefreshScope
@@ -31,7 +19,7 @@ public class IndexController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Reference(protocol = "rest",version = "1.0.0",check = false)
+    @Reference(protocol = "rest", version = "1.0.0", check = false)
     //@Autowired
     private IndexService indexFeign;
 
@@ -84,7 +72,7 @@ public class IndexController {
 
     @RequestMapping(value = "index2")
     @ResponseBody
-    public String index2(){
+    public String index2() {
         return indexFeign.index();
     }
 }

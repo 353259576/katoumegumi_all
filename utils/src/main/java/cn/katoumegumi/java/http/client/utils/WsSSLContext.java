@@ -1,7 +1,10 @@
 package cn.katoumegumi.java.http.client.utils;
 
 import io.netty.handler.codec.http2.Http2SecurityUtil;
-import io.netty.handler.ssl.*;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
+import io.netty.handler.ssl.SupportedCipherSuiteFilter;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 import javax.net.ssl.*;
@@ -15,7 +18,7 @@ public class WsSSLContext {
     //private final static String URL = "D:/项目/环境/apache-tomcat-9.0.12 - 副本/conf/www.fishmaimai.com.jks";
     //private final static String PASSWORD = "199645";
 
-    public static SSLContext getSSLContext(String url,String password,String certificateType){
+    public static SSLContext getSSLContext(String url, String password, String certificateType) {
         SSLContext sslContext = null;
         try {
             sslContext = SSLContext.getInstance("TLSv1.2");
@@ -37,36 +40,36 @@ public class WsSSLContext {
             }};
 
             KeyManager keyManagers[] = null;
-            if(certificateType != null){
-                KeyManagerFactory keyManagerFactory = keyManagerFactory(url,password,certificateType);
+            if (certificateType != null) {
+                KeyManagerFactory keyManagerFactory = keyManagerFactory(url, password, certificateType);
                 keyManagers = keyManagerFactory.getKeyManagers();
             }
 
-            sslContext.init(keyManagers,trustManager,new SecureRandom());
-        }catch (Exception e) {
+            sslContext.init(keyManagers, trustManager, new SecureRandom());
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return sslContext;
     }
 
 
-    public static KeyManagerFactory keyManagerFactory(String url,String password,String certificateType){
+    public static KeyManagerFactory keyManagerFactory(String url, String password, String certificateType) {
         FileInputStream fileInputStream = null;
         try {
             KeyStore keyStore = KeyStore.getInstance(certificateType);
             fileInputStream = new FileInputStream(url);
-            keyStore.load(fileInputStream,password.toCharArray());
+            keyStore.load(fileInputStream, password.toCharArray());
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            keyManagerFactory.init(keyStore,password.toCharArray());
+            keyManagerFactory.init(keyStore, password.toCharArray());
             return keyManagerFactory;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
-                if(fileInputStream != null){
+                if (fileInputStream != null) {
                     fileInputStream.close();
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -75,21 +78,22 @@ public class WsSSLContext {
     }
 
 
-    public static SslContext createNettySslContext(boolean server,KeyManagerFactory keyManagerFactory){
-        if (server){
+    public static SslContext createNettySslContext(boolean server, KeyManagerFactory keyManagerFactory) {
+        if (server) {
             SslContextBuilder sslContextBuilder = SslContextBuilder.forServer(keyManagerFactory);
             try {
                 return sslContextBuilder.build();
-            }catch (SSLException e){
+            } catch (SSLException e) {
                 e.printStackTrace();
             }
             return null;
-        }else {
+        } else {
             try {
-                SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
+                SslProvider provider = SslProvider.isAlpnSupported(SslProvider.OPENSSL) ? SslProvider.OPENSSL : SslProvider.JDK;
+                //SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
                 SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
                 sslContextBuilder.sslProvider(provider);
-                ApplicationProtocolConfig applicationProtocolConfig = new ApplicationProtocolConfig(
+                /*ApplicationProtocolConfig applicationProtocolConfig = new ApplicationProtocolConfig(
                         ApplicationProtocolConfig.Protocol.ALPN,
                         // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
                         ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
@@ -97,9 +101,9 @@ public class WsSSLContext {
                         ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
                         ApplicationProtocolNames.HTTP_2,
                         ApplicationProtocolNames.HTTP_1_1);
-                sslContextBuilder.applicationProtocolConfig(applicationProtocolConfig);
+                sslContextBuilder.applicationProtocolConfig(applicationProtocolConfig);*/
                 sslContextBuilder.keyStoreType("TLSv1.2");
-                sslContextBuilder.ciphers(Http2SecurityUtil.CIPHERS,SupportedCipherSuiteFilter.INSTANCE);
+                sslContextBuilder.ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE);
                 sslContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE);
                 SslContext sslContext = sslContextBuilder.build();
                 return sslContext;
@@ -117,14 +121,13 @@ public class WsSSLContext {
                                 ApplicationProtocolNames.HTTP_1_1))
                         .build();
                         return sslContext;*/
-            }catch (SSLException e){
+            } catch (SSLException e) {
                 e.printStackTrace();
             }
 
             return null;
         }
     }
-
 
 
 }

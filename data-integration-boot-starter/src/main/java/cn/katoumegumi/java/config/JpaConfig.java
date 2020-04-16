@@ -3,10 +3,9 @@ package cn.katoumegumi.java.config;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.properties.HibernateWsProperties;
 import cn.katoumegumi.java.properties.JpaWsProperties;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -29,12 +27,13 @@ import java.util.Properties;
 //import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 
 @Configuration
-@Slf4j
-@ConditionalOnClass({DataSource.class,EntityManagerFactory.class})
+@ConditionalOnClass({DataSource.class, EntityManagerFactory.class})
 @AutoConfigureAfter({HibernateConfig.class})
 @EnableConfigurationProperties({JpaWsProperties.class})
-@ConditionalOnProperty(prefix = "megumi.jpa",name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "megumi.jpa", name = "enable", havingValue = "true")
 public class JpaConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(JpaConfig.class);
 
     /*@Resource
     private DataSource dataSource;*/
@@ -45,32 +44,32 @@ public class JpaConfig {
     @Resource
     private JpaWsProperties jpaWsProperties;
 
-    public JpaConfig(){
+    public JpaConfig() {
 
     }
 
-    private Properties createProperties(){
+    private Properties createProperties() {
         Properties properties = new Properties();
-        if(hibernateWsProperties.getHbm2ddl() != null){
-            properties.setProperty("hibernate.hbm2ddl.auto",hibernateWsProperties.getHbm2ddl());
+        if (hibernateWsProperties.getHbm2ddl() != null) {
+            properties.setProperty("hibernate.hbm2ddl.auto", hibernateWsProperties.getHbm2ddl());
         }
-        if(hibernateWsProperties.getDialect() != null){
-            properties.setProperty("hibernate.dialect",hibernateWsProperties.getDialect().getName());
+        if (hibernateWsProperties.getDialect() != null) {
+            properties.setProperty("hibernate.dialect", hibernateWsProperties.getDialect().getName());
         }
-        properties.setProperty("hibernate.show_sql",hibernateWsProperties.getShowSql().toString());
-        properties.setProperty("hibernate.format_sql",hibernateWsProperties.getFormatSql().toString());
-        properties.setProperty("hibernate.use_sql_comments",hibernateWsProperties.getUseSqlComments().toString());
-        properties.setProperty("hibernate.physical_naming_strategy",hibernateWsProperties.physicalStrategy.getName());
-        properties.setProperty("hibernate.implicit_naming_strategy",hibernateWsProperties.implicitStrategy.getName());
-        if(hibernateWsProperties.getDefaultSchema() != null){
-            properties.setProperty("hibernate.default_schema",hibernateWsProperties.getDefaultSchema());
+        properties.setProperty("hibernate.show_sql", hibernateWsProperties.getShowSql().toString());
+        properties.setProperty("hibernate.format_sql", hibernateWsProperties.getFormatSql().toString());
+        properties.setProperty("hibernate.use_sql_comments", hibernateWsProperties.getUseSqlComments().toString());
+        properties.setProperty("hibernate.physical_naming_strategy", hibernateWsProperties.physicalStrategy.getName());
+        properties.setProperty("hibernate.implicit_naming_strategy", hibernateWsProperties.implicitStrategy.getName());
+        if (hibernateWsProperties.getDefaultSchema() != null) {
+            properties.setProperty("hibernate.default_schema", hibernateWsProperties.getDefaultSchema());
         }
-        if(hibernateWsProperties.getFactoryClass() != null){
-            properties.setProperty("transaction.factory_class",hibernateWsProperties.getFactoryClass().getName());
+        if (hibernateWsProperties.getFactoryClass() != null) {
+            properties.setProperty("transaction.factory_class", hibernateWsProperties.getFactoryClass().getName());
         }
-        if(hibernateWsProperties.getOtherConfig().size() > 0) {
-            hibernateWsProperties.getOtherConfig().forEach((key,value)->{
-                properties.setProperty(key,value);
+        if (hibernateWsProperties.getOtherConfig().size() > 0) {
+            hibernateWsProperties.getOtherConfig().forEach((key, value) -> {
+                properties.setProperty(key, value);
             });
         }
         return properties;
@@ -99,17 +98,15 @@ public class JpaConfig {
     }*/
 
 
-
-
     @Primary
     @Bean(name = "entityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(DataSource dataSource){
+    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(DataSource dataSource) {
         HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
         hibernateJpaVendorAdapter.setGenerateDdl(jpaWsProperties.getGenerateDdl());
         hibernateJpaVendorAdapter.setPrepareConnection(jpaWsProperties.getPrepareConnection());
         hibernateJpaVendorAdapter.setShowSql(jpaWsProperties.getShowSql());
         hibernateJpaVendorAdapter.setDatabase(jpaWsProperties.getDatabase());
-        if(WsStringUtils.isNotBlank(jpaWsProperties.getDatabasePlatform())) {
+        if (WsStringUtils.isNotBlank(jpaWsProperties.getDatabasePlatform())) {
             hibernateJpaVendorAdapter.setDatabasePlatform(jpaWsProperties.getDatabasePlatform());
         }
         LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
@@ -123,7 +120,7 @@ public class JpaConfig {
 
     @Primary
     @Bean
-    public PlatformTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory){
+    public PlatformTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory) {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactory);
         return jpaTransactionManager;
@@ -135,10 +132,10 @@ public class JpaConfig {
 
     @Bean
     @Primary
-    public EntityManager sharedEntityManagerCreator(/*EntityManagerFactory entityManagerFactory*/ List<EntityManager> entityManagers){
+    public EntityManager sharedEntityManagerCreator(/*EntityManagerFactory entityManagerFactory*/ List<EntityManager> entityManagers) {
         //return SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
-        for(EntityManager entityManager:entityManagers){
-            if(entityManager.toString().contains("LocalContainerEntityManagerFactoryBean")){
+        for (EntityManager entityManager : entityManagers) {
+            if (entityManager.toString().contains("LocalContainerEntityManagerFactoryBean")) {
                 return entityManager;
             }
         }

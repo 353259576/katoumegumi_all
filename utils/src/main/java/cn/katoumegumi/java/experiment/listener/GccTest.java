@@ -8,17 +8,6 @@ import org.opencv.utils.Converters;
 import org.opencv.video.Video;
 import org.opencv.videoio.Videoio;*/
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.WritableByteChannel;
-import java.util.EventListener;
-import java.util.EventObject;
-
 public class GccTest {
 
 
@@ -28,7 +17,7 @@ public class GccTest {
     }
 
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         /*String str = "D:/image/19.jpg";
         String str1 = "D:/image/24.jpg";
         String newStr = new String(str.getBytes("GBK"),"GBK");

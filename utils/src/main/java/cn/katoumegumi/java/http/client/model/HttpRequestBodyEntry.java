@@ -12,32 +12,32 @@ public class HttpRequestBodyEntry implements Comparable<HttpRequestBodyEntry> {
     private InputStream inputStreamValue;
     private boolean isFile = false;
 
-    public HttpRequestBodyEntry(){
+    public HttpRequestBodyEntry() {
 
     }
 
-    public HttpRequestBodyEntry(String name,String value){
+    public HttpRequestBodyEntry(String name, String value) {
         this.name = name;
         this.value = value;
     }
-    public HttpRequestBodyEntry(String name, File file){
+
+    public HttpRequestBodyEntry(String name, File file) {
         try {
             this.name = name;
             this.value = file.getName();
             this.inputStreamValue = new FileInputStream(file);
             this.isFile = true;
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    public HttpRequestBodyEntry(String name,String fileName,InputStream inputStream){
+
+    public HttpRequestBodyEntry(String name, String fileName, InputStream inputStream) {
         this.name = name;
         this.value = fileName;
         this.inputStreamValue = inputStream;
         this.isFile = true;
     }
-
-
 
 
     public String getName() {
@@ -88,13 +88,13 @@ public class HttpRequestBodyEntry implements Comparable<HttpRequestBodyEntry> {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof HttpRequestBodyEntry){
-            if(((HttpRequestBodyEntry) obj).getName().equals(this.name)){
+        if (obj instanceof HttpRequestBodyEntry) {
+            if (((HttpRequestBodyEntry) obj).getName().equals(this.name)) {
                 return true;
-            }else {
+            } else {
                 return false;
             }
-        }else {
+        } else {
             return false;
         }
     }

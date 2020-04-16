@@ -28,22 +28,22 @@ public class HttpResponseBody {
 
     private boolean isGzip = false;
 
-    private HttpResponseBody(){
+    private HttpResponseBody() {
         this.headers = new HashMap<>();
     }
 
-    private HttpResponseBody(int code,byte returnBytes[],Map<String,List<String>> headers){
+    private HttpResponseBody(int code, byte returnBytes[], Map<String, List<String>> headers) {
         this.code = code;
         this.returnBytes = returnBytes;
         this.headers = headers;
     }
 
-    public static HttpResponseBody createHttpResponseBody(){
+    public static HttpResponseBody createHttpResponseBody() {
         return new HttpResponseBody();
     }
 
-    public static HttpResponseBody createHttpResponseBody(int code, byte returnBytes[], Map<String,List<String>> headers){
-        return new HttpResponseBody(code,returnBytes,headers);
+    public static HttpResponseBody createHttpResponseBody(int code, byte returnBytes[], Map<String, List<String>> headers) {
+        return new HttpResponseBody(code, returnBytes, headers);
     }
 
 
@@ -55,112 +55,112 @@ public class HttpResponseBody {
         this.url = url;
     }
 
-    public List<String> getHeaderProperty(String key){
+    public List<String> getHeaderProperty(String key) {
         return headers.get(key);
     }
 
 
-    public void setHeaderProperty(String key,List<String> value){
-        headers.put(key,value);
+    public void setHeaderProperty(String key, List<String> value) {
+        headers.put(key, value);
     }
 
-    public synchronized void setHeaderProperty(String key,String value){
+    public synchronized void setHeaderProperty(String key, String value) {
         List<String> list = headers.get(key);
-        if(list == null){
+        if (list == null) {
             list = new ArrayList<>(Arrays.asList(value.split(",")));
-            headers.put(key,list);
-        }else {
-            for(String str:value.split(",")){
+            headers.put(key, list);
+        } else {
+            for (String str : value.split(",")) {
                 list.add(str);
             }
         }
     }
 
-    public String getResponseBodyToString(String charset){
+    public String getResponseBodyToString(String charset) {
 
         try {
-            if(returnBytes == null){
-                return new String(errorReturnBytes,charset);
-            }else {
-                return new String(returnBytes,charset);
+            if (returnBytes == null) {
+                return new String(errorReturnBytes, charset);
+            } else {
+                return new String(returnBytes, charset);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public String getResponseBodyToString(){
+    public String getResponseBodyToString() {
         return getResponseBodyToString("UTF-8");
     }
 
-    public String getErrorResponseBodyToString(String charset){
+    public String getErrorResponseBodyToString(String charset) {
         try {
-            if(errorReturnBytes == null){
+            if (errorReturnBytes == null) {
                 return null;
             }
-            return new String(errorReturnBytes,charset);
-        }catch (Exception e){
+            return new String(errorReturnBytes, charset);
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public String getErrorResponseBodyToString(){
-        if(charSet != null){
+    public String getErrorResponseBodyToString() {
+        if (charSet != null) {
             return getErrorResponseBodyToString(charSet);
-        }else {
+        } else {
             return getResponseBodyToString("UTF-8");
         }
 
     }
 
 
-    public void build(){
+    public void build() {
         List<String> list = headers.get("Connection");
         this.isKeepAlive = false;
-        if(!(list == null || list.size() ==0)){
-            if("keep-alive".equals(list.get(0))){
+        if (!(list == null || list.size() == 0)) {
+            if ("keep-alive".equals(list.get(0))) {
                 this.isKeepAlive = true;
             }
         }
         list = headers.get(null);
-        if(!(list == null || list.size() ==0)){
+        if (!(list == null || list.size() == 0)) {
             int k = list.get(0).indexOf(' ');
-            if(k <1){
+            if (k < 1) {
                 k = list.get(0).length();
             }
-            httpVersion = list.get(0).substring(0,k);
+            httpVersion = list.get(0).substring(0, k);
         }
 
         list = headers.get("Content-Type");
-        if(!(list == null || list.size() ==0)){
+        if (!(list == null || list.size() == 0)) {
             int l = list.get(0).length();
             int k = list.get(0).toLowerCase().indexOf("charset");
-            if(k > 1){
-                contentType = list.get(0).substring(0,k);
-                if(l-k > 10){
-                    charSet = list.get(0).substring(k + 8,l);
+            if (k > 1) {
+                contentType = list.get(0).substring(0, k);
+                if (l - k > 10) {
+                    charSet = list.get(0).substring(k + 8, l);
                 }
-            }else {
-                if(list.get(0).startsWith("charset")){
-                    charSet = list.get(0).substring(list.get(0).indexOf("charset")+8,l);
-                }else {
+            } else {
+                if (list.get(0).startsWith("charset")) {
+                    charSet = list.get(0).substring(list.get(0).indexOf("charset") + 8, l);
+                } else {
                     contentType = list.get(0);
                 }
             }
         }
         list = headers.get("Content-Encoding");
-        if(!(list == null||list.isEmpty())){
-            for(Object o:list){
-                String str = (String)o;
-                if("gzip".equals(str.toLowerCase())){
+        if (!(list == null || list.isEmpty())) {
+            for (Object o : list) {
+                String str = (String) o;
+                if ("gzip".equals(str.toLowerCase())) {
                     isGzip = true;
-                    if(!(returnBytes == null && returnBytes.length ==0)){
+                    if (!(returnBytes == null && returnBytes.length == 0)) {
                         this.returnBytes = uncmpressByGZIP(this.returnBytes);
                     }
-                    if(!(errorReturnBytes == null || errorReturnBytes.length == 0)){
+                    if (!(errorReturnBytes == null || errorReturnBytes.length == 0)) {
                         this.errorReturnBytes = uncmpressByGZIP(this.errorReturnBytes);
                     }
                 }
@@ -170,8 +170,8 @@ public class HttpResponseBody {
     }
 
 
-    public byte[] uncmpressByGZIP(byte bytes[]){
-        if(bytes == null || bytes.length == 0){
+    public byte[] uncmpressByGZIP(byte bytes[]) {
+        if (bytes == null || bytes.length == 0) {
             return bytes;
         }
         try {
@@ -181,9 +181,9 @@ public class HttpResponseBody {
             ReadableByteChannel readableByteChannel = Channels.newChannel(gzipInputStream);
             WritableByteChannel writableByteChannel = Channels.newChannel(byteArrayOutputStream);
             ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-            while (readableByteChannel.read(byteBuffer) != -1){
+            while (readableByteChannel.read(byteBuffer) != -1) {
                 byteBuffer.flip();
-                while(byteBuffer.hasRemaining()){
+                while (byteBuffer.hasRemaining()) {
                     writableByteChannel.write(byteBuffer);
                 }
                 byteBuffer.clear();
@@ -196,14 +196,11 @@ public class HttpResponseBody {
             gzipInputStream.close();
             byteArrayInputStream.close();
             return newbytes;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return bytes;
         }
     }
-
-
-
 
 
     public int getCode() {
@@ -305,6 +302,6 @@ public class HttpResponseBody {
 
     @Override
     public String toString() {
-        return getClass().getName() + "@" + Integer.toHexString(hashCode()) + "\r\n状态码：\r\n"+this.getCode() +"\r\ncontentType：\r\n"+ this.getContentType()+"\r\n字符：\r\n"+this.getCharSet() +"\r\n内容:\r\n"+this.getResponseBodyToString();
+        return getClass().getName() + "@" + Integer.toHexString(hashCode()) + "\r\n状态码：\r\n" + this.getCode() + "\r\ncontentType：\r\n" + this.getContentType() + "\r\n字符：\r\n" + this.getCharSet() + "\r\n内容:\r\n" + this.getResponseBodyToString();
     }
 }

@@ -18,7 +18,7 @@ public class DiscardChannelInitializer extends ChannelInitializer<SocketChannel>
 
         socketChannel.pipeline().addLast(new HttpRequestDecoder());
         socketChannel.pipeline().addLast(new HttpResponseEncoder());
-        socketChannel.pipeline().addLast("httpAggregator",new HttpObjectAggregator(512*1024*1024));
+        socketChannel.pipeline().addLast("httpAggregator", new HttpObjectAggregator(512 * 1024 * 1024));
         socketChannel.pipeline().addLast(new HttpResponseHandler());
         socketChannel.pipeline().addLast(new HttpRequestHandler());
 

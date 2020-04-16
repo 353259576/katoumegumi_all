@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.http.client.model;
 
-public enum  MediaType {
+public enum MediaType {
     ALL_VALUE("*/*"),
     APPLICATION_XML_VALUE("application/xml"),
     APPLICATION_FORM_URLENCODED_VALUE("application/x-www-form-urlencoded"),
@@ -10,7 +10,7 @@ public enum  MediaType {
 
     private String coed;
 
-    private MediaType(String code){
+    private MediaType(String code) {
         this.coed = code;
     }
 

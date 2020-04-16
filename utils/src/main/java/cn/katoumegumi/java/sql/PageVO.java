@@ -20,7 +20,7 @@ public class PageVO implements Serializable {
     }
 
     public void setPage(Integer page) {
-        if(page < 1){
+        if (page < 1) {
             page = 1;
         }
 
@@ -32,7 +32,7 @@ public class PageVO implements Serializable {
     }
 
     public void setRows(Integer rows) {
-        if(rows < 1){
+        if (rows < 1) {
             rows = 1;
         }
         this.rows = rows;
@@ -43,7 +43,7 @@ public class PageVO implements Serializable {
     }
 
     public void setTotalRows(Integer totalRows) {
-        if(totalRows < 0){
+        if (totalRows < 0) {
             totalRows = 0;
         }
         this.totalRows = totalRows;

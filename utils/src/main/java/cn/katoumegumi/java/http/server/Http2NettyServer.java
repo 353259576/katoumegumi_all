@@ -36,13 +36,13 @@ public class Http2NettyServer {
         serverBootstrap.group(workEventExecutors);
         serverBootstrap.channel(NioServerSocketChannel.class);
         serverBootstrap.handler(new LoggingHandler(LogLevel.INFO));
-        serverBootstrap.option(ChannelOption.SO_BACKLOG,128);
-        serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE,true);
+        serverBootstrap.option(ChannelOption.SO_BACKLOG, 128);
+        serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
         serverBootstrap.childHandler(new Http2Initailzer());
         try {
             Channel channel = serverBootstrap.bind(1996).sync().channel();
             channel.closeFuture().sync();
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 

@@ -20,7 +20,6 @@ import java.lang.annotation.*;
 public @interface HibernateTransactional {
 
 
-
     /**
      * A <em>qualifier</em> value for the specified transaction.
      * <p>May be used to determine the target transaction manager,
@@ -35,9 +34,10 @@ public @interface HibernateTransactional {
     /**
      * The transaction propagation type.
      * <p>Defaults to {@link Propagation#REQUIRED}.
+     *
      * @see org.springframework.transaction.interceptor.TransactionAttribute#getPropagationBehavior()
      */
-    @AliasFor(annotation = Transactional.class,value = "propagation")
+    @AliasFor(annotation = Transactional.class, value = "propagation")
     Propagation propagation() default Propagation.REQUIRED;
 
     /**
@@ -49,10 +49,11 @@ public @interface HibernateTransactional {
      * "true" on your transaction manager if you'd like isolation level declarations
      * to get rejected when participating in an existing transaction with a different
      * isolation level.
+     *
      * @see org.springframework.transaction.interceptor.TransactionAttribute#getIsolationLevel()
      * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setValidateExistingTransaction
      */
-    @AliasFor(annotation = Transactional.class,value = "isolation")
+    @AliasFor(annotation = Transactional.class, value = "isolation")
     Isolation isolation() default Isolation.DEFAULT;
 
     /**
@@ -61,9 +62,10 @@ public @interface HibernateTransactional {
      * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
      * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
      * transactions.
+     *
      * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
      */
-    @AliasFor(annotation = Transactional.class,value = "timeout")
+    @AliasFor(annotation = Transactional.class, value = "timeout")
     int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
 
     /**
@@ -75,10 +77,11 @@ public @interface HibernateTransactional {
      * A transaction manager which cannot interpret the read-only hint will
      * <i>not</i> throw an exception when asked for a read-only transaction
      * but rather silently ignore the hint.
+     *
      * @see org.springframework.transaction.interceptor.TransactionAttribute#isReadOnly()
      * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
      */
-    @AliasFor(annotation = Transactional.class,value = "readOnly")
+    @AliasFor(annotation = Transactional.class, value = "readOnly")
     boolean readOnly() default false;
 
     /**
@@ -92,10 +95,11 @@ public @interface HibernateTransactional {
      * <p>This is the preferred way to construct a rollback rule (in contrast to
      * {@link #rollbackForClassName}), matching the exception class and its subclasses.
      * <p>Similar to {@link org.springframework.transaction.interceptor.RollbackRuleAttribute#RollbackRuleAttribute(Class clazz)}.
+     *
      * @see #rollbackForClassName
      * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
      */
-    @AliasFor(annotation = Transactional.class,value = "rollbackFor")
+    @AliasFor(annotation = Transactional.class, value = "rollbackFor")
     Class<? extends Throwable>[] rollbackFor() default {};
 
     /**
@@ -113,10 +117,11 @@ public @interface HibernateTransactional {
      * {@link Exception} names such as {@code "BaseBusinessException"} there is no
      * need to use a FQN.
      * <p>Similar to {@link org.springframework.transaction.interceptor.RollbackRuleAttribute#RollbackRuleAttribute(String exceptionName)}.
+     *
      * @see #rollbackFor
      * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
      */
-    @AliasFor(annotation = Transactional.class,value = "rollbackForClassName")
+    @AliasFor(annotation = Transactional.class, value = "rollbackForClassName")
     String[] rollbackForClassName() default {};
 
     /**
@@ -127,10 +132,11 @@ public @interface HibernateTransactional {
      * to {@link #noRollbackForClassName}), matching the exception class and
      * its subclasses.
      * <p>Similar to {@link org.springframework.transaction.interceptor.NoRollbackRuleAttribute#NoRollbackRuleAttribute(Class clazz)}.
+     *
      * @see #noRollbackForClassName
      * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
      */
-    @AliasFor(annotation = Transactional.class,value = "noRollbackFor")
+    @AliasFor(annotation = Transactional.class, value = "noRollbackFor")
     Class<? extends Throwable>[] noRollbackFor() default {};
 
     /**
@@ -140,10 +146,11 @@ public @interface HibernateTransactional {
      * <p>See the description of {@link #rollbackForClassName} for further
      * information on how the specified names are treated.
      * <p>Similar to {@link org.springframework.transaction.interceptor.NoRollbackRuleAttribute#NoRollbackRuleAttribute(String exceptionName)}.
+     *
      * @see #noRollbackFor
      * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
      */
-    @AliasFor(annotation = Transactional.class,value = "noRollbackForClassName")
+    @AliasFor(annotation = Transactional.class, value = "noRollbackForClassName")
     String[] noRollbackForClassName() default {};
 
 

@@ -5,10 +5,13 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
+
 public class InServerHandler extends ChannelInboundHandlerAdapter {
+
+    private static final Logger log = LoggerFactory.getLogger(InServerHandler.class);
 
 
     @Override
@@ -29,13 +32,13 @@ public class InServerHandler extends ChannelInboundHandlerAdapter {
         log.info("读取进行");
         try {
             //super.channelRead(ctx, msg);
-            ByteBuf byteBuf = (ByteBuf)msg;
+            ByteBuf byteBuf = (ByteBuf) msg;
             Integer start = byteBuf.readerIndex();
             Integer end = byteBuf.readableBytes();
             byte bytes[] = new byte[end - start];
-            byteBuf.readBytes(bytes,start,end);
+            byteBuf.readBytes(bytes, start, end);
             //System.out.println(new String(bytes));
-            log.info("\r\n"+new String(bytes));
+            log.info("\r\n" + new String(bytes));
             ChannelFuture channelFuture = ctx.write(msg);
             ctx.flush();
             /*channelFuture.addListener(new ChannelFutureListener() {
@@ -49,7 +52,7 @@ public class InServerHandler extends ChannelInboundHandlerAdapter {
             ctx.flush();*/
             //ctx.fireChannelRead(msg);
 
-        }finally {
+        } finally {
             ReferenceCountUtil.retain(msg);
             ReferenceCountUtil.retain(msg);
             ReferenceCountUtil.release(msg);

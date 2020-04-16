@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.experiment.luence;
 
-import lombok.extern.slf4j.Slf4j;
+
 /*import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
@@ -19,18 +19,9 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;*/
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 /**
  * @author ws
  */
-@Slf4j
 public class LuenceTest {
 
 
@@ -92,7 +83,6 @@ public class LuenceTest {
         indexWriter.close();
         directory.close();
     }*/
-
 
 
 }

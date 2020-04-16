@@ -1,39 +1,25 @@
 package cn.katoumegumi.java.lx.controller;
 
-import cn.katoumegumi.java.common.DBCreateLevel;
 import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsFileUtils;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
 import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
+import cn.katoumegumi.java.lx.model.UserOrder;
 import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.SQLModelUtils;
 import com.alibaba.fastjson.JSON;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.*;
 import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.WritableByteChannel;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -41,6 +27,11 @@ import java.util.List;
  */
 @Controller
 public class Index2Conftoller {
+
+    @Autowired
+    private UserJpaDao userJpaDao;
+    @Autowired
+    private HibernateDao hibernateDao;
 
     public static void main(String[] args) {
         /*String str = new BCryptPasswordEncoder().encode("nacos");
@@ -75,35 +66,33 @@ public class Index2Conftoller {
         }*/
 
 
-        Field field = WsFieldUtils.getFieldByName(User.class,"userDetails");
+        Field field = WsFieldUtils.getFieldByName(User.class, "userDetails");
         Class c = WsFieldUtils.getClassListType(field);
         System.out.println(c);
 
+        MySearchList mySearchList = MySearchList.newMySearchList();
+        mySearchList.setMainClass(UserOrder.class);
+        mySearchList.join(null, User.class, "user123", "userId", "id");
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        String str = sqlModelUtils.searchListBaseSQLProcessor();
+        System.out.println(str);
 
     }
 
-    @Autowired
-    private UserJpaDao userJpaDao;
-
-    @Autowired
-    private HibernateDao hibernateDao;
-
-
-
     @RequestMapping(value = "hibernateTest")
     @ResponseBody
-    public String hibernateTest(){
+    public String hibernateTest() {
         User user = new User();
-        MySearchList mySearchList = MySearchList.newMySearchList().sort("userDetails.id","desc");
-        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
-                MySearchList.newMySearchList().eq(user::getPassword,"世界")
+        MySearchList mySearchList = MySearchList.newMySearchList().sort("userDetails.id", "desc");
+        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex", "男").eq(user::getName, "你好"),
+                MySearchList.newMySearchList().eq(user::getPassword, "世界")
         )
-                .eq(user::getId,1)
-                .lte(user::getCreateDate,"2019-12-13")
-                .eqp(user::getName,user::getPassword)
-                .sort("id","ASC")
-                .sort("userDetails.sex","DESC");
-        List<User> users = hibernateDao.selectValueToList(mySearchList,User.class);
+                .eq(user::getId, 1)
+                .lte(user::getCreateDate, "2019-12-13")
+                .eqp(user::getName, user::getPassword)
+                .sort("id", "ASC")
+                .sort("userDetails.sex", "DESC");
+        List<User> users = hibernateDao.selectValueToList(mySearchList, User.class);
         return JSON.toJSONString(user);
     }
 
@@ -111,25 +100,25 @@ public class Index2Conftoller {
     @RequestMapping(value = "index2")
     @ResponseBody
     @HibernateTransactional
-    public Mono<String> index(ServerHttpRequest serverHttpRequest){
+    public Mono<String> index(ServerHttpRequest serverHttpRequest) {
         System.out.println(serverHttpRequest.getId());
         System.out.println(serverHttpRequest.getMethod().name());
         //List<User> list = userJpaDao.selectUser();
-        for(int i = 0; i < 1000; i++){
+        for (int i = 0; i < 1000; i++) {
             User user = new User();
-            user.setName("你好"+i);
-            user.setPassword("世界"+i);
+            user.setName("你好" + i);
+            user.setPassword("世界" + i);
             user.setCreateDate(LocalDateTime.now());
             hibernateDao.insertObject(user);
-            for(int k = 0; k < 10; k++){
+            for (int k = 0; k < 10; k++) {
                 UserDetails userDetails = new UserDetails();
-                userDetails.setSex(k%2==0?"男":"女");
-                userDetails.setNickName("你好世界"+i);
+                userDetails.setSex(k % 2 == 0 ? "男" : "女");
+                userDetails.setNickName("你好世界" + i);
                 userDetails.setUserId(user.getId());
                 hibernateDao.insertObject(userDetails);
-                for(int j = 0; j < 10; j++){
+                for (int j = 0; j < 10; j++) {
                     UserDetailsRemake userDetailsRemake = new UserDetailsRemake();
-                    userDetailsRemake.setRemake(j+"");
+                    userDetailsRemake.setRemake(j + "");
                     userDetailsRemake.setUserDetailsId(userDetails.getId());
                     hibernateDao.insertObject(userDetailsRemake);
                 }

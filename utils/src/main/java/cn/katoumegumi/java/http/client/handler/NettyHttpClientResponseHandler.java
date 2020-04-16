@@ -1,9 +1,9 @@
 package cn.katoumegumi.java.http.client.handler;
 
-import cn.katoumegumi.java.http.client.processor.WsChannelHttpRequestBodyBind;
 import cn.katoumegumi.java.http.client.model.ChannelTimeoutEntry;
 import cn.katoumegumi.java.http.client.model.HttpRequestBody;
 import cn.katoumegumi.java.http.client.model.HttpResponseBody;
+import cn.katoumegumi.java.http.client.processor.WsChannelHttpRequestBodyBind;
 import cn.katoumegumi.java.http.client.utils.WsNettyClientUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -11,7 +11,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.ChannelInputShutdownEvent;
 import io.netty.handler.codec.http.*;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
 import java.util.Iterator;
@@ -19,16 +20,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Slf4j
 public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter {
+    private static final Logger log = LoggerFactory.getLogger(NettyHttpClientResponseHandler.class);
+    public static AtomicInteger atomicInteger = new AtomicInteger(0);
     private volatile HttpRequestBody httpRequestBody;
     private volatile String id;
     private volatile boolean sendHttp;
 
-    public static AtomicInteger atomicInteger = new AtomicInteger(0);
 
-
-    public NettyHttpClientResponseHandler(HttpRequestBody httpRequestBody, String id,boolean sendHttp){
+    public NettyHttpClientResponseHandler(HttpRequestBody httpRequestBody, String id, boolean sendHttp) {
         this.httpRequestBody = httpRequestBody;
         this.id = id;
         this.sendHttp = sendHttp;
@@ -54,15 +54,15 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
-            String channelId  = ctx.channel().id().asLongText();
-            if(msg instanceof FullHttpResponse){
-                FullHttpResponse fullHttpResponse = (FullHttpResponse)msg;
+            String channelId = ctx.channel().id().asLongText();
+            if (msg instanceof FullHttpResponse) {
+                FullHttpResponse fullHttpResponse = (FullHttpResponse) msg;
                 HttpHeaders httpHeaders = fullHttpResponse.headers();
                 HttpResponseBody httpResponseBody = HttpResponseBody.createHttpResponseBody();
-                Iterator<Map.Entry<String,String>> iterator = httpHeaders.iteratorAsString();
-                while (iterator.hasNext()){
-                    Map.Entry<String,String> entry = iterator.next();
-                    httpResponseBody.setHeaderProperty(entry.getKey(),entry.getValue());
+                Iterator<Map.Entry<String, String>> iterator = httpHeaders.iteratorAsString();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, String> entry = iterator.next();
+                    httpResponseBody.setHeaderProperty(entry.getKey(), entry.getValue());
                 }
                 ByteBuf byteBuf = fullHttpResponse.content();
                 //ByteBuf byteBuf = (ByteBuf)msg;
@@ -74,34 +74,34 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
                 httpResponseBody.setCode(code);
                 httpResponseBody.setUrl(httpRequestBody.getUrl());
                 httpResponseBody.setHttpVersion(fullHttpResponse.protocolVersion().text());
-                if(code == 200){
+                if (code == 200) {
                     httpResponseBody.setReturnBytes(bytes);
-                }else {
+                } else {
                     httpResponseBody.setErrorReturnBytes(bytes);
                 }
                 WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.remove(id);
                 ChannelTimeoutEntry channelTimeoutEntry = new ChannelTimeoutEntry();
                 channelTimeoutEntry.setId(id);
                 WsChannelHttpRequestBodyBind.delayQueue.remove(channelTimeoutEntry);
-                WsChannelHttpRequestBodyBind.putHttpResponseBody(id,httpResponseBody);
+                WsChannelHttpRequestBodyBind.putHttpResponseBody(id, httpResponseBody);
                 WsChannelHttpRequestBodyBind.removeChannelAndHttpRequestBodyBind(id);
                 WsChannelHttpRequestBodyBind.semaphore.release();
-                if(HttpHeaderValues.KEEP_ALIVE.toString().equals(fullHttpResponse.headers().get("Connection"))){
-                    WsChannelHttpRequestBodyBind.addResumableChannel(httpRequestBody,ctx.channel());
-                }else {
+                if (HttpHeaderValues.KEEP_ALIVE.toString().equals(fullHttpResponse.headers().get("Connection"))) {
+                    WsChannelHttpRequestBodyBind.addResumableChannel(httpRequestBody, ctx.channel());
+                } else {
                     ctx.close();
                 }
                 atomicInteger.getAndAdd(1);
 
-            }else if(msg instanceof HttpResponse){
+            } else if (msg instanceof HttpResponse) {
                 //long startTime = System.currentTimeMillis();
-                HttpResponse httpResponse = (HttpResponse)msg;
+                HttpResponse httpResponse = (HttpResponse) msg;
                 HttpHeaders httpHeaders = httpResponse.headers();
                 HttpResponseBody httpResponseBody = HttpResponseBody.createHttpResponseBody();
-                Iterator<Map.Entry<String,String>> iterator = httpHeaders.iteratorAsString();
-                while (iterator.hasNext()){
-                    Map.Entry<String,String> entry = iterator.next();
-                    httpResponseBody.setHeaderProperty(entry.getKey(),entry.getValue());
+                Iterator<Map.Entry<String, String>> iterator = httpHeaders.iteratorAsString();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, String> entry = iterator.next();
+                    httpResponseBody.setHeaderProperty(entry.getKey(), entry.getValue());
                 }
                 int code = httpResponse.status().code();
                 httpResponseBody.setCode(code);
@@ -109,11 +109,11 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
                 httpResponseBody.setHttpVersion(httpResponse.protocolVersion().text());
                 httpResponseBody.setReturnBytes(new byte[0]);
                 httpResponseBody.setErrorReturnBytes(new byte[0]);
-                WsChannelHttpRequestBodyBind.httpResponseBodyMap.put(id,httpResponseBody);
-                WsChannelHttpRequestBodyBind.stringByteBufMap.put(id,Unpooled.directBuffer());
+                WsChannelHttpRequestBodyBind.httpResponseBodyMap.put(id, httpResponseBody);
+                WsChannelHttpRequestBodyBind.stringByteBufMap.put(id, Unpooled.directBuffer());
                 //long endTime = System.currentTimeMillis();
                 //log.info("读取http头花费时间：{}",endTime - startTime);
-            }else if(msg instanceof HttpContent) {
+            } else if (msg instanceof HttpContent) {
                 //log.info("下载中");
                 ByteBuf oldBytebuf = WsChannelHttpRequestBodyBind.stringByteBufMap.get(id);
                 HttpContent httpContent = (HttpContent) msg;
@@ -141,11 +141,11 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
                     List<String> list = httpResponseBody.getHeaderProperty("Connection");
                     if (list != null) {
                         if (list.contains(HttpHeaderValues.KEEP_ALIVE.toString())) {
-                            WsChannelHttpRequestBodyBind.addResumableChannel(httpRequestBody,ctx.channel());
-                        }else {
+                            WsChannelHttpRequestBodyBind.addResumableChannel(httpRequestBody, ctx.channel());
+                        } else {
                             ctx.close();
                         }
-                    }else {
+                    } else {
                         ctx.close();
                     }
                     atomicInteger.getAndAdd(1);
@@ -161,7 +161,7 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
                     channelFuture.channel().close();
                 }
             });*/
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -170,10 +170,10 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         try {
-            if(sendHttp) {
+            if (sendHttp) {
                 WsNettyClientUtils.sendHttpRequest(ctx, httpRequestBody, id);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         ctx.fireChannelActive();
@@ -204,7 +204,7 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if(evt instanceof ChannelInputShutdownEvent){
+        if (evt instanceof ChannelInputShutdownEvent) {
             log.info("服务器主动断开");
             ctx.close();
         }

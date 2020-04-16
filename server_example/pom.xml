@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>katoumegumi_all</artifactId>
         <groupId>cn.katoumegumi.java</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -22,8 +22,14 @@
     </properties>-->
 
 
-
     <dependencies>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -40,7 +46,7 @@
         <dependency>
             <groupId>cn.katoumegumi.java</groupId>
             <artifactId>data-integration-boot-starter</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -115,9 +121,6 @@
         </dependency>-->
 
 
-
-
-
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
@@ -180,7 +183,6 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
@@ -226,7 +228,6 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
         </dependency>-->
-
 
 
         <dependency>
@@ -283,7 +284,8 @@
             <artifactId>curator-framework</artifactId>
             <version>4.2.0</version>
         </dependency>
--->    </dependencies>
+-->
+    </dependencies>
 
 
 </project>

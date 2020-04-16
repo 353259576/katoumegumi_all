@@ -7,9 +7,8 @@ import java.util.List;
 
 /**
  * @author ws
-
  */
-public interface PagingService <T>  {
+public interface PagingService<T> {
 
     public <S extends T> S save(S var1);
 

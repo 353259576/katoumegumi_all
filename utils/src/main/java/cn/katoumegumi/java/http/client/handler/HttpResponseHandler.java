@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
     private final Map<Integer, Entry<ChannelFuture, ChannelPromise>> streamidPromiseMap;
-    private  AtomicInteger atomicInteger = new AtomicInteger(1);
+    private AtomicInteger atomicInteger = new AtomicInteger(1);
 
     public HttpResponseHandler() {
         // Use a concurrent map because we add and iterate from the main thread (just for the purposes of the example),
@@ -46,7 +46,7 @@ public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpRes
     }
 
 
-    public Integer getStreamId(){
+    public Integer getStreamId() {
         return atomicInteger.getAndAdd(2);
     }
 
@@ -54,9 +54,9 @@ public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpRes
     /**
      * Create an association between an anticipated response stream id and a {@link ChannelPromise}
      *
-     * @param streamId The stream for which a response is expected
+     * @param streamId    The stream for which a response is expected
      * @param writeFuture A future that represent the request write operation
-     * @param promise The promise object that will be used to wait/notify events
+     * @param promise     The promise object that will be used to wait/notify events
      * @return The previous object associated with {@code streamId}
      * @see HttpResponseHandler#awaitResponses(long, TimeUnit)
      */
@@ -68,7 +68,7 @@ public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpRes
      * Wait (sequentially) for a time duration for each anticipated response
      *
      * @param timeout Value of time to wait for each response
-     * @param unit Units associated with {@code timeout}
+     * @param unit    Units associated with {@code timeout}
      * @see HttpResponseHandler#put(int, ChannelFuture, ChannelPromise)
      */
     public void awaitResponses(long timeout, TimeUnit unit) {

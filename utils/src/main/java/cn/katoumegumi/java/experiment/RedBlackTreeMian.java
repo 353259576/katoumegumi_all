@@ -26,23 +26,24 @@ public class RedBlackTreeMian {
 
     /**
      * 树右旋
+     *
      * @param treeNode
      */
-    public <T> TreeNode<T> rightRotation(TreeNode<T> treeNode){
+    public <T> TreeNode<T> rightRotation(TreeNode<T> treeNode) {
         TreeNode<T> parentTreeNode = treeNode.getParentTreeNode();
         //boolean isRoot = parentTreeNode==null;
         TreeNode<T> leftTreeNode = treeNode.getLeftTreeNode();
-        TreeNode<T> leftRightTreeNode = leftTreeNode==null?null:leftTreeNode.getRightTreeNode();
+        TreeNode<T> leftRightTreeNode = leftTreeNode == null ? null : leftTreeNode.getRightTreeNode();
         treeNode.setLeftTreeNode(leftRightTreeNode);
         leftTreeNode.setRightTreeNode(treeNode);
-        if(parentTreeNode != null){
+        if (parentTreeNode != null) {
             //boolean isParentRight = parentTreeNode.getRightTreeNode().equals(treeNode);
-            if(parentTreeNode.getRightTreeNode().equals(treeNode)){
+            if (parentTreeNode.getRightTreeNode().equals(treeNode)) {
                 parentTreeNode.setRightTreeNode(leftTreeNode);
-            }else {
+            } else {
                 parentTreeNode.setLeftTreeNode(leftTreeNode);
             }
-        }else {
+        } else {
             leftTreeNode.setParentTreeNode(null);
         }
         return leftTreeNode;
@@ -50,29 +51,30 @@ public class RedBlackTreeMian {
 
     /**
      * 树左旋
+     *
      * @param treeNode
      */
-    public <T> TreeNode<T> leftRotation(TreeNode<T> treeNode){
+    public <T> TreeNode<T> leftRotation(TreeNode<T> treeNode) {
         TreeNode<T> parentTreeNode = treeNode.getParentTreeNode();
         //boolean isRoot = parentTreeNode==null;
         TreeNode<T> rightTreeNode = treeNode.getRightTreeNode();
-        TreeNode<T> rightLeftTreeNode = rightTreeNode == null?null:rightTreeNode.getLeftTreeNode();
+        TreeNode<T> rightLeftTreeNode = rightTreeNode == null ? null : rightTreeNode.getLeftTreeNode();
         treeNode.setRightTreeNode(rightLeftTreeNode);
         rightTreeNode.setLeftTreeNode(treeNode);
-        if(parentTreeNode!=null) {
+        if (parentTreeNode != null) {
             //boolean isParentRight = parentTreeNode.getRightTreeNode().equals(treeNode);
             if (parentTreeNode.getRightTreeNode().equals(treeNode)) {
                 parentTreeNode.setRightTreeNode(rightTreeNode);
             } else {
                 parentTreeNode.setLeftTreeNode(rightLeftTreeNode);
             }
-        }else {
+        } else {
             rightTreeNode.setParentTreeNode(null);
         }
         return rightTreeNode;
     }
 
-    public void changeColor(TreeNode treeNode){
+    public void changeColor(TreeNode treeNode) {
 
     }
 

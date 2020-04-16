@@ -1,11 +1,9 @@
 package cn.katoumegumi.java.properties;
 
-import lombok.Data;
 
 /**
  * @author ws
  */
-@Data
 public class DruidDataSourceProperties {
     private String alias;
     private String driverClassName = "com.mysql.cj.jdbc.Driver";
@@ -26,4 +24,157 @@ public class DruidDataSourceProperties {
     private long timeBetweenEvictionRunsMillis = 60000L;
     private boolean testOnReturn = false;
     private int maxActive = 50;
+
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getDriverClassName() {
+        return driverClassName;
+    }
+
+    public void setDriverClassName(String driverClassName) {
+        this.driverClassName = driverClassName;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean isRemoveAbandoned() {
+        return removeAbandoned;
+    }
+
+    public void setRemoveAbandoned(boolean removeAbandoned) {
+        this.removeAbandoned = removeAbandoned;
+    }
+
+    public String getConnectionProperties() {
+        return connectionProperties;
+    }
+
+    public void setConnectionProperties(String connectionProperties) {
+        this.connectionProperties = connectionProperties;
+    }
+
+    public int getMinIdle() {
+        return minIdle;
+    }
+
+    public void setMinIdle(int minIdle) {
+        this.minIdle = minIdle;
+    }
+
+    public String getValidationQuery() {
+        return validationQuery;
+    }
+
+    public void setValidationQuery(String validationQuery) {
+        this.validationQuery = validationQuery;
+    }
+
+    public int getInitialSize() {
+        return initialSize;
+    }
+
+    public void setInitialSize(int initialSize) {
+        this.initialSize = initialSize;
+    }
+
+    public long getMaxWait() {
+        return maxWait;
+    }
+
+    public void setMaxWait(long maxWait) {
+        this.maxWait = maxWait;
+    }
+
+    public boolean isPoolPreparedStatements() {
+        return poolPreparedStatements;
+    }
+
+    public void setPoolPreparedStatements(boolean poolPreparedStatements) {
+        this.poolPreparedStatements = poolPreparedStatements;
+    }
+
+    public String getFilters() {
+        return filters;
+    }
+
+    public void setFilters(String filters) {
+        this.filters = filters;
+    }
+
+    public boolean isTestOnBorrow() {
+        return testOnBorrow;
+    }
+
+    public void setTestOnBorrow(boolean testOnBorrow) {
+        this.testOnBorrow = testOnBorrow;
+    }
+
+    public boolean isTestWhileIdle() {
+        return testWhileIdle;
+    }
+
+    public void setTestWhileIdle(boolean testWhileIdle) {
+        this.testWhileIdle = testWhileIdle;
+    }
+
+    public long getMinEvictableIdleTimeMillis() {
+        return minEvictableIdleTimeMillis;
+    }
+
+    public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+        this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+    }
+
+    public long getTimeBetweenEvictionRunsMillis() {
+        return timeBetweenEvictionRunsMillis;
+    }
+
+    public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
+        this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
+    }
+
+    public boolean isTestOnReturn() {
+        return testOnReturn;
+    }
+
+    public void setTestOnReturn(boolean testOnReturn) {
+        this.testOnReturn = testOnReturn;
+    }
+
+    public int getMaxActive() {
+        return maxActive;
+    }
+
+    public void setMaxActive(int maxActive) {
+        this.maxActive = maxActive;
+    }
 }

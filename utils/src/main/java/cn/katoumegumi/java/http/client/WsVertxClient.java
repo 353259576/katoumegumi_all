@@ -29,7 +29,7 @@ public class WsVertxClient {
         vertx = Vertx.vertx(vertxOptions);
         WebClientOptions webClientOptions = new WebClientOptions();
         webClientOptions.setUserAgent("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36");
-        webClient = WebClient.create(vertx,webClientOptions);
+        webClient = WebClient.create(vertx, webClientOptions);
     }
 
 
@@ -76,10 +76,9 @@ public class WsVertxClient {
         };
 
 
-
         Executor executor = Executors.newCachedThreadPool();
-        for(int i = 0; i < 10; i++){
-            executor.execute(()->{
+        for (int i = 0; i < 10; i++) {
+            executor.execute(() -> {
                 Random random = new Random();
                 int k = random.nextInt(strs.length);
                 String str = strs[k];
@@ -90,7 +89,7 @@ public class WsVertxClient {
                 try {
                     HttpResponseBody httpResponseBody = httpResponseTask.call();
                     System.out.println(JSON.toJSONString(httpResponseBody.getHeaders()));
-                }catch (TimeoutException e){
+                } catch (TimeoutException e) {
                     e.printStackTrace();
                 }
             });
@@ -101,17 +100,17 @@ public class WsVertxClient {
     }
 
 
-    public static HttpResponseTask clientStart(HttpRequestBody httpRequestBody){
+    public static HttpResponseTask clientStart(HttpRequestBody httpRequestBody) {
         boolean isPrivate = false;
         final WebClient webClient;
-        if(httpRequestBody.getPkcsPath() != null){
+        if (httpRequestBody.getPkcsPath() != null) {
             WebClientOptions webClientOptions = new WebClientOptions();
            /* PfxOptions pfxOptions = new PfxOptions();
             pfxOptions.setPath(httpRequestBody.getPkcsPath());
             pfxOptions.setPassword(httpRequestBody.getPkcsPassword());
             webClientOptions.setPfxKeyCertOptions(pfxOptions);*/
-            webClient = WebClient.create(vertx,webClientOptions);
-        }else {
+            webClient = WebClient.create(vertx, webClientOptions);
+        } else {
             webClient = WsVertxClient.webClient;
         }
 
@@ -119,37 +118,37 @@ public class WsVertxClient {
         HttpResponseTask httpResponseTask = new HttpResponseTask(countDownLatch);
         List<WsRequestProperty> list = httpRequestBody.getRequestProperty();
         MultiMap multiMap = MultiMap.caseInsensitiveMultiMap();
-        for(WsRequestProperty wsRequestProperty:list) {
-            multiMap.add(wsRequestProperty.getKey(),wsRequestProperty.getValue());
+        for (WsRequestProperty wsRequestProperty : list) {
+            multiMap.add(wsRequestProperty.getKey(), wsRequestProperty.getValue());
         }
         byte bytes[] = httpRequestBody.getbyteHttpRequestBody();
-        if(bytes == null){
+        if (bytes == null) {
             bytes = new byte[0];
         }
-        webClient.request(getHttpMethod(httpRequestBody.getMethod()),httpRequestBody.getPort(),httpRequestBody.getUri().getHost(),httpRequestBody.getUri().getPath())
+        webClient.request(getHttpMethod(httpRequestBody.getMethod()), httpRequestBody.getPort(), httpRequestBody.getUri().getHost(), httpRequestBody.getUri().getPath())
                 .ssl(httpRequestBody.isHttps())
                 .putHeaders(multiMap).sendBuffer(Buffer.buffer(bytes), new Handler<AsyncResult<HttpResponse<Buffer>>>() {
             @Override
             public void handle(AsyncResult<HttpResponse<Buffer>> event) {
-                if(event.succeeded()){
+                if (event.succeeded()) {
                     HttpResponse<Buffer> httpResponse = event.result();
                     MultiMap multiMap1 = httpResponse.headers();
-                    List<Map.Entry<String,String>> list1 = multiMap1.entries();
-                    Map<String,List<String>> map = new HashMap<>();
-                    for(Map.Entry<String,String> entry:list1){
-                        map.put(entry.getKey(),new ArrayList<>(Arrays.asList(entry.getValue().split(","))));
+                    List<Map.Entry<String, String>> list1 = multiMap1.entries();
+                    Map<String, List<String>> map = new HashMap<>();
+                    for (Map.Entry<String, String> entry : list1) {
+                        map.put(entry.getKey(), new ArrayList<>(Arrays.asList(entry.getValue().split(","))));
                     }
-                    HttpResponseBody httpResponseBody = HttpResponseBody.createHttpResponseBody(httpResponse.statusCode(),httpResponse.body().getBytes(),map);
+                    HttpResponseBody httpResponseBody = HttpResponseBody.createHttpResponseBody(httpResponse.statusCode(), httpResponse.body().getBytes(), map);
                     httpResponseBody.setUrl(httpRequestBody.getUrl());
                     httpResponseBody.setHttpVersion(httpResponse.version().name());
                     httpResponseBody.build();
                     httpResponseTask.setHttpResponseBody(httpResponseBody);
                     countDownLatch.countDown();
-                }else {
+                } else {
                     event.cause().printStackTrace();
                     countDownLatch.countDown();
                 }
-                if(isPrivate){
+                if (isPrivate) {
                     webClient.close();
                 }
 
@@ -158,19 +157,29 @@ public class WsVertxClient {
         return httpResponseTask;
     }
 
-    public static HttpMethod getHttpMethod(String method){
+    public static HttpMethod getHttpMethod(String method) {
         method = method.toUpperCase();
-        switch (method){
-            case "GET":return HttpMethod.GET;
-            case "POST":return HttpMethod.POST;
-            case "PUT":return HttpMethod.PUT;
-            case "CONNECT":return HttpMethod.CONNECT;
-            case "DELETE":return HttpMethod.DELETE;
-            case "HEAD":return HttpMethod.HEAD;
-            case "OTHER":return HttpMethod.OTHER;
-            case "OPTIONS":return HttpMethod.OPTIONS;
-            case "PATCH":return HttpMethod.PATCH;
-            default:return HttpMethod.GET;
+        switch (method) {
+            case "GET":
+                return HttpMethod.GET;
+            case "POST":
+                return HttpMethod.POST;
+            case "PUT":
+                return HttpMethod.PUT;
+            case "CONNECT":
+                return HttpMethod.CONNECT;
+            case "DELETE":
+                return HttpMethod.DELETE;
+            case "HEAD":
+                return HttpMethod.HEAD;
+            case "OTHER":
+                return HttpMethod.OTHER;
+            case "OPTIONS":
+                return HttpMethod.OPTIONS;
+            case "PATCH":
+                return HttpMethod.PATCH;
+            default:
+                return HttpMethod.GET;
         }
     }
 

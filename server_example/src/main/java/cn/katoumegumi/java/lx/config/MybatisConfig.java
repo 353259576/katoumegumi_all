@@ -1,8 +1,14 @@
 package cn.katoumegumi.java.lx.config;
 
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.sql.SQLClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.sql.DataSource;
 
 /**
  * @author ws
@@ -22,6 +28,18 @@ public class MybatisConfig {
     }
 
 
+    @Bean
+    public SQLClient sqlClient(DataSource dataSource) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.put("provider_class", "cn.katoumegumi.java.vertx.DruidDataSourceProvider");
+        jsonObject.put("url", "jdbc:mysql://127.0.0.1:3306/wslx?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&allowMultiQueries=true&allowPublicKeyRetrieval=true");
+        jsonObject.put("user", "root");
+        jsonObject.put("password", "199645");
+        jsonObject.put("driver_class", "com.mysql.cj.jdbc.Driver");
+        Vertx vertx = Vertx.vertx();
+        SQLClient client = JDBCClient.create(vertx, dataSource);
+        return client;
+    }
 
 
 }

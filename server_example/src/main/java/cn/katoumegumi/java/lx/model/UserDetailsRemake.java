@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.lx.model;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -20,6 +19,6 @@ public class UserDetailsRemake {
     @Column(name = "user_details_id")
     private Long userDetailsId;
 
-    @Column(name = "remake",length = 250,nullable = true)
+    @Column(name = "remake", length = 250, nullable = true)
     private String remake;
 }

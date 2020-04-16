@@ -71,8 +71,7 @@ public class WsNioServer {
             }
 
 
-
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

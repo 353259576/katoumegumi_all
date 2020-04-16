@@ -7,17 +7,17 @@ public class MySearch {
     private String tableNickName;
     private Class tableClass;
 
-    private MySearch(){
+    private MySearch() {
 
     }
 
-    public MySearch(String fieldName, SqlOperator operator,Object value){
+    public MySearch(String fieldName, SqlOperator operator, Object value) {
         this.fieldName = fieldName;
         this.operator = operator;
         this.value = value;
     }
 
-    public MySearch(Class tableClass,String tableNickName,String fieldName, SqlOperator operator,Object value){
+    public MySearch(Class tableClass, String tableNickName, String fieldName, SqlOperator operator, Object value) {
         this.tableClass = tableClass;
         this.tableNickName = tableNickName;
         this.fieldName = fieldName;

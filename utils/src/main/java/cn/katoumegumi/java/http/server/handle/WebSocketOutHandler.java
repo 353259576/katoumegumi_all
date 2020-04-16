@@ -11,6 +11,6 @@ public class WebSocketOutHandler extends ChannelOutboundHandlerAdapter {
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         String str = (String) msg;
         TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame(str);
-        ctx.write(textWebSocketFrame,promise).addListener(ChannelFutureListener.CLOSE);
+        ctx.write(textWebSocketFrame, promise).addListener(ChannelFutureListener.CLOSE);
     }
 }

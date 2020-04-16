@@ -1,7 +1,6 @@
 package cn.katoumegumi.java.http.client;
 
 
-
 import cn.katoumegumi.java.http.client.model.HttpRequestBody;
 import cn.katoumegumi.java.http.client.model.HttpResponseBody;
 import cn.katoumegumi.java.http.client.model.WsRequestProperty;
@@ -58,13 +57,13 @@ public class WsUrlConnection {
         System.out.println(httpResponseBody.getErrorResponseBodyToString());
         System.out.println(JSON.toJSONString(httpResponseBody.getHeaders()));*/
 
-       try {
-           System.setProperty("http.proxyHost", "localhost");
-           System.setProperty("https.proxyHost", "127.0.0.1");
-           System.setProperty("http.proxyPort", "8888");
-           System.setProperty("https.proxyPort", "8888");
-           HttpResponseBody httpResponseBody = WsUrlConnection.urlLink(HttpRequestBody.createHttpRequestBody().setUrl("https://www.bilibili.com").setMethod("GET").setGZIP(true));
-           System.out.println(httpResponseBody);
+        try {
+            System.setProperty("http.proxyHost", "localhost");
+            System.setProperty("https.proxyHost", "127.0.0.1");
+            System.setProperty("http.proxyPort", "8888");
+            System.setProperty("https.proxyPort", "8888");
+            HttpResponseBody httpResponseBody = WsUrlConnection.urlLink(HttpRequestBody.createHttpRequestBody().setUrl("https://www.bilibili.com").setMethod("GET").setGZIP(true));
+            System.out.println(httpResponseBody);
            /*TimerEnity timerEnity = new TimerEnity();
            timerEnity.setInitiatorUrl("订单回调");
            timerEnity.setAddition("fsdfsdf"+"-"+1);
@@ -75,9 +74,9 @@ public class WsUrlConnection {
            //httpRequestBody.setStringHttpRequestBody(JSON.toJSONString(timerEnity));
            HttpResponseBody responseBody = WsUrlConnection.urlLink("http://localhost:2011/timer/addTimer","POST",httpRequestBody);
            System.out.println(responseBody.getResponseBodyToString());*/
-       }catch (Exception e){
-           e.printStackTrace();
-       }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -98,16 +97,16 @@ public class WsUrlConnection {
     }
 
 
-    public static HttpResponseBody urlLink(HttpRequestBody httpRequestBody){
-        if(httpRequestBody.isHttps()){
+    public static HttpResponseBody urlLink(HttpRequestBody httpRequestBody) {
+        if (httpRequestBody.isHttps()) {
             return httpsRequest(httpRequestBody);
-        }else {
+        } else {
             return httpRequest(httpRequestBody);
         }
     }
 
-    public static HttpResponseBody urlLink(String urlpath, HttpRequestBody httpRequestBody, String pkcsPath, String pkcsPassword){
-        if(httpRequestBody == null){
+    public static HttpResponseBody urlLink(String urlpath, HttpRequestBody httpRequestBody, String pkcsPath, String pkcsPassword) {
+        if (httpRequestBody == null) {
             httpRequestBody = HttpRequestBody.createHttpRequestBody();
         }
         httpRequestBody.setUrl(urlpath);
@@ -117,7 +116,7 @@ public class WsUrlConnection {
     }
 
 
-    public static HttpResponseBody httpsRequest(HttpRequestBody httpRequestBody){
+    public static HttpResponseBody httpsRequest(HttpRequestBody httpRequestBody) {
         InputStream inputStream = null;
         InputStream eInputStream = null;
         BufferedOutputStream bufferedOutputStream = null;
@@ -125,7 +124,7 @@ public class WsUrlConnection {
         Integer resultCode = null;
         String textType = null;
         FileInputStream fileInputStream = null;
-        if(httpRequestBody == null){
+        if (httpRequestBody == null) {
             httpRequestBody = HttpRequestBody.createHttpRequestBody();
         }
         HttpResponseBody httpResponseBody = HttpResponseBody.createHttpResponseBody();
@@ -179,7 +178,7 @@ public class WsUrlConnection {
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
             httpsURLConnection.setSSLSocketFactory(sslSocketFactory);
             byte data[] = httpRequestBody.getbyteHttpRequestBody();
-            if (data != null&&data.length > 0) {
+            if (data != null && data.length > 0) {
                 httpsURLConnection.setDoInput(true);
             }
             httpsURLConnection.setDoOutput(true);
@@ -187,15 +186,15 @@ public class WsUrlConnection {
 
             if (!httpRequestBody.getRequestProperty().isEmpty()) {
                 List<WsRequestProperty> wsRequestProperties = httpRequestBody.getRequestProperty();
-                for (WsRequestProperty wsRequestProperty:wsRequestProperties) {
+                for (WsRequestProperty wsRequestProperty : wsRequestProperties) {
                     httpsURLConnection.addRequestProperty(wsRequestProperty.getKey(), wsRequestProperty.getValue());
                 }
             }
 
             httpsURLConnection.connect();
 
-            if("POST".equals(httpRequestBody.getMethod())){
-                if (data != null&&data.length > 0) {
+            if ("POST".equals(httpRequestBody.getMethod())) {
+                if (data != null && data.length > 0) {
                     outputStream = httpsURLConnection.getOutputStream();
                     bufferedOutputStream = new BufferedOutputStream(outputStream);
                     bufferedOutputStream.write(data);
@@ -210,25 +209,22 @@ public class WsUrlConnection {
             httpResponseBody.setHeaders(map);
             try {
                 inputStream = httpsURLConnection.getInputStream();
-            }catch (Exception e){
+            } catch (Exception e) {
                 //e.printStackTrace();
             }
             try {
                 eInputStream = httpsURLConnection.getErrorStream();
-            }catch (Exception e){
+            } catch (Exception e) {
                 //e.printStackTrace();
             }
 
 
-
-
-
             //textType = httpsURLConnection.getRequestProperty("Content-Type").split("=")[1];
 
-            if(inputStream != null){
+            if (inputStream != null) {
                 httpResponseBody.setReturnBytes(WsUrlConnection.readInputsteam(inputStream));
             }
-            if(eInputStream != null){
+            if (eInputStream != null) {
                 httpResponseBody.setErrorReturnBytes(WsUrlConnection.readInputsteam(eInputStream));
             }
             httpResponseBody.build();
@@ -326,8 +322,7 @@ public class WsUrlConnection {
     }
 
 
-
-    public static byte[] readInputsteam(InputStream inputStream){
+    public static byte[] readInputsteam(InputStream inputStream) {
         WritableByteChannel writableByteChannel = null;
         ReadableByteChannel readableByteChannel = null;
         ByteArrayOutputStream byteArrayOutputStream = null;
@@ -338,60 +333,60 @@ public class WsUrlConnection {
             readableByteChannel = Channels.newChannel(inputStream);
             writableByteChannel = Channels.newChannel(byteArrayOutputStream);
             byteBuffer = ByteBuffer.allocate(1024);
-            while (readableByteChannel.read(byteBuffer) != -1){
+            while (readableByteChannel.read(byteBuffer) != -1) {
                 byteBuffer.flip();
-                while (byteBuffer.hasRemaining()){
+                while (byteBuffer.hasRemaining()) {
                     writableByteChannel.write(byteBuffer);
                 }
                 byteBuffer.clear();
             }
             bytes = byteArrayOutputStream.toByteArray();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
-                if(writableByteChannel != null) {
+                if (writableByteChannel != null) {
                     writableByteChannel.close();
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 writableByteChannel = null;
             }
             try {
-                if(readableByteChannel != null) {
+                if (readableByteChannel != null) {
                     readableByteChannel.close();
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 readableByteChannel = null;
             }
             try {
-                if(byteArrayOutputStream != null){
+                if (byteArrayOutputStream != null) {
                     byteArrayOutputStream.flush();
                     byteArrayOutputStream.close();
                 }
 
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 byteArrayOutputStream = null;
             }
             try {
-                if(inputStream != null) {
+                if (inputStream != null) {
                     inputStream.close();
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 inputStream = null;
             }
         }
         return bytes;
     }
 
-    public static OutputStream writeOutputsteam(InputStream inputStream,OutputStream outputStream){
+    public static OutputStream writeOutputsteam(InputStream inputStream, OutputStream outputStream) {
         WritableByteChannel writableByteChannel = null;
         ReadableByteChannel readableByteChannel = null;
         ByteBuffer byteBuffer = null;
@@ -399,17 +394,17 @@ public class WsUrlConnection {
             readableByteChannel = Channels.newChannel(inputStream);
             writableByteChannel = Channels.newChannel(outputStream);
             byteBuffer = ByteBuffer.allocate(1024);
-            while (readableByteChannel.read(byteBuffer) != -1){
+            while (readableByteChannel.read(byteBuffer) != -1) {
                 byteBuffer.flip();
-                while (byteBuffer.hasRemaining()){
+                while (byteBuffer.hasRemaining()) {
                     writableByteChannel.write(byteBuffer);
                 }
                 byteBuffer.clear();
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             closeSteam(writableByteChannel);
             closeSteam(readableByteChannel);
             closeSteam(inputStream);
@@ -418,8 +413,8 @@ public class WsUrlConnection {
     }
 
 
-    public static void closeSteam(Closeable closeable){
-        if(closeable != null) {
+    public static void closeSteam(Closeable closeable) {
+        if (closeable != null) {
             try {
                 if (closeable instanceof Flushable) {
                     ((Flushable) closeable).flush();

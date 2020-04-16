@@ -2,7 +2,6 @@ package cn.katoumegumi.java.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -18,11 +17,7 @@ public class WsTranactionUtils {
 
     }
 
-    public interface WsTranactionRun{
-        public Object run() throws RuntimeException;
-    }
-
-    public Object runMethod(WsTranactionRun runnable){
+    public Object runMethod(WsTranactionRun runnable) {
         DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
         transactionDefinition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
         transactionDefinition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
@@ -31,11 +26,15 @@ public class WsTranactionUtils {
         try {
             object = runnable.run();
             platformTransactionManager.commit(transactionStatus);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             platformTransactionManager.rollback(transactionStatus);
         }
         return object;
+    }
+
+    public interface WsTranactionRun {
+        public Object run() throws RuntimeException;
     }
 
 }

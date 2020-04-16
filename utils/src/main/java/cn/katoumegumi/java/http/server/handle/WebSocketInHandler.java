@@ -9,7 +9,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
 import java.util.Date;
@@ -18,8 +19,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 
-@Slf4j
+
 public class WebSocketInHandler extends SimpleChannelInboundHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(WebSocketInHandler.class);
 
     public static Map<String, Channel> map = new ConcurrentHashMap<>();
 
@@ -80,7 +83,7 @@ public class WebSocketInHandler extends SimpleChannelInboundHandler {
         channel.writeAndFlush(new TextWebSocketFrame(str));
         channelHandlerContext.flush();*/
         //channelHandlerContext.flush();
-        try{
+        try {
             if (textWebSocketFrame instanceof FullHttpRequest) {
                 handleRequest(channelHandlerContext, (FullHttpRequest) textWebSocketFrame);
             }
@@ -88,7 +91,7 @@ public class WebSocketInHandler extends SimpleChannelInboundHandler {
             if (textWebSocketFrame instanceof WebSocketFrame) {
                 handleWebSocket(channelHandlerContext, (WebSocketFrame) textWebSocketFrame);
             }
-        }finally {
+        } finally {
             //ReferenceCountUtil.retain(textWebSocketFrame);
             //7ReferenceCountUtil.release(textWebSocketFrame);
         }
@@ -161,38 +164,38 @@ public class WebSocketInHandler extends SimpleChannelInboundHandler {
             //channelHandlerContext.writeAndFlush(new PongWebSocketFrame());
             return;
         }
-        if(webSocketFrame instanceof PongWebSocketFrame){
+        if (webSocketFrame instanceof PongWebSocketFrame) {
             //channelHandlerContext.writeAndFlush(new PingWebSocketFrame(webSocketFrame.content().retain()));
             return;
         }
         String str = ((TextWebSocketFrame) webSocketFrame).text();
         //channelHandlerContext.writeAndFlush(new TextWebSocketFrame(str));
         channelHandlerContext.flush();
-        executorService.submit(()->{
-            sendMsg(channelHandlerContext.channel().id().asLongText(),str);
+        executorService.submit(() -> {
+            sendMsg(channelHandlerContext.channel().id().asLongText(), str);
         });
     }
 
 
-    public void sendMsg(String channelId, String value){
-        Set<Map.Entry<String,Channel>> set = map.entrySet();
-        Iterator<Map.Entry<String,Channel>> iterator = set.iterator();
-        Flux.<Map.Entry<String,Channel>>create(channelFluxSink -> {
-            while (iterator.hasNext()){
+    public void sendMsg(String channelId, String value) {
+        Set<Map.Entry<String, Channel>> set = map.entrySet();
+        Iterator<Map.Entry<String, Channel>> iterator = set.iterator();
+        Flux.<Map.Entry<String, Channel>>create(channelFluxSink -> {
+            while (iterator.hasNext()) {
                 channelFluxSink.next(iterator.next());
             }
             channelFluxSink.complete();
-        }).filter(entity->{
+        }).filter(entity -> {
             String id = entity.getKey();
-            if(id.equals(channelId)){
+            if (id.equals(channelId)) {
                 return false;
-            }else {
+            } else {
                 return true;
             }
-        }).subscribe(entity->{
+        }).subscribe(entity -> {
             String id = entity.getKey();
             Channel channel = entity.getValue();
-            TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame(id+"："+value);
+            TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame(id + "：" + value);
             channel.writeAndFlush(textWebSocketFrame);
         });
 

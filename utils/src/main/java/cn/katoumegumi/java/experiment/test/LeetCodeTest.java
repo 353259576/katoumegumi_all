@@ -2,15 +2,23 @@ package cn.katoumegumi.java.experiment.test;
 
 import com.alibaba.fastjson.JSON;
 
-import java.sql.Array;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author ws
  */
 
 public class LeetCodeTest {
+
+    private final static int MAX = Integer.MAX_VALUE >> 1;
+    /**
+     * 513. 找树左下角的值
+     *
+     * @param root
+     * @return
+     */
+    public static int lastDeep = 0;
+    public static int leftValue;
 
     public static void main(String[] args) {
         /*TreeNode treeNode = new TreeNode(0);
@@ -25,17 +33,18 @@ public class LeetCodeTest {
 
     /**
      * 斐波那契数列
+     *
      * @param N
      * @return
      */
-    public static int fib(int N){
-        if(N < 2){
+    public static int fib(int N) {
+        if (N < 2) {
             return N;
         }
         int x0 = 0;
         int x1 = 1;
         int fibSum = 0;
-        for(int i = 2;i <= N; i++){
+        for (int i = 2; i <= N; i++) {
             fibSum = x0 + x1;
             x0 = x1;
             x1 = fibSum;
@@ -43,51 +52,45 @@ public class LeetCodeTest {
         return fibSum;
     }
 
-    /**
-     * 513. 找树左下角的值
-     * @param root
-     * @return
-     */
-    public static int lastDeep = 0;
-    public static int leftValue;
     public static int findBottomLeftValue(TreeNode root) {
         int deep = 0;
         leftValue = root.val;
-        if(root.left != null){
+        if (root.left != null) {
 
-            findBottomLeftValue(root.left,deep + 1);
+            findBottomLeftValue(root.left, deep + 1);
         }
-        if(root.right != null){
-            findBottomLeftValue(root.right,deep + 1);
+        if (root.right != null) {
+            findBottomLeftValue(root.right, deep + 1);
         }
         return leftValue;
     }
-    public static void findBottomLeftValue(TreeNode root,int deep) {
-        if(deep > lastDeep){
+
+    public static void findBottomLeftValue(TreeNode root, int deep) {
+        if (deep > lastDeep) {
             lastDeep = deep;
             leftValue = root.val;
         }
-        if(root.left != null){
-            findBottomLeftValue(root.left,deep + 1);
+        if (root.left != null) {
+            findBottomLeftValue(root.left, deep + 1);
         }
-        if(root.right != null){
-            findBottomLeftValue(root.right,deep + 1);
+        if (root.right != null) {
+            findBottomLeftValue(root.right, deep + 1);
         }
     }
 
-    public static int findBottomLeftValue1(TreeNode root){
+    public static int findBottomLeftValue1(TreeNode root) {
         Queue<TreeNode> queue = new LinkedList<>();
         queue.add(root);
         int value = 0;
-        while (!queue.isEmpty()){
+        while (!queue.isEmpty()) {
             value = queue.peek().val;
             int count = queue.size();
-            while (count -- > 0){
+            while (count-- > 0) {
                 TreeNode treeNode = queue.poll();
-                if(treeNode.left != null){
+                if (treeNode.left != null) {
                     queue.add(treeNode.left);
                 }
-                if(treeNode.right != null){
+                if (treeNode.right != null) {
                     queue.add(treeNode.right);
                 }
             }
@@ -97,60 +100,59 @@ public class LeetCodeTest {
 
     /**
      * 514. 自由之路
+     *
      * @param ring
      * @param key
      * @return
      */
     public static int findRotateSteps1(String ring, String key) {
-        char[] rings=ring.toCharArray();
-        List<Integer>[] rs=new ArrayList[26];
-        for (int i=0;i<26;i++){
-            rs[i]=new ArrayList<>();
+        char[] rings = ring.toCharArray();
+        List<Integer>[] rs = new ArrayList[26];
+        for (int i = 0; i < 26; i++) {
+            rs[i] = new ArrayList<>();
         }
-        for (int i=0; i<rings.length ;i++)
-        {
-            rs[rings[i]-'a'].add(i);
+        for (int i = 0; i < rings.length; i++) {
+            rs[rings[i] - 'a'].add(i);
         }
 
-        char[] keys=key.toCharArray();
-        int[][] dp=new int[ring.length()][key.length()];
-        for (int i=0;i<dp.length;i++) {
-            Arrays.fill(dp[i],-1);
+        char[] keys = key.toCharArray();
+        int[][] dp = new int[ring.length()][key.length()];
+        for (int i = 0; i < dp.length; i++) {
+            Arrays.fill(dp[i], -1);
         }
-        return slove(0,0,keys,rs,dp,ring.length());
+        return slove(0, 0, keys, rs, dp, ring.length());
 
 
     }
 
-    private final static int MAX=Integer.MAX_VALUE>>1;
-    private static int slove(int r_idx, int k_idx, char[] keys, List<Integer>[] rs, int[][] dp,final int rlen) {
-        if(k_idx==keys.length){
+    private static int slove(int r_idx, int k_idx, char[] keys, List<Integer>[] rs, int[][] dp, final int rlen) {
+        if (k_idx == keys.length) {
             return 0;
         }
-        if(dp[r_idx][k_idx]!=-1){
+        if (dp[r_idx][k_idx] != -1) {
             return dp[r_idx][k_idx];
         }
-        int res=MAX;
-        for (int i:rs[keys[k_idx]-'a']) {
-            int t=1+Math.min(Math.abs(r_idx-i),Math.min(Math.abs(i+rlen-r_idx),Math.abs(r_idx+rlen-i)));
-            t+=slove(i,k_idx+1,keys,rs,dp,rlen);
+        int res = MAX;
+        for (int i : rs[keys[k_idx] - 'a']) {
+            int t = 1 + Math.min(Math.abs(r_idx - i), Math.min(Math.abs(i + rlen - r_idx), Math.abs(r_idx + rlen - i)));
+            t += slove(i, k_idx + 1, keys, rs, dp, rlen);
 
-            res=Math.min(res,t);
+            res = Math.min(res, t);
         }
-        if(r_idx == 0&& r_idx == 0){
+        if (r_idx == 0 && r_idx == 0) {
             System.out.println(JSON.toJSONString(dp));
         }
-        return dp[r_idx][k_idx]=res;
+        return dp[r_idx][k_idx] = res;
     }
 
 
     public static int findRotateSteps(String ring, String key) {
-        Map<Integer,List<Integer>> locationMap = new HashMap<>();
+        Map<Integer, List<Integer>> locationMap = new HashMap<>();
         int ringLength = ring.length();
         int keyLength = key.length();
         char[] ringChars = ring.toCharArray();
         char[] keyChars = key.toCharArray();
-        for(int i = 0; i < ringLength;i++) {
+        for (int i = 0; i < ringLength; i++) {
             int index = ringChars[i] - 'a';
             List<Integer> list = locationMap.computeIfAbsent(index, k -> new ArrayList<>());
             list.add(i);
@@ -277,48 +279,60 @@ public class LeetCodeTest {
 
     /**
      * 70.爬楼梯
+     *
      * @param n
      * @return
      */
     //记忆
-
-    public static int climbStairs(int n){
+    public static int climbStairs(int n) {
         //f(n) = f(n-1) + f(n-2)
         int dp[] = new int[n + 1];
         dp[0] = 1;
         dp[1] = 2;
-        for(int i = 2; i < n; i++){
-            dp[i] = dp[i-1] + dp[i -2];
+        for (int i = 2; i < n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
         }
-        return dp[n -1];
+        return dp[n - 1];
 
     }
-
-
 
 
     public static int climbStairs1(int n) {
         int[] steps = new int[n + 1];
         int nowStairs = 0;
-        return climbStairsRecursion(nowStairs,n,steps);
+        return climbStairsRecursion(nowStairs, n, steps);
     }
 
-    public static int climbStairsRecursion(int nowStairs, int n, int[] steps){
-        if(nowStairs > n){
+    public static int climbStairsRecursion(int nowStairs, int n, int[] steps) {
+        if (nowStairs > n) {
             return 0;
         }
-        if(nowStairs == n){
+        if (nowStairs == n) {
             return 1;
         }
-        if(steps[nowStairs] > 0){
+        if (steps[nowStairs] > 0) {
             return steps[nowStairs];
         }
-        return steps[nowStairs] = climbStairsRecursion(nowStairs + 1,n,steps) + climbStairsRecursion(nowStairs + 2,n,steps);
+        return steps[nowStairs] = climbStairsRecursion(nowStairs + 1, n, steps) + climbStairsRecursion(nowStairs + 2, n, steps);
     }
 
+    /**
+     * 338. 比特位计数
+     *
+     * @param num
+     * @return
+     */
+    public static int[] countBits(int num) {
+        int[] dp = new int[num + 1];
+        for (int i = 0; i <= num; i++) {
+            dp[i] = (dp[i >> 1]) + (i & 1);
+        }
+        return dp;
+    }
 
     /**
      * 62.不同路径
+     *
      * @param m
      * @param n
      * @return
@@ -326,36 +340,23 @@ public class LeetCodeTest {
     public int uniquePaths(int m, int n) {
         int[][] dp = new int[n][m];
         //f(m,n) = f(n-1,m) + f(n,m-1);
-        for(int i = 0; i < m; i++){
+        for (int i = 0; i < m; i++) {
             dp[0][i] = 1;
         }
-        for(int i = 0; i < n; i++){
+        for (int i = 0; i < n; i++) {
             dp[i][0] = 1;
         }
-        for(int i = 1; i < m; i++){
-            for (int j = 1; j < n; j++){
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
                 dp[j][i] = dp[j - 1][i] + dp[j][i - 1];
             }
         }
         return dp[n - 1][m - 1];
     }
 
-
     /**
-     * 338. 比特位计数
-     * @param num
-     * @return
-     */
-    public static int[] countBits(int num) {
-        int[] dp = new int[num + 1];
-        for(int i = 0; i <= num; i++){
-            dp[i] = (dp[i>>1]) + (i & 1);
-        }
-        return dp;
-    }
-
-    /**
-     *64. 最小路径和
+     * 64. 最小路径和
+     *
      * @param grid
      * @return
      */
@@ -365,17 +366,17 @@ public class LeetCodeTest {
         int m = grid[0].length;
         int dp[][] = new int[n][m];
         dp[0][0] = grid[0][0];
-        for(int i = 1; i < n; i++){
-            dp[i][0] = dp[i -1][0] + grid[i][0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = dp[i - 1][0] + grid[i][0];
         }
 
-        for(int i = 1; i < m; i++){
-            dp[0][i] = dp[0][i -1] + grid[0][i];
+        for (int i = 1; i < m; i++) {
+            dp[0][i] = dp[0][i - 1] + grid[0][i];
         }
 
-        for(int i = 1; i < n; i++){
-            for(int j = 1; j < m; j++){
-                dp[i][j] = Math.min(dp[i - 1][j],dp[i][j - 1]) + grid[i][j];
+        for (int i = 1; i < n; i++) {
+            for (int j = 1; j < m; j++) {
+                dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
             }
         }
         return dp[n - 1][m - 1];
@@ -386,7 +387,6 @@ public class LeetCodeTest {
      */
     /*public static String longestPalindrome(String s) {
     }*/
-
 
 
 }

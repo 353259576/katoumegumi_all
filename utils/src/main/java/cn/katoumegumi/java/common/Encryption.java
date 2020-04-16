@@ -78,39 +78,36 @@ public class Encryption {
     }
 
 
-
-
-
     //*****************************************************************************************************
-    public static String desEncoder(String str,String password){
+    public static String desEncoder(String str, String password) {
         try {
-            password = md5Encoder(password).substring(0,8);
+            password = md5Encoder(password).substring(0, 8);
             //SecureRandom secureRandom = new SecureRandom();
             IvParameterSpec ivParameterSpec = new IvParameterSpec(password.getBytes("UTF-8"));
             DESKeySpec desKeySpec = new DESKeySpec(password.getBytes());
             SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(DES_ALGORITHM);
             SecretKey secretKey = secretKeyFactory.generateSecret(desKeySpec);
             Cipher cipher = Cipher.getInstance(DES_INTERFACE);
-            cipher.init(Cipher.ENCRYPT_MODE,secretKey,ivParameterSpec);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
             return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes("UTF-8")));
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static String desDecoder(String str,String password){
+    public static String desDecoder(String str, String password) {
         try {
-            password = md5Encoder(password).substring(0,8);
+            password = md5Encoder(password).substring(0, 8);
             //SecureRandom secureRandom = new SecureRandom();
             IvParameterSpec ivParameterSpec = new IvParameterSpec(password.getBytes());
             DESKeySpec desKeySpec = new DESKeySpec(password.getBytes());
             SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(DES_ALGORITHM);
             SecretKey secretKey = secretKeyFactory.generateSecret(desKeySpec);
             Cipher cipher = Cipher.getInstance(DES_INTERFACE);
-            cipher.init(Cipher.DECRYPT_MODE,secretKey,ivParameterSpec);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
             return new String(cipher.doFinal(Base64.getDecoder().decode(str.getBytes(CHARSET))));
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -118,25 +115,21 @@ public class Encryption {
     }
 
 
-
-
-
-
-
     //*****************************************************************************************************
 
     /**
      * sha1加密
+     *
      * @param str
      * @return
      */
-    public static String sha1Encoder(String str){
+    public static String sha1Encoder(String str) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
             messageDigest.update(str.getBytes("UTF-8"));
             byte bytes[] = messageDigest.digest();
             return byteHexToString(bytes);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -144,30 +137,28 @@ public class Encryption {
 
     /**
      * hmacsha1加密
+     *
      * @param str
      * @param key
      * @return
      */
-    public static String hmacSha1Encoder(String str,String key){
+    public static String hmacSha1Encoder(String str, String key) {
         try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(),"HmacSHA1");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), "HmacSHA1");
             Mac mac = Mac.getInstance("HmacSHA1");
             mac.init(secretKeySpec);
             byte bytes[] = mac.doFinal(str.getBytes());
             return byteHexToString(bytes);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
 
-
-
-
     //***********************************************************************************************************
 
-    public static Map<String,String> createSecp256k1Key(int keySize){
+    public static Map<String, String> createSecp256k1Key(int keySize) {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
             keyPairGenerator.initialize(keySize);
@@ -176,18 +167,18 @@ public class Encryption {
             PublicKey publicKey = keyPair.getPublic();
             String publicKeyString = Base64.getEncoder().encodeToString(publicKey.getEncoded());
             String privateKeyString = Base64.getEncoder().encodeToString(privateKey.getEncoded());
-            Map<String,String> map = new HashMap<>();
-            map.put(PUBLIC_KEY,publicKeyString);
-            map.put(PRIVATE_KEY,privateKeyString);
+            Map<String, String> map = new HashMap<>();
+            map.put(PUBLIC_KEY, publicKeyString);
+            map.put(PRIVATE_KEY, privateKeyString);
             return map;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
 
-    public static PrivateKey getECPrivateKey(String privateKeyString){
+    public static PrivateKey getECPrivateKey(String privateKeyString) {
         try {
             byte[] privateKeyStringByte = Base64.getDecoder().decode(privateKeyString);
             // 取得私钥
@@ -195,13 +186,13 @@ public class Encryption {
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             ECPrivateKey priKey = (ECPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
             return priKey;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static PublicKey getECPublicKey(String publicKeyString){
+    public static PublicKey getECPublicKey(String publicKeyString) {
         try {
             byte[] privateKeyStringByte = Base64.getDecoder().decode(publicKeyString);
             // 取得公钥
@@ -209,15 +200,14 @@ public class Encryption {
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             ECPublicKey ecPublicKey = (ECPublicKey) keyFactory.generatePublic(x509EncodedKeySpec);
             return ecPublicKey;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
 
-
-    public static byte[] signECByte(String str,String privateKeyString){
+    public static byte[] signECByte(String str, String privateKeyString) {
         try {
             //KeyStore keyStore = KeyStore.getInstance(PRIVATE_KEY);
             PrivateKey privateKey = getECPrivateKey(privateKeyString);
@@ -227,18 +217,18 @@ public class Encryption {
             byte bytes[] = signature.sign();
             //return Base64.getEncoder().encodeToString(bytes);
             return bytes;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static String signEC(String str,String privateKeyString){
-        return Base64.getEncoder().encodeToString(signECByte(str,privateKeyString));
+    public static String signEC(String str, String privateKeyString) {
+        return Base64.getEncoder().encodeToString(signECByte(str, privateKeyString));
     }
 
 
-    public static boolean verifyEC(String str,String publicKeyString,String sign){
+    public static boolean verifyEC(String str, String publicKeyString, String sign) {
         try {
 
             //ecurity.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -254,7 +244,6 @@ public class Encryption {
             //byte[] signatureBytes = Base64.getEncoder().encode(str.getBytes("UTF-8"));
 
 
-
             PublicKey publicKey = getECPublicKey(publicKeyString);
             Signature signature = Signature.getInstance("SHA256withECDSA");
             signature.initVerify(publicKey);
@@ -262,7 +251,7 @@ public class Encryption {
             boolean k = signature.verify(Base64.getDecoder().decode(sign));
             //boolean k = signature.verify(Base64Url.base64DecodeUrl(sign.getBytes("UTF-8")));
             return k;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -272,16 +261,17 @@ public class Encryption {
 
     /**
      * md5加密
+     *
      * @param str
      * @return
      */
-    public static String md5Encoder(String str){
+    public static String md5Encoder(String str) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.update(str.getBytes("UTF-8"));
             byte bytes[] = messageDigest.digest();
             return byteHexToString(bytes);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -289,9 +279,9 @@ public class Encryption {
     }
 
 
-    private static String byteHexToString(byte bytes[]){
+    private static String byteHexToString(byte bytes[]) {
         StringBuffer stringBuffer = new StringBuffer();
-        for(int i = 0; i < bytes.length; i++){
+        for (int i = 0; i < bytes.length; i++) {
             stringBuffer.append(HEX_DIGITS[(bytes[i] >> 4) & 0x0f]);
             stringBuffer.append(HEX_DIGITS[bytes[i] & 0x0f]);
         }
@@ -299,34 +289,33 @@ public class Encryption {
     }
 
 
-
-
-
     //******************************************************************************************************
+
     /**
      * 获取公钥私钥
+     *
      * @param keySize
      * @return
      */
-    public static Map<String,String> createKeys(int keySize){
+    public static Map<String, String> createKeys(int keySize) {
         KeyPairGenerator keyPairGenerator = null;
         try {
             keyPairGenerator = KeyPairGenerator.getInstance(RSA_ALGORITHM);
-        }catch (NoSuchAlgorithmException e){
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        if(keyPairGenerator != null){
+        if (keyPairGenerator != null) {
             keyPairGenerator.initialize(keySize);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
             Key publicKey = keyPair.getPublic();
             Key privateKey = keyPair.getPrivate();
             String publicKeyString = Base64.getEncoder().encodeToString(publicKey.getEncoded());
             String privateKeyString = Base64.getEncoder().encodeToString(privateKey.getEncoded());
-            Map<String,String> map = new HashMap<>();
-            map.put(PUBLIC_KEY,publicKeyString);
-            map.put(PRIVATE_KEY,privateKeyString);
+            Map<String, String> map = new HashMap<>();
+            map.put(PUBLIC_KEY, publicKeyString);
+            map.put(PRIVATE_KEY, privateKeyString);
             return map;
-        }else {
+        } else {
             return null;
         }
 
@@ -335,16 +324,17 @@ public class Encryption {
 
     /**
      * 公钥翻译为公钥
+     *
      * @param publicKey
      * @return
      */
-    public static RSAPublicKey getPublicKey(String publicKey){
+    public static RSAPublicKey getPublicKey(String publicKey) {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGORITHM);
             X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey.getBytes()));
             RSAPublicKey rsaPublicKey = (RSAPublicKey) keyFactory.generatePublic(x509EncodedKeySpec);
             return rsaPublicKey;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -352,16 +342,17 @@ public class Encryption {
 
     /**
      * 私钥翻译为私钥
+     *
      * @param privateKey
      * @return
      */
-    public static RSAPrivateKey getPrivateKey(String privateKey){
+    public static RSAPrivateKey getPrivateKey(String privateKey) {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGORITHM);
             PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey.getBytes()));
             RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyFactory.generatePrivate(pkcs8EncodedKeySpec);
             return rsaPrivateKey;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -369,16 +360,17 @@ public class Encryption {
 
     /**
      * 公钥加密
+     *
      * @param data
      * @param rsaPublicKey
      * @return
      */
-    public static String publicKeyEncoder(String data,RSAPublicKey rsaPublicKey){
+    public static String publicKeyEncoder(String data, RSAPublicKey rsaPublicKey) {
         try {
             Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
-            cipher.init(Cipher.ENCRYPT_MODE,rsaPublicKey);
-            return new String(Base64.getEncoder().encode(rsaSplitCode(cipher,Cipher.ENCRYPT_MODE,data.getBytes(CHARSET),rsaPublicKey.getModulus().bitLength())));
-        }catch (Exception e){
+            cipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
+            return new String(Base64.getEncoder().encode(rsaSplitCode(cipher, Cipher.ENCRYPT_MODE, data.getBytes(CHARSET), rsaPublicKey.getModulus().bitLength())));
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -386,16 +378,17 @@ public class Encryption {
 
     /**
      * 公钥解密
+     *
      * @param data
      * @param rsaPublicKey
      * @return
      */
-    public static String publicKeyDecoder(String data,RSAPublicKey rsaPublicKey){
+    public static String publicKeyDecoder(String data, RSAPublicKey rsaPublicKey) {
         try {
             Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE,rsaPublicKey);
-            return new String(rsaSplitCode(cipher,Cipher.DECRYPT_MODE,Base64.getDecoder().decode(data),rsaPublicKey.getModulus().bitLength()),CHARSET);
-        }catch (Exception e){
+            cipher.init(Cipher.DECRYPT_MODE, rsaPublicKey);
+            return new String(rsaSplitCode(cipher, Cipher.DECRYPT_MODE, Base64.getDecoder().decode(data), rsaPublicKey.getModulus().bitLength()), CHARSET);
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -403,16 +396,17 @@ public class Encryption {
 
     /**
      * 私钥加密
+     *
      * @param data
      * @param rsaPrivateKey
      * @return
      */
-    public static String privateKeyEncoder(String data,RSAPrivateKey rsaPrivateKey){
+    public static String privateKeyEncoder(String data, RSAPrivateKey rsaPrivateKey) {
         try {
             Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
-            cipher.init(Cipher.ENCRYPT_MODE,rsaPrivateKey);
-            return new String(Base64.getEncoder().encode(rsaSplitCode(cipher,Cipher.ENCRYPT_MODE,data.getBytes(CHARSET),rsaPrivateKey.getModulus().bitLength())));
-        }catch (Exception e){
+            cipher.init(Cipher.ENCRYPT_MODE, rsaPrivateKey);
+            return new String(Base64.getEncoder().encode(rsaSplitCode(cipher, Cipher.ENCRYPT_MODE, data.getBytes(CHARSET), rsaPrivateKey.getModulus().bitLength())));
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -420,16 +414,17 @@ public class Encryption {
 
     /**
      * 私钥解密
+     *
      * @param data
      * @param rsaPrivateKey
      * @return
      */
-    public static String privateKeyDecoder(String data,RSAPrivateKey rsaPrivateKey){
+    public static String privateKeyDecoder(String data, RSAPrivateKey rsaPrivateKey) {
         try {
             Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE,rsaPrivateKey);
-            return new String(rsaSplitCode(cipher,Cipher.DECRYPT_MODE,Base64.getDecoder().decode(data),rsaPrivateKey.getModulus().bitLength()),CHARSET);
-        }catch (Exception e){
+            cipher.init(Cipher.DECRYPT_MODE, rsaPrivateKey);
+            return new String(rsaSplitCode(cipher, Cipher.DECRYPT_MODE, Base64.getDecoder().decode(data), rsaPrivateKey.getModulus().bitLength()), CHARSET);
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -438,48 +433,47 @@ public class Encryption {
 
     /**
      * 开始加密解密
+     *
      * @param cipher
      * @param opmode
      * @param dataBytes
      * @param keySize
      * @return
      */
-    private static byte[] rsaSplitCode(Cipher cipher,int opmode,byte[] dataBytes,int keySize){
+    private static byte[] rsaSplitCode(Cipher cipher, int opmode, byte[] dataBytes, int keySize) {
         int maxBlock = 0;
-        if(opmode==Cipher.DECRYPT_MODE){
+        if (opmode == Cipher.DECRYPT_MODE) {
             maxBlock = keySize / 8;
-        }else {
-            maxBlock = keySize / 8 -11;
+        } else {
+            maxBlock = keySize / 8 - 11;
         }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         int offSet = 0;
         byte[] buff;
         int i = 0;
         try {
-            while (dataBytes.length > offSet){
-                if(dataBytes.length-offSet > maxBlock){
-                    buff = cipher.doFinal(dataBytes,offSet,maxBlock);
-                }else {
-                    buff = cipher.doFinal(dataBytes, offSet,dataBytes.length-offSet);
+            while (dataBytes.length > offSet) {
+                if (dataBytes.length - offSet > maxBlock) {
+                    buff = cipher.doFinal(dataBytes, offSet, maxBlock);
+                } else {
+                    buff = cipher.doFinal(dataBytes, offSet, dataBytes.length - offSet);
                 }
-                byteArrayOutputStream.write(buff,0,buff.length);
+                byteArrayOutputStream.write(buff, 0, buff.length);
                 i++;
-                offSet = i*maxBlock;
+                offSet = i * maxBlock;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         byte[] resultDatas = byteArrayOutputStream.toByteArray();
         try {
             byteArrayOutputStream.flush();
             byteArrayOutputStream.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return resultDatas;
     }
-
-
 
 
 }

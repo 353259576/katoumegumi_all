@@ -1,11 +1,8 @@
 package cn.katoumegumi.java.lx;
 
 import com.alibaba.cloud.dubbo.annotation.DubboTransported;
-import io.seata.spring.annotation.GlobalTransactionScanner;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubboConfig;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
@@ -14,8 +11,6 @@ import org.springframework.cloud.client.SpringCloudApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -24,7 +19,7 @@ import javax.sql.DataSource;
 
 //@SpringBootApplication(scanBasePackages = "com.ws.java",exclude = {HibernateJpaAutoConfiguration.class})
 @SpringCloudApplication
-@EnableJpaRepositories(transactionManagerRef = "jpaTransactionManager",basePackages = "cn.katoumegumi.java.lx.jpa")
+@EnableJpaRepositories(transactionManagerRef = "jpaTransactionManager", basePackages = "cn.katoumegumi.java.lx.jpa")
 @EnableCaching
 @EnableDiscoveryClient
 @EnableDubboConfig
@@ -38,12 +33,12 @@ public class Application {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class,args);
+        SpringApplication.run(Application.class, args);
     }
 
 
     @Bean
-    public JdbcTemplate jdbcTemplate(@Qualifier("dataSource") DataSource dataSource){
+    public JdbcTemplate jdbcTemplate(@Qualifier("dataSource") DataSource dataSource) {
         //org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration
         //JpaMetamodelMappingContext
         //HibernateJpaAutoConfiguration

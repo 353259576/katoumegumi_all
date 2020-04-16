@@ -1,7 +1,6 @@
 package cn.katoumegumi.java.lx;
 
 import com.alibaba.cloud.dubbo.annotation.DubboTransported;
-import io.seata.spring.annotation.GlobalTransactionScanner;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubboConfig;
 import org.springframework.boot.SpringApplication;
@@ -23,7 +22,7 @@ import org.springframework.web.client.RestTemplate;
 public class ClientApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ClientApplication.class,args);
+        SpringApplication.run(ClientApplication.class, args);
     }
 
     @Bean

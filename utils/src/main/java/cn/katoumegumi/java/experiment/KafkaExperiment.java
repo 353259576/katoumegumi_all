@@ -10,11 +10,6 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;*/
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 public class KafkaExperiment {
     /*public static void main(String[] args) {
         Thread thread = new Thread(()->{
