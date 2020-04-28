@@ -106,11 +106,11 @@ public class HttpRequestBody {
         return this;
     }
 
-    public HttpRequestBody addHttpRequestBodyEntry(Map<String, String> map) {
+    public HttpRequestBody addHttpRequestBodyEntry(Map<String, Object> map) {
         if (!(map == null || map.isEmpty())) {
-            Set<Map.Entry<String, String>> set = map.entrySet();
-            for (Map.Entry<String, String> e : set) {
-                httpRequestBodyEntries.add(new HttpRequestBodyEntry(e.getKey(), e.getValue()));
+            Set<Map.Entry<String, Object>> set = map.entrySet();
+            for (Map.Entry<String, Object> e : set) {
+                httpRequestBodyEntries.add(new HttpRequestBodyEntry(e.getKey(), WsStringUtils.anyToString(e.getValue())));
             }
             this.mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
         }
