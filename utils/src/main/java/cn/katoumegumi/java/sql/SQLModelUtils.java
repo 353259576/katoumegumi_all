@@ -4,6 +4,7 @@ import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -886,6 +887,40 @@ public class SQLModelUtils {
         }
     }
 
+
+
+
+
+
+    public <T> void insertSql(T t){
+        InsertSqlEntity entity = new InsertSqlEntity();
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
+        List<FieldColumnRelation> fieldColumnRelationList = fieldColumnRelationMapper.getFieldColumnRelations();
+        List<FieldColumnRelation> validList = new ArrayList<>();
+        List valueList = new ArrayList();
+        for(FieldColumnRelation fieldColumnRelation:fieldColumnRelationList){
+            Field field = fieldColumnRelation.getField();
+            field.setAccessible(true);
+            try {
+                Object o = field.get(t);
+                if(o != null){
+                    validList.add(fieldColumnRelation);
+                    valueList.add(o);
+                }
+            }catch (IllegalAccessException e){
+                e.printStackTrace();
+                log.error(e.getMessage());
+            }finally {
+                field.setAccessible(false);
+            }
+
+        }
+
+    }
+
+
+
+
     public String insertSql(Integer size) {
         return insertSql(size, mainClass);
     }
@@ -952,6 +987,13 @@ public class SQLModelUtils {
         return valueList;
     }
 
+    /**
+     * 合并生成数据（没写完废弃）
+     * @param mapList
+     * @param <T>
+     * @return
+     */
+    @Deprecated
     public <T> List<T> oneLoopMargeMap(List<Map> mapList) {
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mainClass);
         List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
