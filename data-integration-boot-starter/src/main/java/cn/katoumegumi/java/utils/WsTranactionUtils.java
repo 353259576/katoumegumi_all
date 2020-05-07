@@ -7,14 +7,12 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-@Component
 public class WsTranactionUtils {
 
-    @Autowired
     private PlatformTransactionManager platformTransactionManager;
 
-    public static void main(String[] args) {
-
+    public WsTranactionUtils(PlatformTransactionManager platformTransactionManager){
+        this.platformTransactionManager = platformTransactionManager;
     }
 
     public Object runMethod(WsTranactionRun runnable) {
@@ -32,6 +30,7 @@ public class WsTranactionUtils {
         }
         return object;
     }
+
 
     public interface WsTranactionRun {
         public Object run() throws RuntimeException;

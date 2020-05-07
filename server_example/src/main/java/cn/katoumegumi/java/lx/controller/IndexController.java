@@ -1,14 +1,12 @@
 package cn.katoumegumi.java.lx.controller;
 
 import cn.katoumegumi.java.common.WsBeanUtis;
+import cn.katoumegumi.java.datasource.WsJdbcUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.mapper.UserMapper;
-import cn.katoumegumi.java.lx.model.User;
-import cn.katoumegumi.java.lx.model.UserDetails;
-import cn.katoumegumi.java.lx.model.UserDetailsRemake;
-import cn.katoumegumi.java.lx.model.UserOrder;
+import cn.katoumegumi.java.lx.model.*;
 import cn.katoumegumi.java.lx.service.IndexService;
 import cn.katoumegumi.java.lx.service.UserService;
 import cn.katoumegumi.java.sql.MySearchList;
@@ -78,6 +76,9 @@ public class IndexController implements IndexService {
 
     @Autowired
     private SQLClient sqlClient;
+
+    @Autowired
+    private WsJdbcUtils jdbcUtils;
 
     public static void main(String[] args) {
         /*User user = new User();
@@ -535,5 +536,15 @@ public class IndexController implements IndexService {
         return "";*/
     }
 
+    @RequestMapping(value = "index6")
+    @Transactional
+    public String index6(){
+        UserCC user = new UserCC();
+        user.setName("你好啊");
+        user.setPassword("世界");
+        user.setCreateDate(LocalDateTime.now());
+        jdbcUtils.insert(user);
+        return "完成";
+    }
 
 }

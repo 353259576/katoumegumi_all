@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
+import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author ws
@@ -66,7 +68,7 @@ public class Index2Conftoller {
         }*/
 
 
-        Field field = WsFieldUtils.getFieldByName(User.class, "userDetails");
+        /*Field field = WsFieldUtils.getFieldByName(User.class, "userDetails");
         Class c = WsFieldUtils.getClassListType(field);
         System.out.println(c);
 
@@ -75,7 +77,36 @@ public class Index2Conftoller {
         mySearchList.join(null, User.class, "user123", "userId", "id");
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         String str = sqlModelUtils.searchListBaseSQLProcessor();
-        System.out.println(str);
+        System.out.println(str);*/
+
+
+
+
+        System.out.println(LocalDateTime.now() instanceof LocalDateTime);
+
+        String date = WsDateUtils.objectDateFormatString(LocalDateTime.now());
+        System.out.println(date);
+
+
+        Consumer<Runnable> runnableSupplier = runnable -> {
+            long start = System.currentTimeMillis();
+            runnable.run();
+            long end = System.currentTimeMillis();
+            System.out.println(end - start);
+        };
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+        runnableSupplier.accept(()->{
+            for(int i = 0; i < 10000000;i++){
+                boolean b = localDateTime instanceof LocalDateTime;
+            }
+        });
+
+        runnableSupplier.accept(()->{
+            for(int i = 0; i < 10000000;i++){
+                boolean b = WsFieldUtils.classCompare(localDateTime.getClass(),LocalDateTime.class);
+            }
+        });
 
     }
 

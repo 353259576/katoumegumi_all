@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,6 +33,7 @@ import java.util.Map;
 @ConditionalOnProperty(prefix = "megumi.datasource", value = "enable", havingValue = "true")
 @EnableTransactionManagement(proxyTargetClass = true)
 @EnableConfigurationProperties(value = {DruidDataSourcePropertiesList.class})
+@Import(value = JdbcConfig.class)
 public class DataSourceConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceConfig.class);
@@ -81,18 +83,18 @@ public class DataSourceConfig {
     }
 
 
-    @Bean
+    /*@Bean
     public DataSourceTransactionManager dataSourceTransactionManager(DataSource dataSource) {
         DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
         dataSourceTransactionManager.setDataSource(dataSource);
         return dataSourceTransactionManager;
-    }
+    }*/
 
-    @Bean
+    /*@Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         return jdbcTemplate;
-    }
+    }*/
 
     @Bean
     public DynamicDataSourceAdvisor dynamicDataSourceAdvisor() {

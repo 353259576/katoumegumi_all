@@ -83,7 +83,7 @@ public class WsDateUtils {
         return simpleDateFormat.format(date);
     }
 
-    public static String objectDateFormatString(Object object) {
+    public static <T> String objectDateFormatString(T object) {
         try {
             if (object instanceof String) {
                 if (WsStringUtils.isNumber((String) object)) {

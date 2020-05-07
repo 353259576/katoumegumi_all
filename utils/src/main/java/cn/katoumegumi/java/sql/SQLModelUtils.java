@@ -40,6 +40,7 @@ public class SQLModelUtils {
 
     public SQLModelUtils(MySearchList mySearchList) {
         this.mySearchList = mySearchList;
+        mainClass = mySearchList.getMainClass();
     }
 
 
@@ -894,15 +895,19 @@ public class SQLModelUtils {
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(tClass);
         List<FieldColumnRelation> list = fieldColumnRelationMapper.getFieldColumnRelations();
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("insert info ")
+        stringBuilder.append("insert into ")
                 .append(fieldColumnRelationMapper.getTableName())
                 .append("(");
-
+        List<String> strings = new ArrayList<>();
         for (FieldColumnRelation fieldColumnRelation : list) {
-            stringBuilder.append("`");
+
+            strings.add("`"+fieldColumnRelation.getColumnName()+"`");
+
+            /*stringBuilder.append("`");
             stringBuilder.append(fieldColumnRelation.getColumnName());
-            stringBuilder.append("`");
+            stringBuilder.append("`");*/
         }
+        stringBuilder.append(WsStringUtils.jointListString(strings,","));
         stringBuilder.append(")");
         stringBuilder.append(" values");
         for (int k = 0; k < size; k++) {
@@ -933,8 +938,12 @@ public class SQLModelUtils {
         List<FieldColumnRelation> list = fieldColumnRelationMapper.getFieldColumnRelations();
         List valueList = new ArrayList();
         try {
+            Field field;
             for (FieldColumnRelation fieldColumnRelation : list) {
-                Object value = fieldColumnRelation.getField().get(o);
+                field = fieldColumnRelation.getField();
+                field.setAccessible(true);
+                Object value = field.get(o);
+                field.setAccessible(false);
                 valueList.add(value);
             }
         } catch (IllegalAccessException e) {

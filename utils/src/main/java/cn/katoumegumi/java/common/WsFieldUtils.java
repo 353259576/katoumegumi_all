@@ -161,7 +161,7 @@ public class WsFieldUtils {
                 return false;
             } else {
                 Class parentClazz = child.getSuperclass();
-                return classCompare(parent, parentClazz);
+                return classCompare(parentClazz, parent);
             }
         }
         return false;

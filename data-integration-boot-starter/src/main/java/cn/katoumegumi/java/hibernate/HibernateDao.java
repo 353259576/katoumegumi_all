@@ -12,6 +12,8 @@ import org.hibernate.criterion.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
 import org.hibernate.sql.JoinType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import java.lang.reflect.Field;
@@ -19,6 +21,8 @@ import java.util.*;
 
 @HibernateTransactional
 public class HibernateDao {
+
+    public static final Logger log = LoggerFactory.getLogger(HibernateDao.class);
 
     //@Resource
     private HibernateTemplate hibernateTemplate;
@@ -112,6 +116,13 @@ public class HibernateDao {
         return t;
     }
 
+    /**
+     * 分页查询
+     * @param mySearchList
+     * @param clazz
+     * @param <T>
+     * @return
+     */
     public <T> IPage<T> selectValueToPage(MySearchList mySearchList, Class<T> clazz) {
         DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz, mySearchList);
         Page pageVO = mySearchList.getPageVO();
@@ -134,12 +145,38 @@ public class HibernateDao {
         return pageVO;
     }
 
+    /**
+     * 查询
+     * @param mySearchList
+     * @param clazz
+     * @param <T>
+     * @return
+     */
     public <T> List<T> selectValueToList(MySearchList mySearchList, Class<T> clazz) {
         DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz, mySearchList);
 
         List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria);
         return list;
     }
+
+    /**
+     * 查询一条数据
+     * @param mySearchList
+     * @param tClass
+     * @param <T>
+     * @return
+     */
+    public <T> T selectValueOne(MySearchList mySearchList,Class<T> tClass){
+        List<T> tList = selectValueToList(mySearchList,tClass);
+        if(WsListUtils.isEmpty(tList)){
+            return null;
+        }
+        if(tList.size() > 1){
+            log.warn("查询到多条数据，但只显示一条数据");
+        }
+        return tList.get(0);
+    }
+
 
     private <T> DetachedCriteria myDetachedCriteriaCreate(Class<T> clazz, MySearchList mySearchList) {
 
