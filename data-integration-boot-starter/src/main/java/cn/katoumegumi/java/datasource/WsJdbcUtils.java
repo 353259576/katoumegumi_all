@@ -55,6 +55,7 @@ public class WsJdbcUtils {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(createPreparedStatement(insertSqlEntity),keyHolder);
         Map<String,Object> keyMap = keyHolder.getKeys();
+
         if(keyMap.size() > 0) {
             Map<String, FieldColumnRelation> stringFieldColumnRelationMap = new HashMap<>();
             for (FieldColumnRelation fieldColumnRelation : insertSqlEntity.getIdList()) {
