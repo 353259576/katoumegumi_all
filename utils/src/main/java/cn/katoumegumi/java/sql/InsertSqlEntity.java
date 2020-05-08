@@ -9,8 +9,12 @@ import java.util.List;
 public class InsertSqlEntity {
 
     private String insertSql;
-    private List<Field> usedField;
-    private List<List> valueList;
+
+    private List<FieldColumnRelation> usedField;
+
+    private List<FieldColumnRelation> idList;
+
+    private List valueList;
 
     public String getInsertSql() {
         return insertSql;
@@ -20,19 +24,27 @@ public class InsertSqlEntity {
         this.insertSql = insertSql;
     }
 
-    public List<Field> getUsedField() {
-        return usedField;
-    }
-
-    public void setUsedField(List<Field> usedField) {
-        this.usedField = usedField;
-    }
-
-    public List<List> getValueList() {
+    public List getValueList() {
         return valueList;
     }
 
-    public void setValueList(List<List> valueList) {
+    public void setValueList(List valueList) {
         this.valueList = valueList;
+    }
+
+    public List<FieldColumnRelation> getIdList() {
+        return idList;
+    }
+
+    public void setIdList(List<FieldColumnRelation> idList) {
+        this.idList = idList;
+    }
+
+    public List<FieldColumnRelation> getUsedField() {
+        return usedField;
+    }
+
+    public void setUsedField(List<FieldColumnRelation> usedField) {
+        this.usedField = usedField;
     }
 }

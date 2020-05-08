@@ -147,8 +147,6 @@ public class IndexController implements IndexService {
                 sqlModelUtils2.getValueMap();
                 String str1 = sqlModelUtils2.searchListBaseSQLProcessor();
                 String countStr1 = sqlModelUtils2.searchListBaseCountSQLProcessor();
-                String insertSql = sqlModelUtils2.insertSql(100);
-                System.out.println(insertSql);
                 System.out.println(str1);
                 System.out.println(countStr1);
                 countDownLatch.countDown();
@@ -539,11 +537,17 @@ public class IndexController implements IndexService {
     @RequestMapping(value = "index6")
     @Transactional
     public String index6(){
-        UserCC user = new UserCC();
-        user.setName("你好啊");
-        user.setPassword("世界");
-        user.setCreateDate(LocalDateTime.now());
-        jdbcUtils.insert(user);
+        List<UserCC> users = new ArrayList<>();
+        for(int i = 0; i < 10; i++){
+            User user = new User();
+            user.setId(i+1L);
+            user.setName("你好啊");
+            user.setPassword("世界");
+            //users.add(user);
+            jdbcUtils.insert(user);
+            System.out.println(JSON.toJSONString(user));
+        }
+        //jdbcUtils.insert(users);
         return "完成";
     }
 

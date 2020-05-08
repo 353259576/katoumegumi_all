@@ -4,6 +4,8 @@ import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.FieldColumnRelation;
+import cn.katoumegumi.java.sql.InsertSqlEntity;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import com.alibaba.fastjson.JSON;
@@ -18,14 +20,13 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.Date;
 
 /**
  * @author 王松
@@ -37,30 +38,138 @@ public class WsJdbcUtils {
 
     private JdbcTemplate jdbcTemplate;
 
-
     public <T> T insert(T t){
+        return insert(t,true);
+    }
+
+    public <T> List<T> insert(List<T> tList){
+        return insert(tList,true);
+    }
+
+    public <T> T insert(T t,boolean isAuto){
         MySearchList mySearchList = MySearchList.newMySearchList();
         mySearchList.setMainClass(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        String insertSql = sqlModelUtils.insertSql(1);
-        log.debug(insertSql);
-        List valueList = sqlModelUtils.insertValue(t);
+        InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSql(t,isAuto);
+        log.debug(insertSqlEntity.getInsertSql());
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(createPreparedStatement(valueList,insertSql),keyHolder);
+        jdbcTemplate.update(createPreparedStatement(insertSqlEntity),keyHolder);
         Map<String,Object> keyMap = keyHolder.getKeys();
-        log.info(JSON.toJSONString(keyMap));
+        if(keyMap.size() > 0) {
+            Map<String, FieldColumnRelation> stringFieldColumnRelationMap = new HashMap<>();
+            for (FieldColumnRelation fieldColumnRelation : insertSqlEntity.getIdList()) {
+                stringFieldColumnRelationMap.put(fieldColumnRelation.getColumnName(), fieldColumnRelation);
+            }
+            List<String> unUsedSet = new ArrayList<>();
+            keyMap.forEach((s, o) -> {
+                FieldColumnRelation fieldColumnRelation = stringFieldColumnRelationMap.get(s);
+                if (fieldColumnRelation != null) {
+                    Field field = fieldColumnRelation.getField();
+                    field.setAccessible(true);
+                    try {
+                        field.set(t, o);
+                        stringFieldColumnRelationMap.remove(s);
+                        keyMap.remove(s);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    unUsedSet.add(s);
+                }
+            });
+            if (stringFieldColumnRelationMap.size() > 0 && unUsedSet.size() > 0) {
+                Set<Map.Entry<String, FieldColumnRelation>> fSet = stringFieldColumnRelationMap.entrySet();
+                for (Map.Entry<String, FieldColumnRelation> entry : fSet) {
+                    FieldColumnRelation fieldColumnRelation = entry.getValue();
+                    try {
+                        fieldColumnRelation.getField().set(t, WsBeanUtis.objectToT(keyMap.get(unUsedSet.remove(0)), fieldColumnRelation.getField().getType()));
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+            }
+        }
+
+
+
+
+
         return t;
     }
 
+    public <T> List<T> insert(List<T> tList,boolean isAuto){
+        MySearchList mySearchList = MySearchList.newMySearchList();
+        mySearchList.setMainClass(tList.get(0).getClass());
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSqlBatch(tList,isAuto);
+        log.debug(insertSqlEntity.getInsertSql());
+        KeyHolder keyHolder =new GeneratedKeyHolder();
+        jdbcTemplate.update(createPreparedStatement(insertSqlEntity),keyHolder);
+        List<Map<String,Object>> keyMapList = keyHolder.getKeyList();
 
-    private PreparedStatementCreator createPreparedStatement(List valueList,String insertSql){
+        if(keyMapList.size() > 0) {
+            Map<String, FieldColumnRelation> stringFieldColumnRelationMap = new HashMap<>();
+            for (FieldColumnRelation fieldColumnRelation : insertSqlEntity.getIdList()) {
+                stringFieldColumnRelationMap.put(fieldColumnRelation.getColumnName(), fieldColumnRelation);
+            }
+
+            for (int i = 0; i < keyMapList.size(); i++) {
+                Map<String, Object> objectMap = keyMapList.get(i);
+                List<String> unUsedSet = new ArrayList<>();
+                T t = tList.get(i);
+                int finalI = i;
+                objectMap.forEach((s, o) -> {
+                    FieldColumnRelation fieldColumnRelation = stringFieldColumnRelationMap.get(s);
+                    if (fieldColumnRelation != null) {
+                        Field field = fieldColumnRelation.getField();
+                        field.setAccessible(true);
+                        try {
+                            field.set(tList.get(finalI), o);
+                            stringFieldColumnRelationMap.remove(s);
+                            objectMap.remove(s);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        unUsedSet.add(s);
+                    }
+                });
+                if (stringFieldColumnRelationMap.size() > 0 && unUsedSet.size() > 0) {
+                    Set<Map.Entry<String, FieldColumnRelation>> fSet = stringFieldColumnRelationMap.entrySet();
+                    for (Map.Entry<String, FieldColumnRelation> entry : fSet) {
+                        FieldColumnRelation fieldColumnRelation = entry.getValue();
+                        try {
+                            fieldColumnRelation.getField().set(tList.get(i), WsBeanUtis.objectToT(objectMap.get(unUsedSet.remove(0)), fieldColumnRelation.getField().getType()));
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                }
+            }
+        }
+        //log.info(JSON.toJSONString(keyHolder));
+        return tList;
+    }
+
+
+    private PreparedStatementCreator createPreparedStatement(InsertSqlEntity insertSqlEntity){
         PreparedStatementCreator preparedStatementCreator = new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement statement = connection.prepareStatement(insertSql,Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement statement = connection.prepareStatement(insertSqlEntity.getInsertSql(),Statement.RETURN_GENERATED_KEYS);
                 Object o;
+                List valueList = insertSqlEntity.getValueList();
+                List<FieldColumnRelation> validList = insertSqlEntity.getUsedField();
                 for(int i = 0; i < valueList.size(); i++){
                     o = valueList.get(i);
+                    if(o == null){
+                        statement.setNull(i+1,Types.NULL);
+                        continue;
+                    }
                     if(o instanceof String){
                         statement.setString(i+1, WsStringUtils.anyToString(o));
                     }else if(o instanceof Integer || WsFieldUtils.classCompare(int.class,o.getClass())) {

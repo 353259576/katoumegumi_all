@@ -15,6 +15,10 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -496,7 +500,7 @@ public class SQLModelUtils {
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
                 fieldColumnRelation.setFieldClass(field.getType());
                 fieldColumnRelation.setFieldName(field.getName());
-                //field.setAccessible(true);
+                field.setAccessible(true);
                 fieldColumnRelation.setField(field);
                 fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
                 if (column == null || WsStringUtils.isBlank(column.name())) {
@@ -542,7 +546,7 @@ public class SQLModelUtils {
                     fieldJoinClass.setJoinClass(joinClass);
                     JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
                     fieldJoinClass.setArray(isArray);
-                    //field.setAccessible(true);
+                    field.setAccessible(true);
                     fieldJoinClass.setField(field);
                     if (joinColumn != null) {
                         String name = joinColumn.name();
@@ -599,6 +603,7 @@ public class SQLModelUtils {
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
                 fieldColumnRelation.setFieldClass(field.getType());
                 fieldColumnRelation.setFieldName(field.getName());
+                field.setAccessible(true);
                 fieldColumnRelation.setField(field);
                 fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
                 if (id == null) {
@@ -648,6 +653,7 @@ public class SQLModelUtils {
                     fieldJoinClass.setNickName(field.getName());
                     fieldJoinClass.setJoinClass(joinClass);
                     fieldJoinClass.setArray(isArray);
+                    field.setAccessible(true);
                     fieldJoinClass.setField(field);
                     fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
                 }
@@ -876,9 +882,7 @@ public class SQLModelUtils {
             }
             try {
                 //assert field != null;
-                field.setAccessible(true);
                 field.set(parentObject, nowObject);
-                field.setAccessible(false);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -889,39 +893,135 @@ public class SQLModelUtils {
 
 
 
+    public <T> InsertSqlEntity insertSql(T t){
+        return insertSql(t,true);
+    }
 
 
 
-    public <T> void insertSql(T t){
+    public <T> InsertSqlEntity insertSql(T t,boolean isAuto) {
         InsertSqlEntity entity = new InsertSqlEntity();
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
         List<FieldColumnRelation> fieldColumnRelationList = fieldColumnRelationMapper.getFieldColumnRelations();
         List<FieldColumnRelation> validList = new ArrayList<>();
         List valueList = new ArrayList();
-        for(FieldColumnRelation fieldColumnRelation:fieldColumnRelationList){
+        List<String> columnNameList = new ArrayList<>();
+        List<String> placeholderList = new ArrayList<>();
+
+        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
+        if(!isAuto){
+            for(FieldColumnRelation fieldColumnRelation:idList){
+                Field field = fieldColumnRelation.getField();
+                try {
+                    Object o = field.get(t);
+                    if(o != null){
+                        columnNameList.add(fieldColumnRelation.getColumnName());
+                        placeholderList.add("?");
+                        validList.add(fieldColumnRelation);
+                        valueList.add(o);
+                    }
+                }catch (IllegalAccessException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             Field field = fieldColumnRelation.getField();
-            field.setAccessible(true);
             try {
                 Object o = field.get(t);
-                if(o != null){
+                if (o != null) {
+                    columnNameList.add(fieldColumnRelation.getColumnName());
+                    placeholderList.add("?");
                     validList.add(fieldColumnRelation);
                     valueList.add(o);
                 }
-            }catch (IllegalAccessException e){
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 log.error(e.getMessage());
-            }finally {
-                field.setAccessible(false);
             }
-
         }
 
+        String insertSql = "insert into " + fieldColumnRelationMapper.getTableName() + "(`" + WsStringUtils.jointListString(columnNameList, "`,`") + "`) value(" + WsStringUtils.jointListString(placeholderList, ",") + ")";
+        entity.setInsertSql(insertSql);
+        entity.setUsedField(validList);
+        entity.setIdList(fieldColumnRelationMapper.getIdSet());
+        entity.setValueList(valueList);
+        return entity;
+    }
+
+    public <T> InsertSqlEntity insertSqlBatch(List<T> tList,boolean isAuto){
+        if(tList == null){
+            throw new RuntimeException("添加不能为空");
+        }
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(tList.get(0).getClass());
+        List<FieldColumnRelation> fieldColumnRelationList = fieldColumnRelationMapper.getFieldColumnRelations();
+        List<FieldColumnRelation> validField = new ArrayList<>();
+        List<String> columnNameList = new ArrayList<>();
+        List<String> placeholderList = new ArrayList<>();
+        List valueList = new ArrayList();
+
+        if(!isAuto) {
+            List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
+            for (FieldColumnRelation fieldColumnRelation : idList) {
+                Field field = fieldColumnRelation.getField();
+                try {
+                    Object o = field.get(tList.get(0));
+                    if (o != null) {
+                        validField.add(fieldColumnRelation);
+                        columnNameList.add(fieldColumnRelation.getColumnName());
+                        placeholderList.add("?");
+                        valueList.add(o);
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        for (FieldColumnRelation fieldColumnRelation:fieldColumnRelationList) {
+            Field field = fieldColumnRelation.getField();
+            try {
+                Object o = field.get(tList.get(0));
+                if (o != null) {
+                    validField.add(fieldColumnRelation);
+                    columnNameList.add(fieldColumnRelation.getColumnName());
+                    placeholderList.add("?");
+                    valueList.add(o);
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        String placeholderSql = "("+WsStringUtils.jointListString(placeholderList,",")+")";
+        placeholderList = new ArrayList<>();
+        placeholderList.add(placeholderSql);
+        for(int i = 1; i < tList.size(); i++) {
+            for (FieldColumnRelation fieldColumnRelation : validField) {
+                Field field = fieldColumnRelation.getField();
+                try {
+                    Object o = field.get(tList.get(i));
+                    valueList.add(o);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+            placeholderList.add(placeholderSql);
+        }
+        InsertSqlEntity insertSqlEntity = new InsertSqlEntity();
+        String insertSql = "insert into "+fieldColumnRelationMapper.getTableName()+"(`"+WsStringUtils.jointListString(columnNameList,"`,`")+"`) values"+WsStringUtils.jointListString(placeholderList,",");
+        insertSqlEntity.setInsertSql(insertSql);
+        insertSqlEntity.setUsedField(validField);
+        insertSqlEntity.setIdList(fieldColumnRelationMapper.getIdSet());
+        insertSqlEntity.setValueList(valueList);
+        return insertSqlEntity;
     }
 
 
 
 
-    public String insertSql(Integer size) {
+    /*public String insertSql(Integer size) {
         return insertSql(size, mainClass);
     }
 
@@ -938,9 +1038,9 @@ public class SQLModelUtils {
 
             strings.add("`"+fieldColumnRelation.getColumnName()+"`");
 
-            /*stringBuilder.append("`");
+            stringBuilder.append("`");
             stringBuilder.append(fieldColumnRelation.getColumnName());
-            stringBuilder.append("`");*/
+            stringBuilder.append("`");
         }
         stringBuilder.append(WsStringUtils.jointListString(strings,","));
         stringBuilder.append(")");
@@ -985,7 +1085,7 @@ public class SQLModelUtils {
             e.printStackTrace();
         }
         return valueList;
-    }
+    }*/
 
     /**
      * 合并生成数据（没写完废弃）
@@ -1026,9 +1126,7 @@ public class SQLModelUtils {
 
                 }
                 try {
-                    field.setAccessible(true);
                     field.set(nowObject, WsBeanUtis.objectToT(entry.getValue(), field.getType()));
-                    field.setAccessible(false);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
@@ -1387,6 +1485,32 @@ public static boolean mapEquals(Map m1,Map m2){
         }
 
     }*/
+
+
+    public static <T> int getSqlType(Class<T> tClass){
+        if(WsBeanUtis.isBaseType(tClass)){
+            if(WsFieldUtils.classCompare(tClass,String.class)){
+                return Types.VARCHAR;
+            }else if(tClass.equals(Integer.class) || tClass.equals(int.class)){
+                return Types.INTEGER;
+            }else if(tClass.equals(Long.class) || tClass.equals(long.class)){
+                return Types.BIGINT;
+            }else if(tClass.equals(Short.class) || tClass.equals(short.class)){
+                return Types.SMALLINT;
+            }else if(tClass.equals(Float.class) || tClass.equals(float.class)){
+                return Types.FLOAT;
+            }else if(tClass.equals(Double.class) || tClass.equals(double.class)){
+                return Types.DOUBLE;
+            }else if(tClass.equals(Date.class) || tClass.equals(LocalDateTime.class) || tClass.equals(LocalDate.class) || tClass.equals(java.sql.Date.class)){
+                return Types.TIME;
+            }else if(tClass.equals(BigDecimal.class)){
+                return Types.DECIMAL;
+            }
+            return Types.JAVA_OBJECT;
+        }else {
+            return Types.JAVA_OBJECT;
+        }
+    }
 
 
 }
