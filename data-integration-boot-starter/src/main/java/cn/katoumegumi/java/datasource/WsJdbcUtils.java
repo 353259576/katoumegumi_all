@@ -4,10 +4,7 @@ import cn.katoumegumi.java.common.WsBeanUtis;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
-import cn.katoumegumi.java.sql.FieldColumnRelation;
-import cn.katoumegumi.java.sql.InsertSqlEntity;
-import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.SQLModelUtils;
+import cn.katoumegumi.java.sql.*;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -196,6 +193,21 @@ public class WsJdbcUtils {
             }
         };
         return preparedStatementCreator;
+    }
+
+
+    public <T> void update(T t){
+        MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(t.getClass());
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t);
+        log.debug(updateSqlEntity.getUpdateSql());
+        jdbcTemplate.update(updateSqlEntity.getUpdateSql(),updateSqlEntity.getValueList().toArray());
+    }
+    public void update(MySearchList mySearchList){
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
+        log.debug(updateSqlEntity.getUpdateSql());
+        jdbcTemplate.update(updateSqlEntity.getUpdateSql(),updateSqlEntity.getValueList().toArray());
     }
 
 

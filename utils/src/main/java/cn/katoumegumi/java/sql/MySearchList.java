@@ -230,6 +230,28 @@ public class MySearchList {
     }
 
 
+    public <T> MySearchList set(SupplierFunc<?> supplierFunc, Object value) {
+        return add(supplierFunc, SqlOperator.SET, value);
+    }
+
+    public <T> MySearchList add(SupplierFunc<?> supplierFunc, Object value) {
+        return add(supplierFunc, SqlOperator.ADD, value);
+    }
+
+    public <T> MySearchList subtract(SupplierFunc<?> supplierFunc, Object value) {
+        return add(supplierFunc, SqlOperator.SUBTRACT, value);
+    }
+
+    public <T> MySearchList multiply(SupplierFunc<?> supplierFunc, Object value) {
+        return add(supplierFunc, SqlOperator.MULTIPLY, value);
+    }
+
+    public <T> MySearchList divide(SupplierFunc<?> supplierFunc, Object value) {
+        return add(supplierFunc, SqlOperator.DIVIDE, value);
+    }
+
+
+
     public <T> MySearchList eq(String column, Object value) {
         return add(column, SqlOperator.EQ, value);
     }
@@ -306,6 +328,25 @@ public class MySearchList {
         return add(column, SqlOperator.LTEP, value);
     }
 
+    public <T> MySearchList set(String column, String value) {
+        return add(column, SqlOperator.SET, value);
+    }
+
+    public <T> MySearchList add(String column, String value) {
+        return add(column, SqlOperator.ADD, value);
+    }
+
+    public <T> MySearchList subtract(String column, String value) {
+        return add(column, SqlOperator.SUBTRACT, value);
+    }
+
+    public <T> MySearchList multiply(String column, String value) {
+        return add(column, SqlOperator.MULTIPLY, value);
+    }
+
+    public <T> MySearchList divide(String column, String value) {
+        return add(column, SqlOperator.DIVIDE, value);
+    }
 
     public MySearchList and(MySearchList... mySearchLists) {
         ands.addAll(Arrays.asList(mySearchLists));

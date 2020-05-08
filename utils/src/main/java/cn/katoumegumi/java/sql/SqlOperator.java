@@ -71,6 +71,27 @@ public enum SqlOperator {
     /**
      * or
      */
-    OR;
+    OR,
+    /**
+     * 修改
+     */
+    SET,
+    /**
+     * 加
+     */
+    ADD,
+    /**
+     * 减
+     */
+    SUBTRACT,
+    /**
+     * 乘
+     */
+    MULTIPLY,
+    /**
+     * 除
+     */
+    DIVIDE
+    ;
 
 }

@@ -106,6 +106,9 @@ public class WsStringUtils {
         }
         StringBuffer stringBuffer = new StringBuffer();
         for (int i = 0; i < strings.size(); i++) {
+            if(strings.get(i) == null){
+                continue;
+            }
             stringBuffer.append(strings.get(i));
             stringBuffer.append(sign);
         }

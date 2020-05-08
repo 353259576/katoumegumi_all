@@ -545,6 +545,8 @@ public class IndexController implements IndexService {
             user.setPassword("世界");
             //users.add(user);
             jdbcUtils.insert(user);
+            jdbcUtils.update(user);
+            jdbcUtils.update(MySearchList.newMySearchList().setMainClass(User.class).set(user::getName,"你好世界改").eq(user::getId,user.getId()));
             System.out.println(JSON.toJSONString(user));
         }
         //jdbcUtils.insert(users);

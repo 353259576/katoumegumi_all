@@ -140,6 +140,13 @@ public class SQLModelUtils {
      * @return
      */
     public String createWhereColumn(String prefix, MySearch mySearch) {
+        switch (mySearch.getOperator()){
+            case SET:
+            case ADD:
+            case SUBTRACT:
+            case MULTIPLY:
+            case DIVIDE:return null;
+        }
         StringBuilder tableColumn;
         String prefixString;
         String fieldName;
@@ -305,8 +312,7 @@ public class SQLModelUtils {
             case LTEP:
                 tableColumn.append(" <= ").append(mySearch.getValue());
                 break;
-            default:
-                throw new RuntimeException("未知的方式");
+            default:break;
         }
         return tableColumn.toString();
     }
@@ -898,7 +904,13 @@ public class SQLModelUtils {
     }
 
 
-
+    /**
+     * 单个添加
+     * @param t
+     * @param isAuto 主键是否自增
+     * @param <T>
+     * @return
+     */
     public <T> InsertSqlEntity insertSql(T t,boolean isAuto) {
         InsertSqlEntity entity = new InsertSqlEntity();
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
@@ -951,8 +963,15 @@ public class SQLModelUtils {
         return entity;
     }
 
-    public <T> InsertSqlEntity insertSqlBatch(List<T> tList,boolean isAuto){
-        if(tList == null){
+    /**
+     * 批量添加
+     * @param tList
+     * @param isAuto 主键是否自增
+     * @param <T>
+     * @return
+     */
+    public <T> InsertSqlEntity insertSqlBatch(List<T> tList,boolean isAuto) {
+        if (tList == null) {
             throw new RuntimeException("添加不能为空");
         }
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(tList.get(0).getClass());
@@ -962,7 +981,7 @@ public class SQLModelUtils {
         List<String> placeholderList = new ArrayList<>();
         List valueList = new ArrayList();
 
-        if(!isAuto) {
+        if (!isAuto) {
             List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
             for (FieldColumnRelation fieldColumnRelation : idList) {
                 Field field = fieldColumnRelation.getField();
@@ -980,7 +999,7 @@ public class SQLModelUtils {
             }
         }
 
-        for (FieldColumnRelation fieldColumnRelation:fieldColumnRelationList) {
+        for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             Field field = fieldColumnRelation.getField();
             try {
                 Object o = field.get(tList.get(0));
@@ -994,10 +1013,10 @@ public class SQLModelUtils {
                 e.printStackTrace();
             }
         }
-        String placeholderSql = "("+WsStringUtils.jointListString(placeholderList,",")+")";
+        String placeholderSql = "(" + WsStringUtils.jointListString(placeholderList, ",") + ")";
         placeholderList = new ArrayList<>();
         placeholderList.add(placeholderSql);
-        for(int i = 1; i < tList.size(); i++) {
+        for (int i = 1; i < tList.size(); i++) {
             for (FieldColumnRelation fieldColumnRelation : validField) {
                 Field field = fieldColumnRelation.getField();
                 try {
@@ -1010,7 +1029,7 @@ public class SQLModelUtils {
             placeholderList.add(placeholderSql);
         }
         InsertSqlEntity insertSqlEntity = new InsertSqlEntity();
-        String insertSql = "insert into "+fieldColumnRelationMapper.getTableName()+"(`"+WsStringUtils.jointListString(columnNameList,"`,`")+"`) values"+WsStringUtils.jointListString(placeholderList,",");
+        String insertSql = "insert into " + fieldColumnRelationMapper.getTableName() + "(`" + WsStringUtils.jointListString(columnNameList, "`,`") + "`) values" + WsStringUtils.jointListString(placeholderList, ",");
         insertSqlEntity.setInsertSql(insertSql);
         insertSqlEntity.setUsedField(validField);
         insertSqlEntity.setIdList(fieldColumnRelationMapper.getIdSet());
@@ -1018,7 +1037,137 @@ public class SQLModelUtils {
         return insertSqlEntity;
     }
 
+    /**
+     * 修改
+     * @param t
+     * @param <T>
+     * @return
+     */
+    public <T> UpdateSqlEntity update(T t){
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(t.getClass());
+        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
+        List<FieldColumnRelation> columnList = fieldColumnRelationMapper.getFieldColumnRelations();
+        List<String> columnStrList = new ArrayList<>();
+        List<String> idStrList = new ArrayList<>();
+        List valueList = new ArrayList();
 
+        List<FieldColumnRelation> validColumnList = new ArrayList<>();
+        List<FieldColumnRelation> validIdList = new ArrayList<>();
+
+        for(FieldColumnRelation fieldColumnRelation:columnList){
+            try {
+                Object o = fieldColumnRelation.getField().get(t);
+                if(o != null){
+                    String str = fieldColumnRelation.getColumnName() + " = ? ";
+                    columnStrList.add(str);
+                    valueList.add(o);
+                    validColumnList.add(fieldColumnRelation);
+                }
+            }catch (IllegalAccessException e){
+                e.printStackTrace();
+            }
+        }
+        for(FieldColumnRelation fieldColumnRelation:idList){
+            try {
+                Object o = fieldColumnRelation.getField().get(t);
+                if(o != null){
+                    String str = fieldColumnRelation.getColumnName() + " = ? ";
+                    idStrList.add(str);
+                    valueList.add(o);
+                    validIdList.add(fieldColumnRelation);
+                }
+            }catch (IllegalAccessException e){
+                e.printStackTrace();
+            }
+        }
+        if(idStrList.size() == 0){
+            throw new RuntimeException("id不能为空");
+        }
+        String updateSql = "UPDATE "+ fieldColumnRelationMapper.getTableName() + " SET " + WsStringUtils.jointListString(columnStrList,",")+" where "+WsStringUtils.jointListString(idStrList," and ");
+        UpdateSqlEntity updateSqlEntity = new UpdateSqlEntity();
+        updateSqlEntity.setUpdateSql(updateSql);
+        updateSqlEntity.setIdList(validIdList);
+        updateSqlEntity.setUsedField(validColumnList);
+        updateSqlEntity.setValueList(valueList);
+        return updateSqlEntity;
+    }
+
+
+    public UpdateSqlEntity update(MySearchList mySearchList){
+        if(mySearchList.getMainClass() == null) {
+            mySearchList.setMainClass(mainClass);
+        }
+        String searchSql = searchListBaseSQLProcessor();
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
+        List<String> setList = createUpdateSetSql(mySearchList,fieldColumnRelationMapper.getNickName());
+        String updateSql = "UPDATE `"
+                + fieldColumnRelationMapper.getTableName()
+                + "` `"+fieldColumnRelationMapper.getNickName()
+                + "` SET "
+                + WsStringUtils.jointListString(setList,",") + " "+ searchSql.substring(searchSql.lastIndexOf("where"));
+        List valueList = new ArrayList();
+        List setValueList = new ArrayList();
+        List whereValueList = new ArrayList();
+        for (MySearch mySearch:mySearchList.getAll()){
+            switch (mySearch.getOperator()){
+                case SET:
+                case ADD:
+                case SUBTRACT:
+                case MULTIPLY:
+                case DIVIDE:setValueList.add(mySearch.getValue());
+                default:break;
+            }
+        }
+        for(Map.Entry entry:valueMap.entrySet()){
+            whereValueList.add(entry.getValue());
+        }
+        valueList.addAll(setValueList);
+        valueList.addAll(whereValueList);
+        UpdateSqlEntity updateSqlEntity = new UpdateSqlEntity();
+        updateSqlEntity.setUpdateSql(updateSql);
+        updateSqlEntity.setValueList(valueList);
+        return updateSqlEntity;
+
+    }
+
+
+    public List<String> createUpdateSetSql(MySearchList mySearchList,String prefix){
+        List<String> setStrList = new ArrayList<>();
+        String str;
+        for(MySearch mySearch:mySearchList.getAll()){
+            FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearch.getTableClass());
+            FieldColumnRelation fieldColumnRelation = fieldColumnRelationMapper.getFieldColumnRelationByField(mySearch.getFieldName());
+            String columnName = fieldColumnRelation.getColumnName();
+            switch (mySearch.getOperator()){
+                case SET:
+                    str = "`"+prefix+"`.`" + columnName + "` = ? ";
+                    setStrList.add(str);
+                    break;
+                case ADD:
+                    str = "`"+prefix+"`.`" + columnName + "` = `"+prefix+"`.`" + columnName +"` + ? ";
+                    setStrList.add(str);
+                    break;
+                case SUBTRACT:
+                    str = "`"+prefix+"`.`"+ columnName +"` = `"+prefix+"`.`" + columnName +"` - ? ";
+                    setStrList.add(str);
+                    break;
+                case MULTIPLY:
+                    str = "`"+prefix+"`.`"+ columnName +"` = `"+prefix+"`.`" + columnName +"` * ? ";
+                    setStrList.add(str);
+                    break;
+                case DIVIDE:
+                    str = "`"+prefix+"`.`"+ columnName +"` = `"+prefix+"`.`" + columnName +"` / ? ";
+                    setStrList.add(str);
+                    break;
+                default:break;
+            }
+        }
+        if(setStrList.size() == 0){
+            throw new RuntimeException("修改内容不能为空");
+        }
+        return setStrList;
+
+    }
 
 
     /*public String insertSql(Integer size) {
