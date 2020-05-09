@@ -118,6 +118,7 @@ public class HibernateDao {
 
     /**
      * 分页查询
+     *
      * @param mySearchList
      * @param clazz
      * @param <T>
@@ -147,6 +148,7 @@ public class HibernateDao {
 
     /**
      * 查询
+     *
      * @param mySearchList
      * @param clazz
      * @param <T>
@@ -161,17 +163,18 @@ public class HibernateDao {
 
     /**
      * 查询一条数据
+     *
      * @param mySearchList
      * @param tClass
      * @param <T>
      * @return
      */
-    public <T> T selectValueOne(MySearchList mySearchList,Class<T> tClass){
-        List<T> tList = selectValueToList(mySearchList,tClass);
-        if(WsListUtils.isEmpty(tList)){
+    public <T> T selectValueOne(MySearchList mySearchList, Class<T> tClass) {
+        List<T> tList = selectValueToList(mySearchList, tClass);
+        if (WsListUtils.isEmpty(tList)) {
             return null;
         }
-        if(tList.size() > 1){
+        if (tList.size() > 1) {
             log.warn("查询到多条数据，但只显示一条数据");
         }
         return tList.get(0);

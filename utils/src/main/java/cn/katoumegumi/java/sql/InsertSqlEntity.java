@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.sql;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 /***

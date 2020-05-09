@@ -1,7 +1,5 @@
 package cn.katoumegumi.java.utils;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -11,7 +9,7 @@ public class WsTranactionUtils {
 
     private PlatformTransactionManager platformTransactionManager;
 
-    public WsTranactionUtils(PlatformTransactionManager platformTransactionManager){
+    public WsTranactionUtils(PlatformTransactionManager platformTransactionManager) {
         this.platformTransactionManager = platformTransactionManager;
     }
 

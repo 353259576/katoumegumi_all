@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 public class PageConvertUtil {
 
 
-    public static  <T, P> IPage<T> convertPage(IPage<P> page) {
+    public static <T, P> IPage<T> convertPage(IPage<P> page) {
         Page<T> tPage = new Page<>();
         tPage.setCurrent(page.getCurrent());
         tPage.setSize(page.getSize());

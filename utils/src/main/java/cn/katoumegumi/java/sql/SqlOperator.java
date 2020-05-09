@@ -91,7 +91,6 @@ public enum SqlOperator {
     /**
      * 除
      */
-    DIVIDE
-    ;
+    DIVIDE;
 
 }

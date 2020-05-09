@@ -251,7 +251,6 @@ public class MySearchList {
     }
 
 
-
     public <T> MySearchList eq(String column, Object value) {
         return add(column, SqlOperator.EQ, value);
     }
