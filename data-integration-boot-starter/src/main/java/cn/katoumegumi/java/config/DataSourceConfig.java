@@ -31,9 +31,7 @@ import java.util.Map;
 @Configuration
 @ConditionalOnClass({DataSource.class})
 @ConditionalOnProperty(prefix = "megumi.datasource", value = "enable", havingValue = "true")
-@EnableTransactionManagement(proxyTargetClass = true)
 @EnableConfigurationProperties(value = {DruidDataSourcePropertiesList.class})
-@Import(value = JdbcConfig.class)
 public class DataSourceConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceConfig.class);

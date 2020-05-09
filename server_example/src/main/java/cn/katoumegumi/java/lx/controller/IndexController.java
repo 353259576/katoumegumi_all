@@ -92,7 +92,7 @@ public class IndexController implements IndexService {
         //mySearchList/*.join(null,UserDetails.class,"UserDetails1","id","userId")*/
         //.join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
         //.eq("userDetails.sex","男").sort("id","desc");
-        /*mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
+        mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
                 MySearchList.newMySearchList().eq(user::getPassword,"世界")
         )
@@ -100,7 +100,8 @@ public class IndexController implements IndexService {
                 .eq("userDetails11.sex","男")
                 .lte(user::getCreateDate,"2019-12-13")
                 .sort("id","ASC")
-                .sort("userDetails.sex","DESC");*/
+                .sort("userDetails.sex","DESC");
+        mysqlClientTest(mySearchList);
         /*Page page = new Page();
         page.setCurrent(1);
         page.setSize(10);
@@ -127,8 +128,8 @@ public class IndexController implements IndexService {
         mySearchList.or(MySearchList.newMySearchList().eq("sex","男"), MySearchList.newMySearchList().eq(userDetails::getNickName,"世界"));
         sqlModelUtils = new SQLModelUtils(mySearchList);
         System.out.println(sqlModelUtils.searchListBaseSQLProcessor());*/
-        MySearchList mySearchList1 = MySearchList.newMySearchList();
-        mySearchList1.setMainClass(UserOrder.class)
+        /*MySearchList mySearchList1 = MySearchList.newMySearchList();
+        mySearchList1.setMainClass(User.class)
                 .eq(user::getName, "你好");
         SQLModelUtils sqlModelUtils1 = new SQLModelUtils(mySearchList1);
         String str = sqlModelUtils1.searchListBaseSQLProcessor();
@@ -160,7 +161,7 @@ public class IndexController implements IndexService {
             e.printStackTrace();
         }
         long endTime = System.currentTimeMillis();
-        System.out.println(endTime - startTime);
+        System.out.println(endTime - startTime);*/
         //System.out.println(str);
         //System.out.println(countStr);
 

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
+import javax.persistence.criteria.JoinType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -80,7 +81,20 @@ public class SQLModelUtils {
                 }
                 FieldColumnRelationMapper baseMapper = localMapperMap.get(tableNickName);
 
-                selectSql.append(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName()));
+                String joinType;
+                if(tableRelation.getJoinType() != null){
+                    switch (tableRelation.getJoinType()){
+                        case LEFT:joinType = "LEFT JOIN";break;
+                        case INNER:joinType = "INNER JOIN";break;
+                        case RIGHT:joinType = "RIGHT JOIN";break;
+                        default:joinType = "INNER JOIN";break;
+                    }
+                }else {
+                    joinType = "INNER JOIN";
+                }
+
+
+                selectSql.append(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(),joinType));
             }
             if (!(mySearchList.getAll().isEmpty() && mySearchList.getAnds().isEmpty() && mySearchList.getOrs().isEmpty())) {
                 selectSql.append(" where ");
@@ -151,44 +165,51 @@ public class SQLModelUtils {
         String prefixString;
         String fieldName;
         FieldColumnRelationMapper mapper;
-        FieldColumnRelation fieldColumnRelation;
-        if (mySearch.getFieldName().contains(".")) {
-            StringBuilder stringBuffer = new StringBuilder();
-            stringBuffer.append('`');
-            StringBuilder fieldPrefix = new StringBuilder();
-            fieldPrefix.append(prefix);
-            String[] strs = WsStringUtils.splitArray(mySearch.getFieldName(), '.');
-            int i = 0;
-            for (; i < strs.length - 1; i++) {
-                fieldPrefix.append('.');
-                fieldPrefix.append(strs[i]);
+        FieldColumnRelation fieldColumnRelation = null;
+
+        if(!mySearch.getOperator().equals(SqlOperator.SQL)){
+            if (mySearch.getFieldName().contains(".")) {
+                StringBuilder stringBuffer = new StringBuilder();
+                stringBuffer.append('`');
+                StringBuilder fieldPrefix = new StringBuilder();
+                fieldPrefix.append(prefix);
+                String[] strs = WsStringUtils.splitArray(mySearch.getFieldName(), '.');
+                int i = 0;
+                for (; i < strs.length - 1; i++) {
+                    fieldPrefix.append('.');
+                    fieldPrefix.append(strs[i]);
+                }
+                prefixString = fieldPrefix.toString();
+                fieldName = strs[i];
+                mapper = localMapperMap.get(prefixString);
+                fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
+                stringBuffer.append(fieldPrefix);
+                stringBuffer.append('`');
+                stringBuffer.append('.')
+                        .append('`')
+                        .append(fieldColumnRelation.getColumnName())
+                        .append('`');
+                tableColumn = stringBuffer;
+            } else {
+                prefixString = prefix;
+                fieldName = mySearch.getFieldName();
+                StringBuilder stringBuffer = new StringBuilder();
+                mapper = localMapperMap.get(prefixString);
+                fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
+                stringBuffer.append('`')
+                        .append(prefix)
+                        .append('`')
+                        .append('.')
+                        .append('`')
+                        .append(fieldColumnRelation.getColumnName())
+                        .append('`');
+                tableColumn = stringBuffer;
             }
-            prefixString = fieldPrefix.toString();
-            fieldName = strs[i];
-            mapper = localMapperMap.get(prefixString);
-            fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
-            stringBuffer.append(fieldPrefix);
-            stringBuffer.append('`');
-            stringBuffer.append('.')
-                    .append('`')
-                    .append(fieldColumnRelation.getColumnName())
-                    .append('`');
-            tableColumn = stringBuffer;
-        } else {
-            prefixString = prefix;
-            fieldName = mySearch.getFieldName();
-            StringBuilder stringBuffer = new StringBuilder();
-            mapper = localMapperMap.get(prefixString);
-            fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
-            stringBuffer.append('`')
-                    .append(prefix)
-                    .append('`')
-                    .append('.')
-                    .append('`')
-                    .append(fieldColumnRelation.getColumnName())
-                    .append('`');
-            tableColumn = stringBuffer;
+        }else {
+            tableColumn = new StringBuilder();
         }
+
+
 
 
         switch (mySearch.getOperator()) {
@@ -374,8 +395,8 @@ public class SQLModelUtils {
                 '`';
     }
 
-    public String createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn) {
-        return " inner join `" +
+    public String createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn, String joinType) {
+        return " "+joinType+" `" +
                 joinTableName +
                 '`' +
                 ' ' +
@@ -455,7 +476,20 @@ public class SQLModelUtils {
                     lastTableNickName = tableNickName + '.' + fieldJoinClass.getNickName();
                     FieldColumnRelationMapper mapper = mapperMap.get(fieldJoinClass.getJoinClass());
                     localMapperMap.put(lastTableNickName, mapper);
-                    joinString.add(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn()));
+                    String joinType;
+                    if(fieldJoinClass.getJoinType() != null){
+                        switch (fieldJoinClass.getJoinType()){
+                            case LEFT: joinType = "LEFT JOIN";break;
+                            case INNER: joinType = "INNER JOIN";break;
+                            case RIGHT: joinType = "RIGTH JOIN";break;
+                            default:joinType = "INNER JOIN";break;
+                        }
+                    }else {
+                        joinType = "INNER JOIN";
+                    }
+
+
+                    joinString.add(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn(),joinType));
                     selectJoin(lastTableNickName, selectString, joinString, mapper);
                 }
             }
@@ -495,6 +529,12 @@ public class SQLModelUtils {
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields) {
+
+            Transient aTransient = field.getAnnotation(Transient.class);
+            if(aTransient != null){
+                continue;
+            }
+
             if (WsBeanUtis.isBaseType(field.getType())) {
                 boolean isId = false;
                 Id id = field.getAnnotation(Id.class);
@@ -550,6 +590,7 @@ public class SQLModelUtils {
                     FieldJoinClass fieldJoinClass = new FieldJoinClass();
                     fieldJoinClass.setNickName(field.getName());
                     fieldJoinClass.setJoinClass(joinClass);
+                    fieldJoinClass.setJoinType(JoinType.LEFT);
                     JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
                     fieldJoinClass.setArray(isArray);
                     field.setAccessible(true);
@@ -604,6 +645,10 @@ public class SQLModelUtils {
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields) {
+            Transient aTransient = field.getAnnotation(Transient.class);
+            if(aTransient != null){
+                continue;
+            }
             if (WsBeanUtis.isBaseType(field.getType())) {
                 TableId id = field.getAnnotation(TableId.class);
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
@@ -657,6 +702,7 @@ public class SQLModelUtils {
                 if (analysisClassRelation(joinClass) != null) {
                     FieldJoinClass fieldJoinClass = new FieldJoinClass();
                     fieldJoinClass.setNickName(field.getName());
+                    fieldJoinClass.setJoinType(JoinType.LEFT);
                     fieldJoinClass.setJoinClass(joinClass);
                     fieldJoinClass.setArray(isArray);
                     field.setAccessible(true);
@@ -688,6 +734,9 @@ public class SQLModelUtils {
             Map<String, Map> stringMapMap = new HashMap<>();
             Set<Map.Entry> entries = map.entrySet();
             for (Map.Entry entry : entries) {
+                if(entry.getValue() == null){
+                    continue;
+                }
                 String keyString = (String) entry.getKey();
                 List<String> keyPrefixs = stringListMap.get(keyString);
                 if (keyPrefixs == null) {
@@ -888,7 +937,20 @@ public class SQLModelUtils {
             }
             try {
                 //assert field != null;
-                field.set(parentObject, nowObject);
+                if (nowObject instanceof List){
+                    if(WsFieldUtils.isArrayType(field)){
+                        field.set(parentObject, nowObject);
+                    }else {
+                        List list = (List)nowObject;
+                        if(list.size() > 0){
+                            field.set(parentObject, list.get(0));
+                        }
+
+                    }
+                }else {
+                    field.set(parentObject, nowObject);
+                }
+
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

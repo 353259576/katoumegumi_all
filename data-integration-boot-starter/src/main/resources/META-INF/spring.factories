@@ -3,4 +3,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=cn.katoumegumi.ja
   cn.katoumegumi.java.config.mybatis.MybatisPlusAutoConfiguration,\
   cn.katoumegumi.java.config.HibernateConfig,\
   cn.katoumegumi.java.config.JpaConfig,\
-  cn.katoumegumi.java.config.RedisConfig
+  cn.katoumegumi.java.config.RedisConfig,\
+  cn.katoumegumi.java.config.JdbcConfig

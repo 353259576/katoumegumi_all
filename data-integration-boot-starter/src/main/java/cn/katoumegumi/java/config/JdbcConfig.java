@@ -12,12 +12,14 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
 @Configuration
 @ConditionalOnClass(value = DataSource.class)
 @AutoConfigureAfter(value = DataSourceConfig.class)
+@EnableTransactionManagement(proxyTargetClass = true)
 public class JdbcConfig {
 
 
