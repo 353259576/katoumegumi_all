@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(value = {RedisWsProperties.class})
 @ConditionalOnProperty(prefix = "megumi.redis", value = "enable", havingValue = "true")
 public class RedisConfig {

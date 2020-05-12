@@ -26,7 +26,7 @@ import java.util.Properties;
 
 //import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({DataSource.class, EntityManagerFactory.class})
 @AutoConfigureAfter({HibernateConfig.class})
 @EnableConfigurationProperties({JpaWsProperties.class})

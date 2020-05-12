@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({DataSource.class})
 @ConditionalOnProperty(prefix = "megumi.datasource", value = "enable", havingValue = "true")
 @EnableConfigurationProperties(value = {DruidDataSourcePropertiesList.class})

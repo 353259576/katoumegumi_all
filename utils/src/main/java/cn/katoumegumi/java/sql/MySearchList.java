@@ -42,6 +42,14 @@ public class MySearchList {
         return new MySearchList(mySearches);
     }
 
+    public static MySearchList create(){
+        return new MySearchList();
+    }
+
+    public static <T> MySearchList create(Class<T> tClass){
+        return new MySearchList().setMainClass(tClass);
+    }
+
 
     public MySearchList add(MySearch mySearch) {
         mySearches.add(mySearch);

@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({DataSource.class, SessionFactory.class})
 @AutoConfigureAfter({DataSourceConfig.class})
 @EnableConfigurationProperties(value = {HibernateWsProperties.class})

@@ -34,6 +34,7 @@ public class SQLModelUtils {
      * 缓存实体对应的对象属性与列名的关联
      */
     public static Map<Class<?>, FieldColumnRelationMapper> mapperMap = new ConcurrentHashMap<>();
+
     public volatile boolean fieldNameChange = true;
     private Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
     private Map<Integer, Object> valueMap = new TreeMap<>();
@@ -41,6 +42,15 @@ public class SQLModelUtils {
     private Class<?> mainClass;
     private String searchSql;
     private MySearchList mySearchList;
+
+
+
+
+    /**
+     * 字段简称对应
+     */
+    private Map<String,String> abbreviationMap = new HashMap<>();
+
 
 
     public SQLModelUtils(MySearchList mySearchList) {
@@ -1262,7 +1272,7 @@ public class SQLModelUtils {
                 + fieldColumnRelationMapper.getTableName()
                 + "` `" + fieldColumnRelationMapper.getNickName()
                 + "` SET "
-                + WsStringUtils.jointListString(setList, ",") + " " + searchSql.substring(searchSql.lastIndexOf("where"));
+                + WsStringUtils.jointListString(setList, ",") + " " + searchSql.substring(searchSql.indexOf(" where "));
         List valueList = new ArrayList();
         List setValueList = new ArrayList();
         List whereValueList = new ArrayList();
