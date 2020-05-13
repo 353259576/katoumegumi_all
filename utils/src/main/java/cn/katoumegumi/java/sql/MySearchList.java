@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import javax.persistence.criteria.JoinType;
 import java.util.*;
+import java.util.function.Supplier;
 
 public class MySearchList {
     private List<MySearch> mySearches = new ArrayList<>();
@@ -360,8 +361,18 @@ public class MySearchList {
         return this;
     }
 
+    public MySearchList and(Supplier<MySearchList> supplier){
+        ands.add(supplier.get());
+        return this;
+    }
+
     public MySearchList or(MySearchList... mySearchLists) {
         ors.addAll(Arrays.asList(mySearchLists));
+        return this;
+    }
+
+    public MySearchList or(Supplier<MySearchList> supplier){
+        ors.add(supplier.get());
         return this;
     }
 

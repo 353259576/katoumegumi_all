@@ -92,15 +92,17 @@ public class IndexController implements IndexService {
         //mySearchList/*.join(null,UserDetails.class,"UserDetails1","id","userId")*/
         //.join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
         //.eq("userDetails.sex","男").sort("id","desc");
-        mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
+        /*mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
                 MySearchList.newMySearchList().eq(user::getPassword,"世界")
         )
                 .eq(user::getId,1)
                 .eq("userDetails11.sex","男")
                 .lte(user::getCreateDate,"2019-12-13")
+                .sql(" (select count(*) from ws_user w where w.id = {User}.id)",null)
                 .sort("id","ASC")
-                .sort("userDetails.sex","DESC");
+                .sort("userDetails.sex","DESC");*/
+        mysqlClientTest(mySearchList);
         mysqlClientTest(mySearchList);
         /*Page page = new Page();
         page.setCurrent(1);

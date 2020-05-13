@@ -37,19 +37,29 @@ public class SQLModelUtils {
 
     public volatile boolean fieldNameChange = true;
     private Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
-    private Map<Integer, Object> valueMap = new TreeMap<>();
-    private AtomicInteger atomicInteger = new AtomicInteger(1);
+    private final Map<Integer, Object> valueMap = new TreeMap<>();
+    private final AtomicInteger atomicInteger = new AtomicInteger(1);
     private Class<?> mainClass;
     private String searchSql;
-    private MySearchList mySearchList;
+    private final MySearchList mySearchList;
 
 
 
 
     /**
-     * 字段简称对应
+     * 简写数据
      */
     private Map<String,String> abbreviationMap = new HashMap<>();
+
+    /**
+     * 详细数据
+     */
+    private Map<String,String> particularMap = new HashMap<>();
+
+    /**
+     * 缩写防重复
+     */
+    private AtomicInteger abbreviationNum = new AtomicInteger();
 
 
 
@@ -293,7 +303,7 @@ public class SQLModelUtils {
                 fieldName = strs[i];
                 mapper = localMapperMap.get(prefixString);
                 fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
-                stringBuffer.append(fieldPrefix);
+                stringBuffer.append(getAbbreviation(fieldPrefix.toString()));
                 stringBuffer.append('`');
                 stringBuffer.append('.')
                         .append('`')
@@ -307,7 +317,7 @@ public class SQLModelUtils {
                 mapper = localMapperMap.get(prefixString);
                 fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
                 stringBuffer.append('`')
-                        .append(prefix)
+                        .append(getAbbreviation(prefix))
                         .append('`')
                         .append('.')
                         .append('`')
@@ -421,25 +431,44 @@ public class SQLModelUtils {
                 tableColumn.append(mySearch.getValue());
                 break;
             case SQL:
-                tableColumn.append(mySearch.getValue());
+
+                tableColumn.append(translateTableNickName(mySearch.getFieldName()));
+                if(mySearch.getValue() != null) {
+                    if (mySearch.getValue() instanceof Collection) {
+                        Collection collection = (Collection) mySearch.getValue();
+                        Iterator iterator = collection.iterator();
+                        while (iterator.hasNext()) {
+                            valueMap.put(atomicInteger.getAndAdd(1), iterator.next());
+                        }
+                    } else if (mySearch.getValue().getClass().isArray()) {
+                        Object[] os = (Object[]) mySearch.getValue();
+                        for (Object o : os) {
+                            valueMap.put(atomicInteger.getAndAdd(1), o);
+                        }
+                    } else {
+                        valueMap.put(atomicInteger.getAndAdd(1), mySearch.getValue());
+                    }
+                }
+
+                //tableColumn.append(mySearch.getValue());
                 break;
             case EQP:
-                tableColumn.append(" = ").append(mySearch.getValue());
+                tableColumn.append(" = ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case NEP:
-                tableColumn.append(" != ").append(mySearch.getValue());
+                tableColumn.append(" != ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case GTP:
-                tableColumn.append(" > ").append(mySearch.getValue());
+                tableColumn.append(" > ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case LTP:
-                tableColumn.append(" < ").append(mySearch.getValue());
+                tableColumn.append(" < ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case GTEP:
-                tableColumn.append(" >= ").append(mySearch.getValue());
+                tableColumn.append(" >= ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case LTEP:
-                tableColumn.append(" <= ").append(mySearch.getValue());
+                tableColumn.append(" <= ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             default:
                 break;
@@ -486,43 +515,51 @@ public class SQLModelUtils {
         return stringList;
     }
 
+    /**
+     * 创建字段语句
+     * @param nickName
+     * @param columnName
+     * @param fieldName
+     * @return
+     */
     public String createOneSelectColumn(String nickName, String columnName, String fieldName) {
-        return '`' +
-                nickName +
-                '`' +
-                '.' +
-                '`' +
-                columnName +
-                '`' +
-                ' ' +
-                '`' +
-                nickName +
-                '.' +
-                fieldName +
-                '`';
+        String sNickName = getAbbreviation(nickName);
+        //String columnNickName = getAbbreviation(createColumnNickName(nickName,fieldName));
+
+        String sColumnNickName = sNickName + '.' + fieldName;
+        String columnNickName = nickName + '.' + fieldName;
+        abbreviationMap.put(columnNickName,sColumnNickName);
+        particularMap.put(sColumnNickName,columnNickName);
+
+        return createColumnName(sNickName,columnName) + " " + guardKeyword(sNickName + '.'+fieldName);
     }
 
+    /**
+     * 创建表连接语句
+     * @param tableNickName
+     * @param tableColumn
+     * @param joinTableName
+     * @param joinTableNickName
+     * @param joinColumn
+     * @param joinType
+     * @return
+     */
     public String createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn, String joinType) {
-        return " " + joinType + " `" +
-                joinTableName +
-                '`' +
-                ' ' +
-                '`' +
-                joinTableNickName +
-                "` on `" +
-                tableNickName +
-                '`' +
-                '.' +
-                '`' +
-                tableColumn +
-                "` = `" +
-                joinTableNickName +
-                '`' +
-                '.' +
-                '`' +
-                joinColumn +
-                '`';
 
+        String sJoinTableNickName = getAbbreviation(joinTableNickName);
+        String sTableNickName = getAbbreviation(tableNickName);
+        return ' ' + joinType
+                + guardKeyword(joinTableName) +
+                ' ' +
+                guardKeyword(sJoinTableNickName) +
+                " on " +
+                guardKeyword(sTableNickName) +
+                '.'+
+                guardKeyword(tableColumn) +
+                " = " +
+                guardKeyword(sJoinTableNickName) +
+                '.' +
+                guardKeyword(joinColumn);
     }
 
     //创建查询语句
@@ -536,7 +573,7 @@ public class SQLModelUtils {
         List<String> list = new ArrayList<>();
         List<String> joinString = new ArrayList<>();
         selectJoin(tableNickName, list, joinString, fieldColumnRelationMapper);
-        String baseSql = "select " + WsStringUtils.jointListString(list, ",") + " from `" + tableName + "` `" + fieldColumnRelationMapper.getNickName() + "` " + WsStringUtils.jointListString(joinString, " ");
+        String baseSql = "select " + WsStringUtils.jointListString(list, ",") + " from `" + tableName + "` `" + getAbbreviation(fieldColumnRelationMapper.getNickName()) + "` " + WsStringUtils.jointListString(joinString, " ");
         fieldColumnRelationMapper.setBaseSql(baseSql);
         return fieldColumnRelationMapper.getBaseSql();
     }
@@ -846,7 +883,7 @@ public class SQLModelUtils {
                 if (entry.getValue() == null) {
                     continue;
                 }
-                String keyString = (String) entry.getKey();
+                String keyString = getParticular((String) entry.getKey());
                 List<String> keyPrefixs = stringListMap.get(keyString);
                 if (keyPrefixs == null) {
                     keyPrefixs = WsStringUtils.split(keyString, '.');
@@ -1270,7 +1307,7 @@ public class SQLModelUtils {
         List<String> setList = createUpdateSetSql(mySearchList, fieldColumnRelationMapper.getNickName());
         String updateSql = "UPDATE `"
                 + fieldColumnRelationMapper.getTableName()
-                + "` `" + fieldColumnRelationMapper.getNickName()
+                + "` `" + getAbbreviation(fieldColumnRelationMapper.getNickName())
                 + "` SET "
                 + WsStringUtils.jointListString(setList, ",") + " " + searchSql.substring(searchSql.indexOf(" where "));
         List valueList = new ArrayList();
@@ -1371,28 +1408,35 @@ public class SQLModelUtils {
         List<String> setStrList = new ArrayList<>();
         String str;
         for (MySearch mySearch : mySearchList.getAll()) {
+            switch (mySearch.getOperator()){
+                case SET:
+                case DIVIDE:
+                case MULTIPLY:
+                case SUBTRACT:break;
+                default:continue;
+            }
             FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearch.getTableClass());
             FieldColumnRelation fieldColumnRelation = fieldColumnRelationMapper.getFieldColumnRelationByField(mySearch.getFieldName());
             String columnName = fieldColumnRelation.getColumnName();
             switch (mySearch.getOperator()) {
                 case SET:
-                    str = "`" + prefix + "`.`" + columnName + "` = ? ";
+                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = ? ";
                     setStrList.add(str);
                     break;
                 case ADD:
-                    str = "`" + prefix + "`.`" + columnName + "` = `" + prefix + "`.`" + columnName + "` + ? ";
+                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = " + guardKeyword(getAbbreviation(prefix)) + "." + guardKeyword(columnName) + " + ? ";
                     setStrList.add(str);
                     break;
                 case SUBTRACT:
-                    str = "`" + prefix + "`.`" + columnName + "` = `" + prefix + "`.`" + columnName + "` - ? ";
+                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = " + guardKeyword(getAbbreviation(prefix)) + "." + guardKeyword(columnName) + " - ? ";
                     setStrList.add(str);
                     break;
                 case MULTIPLY:
-                    str = "`" + prefix + "`.`" + columnName + "` = `" + prefix + "`.`" + columnName + "` * ? ";
+                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = " + guardKeyword(getAbbreviation(prefix)) + "." + guardKeyword(columnName) + " * ? ";
                     setStrList.add(str);
                     break;
                 case DIVIDE:
-                    str = "`" + prefix + "`.`" + columnName + "` = `" + prefix + "`.`" + columnName + "` / ? ";
+                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = " + guardKeyword(getAbbreviation(prefix)) + "." + guardKeyword(columnName) + " / ? ";
                     setStrList.add(str);
                     break;
                 default:
@@ -1734,6 +1778,113 @@ public static boolean mapEquals(Map m1,Map m2){
         return (List<T>) tList;
     }
 
+
+    /**
+     * 创建table nick name
+     * @param strs
+     * @return
+     */
+    public String createTableNickName(String... strs){
+        return "`" + WsStringUtils.jointListString(strs,"`.`")+"`";
+    }
+
+    /**
+     * 创建table column name
+     * @param tableNickName
+     * @param columnName
+     * @return
+     */
+    public String createColumnName(String tableNickName,String columnName){
+        return guardKeyword(tableNickName)+'.'+guardKeyword(columnName);
+    }
+
+    /**
+     * 创建table column nickName
+     * @param tableNickName
+     * @param fieldName
+     * @return
+     */
+    public String createColumnNickName(String tableNickName,String fieldName) {
+        return tableNickName + '.' + fieldName;
+    }
+
+
+    /**
+     * 预防数据库关键词
+     * @param keyword
+     * @return
+     */
+    public String guardKeyword(String keyword) {
+        return '`' + keyword + '`';
+    }
+
+    public String getAbbreviation(String keyword){
+        String value = abbreviationMap.get(keyword);
+        if(value == null){
+            value = createAbbreviation(keyword);
+            abbreviationMap.put(keyword,value);
+            particularMap.put(value,keyword);
+            return value;
+        }else {
+            return value;
+        }
+    }
+
+    /**
+     * 创建简称
+     * @param keyword
+     * @return
+     */
+    public String createAbbreviation(String keyword){
+        if(keyword.length() < 2){
+            return keyword+'_'+abbreviationNum.getAndAdd(1);
+        }else {
+            return keyword.substring(0,1)+'_'+abbreviationNum.getAndAdd(1);
+        }
+    }
+
+    /**
+     * 获取详细名称
+     * @param value
+     * @return
+     */
+    public String getParticular(String value){
+        return particularMap.get(value);
+    }
+
+
+    /**
+     * 转换sql语句中表名为简写
+     * @param searchSql
+     * @return
+     */
+    public String translateTableNickName(String searchSql){
+        char[] cs = searchSql.toCharArray();
+        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder replaceSb = new StringBuilder();
+        char c;
+        boolean isReplace = false;
+        for(int i = 0; i < cs.length; i++) {
+            c = cs[i];
+            if (isReplace) {
+                if (c == '}') {
+                    stringBuilder.append(getAbbreviation(replaceSb.toString()));
+                    isReplace = false;
+                } else {
+                    replaceSb.append(c);
+                }
+            } else {
+                if (c == '{') {
+                    replaceSb = new StringBuilder();
+                    isReplace = true;
+                } else {
+                    stringBuilder.append(c);
+                }
+            }
+        }
+        return stringBuilder.toString();
+
+    }
 
 }
 
