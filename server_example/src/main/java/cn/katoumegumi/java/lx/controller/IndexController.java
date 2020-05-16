@@ -88,7 +88,8 @@ public class IndexController implements IndexService {
 
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class)
-                .join(null, UserDetails.class, "userDetails1", "id", "userId");
+                .join(null, UserDetails.class, "UserDetails", "id", "userId")
+                .eq("userDetails1.id",1);
         //mySearchList/*.join(null,UserDetails.class,"UserDetails1","id","userId")*/
         //.join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
         //.eq("userDetails.sex","男").sort("id","desc");
