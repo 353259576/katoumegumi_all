@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.WsBeanUtis;
+import cn.katoumegumi.java.common.WsBeanUtils;
 
 import java.util.*;
 
@@ -28,7 +28,7 @@ public class ResultMapIds {
                 Map.Entry entry = iterable.next();
                 Object o = entry.getValue();
                 if (o != null) {
-                    if (WsBeanUtis.isBaseType(o.getClass())) {
+                    if (WsBeanUtils.isBaseType(o.getClass())) {
                         set.add(entry.getKey());
                         set.add(entry.getValue());
                     }

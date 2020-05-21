@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.hibernate;
 
-import cn.katoumegumi.java.common.WsBeanUtis;
+import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearch;
@@ -168,19 +168,19 @@ public class JpaDataHandle {
                             if (mySearch.getValue() == null) {
                                 break;
                             }
-                            predicates.add(criteriaBuilder.lessThan(path, (Comparable) WsBeanUtis.objectToT(mySearch.getValue(), path.getJavaType())));
+                            predicates.add(criteriaBuilder.lessThan(path, (Comparable) WsBeanUtils.objectToT(mySearch.getValue(), path.getJavaType())));
                             break;
                         case GTE:
                             if (mySearch.getValue() == null) {
                                 break;
                             }
-                            predicates.add(criteriaBuilder.greaterThanOrEqualTo(path, (Comparable) WsBeanUtis.objectToT(mySearch.getValue(), path.getJavaType())));
+                            predicates.add(criteriaBuilder.greaterThanOrEqualTo(path, (Comparable) WsBeanUtils.objectToT(mySearch.getValue(), path.getJavaType())));
                             break;
                         case LTE:
                             if (mySearch.getValue() == null) {
                                 break;
                             }
-                            predicates.add(criteriaBuilder.lessThanOrEqualTo(path, (Comparable) WsBeanUtis.objectToT(mySearch.getValue(), path.getJavaType())));
+                            predicates.add(criteriaBuilder.lessThanOrEqualTo(path, (Comparable) WsBeanUtils.objectToT(mySearch.getValue(), path.getJavaType())));
                             break;
                         case IN:
                             if (mySearch.getValue() == null) {
@@ -220,7 +220,7 @@ public class JpaDataHandle {
                                 Object value = null;
                                 while (iterator.hasNext()) {
                                     object = iterator.next();
-                                    value = WsBeanUtis.objectToT(object, path.getJavaType());
+                                    value = WsBeanUtils.objectToT(object, path.getJavaType());
                                     if (value != null) {
                                         in.value(value);
                                     }
@@ -237,7 +237,7 @@ public class JpaDataHandle {
                                 Object value = null;
                                 while (iterator.hasNext()) {
                                     object = iterator.next();
-                                    value = WsBeanUtis.objectToT(object, path.getJavaType());
+                                    value = WsBeanUtils.objectToT(object, path.getJavaType());
                                     if (value != null) {
                                         in.value(value);
                                     }
@@ -251,7 +251,7 @@ public class JpaDataHandle {
                                 Object value = null;
                                 for (int i = 0; i < objects.length; i++) {
                                     //in.value(RestTempLateUtil.objectToT(objects[i],path.getJavaType()));
-                                    value = WsBeanUtis.objectToT(objects[i], path.getJavaType());
+                                    value = WsBeanUtils.objectToT(objects[i], path.getJavaType());
                                     if (value != null) {
                                         in.value(value);
                                     }

@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.datasource;
 
-import cn.katoumegumi.java.common.WsBeanUtis;
+import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
@@ -77,7 +77,7 @@ public class WsJdbcUtils {
                 for (Map.Entry<String, FieldColumnRelation> entry : fSet) {
                     FieldColumnRelation fieldColumnRelation = entry.getValue();
                     try {
-                        fieldColumnRelation.getField().set(t, WsBeanUtis.objectToT(keyMap.get(unUsedSet.remove(0)), fieldColumnRelation.getField().getType()));
+                        fieldColumnRelation.getField().set(t, WsBeanUtils.objectToT(keyMap.get(unUsedSet.remove(0)), fieldColumnRelation.getField().getType()));
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                     }
@@ -133,7 +133,7 @@ public class WsJdbcUtils {
                     for (Map.Entry<String, FieldColumnRelation> entry : fSet) {
                         FieldColumnRelation fieldColumnRelation = entry.getValue();
                         try {
-                            fieldColumnRelation.getField().set(tList.get(i), WsBeanUtis.objectToT(objectMap.get(unUsedSet.remove(0)), fieldColumnRelation.getField().getType()));
+                            fieldColumnRelation.getField().set(tList.get(i), WsBeanUtils.objectToT(objectMap.get(unUsedSet.remove(0)), fieldColumnRelation.getField().getType()));
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
@@ -165,21 +165,21 @@ public class WsJdbcUtils {
                     if (o instanceof String) {
                         statement.setString(i + 1, WsStringUtils.anyToString(o));
                     } else if (o instanceof Integer || WsFieldUtils.classCompare(int.class, o.getClass())) {
-                        statement.setInt(i + 1, WsBeanUtis.objectToT(o, int.class));
+                        statement.setInt(i + 1, WsBeanUtils.objectToT(o, int.class));
                     } else if (o instanceof Long || WsFieldUtils.classCompare(o.getClass(), long.class)) {
-                        statement.setLong(i + 1, WsBeanUtis.objectToT(o, long.class));
+                        statement.setLong(i + 1, WsBeanUtils.objectToT(o, long.class));
                     } else if (o instanceof Short || WsFieldUtils.classCompare(o.getClass(), short.class)) {
-                        statement.setShort(i + 1, WsBeanUtis.objectToT(o, short.class));
+                        statement.setShort(i + 1, WsBeanUtils.objectToT(o, short.class));
                     } else if (o instanceof Float || WsFieldUtils.classCompare(o.getClass(), Float.class)) {
-                        statement.setFloat(i + 1, WsBeanUtis.objectToT(o, float.class));
+                        statement.setFloat(i + 1, WsBeanUtils.objectToT(o, float.class));
                     } else if (o instanceof Double || WsFieldUtils.classCompare(o.getClass(), double.class)) {
-                        statement.setDouble(i + 1, WsBeanUtis.objectToT(o, double.class));
+                        statement.setDouble(i + 1, WsBeanUtils.objectToT(o, double.class));
                     } else if (o instanceof BigDecimal) {
-                        statement.setBigDecimal(i + 1, WsBeanUtis.objectToT(o, BigDecimal.class));
+                        statement.setBigDecimal(i + 1, WsBeanUtils.objectToT(o, BigDecimal.class));
                     } else if (o instanceof Date) {
-                        statement.setString(i + 1, WsBeanUtis.objectToT(o, String.class));
+                        statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
                     } else if (o instanceof LocalDate || o instanceof LocalDateTime) {
-                        statement.setString(i + 1, WsBeanUtis.objectToT(o, String.class));
+                        statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
                     } else {
                         throw new RuntimeException("不支持的数据类型:" + o.getClass());
                     }
@@ -216,32 +216,39 @@ public class WsJdbcUtils {
      */
     public <T> List<T> getListT(MySearchList mySearchList) {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        String sql = sqlModelUtils.searchListBaseSQLProcessor();
+        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+        String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
-        Map<Integer, Object> map = sqlModelUtils.getValueMap();
-        List<String> nameList = new ArrayList<>();
-        List list = new ArrayList();
-        List finalList = list;
-        map.forEach((integer, o) -> {
-            finalList.add(o);
-        });
-        list = jdbcTemplate.query(sql, finalList.toArray(), new RowMapper<Map>() {
-            @Override
-            public Map mapRow(java.sql.ResultSet resultSet, int i) throws SQLException {
-                if (i < 1) {
-                    int length = resultSet.getMetaData().getColumnCount();
-                    for (int j = 0; j < length; j++) {
-                        nameList.add(resultSet.getMetaData().getColumnLabel(j + 1));
-                    }
-                }
-                Map map = new HashMap();
-                for (int j = 0; j < nameList.size(); j++) {
-                    map.put(nameList.get(j), resultSet.getObject(j + 1));
-                }
-                return map;
-            }
-        });
+
+        List finalList = selectSqlEntity.getValueList();
+
+
+        List list = handleJdbcReturnValue(sql, finalList);
+
         return sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
+    }
+
+    private List handleJdbcReturnValue(String sql, List finalList) {
+        List<String> nameList = new ArrayList<>();
+        List list = jdbcTemplate.query(sql, finalList.toArray(), (resultSet, i) -> {
+            if (i < 1) {
+                int length = resultSet.getMetaData().getColumnCount();
+                for (int j = 0; j < length; j++) {
+                    nameList.add(resultSet.getMetaData().getColumnLabel(j + 1));
+                }
+            }
+            Map map = new HashMap();
+            for (int j = 0; j < nameList.size(); j++) {
+                map.put(nameList.get(j), resultSet.getObject(j + 1));
+            }
+            return map;
+        });
+        return list;
+    }
+
+    public <T> List<T> getListT(T t){
+        MySearchList mySearchList = SQLModelUtils.ObjectToMySearchList(t);
+        return getListT(mySearchList);
     }
 
     /**
@@ -262,6 +269,26 @@ public class WsJdbcUtils {
         return null;
     }
 
+    public <T> T getTOne(T t) {
+        MySearchList mySearchList = SQLModelUtils.ObjectToMySearchList(t);
+        return getTOne(mySearchList);
+    }
+
+    public <T> T getOne(Class<T> tClass,Object... objects){
+        FieldColumnRelationMapper mapper = SQLModelUtils.analysisClassRelation(tClass);
+        List<FieldColumnRelation> ids = mapper.getIdSet();
+        if(ids.size() != objects.length){
+            throw new RuntimeException("主键信息需要填写完整");
+        }
+        MySearchList mySearchList = MySearchList.create(tClass);
+        for(int i = 0; i < ids.size(); i++){
+            FieldColumnRelation relation = ids.get(i);
+            Object value = objects[i];
+            mySearchList.eq(relation.getFieldName(),value);
+        }
+        return getTOne(mySearchList);
+    }
+
     /**
      * 分页查询
      *
@@ -271,32 +298,12 @@ public class WsJdbcUtils {
      */
     public <T> IPage<T> getTPage(MySearchList mySearchList) {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        String sql = sqlModelUtils.searchListBaseSQLProcessor();
+        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+        String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
-        String countSql = sqlModelUtils.searchListBaseCountSQLProcessor();
-        Map<Integer, Object> map = sqlModelUtils.getValueMap();
-        List<String> nameList = new ArrayList<>();
-        List list = new ArrayList();
-        List finalList = list;
-        map.forEach((integer, o) -> {
-            finalList.add(o);
-        });
-        list = jdbcTemplate.query(sql, finalList.toArray(), new RowMapper<Map>() {
-            @Override
-            public Map mapRow(java.sql.ResultSet resultSet, int i) throws SQLException {
-                if (i < 1) {
-                    int length = resultSet.getMetaData().getColumnCount();
-                    for (int j = 0; j < length; j++) {
-                        nameList.add(resultSet.getMetaData().getColumnLabel(j + 1));
-                    }
-                }
-                Map map = new HashMap();
-                for (int j = 0; j < nameList.size(); j++) {
-                    map.put(nameList.get(j), resultSet.getObject(j + 1));
-                }
-                return map;
-            }
-        });
+        String countSql = selectSqlEntity.getCountSql();
+        List finalList = selectSqlEntity.getValueList();
+        List list = handleJdbcReturnValue(sql, finalList);
 
         List<T> tList = sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
         Long count = jdbcTemplate.queryForObject(countSql, finalList.toArray(), Long.class);
@@ -308,6 +315,13 @@ public class WsJdbcUtils {
         iPage.setTotal(count);
         return iPage;
     }
+
+    public <T> IPage<T> getTPage(T t,Page page){
+        MySearchList mySearchList = SQLModelUtils.ObjectToMySearchList(t);
+        mySearchList.setPageVO(page);
+        return getTPage(mySearchList);
+    }
+
 
 
     public JdbcTemplate getJdbcTemplate() {

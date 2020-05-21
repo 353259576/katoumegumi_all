@@ -14,7 +14,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class WsBeanUtis {
+public class WsBeanUtils {
 
     public static void main(String[] args) {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
@@ -58,7 +58,7 @@ public class WsBeanUtis {
                             WsFieldUtils.setFieldValueForName(field, newObject, value);
                         }
                     } else {
-                        value = WsBeanUtis.mapToObject(value, field.getType());
+                        value = WsBeanUtils.mapToObject(value, field.getType());
                         if (value != null) {
                             WsFieldUtils.setFieldValueForName(field, newObject, value);
                         }
@@ -791,7 +791,7 @@ public class WsBeanUtis {
             } else {
                 try {
                     Object newObject = tClass.getDeclaredConstructor().newInstance();
-                    newObject = WsBeanUtis.copyField(object, newObject);
+                    newObject = WsBeanUtils.copyField(object, newObject);
                     return (T) newObject;
                 } catch (Exception e) {
                     e.printStackTrace();

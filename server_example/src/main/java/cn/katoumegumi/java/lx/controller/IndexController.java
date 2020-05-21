@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
-import cn.katoumegumi.java.common.WsBeanUtis;
+import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.datasource.WsJdbcUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
@@ -11,6 +11,7 @@ import cn.katoumegumi.java.lx.service.IndexService;
 import cn.katoumegumi.java.lx.service.UserService;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
+import cn.katoumegumi.java.sql.SelectSqlEntity;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.vertx.core.AsyncResult;
@@ -40,9 +41,6 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 @Service(version = "1.0.0", protocol = {"dubbo", "rest"})
@@ -89,7 +87,7 @@ public class IndexController implements IndexService {
         User user = new User();
         MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class)
                 .join(null, UserDetails.class, "UserDetails", "id", "userId")
-                .eq("userDetails1.id",1);
+                .eq("UserDetails.id",1);
         //mySearchList/*.join(null,UserDetails.class,"UserDetails1","id","userId")*/
         //.join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
         //.eq("userDetails.sex","男").sort("id","desc");
@@ -238,14 +236,15 @@ public class IndexController implements IndexService {
             int finalI = i;
             long startTime = System.currentTimeMillis();
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-            String sql = sqlModelUtils.searchListBaseSQLProcessor();
+            SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+            String sql = selectSqlEntity.getSelectSql();
             System.out.println(sql);
-            Map<Integer, Object> valueMap = sqlModelUtils.getValueMap();
+            Map<Integer, Object> valueMap = selectSqlEntity.getValueMap();
             JsonArray jsonArray = new JsonArray();
             for (Map.Entry<Integer, Object> entry : valueMap.entrySet()) {
                 System.out.println(entry.getKey());
                 if (entry.getValue() instanceof LocalDateTime) {
-                    jsonArray.add(WsBeanUtis.objectToT(entry.getValue(), String.class));
+                    jsonArray.add(WsBeanUtils.objectToT(entry.getValue(), String.class));
                 } else {
                     jsonArray = jsonArray.add(entry.getValue());
                 }
@@ -437,7 +436,8 @@ public class IndexController implements IndexService {
         MySearchList mySearchList = MySearchList.newMySearchList();
         mySearchList.setMainClass(UserDetailsRemake.class);
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        String sql = sqlModelUtils.searchListBaseSQLProcessor();
+        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+        String sql = selectSqlEntity.getSelectSql();
         /*sqlClient.getConnection(sqlConnectionAsyncResult -> {
             if(sqlConnectionAsyncResult.succeeded()){
                 sqlConnectionAsyncResult.result().query(sql,resultSetAsyncResult -> {
@@ -529,7 +529,7 @@ public class IndexController implements IndexService {
 
             list = sqlModelUtils.handleMap(list);
             sqlModelUtils.mergeMapList(list);*/
-            List<UserDetailsRemake> users = sqlModelUtils.oneLoopMargeMap(queue.poll());
+            List<UserDetailsRemake> users = sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(queue.poll())));
         });
 
 

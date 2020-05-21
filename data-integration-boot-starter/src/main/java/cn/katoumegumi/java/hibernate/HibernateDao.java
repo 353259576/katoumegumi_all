@@ -303,10 +303,10 @@ public class HibernateDao {
                     break;
                 case EQ:
 
-                    criterionList.add(Restrictions.eq(fieldName, WsBeanUtis.objectToT(mySearch.getValue(), type)));
+                    criterionList.add(Restrictions.eq(fieldName, WsBeanUtils.objectToT(mySearch.getValue(), type)));
                     break;
                 case NE:
-                    criterionList.add(Restrictions.ne(fieldName, WsBeanUtis.objectToT(mySearch.getValue(), type)));
+                    criterionList.add(Restrictions.ne(fieldName, WsBeanUtils.objectToT(mySearch.getValue(), type)));
                     break;
                 case LIKE:
                     String value = WsStringUtils.anyToString(mySearch.getValue());
@@ -323,16 +323,16 @@ public class HibernateDao {
                     }
                     break;
                 case GT:
-                    criterionList.add(Restrictions.gt(fieldName, WsBeanUtis.objectToT(mySearch.getValue(), type)));
+                    criterionList.add(Restrictions.gt(fieldName, WsBeanUtils.objectToT(mySearch.getValue(), type)));
                     break;
                 case GTE:
-                    criterionList.add(Restrictions.ge(fieldName, WsBeanUtis.objectToT(mySearch.getValue(), type)));
+                    criterionList.add(Restrictions.ge(fieldName, WsBeanUtils.objectToT(mySearch.getValue(), type)));
                     break;
                 case LT:
-                    criterionList.add(Restrictions.lt(fieldName, WsBeanUtis.objectToT(mySearch.getValue(), type)));
+                    criterionList.add(Restrictions.lt(fieldName, WsBeanUtils.objectToT(mySearch.getValue(), type)));
                     break;
                 case LTE:
-                    criterionList.add(Restrictions.le(fieldName, WsBeanUtis.objectToT(mySearch.getValue(), type)));
+                    criterionList.add(Restrictions.le(fieldName, WsBeanUtils.objectToT(mySearch.getValue(), type)));
                     break;
                 case NULL:
                     criterionList.add(Restrictions.isNull(fieldName));

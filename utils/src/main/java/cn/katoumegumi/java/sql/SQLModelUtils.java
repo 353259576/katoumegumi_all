@@ -1,9 +1,6 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.WsBeanUtis;
-import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.*;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -35,10 +32,11 @@ public class SQLModelUtils {
      */
     public static Map<Class<?>, FieldColumnRelationMapper> mapperMap = new ConcurrentHashMap<>();
 
-    public volatile boolean fieldNameChange = true;
+    public static volatile boolean fieldNameChange = true;
     private Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
-    private final Map<Integer, Object> valueMap = new TreeMap<>();
-    private final AtomicInteger atomicInteger = new AtomicInteger(1);
+    //private final Map<Integer, Object> valueMap = new TreeMap<>();
+    //private final AtomicInteger atomicInteger = new AtomicInteger(1);
+    private List baseWhereValueList = new ArrayList();
     private Class<?> mainClass;
     private String searchSql;
     private final MySearchList mySearchList;
@@ -60,6 +58,7 @@ public class SQLModelUtils {
      * 缩写防重复
      */
     private AtomicInteger abbreviationNum = new AtomicInteger();
+
 
 
 
@@ -140,7 +139,7 @@ public class SQLModelUtils {
 
     }*/
     public static <T> int getSqlType(Class<T> tClass) {
-        if (WsBeanUtis.isBaseType(tClass)) {
+        if (WsBeanUtils.isBaseType(tClass)) {
             if (WsFieldUtils.classCompare(tClass, String.class)) {
                 return Types.VARCHAR;
             } else if (tClass.equals(Integer.class) || tClass.equals(int.class)) {
@@ -165,11 +164,27 @@ public class SQLModelUtils {
     }
 
     /**
+     * 查询
+     * @return
+     */
+    public SelectSqlEntity select(){
+        SelectSqlEntity selectSqlEntity = new SelectSqlEntity();
+        String selectSql = searchListBaseSQLProcessor();
+        String countSql = searchListBaseCountSQLProcessor();
+        selectSqlEntity.setSelectSql(selectSql);
+        selectSqlEntity.setCountSql(countSql);
+        selectSqlEntity.setValueList(baseWhereValueList);
+        return selectSqlEntity;
+    }
+
+
+
+    /**
      * 生成sql语句
      *
      * @return
      */
-    public String searchListBaseSQLProcessor() {
+    private String searchListBaseSQLProcessor() {
         StringBuilder selectSql = new StringBuilder();
         FieldColumnRelationMapper fieldColumnRelationMapper;
         if (WsStringUtils.isBlank(searchSql)) {
@@ -249,7 +264,7 @@ public class SQLModelUtils {
 
     }
 
-    public String searchListBaseCountSQLProcessor() {
+    private String searchListBaseCountSQLProcessor() {
         if (searchSql == null) {
             searchListBaseSQLProcessor();
         }
@@ -258,7 +273,7 @@ public class SQLModelUtils {
         return stringBuilder.toString();
     }
 
-    public String mysqlPaging(Page page, String selectSql) {
+    private String mysqlPaging(Page page, String selectSql) {
         if (page.getCurrent() == 0L) {
             page.setCurrent(1);
         }
@@ -272,7 +287,7 @@ public class SQLModelUtils {
      * @param mySearch
      * @return
      */
-    public String createWhereColumn(String prefix, MySearch mySearch) {
+    private String createWhereColumn(String prefix, MySearch mySearch) {
         switch (mySearch.getOperator()) {
             case SET:
             case ADD:
@@ -333,27 +348,33 @@ public class SQLModelUtils {
         switch (mySearch.getOperator()) {
             case EQ:
                 tableColumn.append(" = ?");
-                valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
                 break;
             case LIKE:
                 tableColumn.append(" like ?");
-                valueMap.put(atomicInteger.getAndAdd(1), "%" + WsBeanUtis.objectToT(mySearch.getValue(), String.class) + "%");
+                //valueMap.put(atomicInteger.getAndAdd(1), "%" + WsBeanUtis.objectToT(mySearch.getValue(), String.class) + "%");
+                baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
                 break;
             case GT:
                 tableColumn.append(" > ?");
-                valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
                 break;
             case LT:
                 tableColumn.append(" < ?");
-                valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
                 break;
             case GTE:
                 tableColumn.append(" >= ?");
-                valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
                 break;
             case LTE:
                 tableColumn.append(" <= ?");
-                valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
                 break;
             case IN:
                 if (WsFieldUtils.classCompare(mySearch.getValue().getClass(), Collection.class)) {
@@ -363,7 +384,8 @@ public class SQLModelUtils {
                     while (iterator.hasNext()) {
                         Object o = iterator.next();
                         symbols.add("?");
-                        valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(o, fieldColumnRelation.getFieldClass()));
+                        //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
+                        baseWhereValueList.add(WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
                     }
                     tableColumn.append(" in");
                     tableColumn.append('(');
@@ -375,7 +397,8 @@ public class SQLModelUtils {
                     List<String> symbols = new ArrayList<>();
                     for (Object o : os) {
                         symbols.add("?");
-                        valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(o, fieldColumnRelation.getFieldClass()));
+                        //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
+                        baseWhereValueList.add(WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
                     }
                     tableColumn.append(" in");
                     tableColumn.append('(');
@@ -394,7 +417,8 @@ public class SQLModelUtils {
                     while (iterator.hasNext()) {
                         Object o = iterator.next();
                         symbols.add("?");
-                        valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(o, fieldColumnRelation.getFieldClass()));
+                        //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
+                        baseWhereValueList.add(WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
                     }
                     tableColumn.append(" not in");
                     tableColumn.append('(');
@@ -406,7 +430,8 @@ public class SQLModelUtils {
                     List<String> symbols = new ArrayList<>();
                     for (Object o : os) {
                         symbols.add("?");
-                        valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(o, fieldColumnRelation.getFieldClass()));
+                        //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
+                        baseWhereValueList.add(WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
                     }
                     tableColumn.append(" no in");
                     tableColumn.append('(');
@@ -424,7 +449,8 @@ public class SQLModelUtils {
                 break;
             case NE:
                 tableColumn.append(" != ?");
-                valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtis.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                //valueMap.put(atomicInteger.getAndAdd(1), WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
                 break;
             case SORT:
                 tableColumn.append(' ');
@@ -438,15 +464,18 @@ public class SQLModelUtils {
                         Collection collection = (Collection) mySearch.getValue();
                         Iterator iterator = collection.iterator();
                         while (iterator.hasNext()) {
-                            valueMap.put(atomicInteger.getAndAdd(1), iterator.next());
+                            //valueMap.put(atomicInteger.getAndAdd(1), iterator.next());
+                            baseWhereValueList.add(iterator.next());
                         }
                     } else if (mySearch.getValue().getClass().isArray()) {
                         Object[] os = (Object[]) mySearch.getValue();
                         for (Object o : os) {
-                            valueMap.put(atomicInteger.getAndAdd(1), o);
+                            //valueMap.put(atomicInteger.getAndAdd(1), o);
+                            baseWhereValueList.add(o);
                         }
                     } else {
-                        valueMap.put(atomicInteger.getAndAdd(1), mySearch.getValue());
+                        //valueMap.put(atomicInteger.getAndAdd(1), mySearch.getValue());
+                        baseWhereValueList.add(mySearch.getValue());
                     }
                 }
 
@@ -476,7 +505,7 @@ public class SQLModelUtils {
         return tableColumn.toString();
     }
 
-    public List<String> searchListWhereSqlProcessor(MySearchList mySearchList, String prefix) {
+    private List<String> searchListWhereSqlProcessor(MySearchList mySearchList, String prefix) {
         Iterator<MySearch> iterator = mySearchList.iterator();
         List<String> stringList = new ArrayList<>();
         while (iterator.hasNext()) {
@@ -522,7 +551,7 @@ public class SQLModelUtils {
      * @param fieldName
      * @return
      */
-    public String createOneSelectColumn(String nickName, String columnName, String fieldName) {
+    private String createOneSelectColumn(String nickName, String columnName, String fieldName) {
         String sNickName = getAbbreviation(nickName);
         //String columnNickName = getAbbreviation(createColumnNickName(nickName,fieldName));
 
@@ -544,7 +573,7 @@ public class SQLModelUtils {
      * @param joinType
      * @return
      */
-    public String createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn, String joinType) {
+    private String createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn, String joinType) {
 
         String sJoinTableNickName = getAbbreviation(joinTableNickName);
         String sTableNickName = getAbbreviation(tableNickName);
@@ -563,7 +592,7 @@ public class SQLModelUtils {
     }
 
     //创建查询语句
-    public String modelToSqlSelect(Class<?> clazz) {
+    private String modelToSqlSelect(Class<?> clazz) {
 
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(clazz);
         assert fieldColumnRelationMapper != null;
@@ -652,7 +681,7 @@ public class SQLModelUtils {
      * @param clazz
      * @return
      */
-    public FieldColumnRelationMapper analysisClassRelation(Class<?> clazz) {
+    public static FieldColumnRelationMapper analysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(clazz);
         if (fieldColumnRelationMapper != null) {
             return fieldColumnRelationMapper;
@@ -665,7 +694,12 @@ public class SQLModelUtils {
         return mybatisPlusAnalysisClassRelation(clazz);
     }
 
-    public FieldColumnRelationMapper hibernateAnalysisClassRelation(Class<?> clazz) {
+    /**
+     * 解析hibernate注解
+     * @param clazz
+     * @return
+     */
+    private static FieldColumnRelationMapper hibernateAnalysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
         Table table = clazz.getAnnotation(Table.class);
         if (WsStringUtils.isBlank(table.name())) {
@@ -684,7 +718,7 @@ public class SQLModelUtils {
                 continue;
             }
 
-            if (WsBeanUtis.isBaseType(field.getType())) {
+            if (WsBeanUtils.isBaseType(field.getType())) {
                 boolean isId = false;
                 Id id = field.getAnnotation(Id.class);
                 if (id != null) {
@@ -775,7 +809,12 @@ public class SQLModelUtils {
         return fieldColumnRelationMapper;
     }
 
-    public FieldColumnRelationMapper mybatisPlusAnalysisClassRelation(Class<?> clazz) {
+    /**
+     * 解析mybatis plus注解
+     * @param clazz
+     * @return
+     */
+    private static FieldColumnRelationMapper mybatisPlusAnalysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
         TableName table = clazz.getAnnotation(TableName.class);
         if (table == null) {
@@ -797,7 +836,7 @@ public class SQLModelUtils {
             if (aTransient != null) {
                 continue;
             }
-            if (WsBeanUtis.isBaseType(field.getType())) {
+            if (WsBeanUtils.isBaseType(field.getType())) {
                 TableId id = field.getAnnotation(TableId.class);
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
                 fieldColumnRelation.setFieldClass(field.getType());
@@ -863,14 +902,19 @@ public class SQLModelUtils {
         return fieldColumnRelationMapper;
     }
 
-    public String getChangeColumnName(String fieldName) {
+    public static String getChangeColumnName(String fieldName) {
         return fieldNameChange ? WsStringUtils.camel_case(fieldName) : fieldName;
     }
 
-    public Map<Integer, Object> getValueMap() {
+    /*public Map<Integer, Object> getValueMap() {
         return valueMap;
-    }
+    }*/
 
+    /**
+     * 整理数据
+     * @param mapList
+     * @return
+     */
     public List<Map> handleMap(List<Map> mapList) {
         List<Map> list = new ArrayList<>(mapList.size());
 
@@ -912,11 +956,16 @@ public class SQLModelUtils {
         return list;
     }
 
+    /**
+     * 合并数据
+     * @param maps
+     * @return
+     */
     public List<Map> mergeMapList(List<Map> maps) {
         return mergeMapList(maps, mainClass);
     }
 
-    public List<Map> mergeMapList(List<Map> maps, Class<?> tClass) {
+    private List<Map> mergeMapList(List<Map> maps, Class<?> tClass) {
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(tClass);
 
         List<FieldJoinClass> fieldJoinClassList = fieldColumnRelationMapper.getFieldJoinClasses();
@@ -1006,13 +1055,19 @@ public class SQLModelUtils {
 
     }
 
+    /**
+     * 转化为对象
+     * @param list
+     * @param <T>
+     * @return
+     */
     public <T> List<T> loadingObject(List<Map> list) {
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mainClass);
         String prefix = fieldColumnRelationMapper.getNickName();
         List<T> newList = new ArrayList<>(list.size());
 
         for (Map childMap : list) {
-            Object o = WsBeanUtis.createObject(mainClass);
+            Object o = WsBeanUtils.createObject(mainClass);
             newList.add((T) o);
             loadingObject(o, childMap, fieldColumnRelationMapper, prefix);
         }
@@ -1055,7 +1110,7 @@ public class SQLModelUtils {
                 FieldJoinClass fieldJoinClass = parentMapper.getFieldJoinClassByFieldName(key);
                 field = fieldJoinClass.getField();
                 FieldColumnRelationMapper nowMapper = localMapperMap.get(nowPreFix);
-                nowObject = WsBeanUtis.createObject(nowMapper.getClazz());
+                nowObject = WsBeanUtils.createObject(nowMapper.getClazz());
                 loadingObject(nowObject, (Map) oValue, nowMapper, nowPreFix);
                 if (fieldJoinClass.isArray()) {
                     List list = new ArrayList();
@@ -1070,14 +1125,14 @@ public class SQLModelUtils {
                 nowObject = list;
                 List mapList = (List) oValue;
                 for (Object o : mapList) {
-                    Object co = WsBeanUtis.createObject(nowMapper.getClazz());
+                    Object co = WsBeanUtils.createObject(nowMapper.getClazz());
                     list.add(co);
                     loadingObject(co, (Map) o, nowMapper, nowPreFix);
                 }
             } else {
                 FieldColumnRelation relation = parentMapper.getFieldColumnRelationByField(key);
                 field = relation.getField();
-                nowObject = WsBeanUtis.objectToT(nowObject, relation.getFieldClass());
+                nowObject = WsBeanUtils.objectToT(nowObject, relation.getFieldClass());
             }
             try {
                 //assert field != null;
@@ -1243,8 +1298,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 修改
-     *
+     * 修改通过对象
      * @param t
      * @param <T>
      * @return
@@ -1298,6 +1352,11 @@ public class SQLModelUtils {
         return updateSqlEntity;
     }
 
+    /**
+     * 修改通过MySearchList
+     * @param mySearchList
+     * @return
+     */
     public UpdateSqlEntity update(MySearchList mySearchList) {
         if (mySearchList.getMainClass() == null) {
             mySearchList.setMainClass(mainClass);
@@ -1312,7 +1371,6 @@ public class SQLModelUtils {
                 + WsStringUtils.jointListString(setList, ",") + " " + searchSql.substring(searchSql.indexOf(" where "));
         List valueList = new ArrayList();
         List setValueList = new ArrayList();
-        List whereValueList = new ArrayList();
         for (MySearch mySearch : mySearchList.getAll()) {
             switch (mySearch.getOperator()) {
                 case SET:
@@ -1325,11 +1383,8 @@ public class SQLModelUtils {
                     break;
             }
         }
-        for (Map.Entry entry : valueMap.entrySet()) {
-            whereValueList.add(entry.getValue());
-        }
         valueList.addAll(setValueList);
-        valueList.addAll(whereValueList);
+        valueList.addAll(baseWhereValueList);
         UpdateSqlEntity updateSqlEntity = new UpdateSqlEntity();
         updateSqlEntity.setUpdateSql(updateSql);
         updateSqlEntity.setValueList(valueList);
@@ -1404,7 +1459,8 @@ public class SQLModelUtils {
         return valueList;
     }*/
 
-    public List<String> createUpdateSetSql(MySearchList mySearchList, String prefix) {
+
+    private List<String> createUpdateSetSql(MySearchList mySearchList, String prefix) {
         List<String> setStrList = new ArrayList<>();
         String str;
         for (MySearch mySearch : mySearchList.getAll()) {
@@ -1737,7 +1793,7 @@ public static boolean mapEquals(Map m1,Map m2){
      * @return
      */
     @Deprecated
-    public <T> List<T> oneLoopMargeMap(List<Map> mapList) {
+    private <T> List<T> oneLoopMargeMap(List<Map> mapList) {
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mainClass);
         List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
         List<FieldJoinClass> joinClasses = fieldColumnRelationMapper.getFieldJoinClasses();
@@ -1745,7 +1801,7 @@ public static boolean mapEquals(Map m1,Map m2){
         List tList = new ArrayList();
         for (Map map : mapList) {
 
-            Object o = WsBeanUtis.createObject(mainClass);
+            Object o = WsBeanUtils.createObject(mainClass);
             tList.add(o);
 
 
@@ -1765,11 +1821,11 @@ public static boolean mapEquals(Map m1,Map m2){
                 Object nowObject = objectMap.get(keyNameList.get(0));
                 FieldColumnRelation fieldColumnRelation = fieldColumnRelationMapper.getFieldColumnRelationByField(keyNameList.get(keyNameList.size() - 1));
                 Field field = fieldColumnRelation.getField();
-                if (WsBeanUtis.isBaseType(field.getType())) {
+                if (WsBeanUtils.isBaseType(field.getType())) {
 
                 }
                 try {
-                    field.set(nowObject, WsBeanUtis.objectToT(entry.getValue(), field.getType()));
+                    field.set(nowObject, WsBeanUtils.objectToT(entry.getValue(), field.getType()));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
@@ -1784,7 +1840,7 @@ public static boolean mapEquals(Map m1,Map m2){
      * @param strs
      * @return
      */
-    public String createTableNickName(String... strs){
+    private String createTableNickName(String... strs){
         return "`" + WsStringUtils.jointListString(strs,"`.`")+"`";
     }
 
@@ -1794,7 +1850,7 @@ public static boolean mapEquals(Map m1,Map m2){
      * @param columnName
      * @return
      */
-    public String createColumnName(String tableNickName,String columnName){
+    private String createColumnName(String tableNickName,String columnName){
         return guardKeyword(tableNickName)+'.'+guardKeyword(columnName);
     }
 
@@ -1804,7 +1860,7 @@ public static boolean mapEquals(Map m1,Map m2){
      * @param fieldName
      * @return
      */
-    public String createColumnNickName(String tableNickName,String fieldName) {
+    private String createColumnNickName(String tableNickName,String fieldName) {
         return tableNickName + '.' + fieldName;
     }
 
@@ -1814,11 +1870,11 @@ public static boolean mapEquals(Map m1,Map m2){
      * @param keyword
      * @return
      */
-    public String guardKeyword(String keyword) {
+    private static String guardKeyword(String keyword) {
         return '`' + keyword + '`';
     }
 
-    public String getAbbreviation(String keyword){
+    private String getAbbreviation(String keyword){
         String value = abbreviationMap.get(keyword);
         if(value == null){
             value = createAbbreviation(keyword);
@@ -1835,7 +1891,7 @@ public static boolean mapEquals(Map m1,Map m2){
      * @param keyword
      * @return
      */
-    public String createAbbreviation(String keyword){
+    private String createAbbreviation(String keyword){
         if(keyword.length() < 2){
             return keyword+'_'+abbreviationNum.getAndAdd(1);
         }else {
@@ -1848,7 +1904,7 @@ public static boolean mapEquals(Map m1,Map m2){
      * @param value
      * @return
      */
-    public String getParticular(String value){
+    private String getParticular(String value){
         return particularMap.get(value);
     }
 
@@ -1858,7 +1914,7 @@ public static boolean mapEquals(Map m1,Map m2){
      * @param searchSql
      * @return
      */
-    public String translateTableNickName(String searchSql){
+    private String translateTableNickName(String searchSql){
         char[] cs = searchSql.toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
         StringBuilder replaceSb = new StringBuilder();
@@ -1885,6 +1941,46 @@ public static boolean mapEquals(Map m1,Map m2){
         return stringBuilder.toString();
 
     }
+
+
+
+
+    public static MySearchList ObjectToMySearchList(Object o){
+        FieldColumnRelationMapper mapper = analysisClassRelation(o.getClass());
+        List<FieldColumnRelation> ids = mapper.getIdSet();
+        List<FieldColumnRelation> columns = mapper.getFieldColumnRelations();
+        MySearchList mySearchList = MySearchList.create(o.getClass());
+        if(WsListUtils.isNotEmpty(ids)){
+            for (FieldColumnRelation relation:ids){
+                if(WsBeanUtils.isBaseType(relation.getFieldClass())) {
+                    try {
+                        Object value = relation.getField().get(o);
+                        if (value != null) {
+                            mySearchList.eq(relation.getFieldName(), value);
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        if(WsListUtils.isNotEmpty(columns)){
+            for (FieldColumnRelation relation:columns){
+                if(WsBeanUtils.isBaseType(relation.getFieldClass())) {
+                    try {
+                        Object value = relation.getField().get(o);
+                        if (value != null) {
+                            mySearchList.eq(relation.getFieldName(), value);
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return mySearchList;
+    }
+
 
 }
 
