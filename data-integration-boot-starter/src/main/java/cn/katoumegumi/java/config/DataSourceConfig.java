@@ -5,7 +5,7 @@ import cn.katoumegumi.java.datasource.DynamicDataSource;
 import cn.katoumegumi.java.datasource.DynamicDataSourceHolder;
 import cn.katoumegumi.java.datasource.annotation.DynamicDataSourceAdvisor;
 import cn.katoumegumi.java.properties.DruidDataSourceProperties;
-import cn.katoumegumi.java.properties.DruidDataSourcePropertiesList;
+import cn.katoumegumi.java.properties.DataSourcePropertiesList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -27,13 +27,13 @@ import java.util.Map;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({DataSource.class})
 @ConditionalOnProperty(prefix = "megumi.datasource", value = "enable", havingValue = "true")
-@EnableConfigurationProperties(value = {DruidDataSourcePropertiesList.class})
+@EnableConfigurationProperties(value = {DataSourcePropertiesList.class})
 public class DataSourceConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceConfig.class);
 
     @Resource
-    private DruidDataSourcePropertiesList druidDataSourcePropertiesList;
+    private DataSourcePropertiesList dataSourcePropertiesList;
 
     @Primary
     @Bean(name = "dataSource")
@@ -51,9 +51,9 @@ public class DataSourceConfig {
         DruidDataSourceCreateFactory factory = new DruidDataSourceCreateFactory();
         DynamicDataSource dynamicDataSource = new DynamicDataSource();
         Map map = new HashMap<>();
-        List<DruidDataSourceProperties> list = druidDataSourcePropertiesList.getDruids();
+        List<DruidDataSourceProperties> list = dataSourcePropertiesList.getDruids();
         DruidDataSourceProperties properties = list.get(0);
-        DataSource druidDataSource = factory.initDatasource(properties, druidDataSourcePropertiesList.isSeataEnable());
+        DataSource druidDataSource = factory.initDatasource(properties, dataSourcePropertiesList.isSeataEnable());
         map.put(properties.getAlias(), druidDataSource);
         dynamicDataSource.setDefaultTargetDataSource(druidDataSource);
         DynamicDataSourceHolder.defaultDatasouce = properties.getAlias();
@@ -61,7 +61,7 @@ public class DataSourceConfig {
         log.info("默认数据源：{}创建成功，数据源：{}", properties.getAlias(), druidDataSource.toString());
         for (int i = 1, length = list.size(); i < length; i++) {
             properties = list.get(i);
-            druidDataSource = factory.initDatasource(properties, druidDataSourcePropertiesList.isSeataEnable());
+            druidDataSource = factory.initDatasource(properties, dataSourcePropertiesList.isSeataEnable());
             if (druidDataSource != null) {
                 map.put(properties.getAlias(), druidDataSource);
                 DynamicDataSourceHolder.dataSourceNameSet.add(properties.getAlias());

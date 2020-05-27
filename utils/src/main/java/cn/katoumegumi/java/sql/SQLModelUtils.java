@@ -257,7 +257,7 @@ public class SQLModelUtils {
                     .append(WsStringUtils.jointListString(list1, ","));
         }
         if (mySearchList.getPageVO() != null) {
-            return mysqlPaging(mySearchList.getPageVO(), searchSql);
+            return mysqlPaging(mySearchList.getPageVO(), selectSql.toString());
         }
 
         return selectSql.toString();

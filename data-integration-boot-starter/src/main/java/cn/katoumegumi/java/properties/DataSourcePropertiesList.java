@@ -9,7 +9,7 @@ import java.util.List;
  */
 
 @ConfigurationProperties(value = "megumi.datasource")
-public class DruidDataSourcePropertiesList {
+public class DataSourcePropertiesList {
     private boolean enable = false;
     private boolean seataEnable = false;
     private List<DruidDataSourceProperties> druids;
