@@ -376,16 +376,55 @@ public class MySearchList {
         return this;
     }
 
-    public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+    /**
+     * 连接其他表
+     * @param tableNickName 已存在的表名
+     * @param joinTableClass 连接对象类型
+     * @param joinTableNickName 连接对象表名
+     * @param tableColumn 已存在表的字段
+     * @param joinColumn 连接表的字段
+     * @param joinType 连接类型
+     * @param <T>
+     * @return
+     */
+    public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn,JoinType joinType) {
         TableRelation tableRelation = new TableRelation();
         tableRelation.setJoinTableClass(joinTableClass);
         tableRelation.setTableNickName(tableNickName);
         tableRelation.setJoinTableNickName(joinTableNickName);
         tableRelation.setTableColumn(tableColumn);
         tableRelation.setJoinTableColumn(joinColumn);
+        tableRelation.setJoinType(joinType);
         joins.add(tableRelation);
         return this;
     }
+    public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(tableNickName,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.INNER);
+    }
+    public <T> MySearchList join(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn);
+    }
+
+    public <T> MySearchList leftJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.LEFT);
+    }
+    public <T> MySearchList leftJoin(String tableNickName,Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.LEFT);
+    }
+    public <T> MySearchList innerJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.INNER);
+    }
+    public <T> MySearchList innerJoin(String tableNickName,Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.INNER);
+    }
+    public <T> MySearchList rightJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.RIGHT);
+    }
+    public <T> MySearchList rightJoin(String tableNickName,Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.RIGHT);
+    }
+
+
 
 
     public Map<Class, String> getTableAndNickNameMap() {

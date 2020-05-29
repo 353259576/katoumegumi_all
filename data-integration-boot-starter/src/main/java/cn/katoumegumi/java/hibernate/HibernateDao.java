@@ -249,8 +249,6 @@ public class HibernateDao {
             default:
                 joinType = JoinType.INNER_JOIN;
         }
-
-
         List<MySearch> mySearches = mySearchList.getAll();
         //MySearch mySearch;
         String fieldName;

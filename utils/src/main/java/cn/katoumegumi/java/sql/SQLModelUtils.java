@@ -32,14 +32,39 @@ public class SQLModelUtils {
      */
     public static Map<Class<?>, FieldColumnRelationMapper> mapperMap = new ConcurrentHashMap<>();
 
+    /**
+     * 是否转换列名
+     */
     public static volatile boolean fieldNameChange = true;
+
+    /**
+     * 本地对象与表的对应关系
+     */
     private Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
-    //private final Map<Integer, Object> valueMap = new TreeMap<>();
-    //private final AtomicInteger atomicInteger = new AtomicInteger(1);
+    /**
+     * 记录where所需要的值
+     */
     private List baseWhereValueList = new ArrayList();
+
+    /**
+     * 主表的class类型
+     */
     private Class<?> mainClass;
+
+    /**
+     * 基本查询语句
+     */
     private String searchSql;
+
+    /**
+     * 表查询条件
+     */
     private final MySearchList mySearchList;
+
+    /**
+     * 已经使用过的表关联关系
+     */
+    private Set<TableRelation> usedTableRelation = new HashSet<>();
 
 
 
@@ -199,6 +224,10 @@ public class SQLModelUtils {
             }
             String baseTableName = fieldColumnRelationMapper.getNickName();
             for (TableRelation tableRelation : list) {
+                if(usedTableRelation.contains(tableRelation)){
+                    usedTableRelation.remove(tableRelation);
+                    continue;
+                }
                 String tableNickName;
                 FieldColumnRelationMapper mapper = analysisClassRelation(tableRelation.getJoinTableClass());
                 String joinTableNickName = baseTableName + "." + tableRelation.getJoinTableNickName();
@@ -214,20 +243,20 @@ public class SQLModelUtils {
                 if (tableRelation.getJoinType() != null) {
                     switch (tableRelation.getJoinType()) {
                         case LEFT:
-                            joinType = "LEFT JOIN";
+                            joinType = " LEFT JOIN ";
                             break;
                         case INNER:
-                            joinType = "INNER JOIN";
+                            joinType = " INNER JOIN ";
                             break;
                         case RIGHT:
-                            joinType = "RIGHT JOIN";
+                            joinType = " RIGHT JOIN ";
                             break;
                         default:
-                            joinType = "INNER JOIN";
+                            joinType = " INNER JOIN ";
                             break;
                     }
                 } else {
-                    joinType = "INNER JOIN";
+                    joinType = " INNER JOIN ";
                 }
 
 
@@ -620,15 +649,25 @@ public class SQLModelUtils {
         }
         String lastTableNickName;
         if (!fieldColumnRelationMapper.getFieldJoinClasses().isEmpty()) {
+
             for (FieldJoinClass fieldJoinClass : fieldColumnRelationMapper.getFieldJoinClasses()) {
-                if (WsStringUtils.isBlank(fieldJoinClass.getJoinColumn())) {
+
+                if(!checkFieldJoinClass(fieldJoinClass)){
+                    FieldJoinClass newFieldJoinClass = selfFieldJoinClass(tableNickName,fieldJoinClass,mySearchList.getJoins());
+                    if(newFieldJoinClass != null){
+                        fieldJoinClass = newFieldJoinClass;
+                    }
+                }
+
+
+                /*if (WsStringUtils.isBlank(fieldJoinClass.getJoinColumn())) {
                     Iterator<TableRelation> iterator = mySearchList.getJoins().iterator();
                     while (iterator.hasNext()) {
                         TableRelation tableRelation = iterator.next();
                         if (fieldJoinClass.getJoinClass().equals(tableRelation.getJoinTableClass())) {
                             FieldJoinClass oldFieldJoinClass = fieldJoinClass;
                             fieldJoinClass = new FieldJoinClass();
-                            fieldJoinClass.setJoinType(oldFieldJoinClass.getJoinType());
+                            fieldJoinClass.setJoinType(tableRelation.getJoinType());
                             fieldJoinClass.setArray(oldFieldJoinClass.isArray());
                             fieldJoinClass.setNickName(oldFieldJoinClass.getNickName());
                             fieldJoinClass.setField(oldFieldJoinClass.getField());
@@ -642,7 +681,10 @@ public class SQLModelUtils {
                         }
 
                     }
-                }
+                }*/
+
+
+
                 if (WsStringUtils.isNotBlank(fieldJoinClass.getJoinColumn())) {
                     lastTableNickName = tableNickName + '.' + fieldJoinClass.getNickName();
                     FieldColumnRelationMapper mapper = mapperMap.get(fieldJoinClass.getJoinClass());
@@ -654,17 +696,17 @@ public class SQLModelUtils {
                                 joinType = "LEFT JOIN";
                                 break;
                             case INNER:
-                                joinType = "INNER JOIN";
+                                joinType = " INNER JOIN ";
                                 break;
                             case RIGHT:
-                                joinType = "RIGTH JOIN";
+                                joinType = " RIGHT JOIN ";
                                 break;
                             default:
-                                joinType = "INNER JOIN";
+                                joinType = " INNER JOIN ";
                                 break;
                         }
                     } else {
-                        joinType = "INNER JOIN";
+                        joinType = " INNER JOIN ";
                     }
 
 
@@ -674,6 +716,79 @@ public class SQLModelUtils {
             }
         }
     }
+
+
+    /**
+     * 判断连接条件是否符合
+     * @param fieldJoinClass
+     * @return
+     */
+    private boolean checkFieldJoinClass(FieldJoinClass fieldJoinClass){
+        return !(WsStringUtils.isBlank(fieldJoinClass.getJoinColumn()) || WsStringUtils.isBlank(fieldJoinClass.getAnotherJoinColumn()));
+    }
+
+    /**
+     * 完善FieldJoinClass
+     * @param tableNickName
+     * @param fieldJoinClass
+     * @param tableRelationList
+     */
+    private FieldJoinClass selfFieldJoinClass(String tableNickName,FieldJoinClass fieldJoinClass,List<TableRelation> tableRelationList){
+        if(WsListUtils.isEmpty(tableRelationList)){
+            return null;
+        }
+        int firstIndex = tableNickName.indexOf('.');
+        //String prefix = analysisClassRelation(mainClass).getNickName();
+        String prefix = null;
+        if(firstIndex != -1){
+            prefix = tableNickName.substring(0,firstIndex);
+        }else {
+            prefix = tableNickName;
+        }
+        Iterator<TableRelation> iterator = tableRelationList.iterator();
+        TableRelation tableRelation = null;
+        while (iterator.hasNext()){
+            tableRelation = iterator.next();
+            if(WsStringUtils.isNotBlank(tableRelation.getTableNickName())){
+                if(firstIndex == -1){
+                    continue;
+                }
+                if(!tableNickName.equals(prefix + '.' +tableRelation.getTableNickName())){
+                    continue;
+                }
+            }else {
+                if(firstIndex != -1){
+                    continue;
+                }
+            }
+
+            if(!fieldJoinClass.getJoinClass().equals(tableRelation.getJoinTableClass())) {
+                continue;
+            }
+            if(!(tableNickName+"."+fieldJoinClass.getNickName()).equals(prefix +'.'+tableRelation.getJoinTableNickName())){
+                continue;
+            }
+
+            FieldJoinClass oldFieldJoinClass = fieldJoinClass;
+            fieldJoinClass = new FieldJoinClass();
+            fieldJoinClass.setArray(oldFieldJoinClass.isArray());
+            fieldJoinClass.setNickName(oldFieldJoinClass.getNickName());
+            fieldJoinClass.setField(oldFieldJoinClass.getField());
+            fieldJoinClass.setJoinClass(oldFieldJoinClass.getJoinClass());
+            FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
+            fieldJoinClass.setJoinColumn(mapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName());
+            fieldJoinClass.setAnotherJoinColumn(mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName());
+            fieldJoinClass.setNickName(tableRelation.getJoinTableNickName());
+            fieldJoinClass.setJoinType(tableRelation.getJoinType());
+            //iterator.remove();
+            usedTableRelation.add(tableRelation);
+            return fieldJoinClass;
+
+
+        }
+        return null;
+    }
+
 
     /**
      * 解析实体对象
@@ -902,13 +1017,15 @@ public class SQLModelUtils {
         return fieldColumnRelationMapper;
     }
 
+    /**
+     * 对表列名进行转换
+     * @param fieldName
+     * @return
+     */
     public static String getChangeColumnName(String fieldName) {
         return fieldNameChange ? WsStringUtils.camel_case(fieldName) : fieldName;
     }
 
-    /*public Map<Integer, Object> getValueMap() {
-        return valueMap;
-    }*/
 
     /**
      * 整理数据
@@ -1943,8 +2060,11 @@ public static boolean mapEquals(Map m1,Map m2){
     }
 
 
-
-
+    /**
+     * 比对象转换成表查询条件
+     * @param o
+     * @return
+     */
     public static MySearchList ObjectToMySearchList(Object o){
         FieldColumnRelationMapper mapper = analysisClassRelation(o.getClass());
         List<FieldColumnRelation> ids = mapper.getIdSet();

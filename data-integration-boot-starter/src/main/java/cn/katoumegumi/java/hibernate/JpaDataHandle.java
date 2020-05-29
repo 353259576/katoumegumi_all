@@ -2,10 +2,12 @@ package cn.katoumegumi.java.hibernate;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsDateUtils;
+import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SqlOperator;
+import cn.katoumegumi.java.sql.TableRelation;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
@@ -20,38 +22,16 @@ public class JpaDataHandle {
             @Override
             public Predicate toPredicate(Root<T> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
                 Map<String, From> nameMap = new HashMap<>();
+                List<TableRelation> tableRelationList = mySearchList.getJoins();
+                /*if(WsListUtils.isNotEmpty(tableRelationList)){
+                    for (TableRelation tableRelation:tableRelationList){
+                        Root<?>  newRoot = criteriaQuery.from(tableRelation.getJoinTableClass());
+                    }
+                }*/
                 Predicate predicate = analysisPredicate(root, criteriaQuery, criteriaBuilder, mySearchList, true, nameMap);
                 Path path = null;
                 List<Order> orders = new ArrayList<>();
                 for (MySearch mySearch : mySearchList.getOrderSearches()) {
-
-                    /*String mySearchFieldName  = mySearch.getFieldName();
-                    if(mySearchFieldName.contains(".")){
-                        List<String> fieldPaths = WsStringUtils.split(mySearchFieldName,',');
-                        if(fieldPaths.size() < 2){
-                            log.error("输入错误的参数:"+mySearchFieldName);
-                            continue;
-                        }
-                        Join join = null;
-                        int i = 0;
-                        StringBuffer nickName = new StringBuffer();
-                        From last = root;
-                        for (;i < fieldPaths.size() - 1; i++){
-                            if(i != 0){
-                                nickName.append("_");
-                            }
-                            nickName.append(fieldPaths.get(i));
-                            if(nameMap.containsKey(nickName.toString())){
-                                last = nameMap.get(nickName.toString());
-                            }else {
-                                last = last.join(fieldPaths.get(i));
-                                nameMap.put(nickName.toString(),last);
-                            }
-                        }
-                        path = last.get(fieldPaths.get(i));
-                    }else {
-                        path = root.get(mySearch.getFieldName());
-                    }*/
                     path = getPath(root, nameMap, mySearch.getFieldName());
                     if ("asc".equals(mySearch.getValue()) || "ASC".equals(mySearch.getValue())) {
                         orders.add(criteriaBuilder.asc(path));
@@ -105,36 +85,6 @@ public class JpaDataHandle {
 
 
                 path = getPath(root, nameMap, fieldName);
-
-
-                /*String mySearchFieldName  = mySearch.getFieldName();
-                if(mySearchFieldName.contains(".")){
-                    String fieldPaths[] = mySearchFieldName.split("[.]");
-                    if(fieldPaths.length < 2){
-                        log.error("输入错误的参数:"+mySearchFieldName);
-                        continue;
-                    }
-                    Join join = null;
-                    int i = 0;
-                    StringBuffer nickName = new StringBuffer();
-                    From last = root;
-                    for (;i < fieldPaths.length - 1; i++){
-                        if(i != 0){
-                            nickName.append("_");
-                        }
-                        nickName.append(fieldPaths[i]);
-                        if(nameMap.containsKey(nickName.toString())){
-                            last = nameMap.get(nickName.toString());
-                        }else {
-                            last = last.join(fieldPaths[i],mySearchList.getDefaultJoinType());
-                            nameMap.put(nickName.toString(), last);
-                        }
-
-                    }
-                    path = last.get(fieldPaths[i]);
-                }else {
-                    path = root.get(mySearch.getFieldName());
-                }*/
 
 
                 if (path != null) {

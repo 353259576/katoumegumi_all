@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.lx.controller;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.datasource.WsJdbcUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
@@ -42,6 +43,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Service(version = "1.0.0", protocol = {"dubbo", "rest"})
 @RestController
@@ -85,10 +87,29 @@ public class IndexController implements IndexService {
         System.out.println(WsFieldUtils.getFieldName(user.getUserDetails()::getId));*/
 
         User user = new User();
-        MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(User.class)
-                .join(null, UserDetails.class, "UserDetails", "id", "userId")
-                .eq("UserDetails.id",1)
-                .sort("id","desc");
+        Consumer<Runnable> consumer = runnable -> {
+            Long startTime = System.currentTimeMillis();
+            runnable.run();
+            Long endTime = System.currentTimeMillis();
+            System.out.println(endTime - startTime);
+        };
+
+
+        consumer.accept(()->{
+            for (int i = 0; i < 100000; i++){
+                MySearchList mySearchList = MySearchList.create(User.class)
+                        //.innerJoin( UserDetails.class, "userDetails", "id", "userId")
+                        //.innerJoin( UserDetails.class, "userDetails1", "id", "userId")
+                        .eq("id",1)
+                        .eqp("id","{User}.id")
+                        .sort("id","desc");
+                SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+                SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+                //System.out.println(selectSqlEntity.getSelectSql());
+            }
+        });
+
+
         //mySearchList/*.join(null,UserDetails.class,"UserDetails1","id","userId")*/
         //.join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
         //.eq("userDetails.sex","男").sort("id","desc");
@@ -102,8 +123,8 @@ public class IndexController implements IndexService {
                 .sql(" (select count(*) from ws_user w where w.id = {User}.id)",null)
                 .sort("id","ASC")
                 .sort("userDetails.sex","DESC");*/
-        mysqlClientTest(mySearchList);
-        mysqlClientTest(mySearchList);
+        //mysqlClientTest(mySearchList);
+        //mysqlClientTest(mySearchList);
         /*Page page = new Page();
         page.setCurrent(1);
         page.setSize(10);
