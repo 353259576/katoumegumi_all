@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.common;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -55,6 +56,8 @@ public class BaseTypeCommon {
 
     public static final Class LOCAL_DATE_TIME_CLASS = LocalDateTime.class;
 
+    public static final Class BIG_DECIMAL = BigDecimal.class;
+
 
     static {
         CLASS_SET.add(BYTE_CLASS);
@@ -78,6 +81,7 @@ public class BaseTypeCommon {
         CLASS_SET.add(SQL_DATA_CALSS);
         CLASS_SET.add(LOCAL_DATE_CLASS);
         CLASS_SET.add(LOCAL_DATE_TIME_CLASS);
+        CLASS_SET.add(BIG_DECIMAL);
 
     }
 
