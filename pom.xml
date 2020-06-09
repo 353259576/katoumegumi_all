@@ -11,7 +11,7 @@
     <modules>
         <module>data-integration-boot-starter</module>
         <module>utils</module>
-        <!--<module>server_example</module>-->
+        <module>server_example</module>
         <!--<module>client_example</module>
         <module>monitor</module>-->
         <!--<module>auth_server</module>-->
@@ -47,7 +47,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <lombok.version>1.18.12</lombok.version>
-        <fastjson.version>1.2.68</fastjson.version>
+        <fastjson.version>1.2.70</fastjson.version>
         <dubbo-version>2.7.5</dubbo-version>
         <netty-version>4.1.50.Final</netty-version>
         <zxing.version>3.4.0</zxing.version>

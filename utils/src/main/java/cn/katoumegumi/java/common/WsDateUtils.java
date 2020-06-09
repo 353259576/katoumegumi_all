@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common;
 
+import checkers.units.quals.C;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +12,12 @@ import java.util.Date;
 import java.util.List;
 
 public class WsDateUtils {
+
+    public static final String[] CN_MONTH_NAMES = new String[]{"一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"};
+
+    public static final String[] CN_WEEK_NAMES = new String[]{"星期一","星期二","星期三","星期四","星期五","星期六","星期日"};
+
+
     public static final String LONGTIMESTRING = "yyyy-MM-dd HH:mm:ss";
     public static final String LONGTIMESTRINGCOMPACT = "yyyyMMddHHmmss";
     public static final String CNLONGTIMESTRING = "yyyy年MM月dd日 HH时mm分ss秒";
@@ -18,14 +26,15 @@ public class WsDateUtils {
 
 
     public static void main(String[] args) {
-        System.out.println(chinaWeek(1));
+        System.out.println(getCNWeekdayName(new Date()));
+        System.out.println(getCNMonthName(new Date()));
     }
 
     public static String dateStringFormat(String date) {
-        char chars[] = date.toCharArray();
+        char[] chars = date.toCharArray();
         List<String> strings = new ArrayList<>();
         for (int i = 0; i < chars.length; i++) {
-            StringBuffer stringBuffer = new StringBuffer();
+            StringBuilder stringBuffer = new StringBuilder();
             while (i < chars.length && chars[i] > 47 && chars[i] < 58) {
                 stringBuffer.append(chars[i]);
                 i++;
@@ -120,24 +129,27 @@ public class WsDateUtils {
         return chinaWeek;
     }
 
-    public Date changeDate(Date date, int addNum, int type) {
+    /**
+     * 获取中文星期
+     * @param date 时间
+     * @return 中文星期
+     */
+    public static String getCNWeekdayName(Date date){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.add(type, addNum);
-        return calendar.getTime();
+        int weekday = calendar.get(Calendar.DAY_OF_WEEK);
+        weekday = chinaWeek(weekday);
+        return CN_WEEK_NAMES[weekday - 1];
     }
 
-
-    public enum WsDateUtilsEnum {
-        YEAR(1), MONTH(2), DAY(3), HOUR(4), MINUTE(5), SECOND(6);
-        private int code;
-
-        WsDateUtilsEnum(int code) {
-            this.code = code;
-        }
-
-        public int getCode() {
-            return code;
-        }
+    /**
+     * 获取中文月
+     * @param date 时间
+     * @return 中文月
+     */
+    public static String getCNMonthName(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return CN_MONTH_NAMES[calendar.get(Calendar.MONTH)];
     }
 }

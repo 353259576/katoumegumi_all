@@ -11,15 +11,15 @@ import java.util.function.Supplier;
 public class MySearchList {
     private List<MySearch> mySearches = new ArrayList<>();
 
-    private List<MySearch> orderSearches = new ArrayList<>();
+    private final List<MySearch> orderSearches = new ArrayList<>();
 
-    private List<MySearchList> ands = new ArrayList<>();
+    private final List<MySearchList> ands = new ArrayList<>();
 
-    private List<MySearchList> ors = new ArrayList<>();
+    private final List<MySearchList> ors = new ArrayList<>();
 
-    private Map<Class, String> tableAndNickNameMap = new HashMap<>();
+    private final Map<Class, String> tableAndNickNameMap = new HashMap<>();
 
-    private List<TableRelation> joins = new ArrayList<>();
+    private final List<TableRelation> joins = new ArrayList<>();
 
     private Class mainClass;
 
