@@ -101,8 +101,8 @@ public class IndexController implements IndexService {
                 MySearchList mySearchList = MySearchList.create(User.class)
                         .innerJoin( UserDetails.class, "userDetails", "id", "userId")
                         //.innerJoin( UserDetails.class, "userDetails1", "id", "userId")
-                        .eq("id",1)
-                        .eqp("id","{User}.id")
+                        //.eq("id",1)
+                        //.eqp("id","{User}.id")
                         .sort("id","desc");
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
@@ -578,6 +578,8 @@ public class IndexController implements IndexService {
             System.out.println(JSON.toJSONString(user));
         }
         //jdbcUtils.insert(users);
+        users = jdbcUtils.getListT(MySearchList.create(User.class));
+        System.out.println(JSON.toJSONString(users));
         return "完成";
     }
 

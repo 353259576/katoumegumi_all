@@ -65,26 +65,38 @@ public class WsFieldUtils {
 
     public static Field[] getFieldAll(Class clazz) {
         Set<Field> fieldSet = new HashSet<>();
+        Map<String,Field> fieldMap = new HashMap<>();
         try {
             Field fields[];
-            fields = clazz.getFields();
+            /*fields = clazz.getFields();
             for (int i = 0; i < fields.length; i++) {
-                fieldSet.add(fields[i]);
-            }
+                fieldSet.put(fields[i].getName(),fields[i]);
+            }*/
             fields = clazz.getDeclaredFields();
             for (int i = 0; i < fields.length; i++) {
-                fieldSet.add(fields[i]);
+                if(!Modifier.isStatic(fields[i].getModifiers())){
+                    fieldMap.put(fields[i].getName(),fields[i]);
+                }
+
             }
-            fieldSet = fieldSet.stream().filter(field -> (!Modifier.isStatic(field.getModifiers()))).collect(Collectors.toSet());
-            /*for(;!(clazz==Object.class || clazz == null);clazz = clazz.getSuperclass()){
+            for(;!(clazz==Object.class || clazz == null);clazz = clazz.getSuperclass()){
                 fields = clazz.getDeclaredFields();
                 if(!(fields == null || fields.length == 0)){
                     for(int i = 0; i < fields.length; i++){
-                        fieldSet.add(fields[i]);
+                        if(!Modifier.isStatic(fields[i].getModifiers())){
+                            if(!fieldMap.containsKey(fields[i].getName())){
+                                fieldMap.put(fields[i].getName(),fields[i]);
+                            }
+                        }
+
                     }
                 }
-
-            }*/
+            }
+            //fieldSet = fieldSet.stream().filter(field -> (!Modifier.isStatic(field.getModifiers()))).collect(Collectors.toSet());
+            fieldMap.forEach((s, field) -> {
+                fieldSet.add(field);
+            });
+            fieldMap.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
