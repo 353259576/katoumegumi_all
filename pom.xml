@@ -11,10 +11,7 @@
     <modules>
         <module>data-integration-boot-starter</module>
         <module>utils</module>
-        <!--<module>server_example</module>-->
-        <!--<module>client_example</module>
-        <module>monitor</module>-->
-        <!--<module>auth_server</module>-->
+        <module>server_example</module>
     </modules>
 
     <licenses>
