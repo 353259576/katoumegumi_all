@@ -1,6 +1,9 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsListUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;

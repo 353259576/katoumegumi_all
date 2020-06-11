@@ -1,7 +1,5 @@
 package cn.katoumegumi.java.common;
 
-import checkers.units.quals.C;
-
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
