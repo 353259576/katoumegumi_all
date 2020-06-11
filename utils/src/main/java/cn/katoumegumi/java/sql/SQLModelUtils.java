@@ -763,6 +763,9 @@ public class SQLModelUtils {
             return fieldColumnRelationMapper;
         }
         Annotation annotation = clazz.getAnnotation(Entity.class);
+        if(annotation == null){
+            annotation = clazz.getAnnotation(Table.class);
+        }
         if (annotation != null) {
             return hibernateAnalysisClassRelation(clazz);
         }

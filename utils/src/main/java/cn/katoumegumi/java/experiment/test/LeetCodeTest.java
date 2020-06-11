@@ -29,6 +29,7 @@ public class LeetCodeTest {
         //System.out.println(climbStairs1(44));
         //System.out.println(JSON.toJSONString(countBits(5)));
         //longestPalindrome("qwerrewq");
+        System.out.println(translateNum(0));
     }
 
     /**
@@ -388,5 +389,41 @@ public class LeetCodeTest {
     /*public static String longestPalindrome(String s) {
     }*/
 
+
+    /**
+     * 面试题46. 把数字翻译成字符串
+     * @param num
+     * @return
+     */
+    public static int translateNum(int num) {
+        int i1 = 0,i2 = 0,i3 = 1;
+
+        int lastN = -1;
+        int n = num%10;
+        num = num/10;
+        while (num > 0 || n > 0){
+            i1 = i2;
+            i2 = i3;
+            i3 = 0;
+            i3  += i2;
+            if(n > 0){
+                if(lastN > -1){
+                    if((lastN < 6 && n < 3) || (lastN > 5 && n < 2)){
+                        i3 += i1;
+                    }
+                }
+
+
+
+            }
+            lastN = n;
+            n = num%10;
+            num = num/10;
+
+        }
+        return i3;
+
+
+    }
 
 }

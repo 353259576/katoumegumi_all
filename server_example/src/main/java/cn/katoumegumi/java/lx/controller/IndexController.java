@@ -98,13 +98,14 @@ public class IndexController implements IndexService {
         consumer.accept(()->{
             for (int i = 0; i < 100000; i++){
                 MySearchList mySearchList = MySearchList.create(User.class)
-                        //.innerJoin( UserDetails.class, "userDetails", "id", "userId")
+                        .innerJoin( UserDetails.class, "userDetails", "id", "userId")
                         //.innerJoin( UserDetails.class, "userDetails1", "id", "userId")
                         .eq("id",1)
                         .eqp("id","{User}.id")
                         .sort("id","desc");
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+                System.out.println(selectSqlEntity.getSelectSql());
                 //System.out.println(selectSqlEntity.getSelectSql());
             }
         });
