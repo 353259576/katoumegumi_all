@@ -562,23 +562,23 @@ public class MySearchList {
         return add(column, SqlOperator.LTEP, value);
     }
 
-    public <T> MySearchList set(String column, String value) {
+    public <T> MySearchList set(String column, Object value) {
         return add(column, SqlOperator.SET, value);
     }
 
-    public <T> MySearchList add(String column, String value) {
+    public <T> MySearchList add(String column, Object value) {
         return add(column, SqlOperator.ADD, value);
     }
 
-    public <T> MySearchList subtract(String column, String value) {
+    public <T> MySearchList subtract(String column, Object value) {
         return add(column, SqlOperator.SUBTRACT, value);
     }
 
-    public <T> MySearchList multiply(String column, String value) {
+    public <T> MySearchList multiply(String column, Object value) {
         return add(column, SqlOperator.MULTIPLY, value);
     }
 
-    public <T> MySearchList divide(String column, String value) {
+    public <T> MySearchList divide(String column, Object value) {
         return add(column, SqlOperator.DIVIDE, value);
     }
 

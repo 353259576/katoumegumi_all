@@ -1395,7 +1395,7 @@ public class SQLModelUtils {
             try {
                 Object o = fieldColumnRelation.getField().get(t);
                 if (o != null) {
-                    String str = fieldColumnRelation.getColumnName() + " = ? ";
+                    String str = guardKeyword(fieldColumnRelation.getColumnName()) + " = ? ";
                     columnStrList.add(str);
                     valueList.add(o);
                     validColumnList.add(fieldColumnRelation);
@@ -1408,7 +1408,7 @@ public class SQLModelUtils {
             try {
                 Object o = fieldColumnRelation.getField().get(t);
                 if (o != null) {
-                    String str = fieldColumnRelation.getColumnName() + " = ? ";
+                    String str = guardKeyword(fieldColumnRelation.getColumnName()) + " = ? ";
                     idStrList.add(str);
                     valueList.add(o);
                     validIdList.add(fieldColumnRelation);
