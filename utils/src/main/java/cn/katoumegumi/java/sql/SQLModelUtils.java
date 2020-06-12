@@ -1242,19 +1242,14 @@ public class SQLModelUtils {
         }
     }
 
-    public <T> InsertSqlEntity insertSql(T t) {
-        return insertSql(t, true);
-    }
-
     /**
      * 单个添加
      *
      * @param t
-     * @param isAuto 主键是否自增
      * @param <T>
      * @return
      */
-    public <T> InsertSqlEntity insertSql(T t, boolean isAuto) {
+    public <T> InsertSqlEntity insertSql(T t) {
         InsertSqlEntity entity = new InsertSqlEntity();
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
         List<FieldColumnRelation> fieldColumnRelationList = fieldColumnRelationMapper.getFieldColumnRelations();
@@ -1264,20 +1259,19 @@ public class SQLModelUtils {
         List<String> placeholderList = new ArrayList<>();
 
         List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
-        if (!isAuto) {
-            for (FieldColumnRelation fieldColumnRelation : idList) {
-                Field field = fieldColumnRelation.getField();
-                try {
-                    Object o = field.get(t);
-                    if (o != null) {
-                        columnNameList.add(fieldColumnRelation.getColumnName());
-                        placeholderList.add("?");
-                        validList.add(fieldColumnRelation);
-                        valueList.add(o);
-                    }
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+
+        for (FieldColumnRelation fieldColumnRelation : idList) {
+            Field field = fieldColumnRelation.getField();
+            try {
+                Object o = field.get(t);
+                if (o != null) {
+                    columnNameList.add(fieldColumnRelation.getColumnName());
+                    placeholderList.add("?");
+                    validList.add(fieldColumnRelation);
+                    valueList.add(o);
                 }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
 
@@ -1310,11 +1304,10 @@ public class SQLModelUtils {
      * 批量添加
      *
      * @param tList
-     * @param isAuto 主键是否自增
      * @param <T>
      * @return
      */
-    public <T> InsertSqlEntity insertSqlBatch(List<T> tList, boolean isAuto) {
+    public <T> InsertSqlEntity insertSqlBatch(List<T> tList) {
         if (tList == null) {
             throw new RuntimeException("添加不能为空");
         }
@@ -1325,23 +1318,23 @@ public class SQLModelUtils {
         List<String> placeholderList = new ArrayList<>();
         List valueList = new ArrayList();
 
-        if (!isAuto) {
-            List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
-            for (FieldColumnRelation fieldColumnRelation : idList) {
-                Field field = fieldColumnRelation.getField();
-                try {
-                    Object o = field.get(tList.get(0));
-                    if (o != null) {
-                        validField.add(fieldColumnRelation);
-                        columnNameList.add(fieldColumnRelation.getColumnName());
-                        placeholderList.add("?");
-                        valueList.add(o);
-                    }
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+
+        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
+        for (FieldColumnRelation fieldColumnRelation : idList) {
+            Field field = fieldColumnRelation.getField();
+            try {
+                Object o = field.get(tList.get(0));
+                if (o != null) {
+                    validField.add(fieldColumnRelation);
+                    columnNameList.add(fieldColumnRelation.getColumnName());
+                    placeholderList.add("?");
+                    valueList.add(o);
                 }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
+
 
         for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             Field field = fieldColumnRelation.getField();

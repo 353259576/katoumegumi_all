@@ -568,9 +568,10 @@ public class IndexController implements IndexService {
         List<UserCC> users = new ArrayList<>();
         for(int i = 0; i < 10; i++){
             User user = new User();
-            user.setId(i+1L);
+            //user.setId(i+1L);
             user.setName("你好啊");
             user.setPassword("世界");
+            user.setCreateDate(LocalDateTime.now());
             //users.add(user);
             jdbcUtils.insert(user);
             jdbcUtils.update(user);

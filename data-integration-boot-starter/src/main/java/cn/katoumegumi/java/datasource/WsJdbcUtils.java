@@ -32,24 +32,19 @@ public class WsJdbcUtils {
 
     private JdbcTemplate jdbcTemplate;
 
+
+
+
     public <T> T insert(T t) {
-        return insert(t, true);
-    }
-
-    public <T> List<T> insert(List<T> tList) {
-        return insert(tList, true);
-    }
-
-    public <T> T insert(T t, boolean isAuto) {
         MySearchList mySearchList = MySearchList.newMySearchList();
         mySearchList.setMainClass(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSql(t, isAuto);
+        InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSql(t);
         log.debug(insertSqlEntity.getInsertSql());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         Map<String, Object> keyMap = keyHolder.getKeys();
-        if (keyMap.size() > 0) {
+        if (WsListUtils.isNotEmpty(keyMap) && keyMap.size() > 0) {
             Map<String, FieldColumnRelation> stringFieldColumnRelationMap = new HashMap<>();
             for (FieldColumnRelation fieldColumnRelation : insertSqlEntity.getIdList()) {
                 stringFieldColumnRelationMap.put(fieldColumnRelation.getColumnName(), fieldColumnRelation);
@@ -90,17 +85,17 @@ public class WsJdbcUtils {
         return t;
     }
 
-    public <T> List<T> insert(List<T> tList, boolean isAuto) {
+    public <T> List<T> insert(List<T> tList) {
         MySearchList mySearchList = MySearchList.newMySearchList();
         mySearchList.setMainClass(tList.get(0).getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSqlBatch(tList, isAuto);
+        InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSqlBatch(tList);
         log.debug(insertSqlEntity.getInsertSql());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         List<Map<String, Object>> keyMapList = keyHolder.getKeyList();
 
-        if (keyMapList.size() > 0) {
+        if (WsListUtils.isNotEmpty(keyMapList) &&keyMapList.size() > 0) {
             Map<String, FieldColumnRelation> stringFieldColumnRelationMap = new HashMap<>();
             for (FieldColumnRelation fieldColumnRelation : insertSqlEntity.getIdList()) {
                 stringFieldColumnRelationMap.put(fieldColumnRelation.getColumnName(), fieldColumnRelation);

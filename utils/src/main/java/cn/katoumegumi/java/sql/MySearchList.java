@@ -8,6 +8,10 @@ import javax.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.function.Supplier;
 
+/**
+ * 查询条件构造器
+ * @author 王松
+ */
 public class MySearchList {
     private List<MySearch> mySearches = new ArrayList<>();
 
@@ -162,54 +166,152 @@ public class MySearchList {
         return this;
     }
 
+    /**
+     * 等于
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList eq(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.EQ, value);
     }
 
+    /**
+     * 模糊查询
+     * @param supplierFunc
+     * @param value 需要自己传入%
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList like(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.LIKE, value);
     }
 
+    /**
+     * 大于
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList gt(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.GT, value);
     }
 
+    /**
+     * 大于等于
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList gte(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.GTE, value);
     }
 
+    /**
+     * 小于
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList lt(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.LT, value);
     }
 
+    /**
+     * 小于等于
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList lte(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.LTE, value);
     }
 
+    /**
+     * in
+     * @param supplierFunc
+     * @param value 必须为list类型
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList in(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.IN, value);
     }
 
+    /**
+     * not in
+     * @param supplierFunc
+     * @param value 必须为list类型
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList nin(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.NIN, value);
     }
 
+    /**
+     * 字段为空
+     * @param supplierFunc
+     * @param value 不传
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList notNull(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.NOTNULL, value);
     }
+    public <T> MySearchList notNull(SupplierFunc<T> supplierFunc) {
+        return add(supplierFunc, SqlOperator.NOTNULL, null);
+    }
 
+    /**
+     * 字段不为空
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList isNull(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.NULL, value);
     }
 
+    public <T> MySearchList isNull(SupplierFunc<T> supplierFunc) {
+        return add(supplierFunc, SqlOperator.NULL, null);
+    }
+
+    /**
+     * 不等于
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList ne(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.NE, value);
     }
 
+    /**
+     * sql语句 sql语句表名用{}包围
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList sql(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.SQL, value);
     }
 
+    /**
+     * 排序
+     * @param supplierFunc
+     * @param value desc 或 asc
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList sort(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.SORT, value);
     }
@@ -238,72 +340,196 @@ public class MySearchList {
         return add(supplierFunc, SqlOperator.LTEP, WsFieldUtils.getFieldName(value));
     }
 
-
+    /**
+     * 修改使用 set
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList set(SupplierFunc<?> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.SET, value);
     }
 
+    /**
+     * 增加
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList add(SupplierFunc<?> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.ADD, value);
     }
 
+    /**
+     * 减
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList subtract(SupplierFunc<?> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.SUBTRACT, value);
     }
 
+    /**
+     * 乘
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList multiply(SupplierFunc<?> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.MULTIPLY, value);
     }
 
+    /**
+     * 除
+     * @param supplierFunc
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList divide(SupplierFunc<?> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.DIVIDE, value);
     }
 
-
+    /**
+     * 等于
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList eq(String column, Object value) {
         return add(column, SqlOperator.EQ, value);
     }
 
+    /**
+     * 模糊查询
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList like(String column, Object value) {
         return add(column, SqlOperator.LIKE, value);
     }
 
+    /**
+     * 大于
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList gt(String column, Object value) {
         return add(column, SqlOperator.GT, value);
     }
 
+    /**
+     * 大于等于
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList gte(String column, Object value) {
         return add(column, SqlOperator.GTE, value);
     }
 
+    /**
+     * 小于
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList lt(String column, Object value) {
         return add(column, SqlOperator.LT, value);
     }
 
+    /**
+     * 小于等于
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList lte(String column, Object value) {
         return add(column, SqlOperator.LTE, value);
     }
 
+    /**
+     * in
+     * @param column
+     * @param value 需要参数为list
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList in(String column, Object value) {
         return add(column, SqlOperator.IN, value);
     }
 
+    /**
+     * not in
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList nin(String column, Object value) {
         return add(column, SqlOperator.NIN, value);
     }
 
+    /**
+     * 不为空
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList notNull(String column, Object value) {
         return add(column, SqlOperator.NOTNULL, value);
+    }
+
+    public <T> MySearchList notNull(String column) {
+        return add(column, SqlOperator.NOTNULL, null);
     }
 
     public <T> MySearchList isNull(String column, Object value) {
         return add(column, SqlOperator.NULL, value);
     }
 
+    /**
+     * 为空
+     * @param column
+     * @param <T>
+     * @return
+     */
+    public <T> MySearchList isNull(String column) {
+        return add(column, SqlOperator.NULL, null);
+    }
+
+    /**
+     * 不等于
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList ne(String column, Object value) {
         return add(column, SqlOperator.NE, value);
     }
 
+    /**
+     * 嵌入sql语句
+     * @param column
+     * @param value
+     * @param <T>
+     * @return
+     */
     public <T> MySearchList sql(String column, Object value) {
         return add(column, SqlOperator.SQL, value);
     }
