@@ -35,14 +35,14 @@ public class WsJdbcUtils {
 
 
 
-    public <T> T insert(T t) {
+    public <T> int insert(T t) {
         MySearchList mySearchList = MySearchList.newMySearchList();
         mySearchList.setMainClass(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSql(t);
         log.debug(insertSqlEntity.getInsertSql());
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
+        int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         Map<String, Object> keyMap = keyHolder.getKeys();
         if (WsListUtils.isNotEmpty(keyMap) && keyMap.size() > 0) {
             Map<String, FieldColumnRelation> stringFieldColumnRelationMap = new HashMap<>();
@@ -82,17 +82,17 @@ public class WsJdbcUtils {
         }
 
 
-        return t;
+        return row;
     }
 
-    public <T> List<T> insert(List<T> tList) {
+    public <T> int insert(List<T> tList) {
         MySearchList mySearchList = MySearchList.newMySearchList();
         mySearchList.setMainClass(tList.get(0).getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSqlBatch(tList);
         log.debug(insertSqlEntity.getInsertSql());
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
+        int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         List<Map<String, Object>> keyMapList = keyHolder.getKeyList();
 
         if (WsListUtils.isNotEmpty(keyMapList) &&keyMapList.size() > 0) {
@@ -138,7 +138,7 @@ public class WsJdbcUtils {
             }
         }
         //log.info(JSON.toJSONString(keyHolder));
-        return tList;
+        return row;
     }
 
 
@@ -185,19 +185,19 @@ public class WsJdbcUtils {
     }
 
 
-    public <T> void update(T t) {
+    public <T> int update(T t) {
         MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t);
         log.debug(updateSqlEntity.getUpdateSql());
-        jdbcTemplate.update(updateSqlEntity.getUpdateSql(), updateSqlEntity.getValueList().toArray());
+        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), updateSqlEntity.getValueList().toArray());
     }
 
-    public void update(MySearchList mySearchList) {
+    public int update(MySearchList mySearchList) {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
         log.debug(updateSqlEntity.getUpdateSql());
-        jdbcTemplate.update(updateSqlEntity.getUpdateSql(), updateSqlEntity.getValueList().toArray());
+        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), updateSqlEntity.getValueList().toArray());
     }
 
 
