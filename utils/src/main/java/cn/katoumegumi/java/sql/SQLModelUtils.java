@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +87,21 @@ public class SQLModelUtils {
      * 缩写防重复
      */
     private final AtomicInteger abbreviationNum = new AtomicInteger();
+
+    /**
+     * 插入参数注入
+     */
+    private static final Map<String, AbstractSqlInterceptor> insertSqlInterceptorMap = new HashMap<>();
+
+    /**
+     * 修改参数注入
+     */
+    private static final Map<String, AbstractSqlInterceptor> updateSqlInterceptorMap = new HashMap<>();
+
+    /**
+     * 查询参数注入
+     */
+    private static final Map<String, AbstractSqlInterceptor> selectSqlInterceptorMap = new HashMap<>();
 
 
 
@@ -241,6 +257,19 @@ public class SQLModelUtils {
                     tableNickName = baseTableName + "." + tableRelation.getTableNickName();
                 }
                 FieldColumnRelationMapper baseMapper = localMapperMap.get(tableNickName);
+
+                if(WsListUtils.isNotEmpty(selectSqlInterceptorMap)) {
+                    for (FieldColumnRelation fieldColumnRelation : mapper.getFieldColumnRelations()) {
+                        AbstractSqlInterceptor sqlInterceptor = selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+                        if (sqlInterceptor != null && sqlInterceptor.useCondition(baseMapper.getClazz())) {
+                            Object o = sqlInterceptor.selectFill();
+                            if(o != null){
+                                mySearchList.eq(tableRelation.getJoinTableNickName() + "." + sqlInterceptor.fieldName(), o);
+                            }
+
+                        }
+                    }
+                }
 
                 String joinType;
                 if (tableRelation.getJoinType() != null) {
@@ -529,7 +558,11 @@ public class SQLModelUtils {
         List<String> stringList = new ArrayList<>();
         while (iterator.hasNext()) {
             MySearch mySearch = iterator.next();
-            stringList.add(createWhereColumn(prefix, mySearch));
+            String whereSqlPart = createWhereColumn(prefix,mySearch);
+            if(WsStringUtils.isNotBlank(whereSqlPart)){
+                stringList.add(whereSqlPart);
+            }
+
         }
 
         List<MySearchList> ands = mySearchList.getAnds();
@@ -614,6 +647,16 @@ public class SQLModelUtils {
     private String modelToSqlSelect(Class<?> clazz) {
 
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(clazz);
+        for (FieldColumnRelation fieldColumnRelation:fieldColumnRelationMapper.getFieldColumnRelations()){
+            AbstractSqlInterceptor sqlInterceptor = selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+            if(sqlInterceptor != null&&sqlInterceptor.useCondition(fieldColumnRelationMapper.getClazz())){
+                Object o = sqlInterceptor.selectFill();
+                if(o != null){
+                    mySearchList.eq(sqlInterceptor.fieldName(),o);
+                }
+
+            }
+        }
         assert fieldColumnRelationMapper != null;
         String tableName = fieldColumnRelationMapper.getTableName();
         String tableNickName = fieldColumnRelationMapper.getNickName();
@@ -746,6 +789,22 @@ public class SQLModelUtils {
             fieldJoinClass.setJoinType(tableRelation.getJoinType());
             //iterator.remove();
             usedTableRelation.add(tableRelation);
+
+            if(WsListUtils.isNotEmpty(selectSqlInterceptorMap)) {
+                for (FieldColumnRelation fieldColumnRelation : mapper.getFieldColumnRelations()) {
+                    AbstractSqlInterceptor sqlInterceptor = selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+                    if (sqlInterceptor != null && sqlInterceptor.useCondition(mapper.getClazz())) {
+                        Object o = sqlInterceptor.selectFill();
+                        if(o != null){
+                            mySearchList.eq(fieldJoinClass.getNickName() + "." + sqlInterceptor.fieldName(), o);
+                        }
+
+                    }
+                }
+            }
+
+
+
             return fieldJoinClass;
 
 
@@ -1278,17 +1337,23 @@ public class SQLModelUtils {
 
         for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             Field field = fieldColumnRelation.getField();
-            try {
-                Object o = field.get(t);
-                if (o != null) {
-                    columnNameList.add(fieldColumnRelation.getColumnName());
-                    placeholderList.add("?");
-                    validList.add(fieldColumnRelation);
-                    valueList.add(o);
+            AbstractSqlInterceptor sqlInterceptor = insertSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+            Object o = null;
+            if(sqlInterceptor != null && sqlInterceptor.useCondition(mainClass)){
+                o = sqlInterceptor.insertFill();
+            }else {
+                try {
+                    o = field.get(t);
+                }catch (IllegalAccessException e){
+                    e.printStackTrace();
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                log.error(e.getMessage());
+
+            }
+            if (o != null) {
+                columnNameList.add(fieldColumnRelation.getColumnName());
+                placeholderList.add("?");
+                validList.add(fieldColumnRelation);
+                valueList.add(o);
             }
         }
 
@@ -1338,16 +1403,24 @@ public class SQLModelUtils {
 
         for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             Field field = fieldColumnRelation.getField();
-            try {
-                Object o = field.get(tList.get(0));
-                if (o != null) {
-                    validField.add(fieldColumnRelation);
-                    columnNameList.add(fieldColumnRelation.getColumnName());
-                    placeholderList.add("?");
-                    valueList.add(o);
+
+            AbstractSqlInterceptor sqlInterceptor = insertSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+            Object o = null;
+            if(sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper.getClazz())){
+                o = sqlInterceptor.insertFill();
+            }else {
+                try {
+                    o = field.get(tList.get(0));
+                }catch (IllegalAccessException e){
+                    e.printStackTrace();
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+
+            }
+            if (o != null) {
+                validField.add(fieldColumnRelation);
+                columnNameList.add(fieldColumnRelation.getColumnName());
+                placeholderList.add("?");
+                valueList.add(o);
             }
         }
         String placeholderSql = "(" + WsStringUtils.jointListString(placeholderList, ",") + ")";
@@ -1356,12 +1429,19 @@ public class SQLModelUtils {
         for (int i = 1; i < tList.size(); i++) {
             for (FieldColumnRelation fieldColumnRelation : validField) {
                 Field field = fieldColumnRelation.getField();
-                try {
-                    Object o = field.get(tList.get(i));
-                    valueList.add(o);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                AbstractSqlInterceptor sqlInterceptor = insertSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+                Object o = null;
+                if(sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper.getClazz())){
+                    o = sqlInterceptor.insertFill();
+                }else {
+                    try {
+                        o = field.get(tList.get(i));
+                    }catch (IllegalAccessException e){
+                        e.printStackTrace();
+                    }
+
                 }
+                valueList.add(o);
             }
             placeholderList.add(placeholderSql);
         }
@@ -1392,16 +1472,23 @@ public class SQLModelUtils {
         List<FieldColumnRelation> validIdList = new ArrayList<>();
 
         for (FieldColumnRelation fieldColumnRelation : columnList) {
-            try {
-                Object o = fieldColumnRelation.getField().get(t);
-                if (o != null) {
-                    String str = guardKeyword(fieldColumnRelation.getColumnName()) + " = ? ";
-                    columnStrList.add(str);
-                    valueList.add(o);
-                    validColumnList.add(fieldColumnRelation);
+
+            AbstractSqlInterceptor sqlInterceptor = updateSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+            Object o = null;
+            if(sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper.getClazz())){
+                o = sqlInterceptor.updateFill();
+            }else {
+                try {
+                    o = fieldColumnRelation.getField().get(t);
+                }catch (IllegalAccessException e){
+                    e.printStackTrace();
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            }
+            if (o != null) {
+                String str = guardKeyword(fieldColumnRelation.getColumnName()) + " = ? ";
+                columnStrList.add(str);
+                valueList.add(o);
+                validColumnList.add(fieldColumnRelation);
             }
         }
         for (FieldColumnRelation fieldColumnRelation : idList) {
@@ -1440,6 +1527,23 @@ public class SQLModelUtils {
         }
         String searchSql = searchListBaseSQLProcessor();
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
+        List<AbstractSqlInterceptor> interceptorList = new ArrayList<>();
+        List<FieldColumnRelation> fieldColumnRelationList = fieldColumnRelationMapper.getFieldColumnRelations();
+        for (FieldColumnRelation fieldColumnRelation:fieldColumnRelationList){
+            AbstractSqlInterceptor sqlInterceptor = updateSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+            if(sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper.getClazz())){
+                interceptorList.add(sqlInterceptor);
+            }
+        }
+        for (AbstractSqlInterceptor sqlInterceptor:interceptorList){
+            MySearch mySearch = mySearchList.get(sqlInterceptor.fieldName(),SqlOperator.SET);
+            if(mySearch == null){
+                mySearchList.set(sqlInterceptor.fieldName(),sqlInterceptor.updateFill());
+            }else {
+                mySearch.setValue(sqlInterceptor.updateFill());
+            }
+        }
+
         List<String> setList = createUpdateSetSql(mySearchList, fieldColumnRelationMapper.getNickName());
         String updateSql = "UPDATE `"
                 + fieldColumnRelationMapper.getTableName()
@@ -1998,6 +2102,21 @@ public static boolean mapEquals(Map m1,Map m2){
         return mySearchList;
     }
 
+    /**
+     * sql拦截器
+     * @param sqlInterceptor
+     */
+    public static void addSqlInterceptor(AbstractSqlInterceptor sqlInterceptor){
+        if(sqlInterceptor.isInsert()){
+            insertSqlInterceptorMap.put(sqlInterceptor.fieldName(),sqlInterceptor);
+        }
+        if(sqlInterceptor.isUpdate()){
+            updateSqlInterceptorMap.put(sqlInterceptor.fieldName(),sqlInterceptor);
+        }
+        if(sqlInterceptor.isSelect()) {
+            selectSqlInterceptorMap.put(sqlInterceptor.fieldName(), sqlInterceptor);
+        }
+    }
 
 }
 

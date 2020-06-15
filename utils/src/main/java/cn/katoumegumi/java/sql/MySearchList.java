@@ -153,6 +153,14 @@ public class MySearchList {
         }
         return null;
     }
+    public MySearch get(String value,SqlOperator sqlOperator) {
+        for (MySearch m : mySearches) {
+            if (m.getFieldName().equals(value) && m.getOperator().equals(sqlOperator)) {
+                return m;
+            }
+        }
+        return null;
+    }
 
     public Class getMainClass() {
         return mainClass;

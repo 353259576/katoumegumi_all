@@ -37,7 +37,7 @@ public class User extends BaseEntity implements Serializable {
     @TableField(value = "create_date")
     private LocalDateTime createDate;
 
-    @Transient
+    //@Transient
     //@OneToMany
     //@JoinColumn(name = "user_id")
     private List<UserDetails> userDetails;

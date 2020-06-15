@@ -12,9 +12,7 @@ import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
 import cn.katoumegumi.java.lx.service.IndexService;
 import cn.katoumegumi.java.lx.service.UserService;
-import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.SQLModelUtils;
-import cn.katoumegumi.java.sql.SelectSqlEntity;
+import cn.katoumegumi.java.sql.*;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.vertx.core.AsyncResult;
@@ -94,6 +92,42 @@ public class IndexController implements IndexService {
             Long endTime = System.currentTimeMillis();
             System.out.println(endTime - startTime);
         };
+        SQLModelUtils.addSqlInterceptor(new AbstractSqlInterceptor() {
+            @Override
+            protected String fieldName() {
+                return "createDate";
+            }
+
+            @Override
+            protected boolean isSelect() {
+                return true;
+            }
+
+            @Override
+            protected boolean isInsert() {
+                return true;
+            }
+
+            @Override
+            protected boolean isUpdate() {
+                return true;
+            }
+
+            @Override
+            protected Object insertFill() {
+                return new Date();
+            }
+
+            @Override
+            protected Object updateFill() {
+                return new Date();
+            }
+
+            @Override
+            protected Object selectFill() {
+                return new Date();
+            }
+        });
 
 
         consumer.accept(()->{
@@ -107,6 +141,13 @@ public class IndexController implements IndexService {
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
                 System.out.println(selectSqlEntity.getSelectSql());
+
+                /*MySearchList mySearchList = MySearchList.create(User.class);
+                mySearchList.set("name","你好世界");
+                mySearchList.eq("id",1L);
+                SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+                UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
+                System.out.println(updateSqlEntity.getUpdateSql());*/
                 //System.out.println(selectSqlEntity.getSelectSql());
             }
         });

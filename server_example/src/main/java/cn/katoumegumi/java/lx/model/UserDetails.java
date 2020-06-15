@@ -30,6 +30,8 @@ public class UserDetails {
     //@Column(name = "sex")
     private String sex;
 
+    private String name;
+
     //@OneToMany
     //@JoinColumn(name = "user_details_id")
     private List<UserDetailsRemake> userDetailsRemake;
