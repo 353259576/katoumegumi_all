@@ -77,8 +77,6 @@ public class Index2Conftoller {
         System.out.println(str);*/
 
 
-
-
         System.out.println(LocalDateTime.now() instanceof LocalDateTime);
 
         String date = WsDateUtils.objectDateFormatString(LocalDateTime.now());
@@ -93,15 +91,15 @@ public class Index2Conftoller {
         };
 
         LocalDateTime localDateTime = LocalDateTime.now();
-        runnableSupplier.accept(()->{
-            for(int i = 0; i < 10000000;i++){
+        runnableSupplier.accept(() -> {
+            for (int i = 0; i < 10000000; i++) {
                 boolean b = localDateTime instanceof LocalDateTime;
             }
         });
 
-        runnableSupplier.accept(()->{
-            for(int i = 0; i < 10000000;i++){
-                boolean b = WsFieldUtils.classCompare(localDateTime.getClass(),LocalDateTime.class);
+        runnableSupplier.accept(() -> {
+            for (int i = 0; i < 10000000; i++) {
+                boolean b = WsFieldUtils.classCompare(localDateTime.getClass(), LocalDateTime.class);
             }
         });
 

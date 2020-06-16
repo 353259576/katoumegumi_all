@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
  */
 public class FieldJoinClass {
     private boolean isArray;
+    private String baseTableNickName;
     private String nickName;
     private Class joinClass;
     private JoinType joinType;
@@ -15,6 +16,13 @@ public class FieldJoinClass {
     private String anotherJoinColumn;
     private Field field;
 
+    public String getBaseTableNickName() {
+        return baseTableNickName;
+    }
+
+    public void setBaseTableNickName(String baseTableNickName) {
+        this.baseTableNickName = baseTableNickName;
+    }
 
     public boolean isArray() {
         return isArray;

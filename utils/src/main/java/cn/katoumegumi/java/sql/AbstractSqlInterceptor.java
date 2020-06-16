@@ -8,53 +8,52 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class AbstractSqlInterceptor {
 
-    private Map<Class,FieldColumnRelation> classFieldMap = new ConcurrentHashMap<>();
+    private Map<Class, FieldColumnRelation> classFieldMap = new ConcurrentHashMap<>();
 
-    protected boolean isSelect(){
+    protected boolean isSelect() {
         return false;
     }
 
-    protected boolean isInsert(){
+    protected boolean isInsert() {
         return false;
     }
 
-    protected boolean isUpdate(){
+    protected boolean isUpdate() {
         return false;
     }
 
 
-    protected boolean useCondition(Class tClass){
+    protected boolean useCondition(FieldColumnRelationMapper fieldColumnRelationMapper) {
         return true;
     }
 
-    protected Object insertFill(){
+    protected Object insertFill() {
         return null;
     }
 
-    protected Object updateFill(){
+    protected Object updateFill() {
         return null;
     }
 
-    protected Object selectFill(){
+    protected Object selectFill() {
         return null;
     }
 
     /**
      * 需要自动注入的属性名称
+     *
      * @return
      */
     protected abstract String fieldName();
 
 
-    protected void addClassFieldName(Class tClass,FieldColumnRelation fieldColumnRelation){
-        classFieldMap.put(tClass,fieldColumnRelation);
+    protected void addClassFieldName(Class tClass, FieldColumnRelation fieldColumnRelation) {
+        classFieldMap.put(tClass, fieldColumnRelation);
     }
 
-    public FieldColumnRelation getFieldColumnRelation(Class tClass){
+    public FieldColumnRelation getFieldColumnRelation(Class tClass) {
         return classFieldMap.get(tClass);
     }
-
-
 
 
 }

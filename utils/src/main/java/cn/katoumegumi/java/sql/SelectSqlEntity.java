@@ -35,15 +35,15 @@ public class SelectSqlEntity {
         return valueList;
     }
 
-    public Map<Integer,Object> getValueMap(){
-        Map<Integer,Object> map = new TreeMap<>();
-        for(int i = 0; i < valueList.size(); i++){
-            map.put(i,valueList.get(i));
-        }
-        return map;
-    }
-
     public void setValueList(List valueList) {
         this.valueList = valueList;
+    }
+
+    public Map<Integer, Object> getValueMap() {
+        Map<Integer, Object> map = new TreeMap<>();
+        for (int i = 0; i < valueList.size(); i++) {
+            map.put(i, valueList.get(i));
+        }
+        return map;
     }
 }

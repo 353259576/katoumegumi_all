@@ -11,9 +11,9 @@ import java.util.List;
 
 public class WsDateUtils {
 
-    public static final String[] CN_MONTH_NAMES = new String[]{"一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"};
+    public static final String[] CN_MONTH_NAMES = new String[]{"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"};
 
-    public static final String[] CN_WEEK_NAMES = new String[]{"星期一","星期二","星期三","星期四","星期五","星期六","星期日"};
+    public static final String[] CN_WEEK_NAMES = new String[]{"星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"};
 
 
     public static final String LONGTIMESTRING = "yyyy-MM-dd HH:mm:ss";
@@ -129,10 +129,11 @@ public class WsDateUtils {
 
     /**
      * 获取中文星期
+     *
      * @param date 时间
      * @return 中文星期
      */
-    public static String getCNWeekdayName(Date date){
+    public static String getCNWeekdayName(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int weekday = calendar.get(Calendar.DAY_OF_WEEK);
@@ -142,6 +143,7 @@ public class WsDateUtils {
 
     /**
      * 获取中文月
+     *
      * @param date 时间
      * @return 中文月
      */

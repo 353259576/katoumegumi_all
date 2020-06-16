@@ -19,11 +19,11 @@ public class UserCC {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    @Column(name = "name",length = 20)
+    @Column(name = "name", length = 20)
     @TableField(value = "name")
     private String name;
 
-    @Column(name = "password",length = 20)
+    @Column(name = "password", length = 20)
     @TableField(value = "password")
     private String password;
 

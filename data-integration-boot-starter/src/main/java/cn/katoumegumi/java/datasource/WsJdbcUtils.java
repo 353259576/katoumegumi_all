@@ -33,8 +33,6 @@ public class WsJdbcUtils {
     private JdbcTemplate jdbcTemplate;
 
 
-
-
     public <T> int insert(T t) {
         MySearchList mySearchList = MySearchList.newMySearchList();
         mySearchList.setMainClass(t.getClass());
@@ -95,7 +93,7 @@ public class WsJdbcUtils {
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         List<Map<String, Object>> keyMapList = keyHolder.getKeyList();
 
-        if (WsListUtils.isNotEmpty(keyMapList) &&keyMapList.size() > 0) {
+        if (WsListUtils.isNotEmpty(keyMapList) && keyMapList.size() > 0) {
             Map<String, FieldColumnRelation> stringFieldColumnRelationMap = new HashMap<>();
             for (FieldColumnRelation fieldColumnRelation : insertSqlEntity.getIdList()) {
                 stringFieldColumnRelationMap.put(fieldColumnRelation.getColumnName(), fieldColumnRelation);
@@ -240,7 +238,7 @@ public class WsJdbcUtils {
         return list;
     }
 
-    public <T> List<T> getListT(T t){
+    public <T> List<T> getListT(T t) {
         MySearchList mySearchList = SQLModelUtils.ObjectToMySearchList(t);
         return getListT(mySearchList);
     }
@@ -268,17 +266,17 @@ public class WsJdbcUtils {
         return getTOne(mySearchList);
     }
 
-    public <T> T getOne(Class<T> tClass,Object... objects){
+    public <T> T getOne(Class<T> tClass, Object... objects) {
         FieldColumnRelationMapper mapper = SQLModelUtils.analysisClassRelation(tClass);
         List<FieldColumnRelation> ids = mapper.getIdSet();
-        if(ids.size() != objects.length){
+        if (ids.size() != objects.length) {
             throw new RuntimeException("主键信息需要填写完整");
         }
         MySearchList mySearchList = MySearchList.create(tClass);
-        for(int i = 0; i < ids.size(); i++){
+        for (int i = 0; i < ids.size(); i++) {
             FieldColumnRelation relation = ids.get(i);
             Object value = objects[i];
-            mySearchList.eq(relation.getFieldName(),value);
+            mySearchList.eq(relation.getFieldName(), value);
         }
         return getTOne(mySearchList);
     }
@@ -310,12 +308,11 @@ public class WsJdbcUtils {
         return iPage;
     }
 
-    public <T> IPage<T> getTPage(T t,Page page){
+    public <T> IPage<T> getTPage(T t, Page page) {
         MySearchList mySearchList = SQLModelUtils.ObjectToMySearchList(t);
         mySearchList.setPageVO(page);
         return getTPage(mySearchList);
     }
-
 
 
     public JdbcTemplate getJdbcTemplate() {

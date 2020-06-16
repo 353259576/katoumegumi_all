@@ -332,6 +332,42 @@ public class LeetCodeTest {
     }
 
     /**
+     * 面试题46. 把数字翻译成字符串
+     *
+     * @param num
+     * @return
+     */
+    public static int translateNum(int num) {
+        int i1 = 0, i2 = 0, i3 = 1;
+
+        int lastN = -1;
+        int n = num % 10;
+        num = num / 10;
+        while (num > 0 || n > 0) {
+            i1 = i2;
+            i2 = i3;
+            i3 = 0;
+            i3 += i2;
+            if (n > 0) {
+                if (lastN > -1) {
+                    if ((lastN < 6 && n < 3) || (lastN > 5 && n < 2)) {
+                        i3 += i1;
+                    }
+                }
+
+
+            }
+            lastN = n;
+            n = num % 10;
+            num = num / 10;
+
+        }
+        return i3;
+
+
+    }
+
+    /**
      * 62.不同路径
      *
      * @param m
@@ -354,6 +390,12 @@ public class LeetCodeTest {
         }
         return dp[n - 1][m - 1];
     }
+
+    /**
+     * 5.最长回文子串
+     */
+    /*public static String longestPalindrome(String s) {
+    }*/
 
     /**
      * 64. 最小路径和
@@ -381,49 +423,6 @@ public class LeetCodeTest {
             }
         }
         return dp[n - 1][m - 1];
-    }
-
-    /**
-     * 5.最长回文子串
-     */
-    /*public static String longestPalindrome(String s) {
-    }*/
-
-
-    /**
-     * 面试题46. 把数字翻译成字符串
-     * @param num
-     * @return
-     */
-    public static int translateNum(int num) {
-        int i1 = 0,i2 = 0,i3 = 1;
-
-        int lastN = -1;
-        int n = num%10;
-        num = num/10;
-        while (num > 0 || n > 0){
-            i1 = i2;
-            i2 = i3;
-            i3 = 0;
-            i3  += i2;
-            if(n > 0){
-                if(lastN > -1){
-                    if((lastN < 6 && n < 3) || (lastN > 5 && n < 2)){
-                        i3 += i1;
-                    }
-                }
-
-
-
-            }
-            lastN = n;
-            n = num%10;
-            num = num/10;
-
-        }
-        return i3;
-
-
     }
 
 }

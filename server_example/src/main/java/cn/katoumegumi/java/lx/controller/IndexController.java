@@ -12,7 +12,10 @@ import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
 import cn.katoumegumi.java.lx.service.IndexService;
 import cn.katoumegumi.java.lx.service.UserService;
-import cn.katoumegumi.java.sql.*;
+import cn.katoumegumi.java.sql.AbstractSqlInterceptor;
+import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.SQLModelUtils;
+import cn.katoumegumi.java.sql.SelectSqlEntity;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.vertx.core.AsyncResult;
@@ -130,14 +133,15 @@ public class IndexController implements IndexService {
         });
 
 
-        consumer.accept(()->{
-            for (int i = 0; i < 100000; i++){
+        consumer.accept(() -> {
+            for (int i = 0; i < 100000; i++) {
                 MySearchList mySearchList = MySearchList.create(User.class)
-                        .innerJoin( UserDetails.class, "userDetails", "id", "userId")
+                        .innerJoin(UserDetails.class, "userDetails1", "id", "userId")
+                        .innerJoin("userDetails1",UserDetailsRemake.class, "userDetailsRemakeList", "id", "userDetailsId")
                         //.innerJoin( UserDetails.class, "userDetails1", "id", "userId")
                         //.eq("id",1)
                         //.eqp("id","{User}.id")
-                        .sort("id","desc");
+                        .sort("id", "desc");
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
                 System.out.println(selectSqlEntity.getSelectSql());
@@ -605,9 +609,9 @@ public class IndexController implements IndexService {
 
     @RequestMapping(value = "index6")
     @Transactional
-    public String index6(){
+    public String index6() {
         List<UserCC> users = new ArrayList<>();
-        for(int i = 0; i < 10; i++){
+        for (int i = 0; i < 10; i++) {
             User user = new User();
             //user.setId(i+1L);
             user.setName("你好啊");
@@ -616,7 +620,7 @@ public class IndexController implements IndexService {
             //users.add(user);
             jdbcUtils.insert(user);
             jdbcUtils.update(user);
-            jdbcUtils.update(MySearchList.newMySearchList().setMainClass(User.class).set(user::getName,"你好世界改").eq(user::getId,user.getId()));
+            jdbcUtils.update(MySearchList.newMySearchList().setMainClass(User.class).set(user::getName, "你好世界改").eq(user::getId, user.getId()));
             System.out.println(JSON.toJSONString(user));
         }
         //jdbcUtils.insert(users);

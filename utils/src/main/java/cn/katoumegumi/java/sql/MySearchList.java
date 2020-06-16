@@ -10,21 +10,16 @@ import java.util.function.Supplier;
 
 /**
  * 查询条件构造器
+ *
  * @author 王松
  */
 public class MySearchList {
-    private List<MySearch> mySearches = new ArrayList<>();
-
     private final List<MySearch> orderSearches = new ArrayList<>();
-
     private final List<MySearchList> ands = new ArrayList<>();
-
     private final List<MySearchList> ors = new ArrayList<>();
-
     private final Map<Class, String> tableAndNickNameMap = new HashMap<>();
-
     private final List<TableRelation> joins = new ArrayList<>();
-
+    private List<MySearch> mySearches = new ArrayList<>();
     private Class mainClass;
 
     private JoinType defaultJoinType = JoinType.INNER;
@@ -47,11 +42,11 @@ public class MySearchList {
         return new MySearchList(mySearches);
     }
 
-    public static MySearchList create(){
+    public static MySearchList create() {
         return new MySearchList();
     }
 
-    public static <T> MySearchList create(Class<T> tClass){
+    public static <T> MySearchList create(Class<T> tClass) {
         return new MySearchList().setMainClass(tClass);
     }
 
@@ -153,7 +148,8 @@ public class MySearchList {
         }
         return null;
     }
-    public MySearch get(String value,SqlOperator sqlOperator) {
+
+    public MySearch get(String value, SqlOperator sqlOperator) {
         for (MySearch m : mySearches) {
             if (m.getFieldName().equals(value) && m.getOperator().equals(sqlOperator)) {
                 return m;
@@ -176,6 +172,7 @@ public class MySearchList {
 
     /**
      * 等于
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -187,8 +184,9 @@ public class MySearchList {
 
     /**
      * 模糊查询
+     *
      * @param supplierFunc
-     * @param value 需要自己传入%
+     * @param value        需要自己传入%
      * @param <T>
      * @return
      */
@@ -198,6 +196,7 @@ public class MySearchList {
 
     /**
      * 大于
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -209,6 +208,7 @@ public class MySearchList {
 
     /**
      * 大于等于
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -220,6 +220,7 @@ public class MySearchList {
 
     /**
      * 小于
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -231,6 +232,7 @@ public class MySearchList {
 
     /**
      * 小于等于
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -242,8 +244,9 @@ public class MySearchList {
 
     /**
      * in
+     *
      * @param supplierFunc
-     * @param value 必须为list类型
+     * @param value        必须为list类型
      * @param <T>
      * @return
      */
@@ -253,8 +256,9 @@ public class MySearchList {
 
     /**
      * not in
+     *
      * @param supplierFunc
-     * @param value 必须为list类型
+     * @param value        必须为list类型
      * @param <T>
      * @return
      */
@@ -264,20 +268,23 @@ public class MySearchList {
 
     /**
      * 字段为空
+     *
      * @param supplierFunc
-     * @param value 不传
+     * @param value        不传
      * @param <T>
      * @return
      */
     public <T> MySearchList notNull(SupplierFunc<T> supplierFunc, Object value) {
         return add(supplierFunc, SqlOperator.NOTNULL, value);
     }
+
     public <T> MySearchList notNull(SupplierFunc<T> supplierFunc) {
         return add(supplierFunc, SqlOperator.NOTNULL, null);
     }
 
     /**
      * 字段不为空
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -293,6 +300,7 @@ public class MySearchList {
 
     /**
      * 不等于
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -304,6 +312,7 @@ public class MySearchList {
 
     /**
      * sql语句 sql语句表名用{}包围
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -315,8 +324,9 @@ public class MySearchList {
 
     /**
      * 排序
+     *
      * @param supplierFunc
-     * @param value desc 或 asc
+     * @param value        desc 或 asc
      * @param <T>
      * @return
      */
@@ -350,6 +360,7 @@ public class MySearchList {
 
     /**
      * 修改使用 set
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -361,6 +372,7 @@ public class MySearchList {
 
     /**
      * 增加
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -372,6 +384,7 @@ public class MySearchList {
 
     /**
      * 减
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -383,6 +396,7 @@ public class MySearchList {
 
     /**
      * 乘
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -394,6 +408,7 @@ public class MySearchList {
 
     /**
      * 除
+     *
      * @param supplierFunc
      * @param value
      * @param <T>
@@ -405,6 +420,7 @@ public class MySearchList {
 
     /**
      * 等于
+     *
      * @param column
      * @param value
      * @param <T>
@@ -416,6 +432,7 @@ public class MySearchList {
 
     /**
      * 模糊查询
+     *
      * @param column
      * @param value
      * @param <T>
@@ -427,6 +444,7 @@ public class MySearchList {
 
     /**
      * 大于
+     *
      * @param column
      * @param value
      * @param <T>
@@ -438,6 +456,7 @@ public class MySearchList {
 
     /**
      * 大于等于
+     *
      * @param column
      * @param value
      * @param <T>
@@ -449,6 +468,7 @@ public class MySearchList {
 
     /**
      * 小于
+     *
      * @param column
      * @param value
      * @param <T>
@@ -460,6 +480,7 @@ public class MySearchList {
 
     /**
      * 小于等于
+     *
      * @param column
      * @param value
      * @param <T>
@@ -471,8 +492,9 @@ public class MySearchList {
 
     /**
      * in
+     *
      * @param column
-     * @param value 需要参数为list
+     * @param value  需要参数为list
      * @param <T>
      * @return
      */
@@ -482,6 +504,7 @@ public class MySearchList {
 
     /**
      * not in
+     *
      * @param column
      * @param value
      * @param <T>
@@ -493,6 +516,7 @@ public class MySearchList {
 
     /**
      * 不为空
+     *
      * @param column
      * @param value
      * @param <T>
@@ -512,6 +536,7 @@ public class MySearchList {
 
     /**
      * 为空
+     *
      * @param column
      * @param <T>
      * @return
@@ -522,6 +547,7 @@ public class MySearchList {
 
     /**
      * 不等于
+     *
      * @param column
      * @param value
      * @param <T>
@@ -533,6 +559,7 @@ public class MySearchList {
 
     /**
      * 嵌入sql语句
+     *
      * @param column
      * @param value
      * @param <T>
@@ -595,7 +622,7 @@ public class MySearchList {
         return this;
     }
 
-    public MySearchList and(Supplier<MySearchList> supplier){
+    public MySearchList and(Supplier<MySearchList> supplier) {
         ands.add(supplier.get());
         return this;
     }
@@ -605,23 +632,24 @@ public class MySearchList {
         return this;
     }
 
-    public MySearchList or(Supplier<MySearchList> supplier){
+    public MySearchList or(Supplier<MySearchList> supplier) {
         ors.add(supplier.get());
         return this;
     }
 
     /**
      * 连接其他表
-     * @param tableNickName 已存在的表名
-     * @param joinTableClass 连接对象类型
+     *
+     * @param tableNickName     已存在的表名
+     * @param joinTableClass    连接对象类型
      * @param joinTableNickName 连接对象表名
-     * @param tableColumn 已存在表的字段
-     * @param joinColumn 连接表的字段
-     * @param joinType 连接类型
+     * @param tableColumn       已存在表的字段
+     * @param joinColumn        连接表的字段
+     * @param joinType          连接类型
      * @param <T>
      * @return
      */
-    public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn,JoinType joinType) {
+    public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn, JoinType joinType) {
         TableRelation tableRelation = new TableRelation();
         tableRelation.setJoinTableClass(joinTableClass);
         tableRelation.setTableNickName(tableNickName);
@@ -632,33 +660,38 @@ public class MySearchList {
         joins.add(tableRelation);
         return this;
     }
+
     public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(tableNickName,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.INNER);
+        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.INNER);
     }
+
     public <T> MySearchList join(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn);
+        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn);
     }
 
     public <T> MySearchList leftJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.LEFT);
+        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.LEFT);
     }
-    public <T> MySearchList leftJoin(String tableNickName,Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.LEFT);
+
+    public <T> MySearchList leftJoin(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.LEFT);
     }
+
     public <T> MySearchList innerJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.INNER);
+        return join(null,joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.INNER);
     }
-    public <T> MySearchList innerJoin(String tableNickName,Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.INNER);
+
+    public <T> MySearchList innerJoin(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.INNER);
     }
+
     public <T> MySearchList rightJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.RIGHT);
-    }
-    public <T> MySearchList rightJoin(String tableNickName,Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null,joinTableClass,joinTableNickName,tableColumn,joinColumn,JoinType.RIGHT);
+        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.RIGHT);
     }
 
-
+    public <T> MySearchList rightJoin(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
+        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.RIGHT);
+    }
 
 
     public Map<Class, String> getTableAndNickNameMap() {
