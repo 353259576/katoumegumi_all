@@ -4,6 +4,8 @@ package cn.katoumegumi.java.common;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class WsStringUtils {
     public static final byte TRIM = 32;
@@ -94,6 +96,13 @@ public class WsStringUtils {
 
     public static String jointListString(String strings[], String sign) {
         return jointListString(Arrays.asList(strings), sign);
+    }
+
+    public static <T,R> String jointListString(List<T> list,String sign,Function<T,String> function){
+        List<String> stringList = list.stream().map(function::apply).filter(WsStringUtils::isNotBlank).collect(Collectors.toList());
+        return jointListString(stringList,sign);
+
+
     }
 
 
@@ -458,6 +467,7 @@ public class WsStringUtils {
         return str.substring(0, 1).toLowerCase() + str.substring(1, length);
     }
 
+
     public static List<String> split(String str, char c) {
         char[] cs = str.toCharArray();
         List<String> list = new ArrayList<>();
@@ -478,19 +488,29 @@ public class WsStringUtils {
 
     public static String[] splitArray(String str, char c) {
         List<String> list = WsStringUtils.split(str, c);
-        if (list == null) {
-            return null;
-        } else {
-            return list.toArray(new String[list.size()]);
-        }
+        return list.toArray(new String[0]);
     }
 
+    /**
+     * 判断是不是汉字
+     * @param c 字符
+     * @return
+     */
     public boolean isChinese(char c) {
         if (c >= 19968 && c <= 40869) {
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * 判断是不是字母数字
+     * @param c 字符
+     * @return
+     */
+    public static boolean isAlphabetOrNumber(char c) {
+        return (48 <= c && c <= 57) || (97 <= c && c <= 122) || (65 <= c && c <= 90);
     }
 
 
