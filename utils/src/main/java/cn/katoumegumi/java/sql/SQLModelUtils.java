@@ -943,7 +943,12 @@ public class SQLModelUtils {
                 }
 
                 if (WsStringUtils.isNotBlank(fieldJoinClass.getJoinColumn())) {
-                    lastTableNickName = analysisClassRelation(mainClass).getNickName() + '.' + fieldJoinClass.getNickName();
+                    if(fieldJoinClass.getNickName().contains(".")){
+                        lastTableNickName = analysisClassRelation(mainClass).getNickName() + '.' + fieldJoinClass.getNickName();
+                    }else {
+                        lastTableNickName = tableNickName + '.' + fieldJoinClass.getNickName();
+                    }
+
                     FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
                     localMapperMap.put(lastTableNickName, mapper);
                     String joinType;
