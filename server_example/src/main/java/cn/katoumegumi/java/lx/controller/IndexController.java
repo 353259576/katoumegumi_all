@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.lx.controller;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.datasource.WsJdbcUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
@@ -73,6 +74,7 @@ public class IndexController implements IndexService {
     @Autowired
     private HibernateDao hibernateDao;
 
+
     @Autowired
     private EntityManager entityManager;
 
@@ -88,50 +90,13 @@ public class IndexController implements IndexService {
         user.setUserDetails(userDetails);
         System.out.println(WsFieldUtils.getFieldName(user.getUserDetails()::getId));*/
 
-        User user = new User();
+/*        User user = new User();
         Consumer<Runnable> consumer = runnable -> {
             Long startTime = System.currentTimeMillis();
             runnable.run();
             Long endTime = System.currentTimeMillis();
             System.out.println(endTime - startTime);
         };
-        SQLModelUtils.addSqlInterceptor(new AbstractSqlInterceptor() {
-            @Override
-            protected String fieldName() {
-                return "createDate";
-            }
-
-            @Override
-            protected boolean isSelect() {
-                return true;
-            }
-
-            @Override
-            protected boolean isInsert() {
-                return true;
-            }
-
-            @Override
-            protected boolean isUpdate() {
-                return true;
-            }
-
-            @Override
-            protected Object insertFill() {
-                return new Date();
-            }
-
-            @Override
-            protected Object updateFill() {
-                return new Date();
-            }
-
-            @Override
-            protected Object selectFill() {
-                return new Date();
-            }
-        });
-
 
         consumer.accept(() -> {
             for (int i = 0; i < 100000; i++) {
@@ -146,15 +111,26 @@ public class IndexController implements IndexService {
                 SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
                 System.out.println(selectSqlEntity.getSelectSql());
 
-                /*MySearchList mySearchList = MySearchList.create(User.class);
+                MySearchList mySearchList = MySearchList.create(User.class);
                 mySearchList.set("name","你好世界");
                 mySearchList.eq("id",1L);
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
-                System.out.println(updateSqlEntity.getUpdateSql());*/
+                System.out.println(updateSqlEntity.getUpdateSql());
                 //System.out.println(selectSqlEntity.getSelectSql());
             }
         });
+
+
+        List<User> list = new ArrayList<>();
+        for(int i = 0; i < 100; i++){
+            User user1 = new User();
+            user1.setId(WsBeanUtils.objectToT(i,Long.class));
+            list.add(user1);
+        }
+        System.out.println(WsStringUtils.jointListString(list,",",user1 -> {
+            return user1.getId().toString();
+        }));*/
 
 
         //mySearchList/*.join(null,UserDetails.class,"UserDetails1","id","userId")*/
@@ -235,6 +211,11 @@ public class IndexController implements IndexService {
         //System.out.println(str);
         //System.out.println(countStr);
 
+
+        MySearchList searchList = MySearchList.create(User.class);
+        searchList.leftJoin(UserDetails.class,"userDetails","id","userId")
+                .leftJoin("userDetails",UserDetailsRemake.class,"userDetails.userDetailsRemakeList","id","userDetailsId");
+        mysqlClientTest(searchList);
 
     }
 

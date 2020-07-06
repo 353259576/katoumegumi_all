@@ -462,11 +462,11 @@ public class SQLModelUtils {
             selectSql.append(modelToSqlSelect(mySearchList.getMainClass()));
             List<TableRelation> list = mySearchList.getJoins();
             fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
-            if (fieldColumnRelationMapper.getMap() == null) {
+            /*if (fieldColumnRelationMapper.getMap() == null) {
                 fieldColumnRelationMapper.setMap(localMapperMap);
             } else {
                 localMapperMap = fieldColumnRelationMapper.getMap();
-            }
+            }*/
             String baseTableName = fieldColumnRelationMapper.getNickName();
             for (TableRelation tableRelation : list) {
                 if (usedTableRelation.contains(tableRelation)) {
@@ -943,8 +943,8 @@ public class SQLModelUtils {
                 }
 
                 if (WsStringUtils.isNotBlank(fieldJoinClass.getJoinColumn())) {
-                    lastTableNickName = tableNickName + '.' + fieldJoinClass.getNickName();
-                    FieldColumnRelationMapper mapper = mapperMap.get(fieldJoinClass.getJoinClass());
+                    lastTableNickName = analysisClassRelation(mainClass).getNickName() + '.' + fieldJoinClass.getNickName();
+                    FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
                     localMapperMap.put(lastTableNickName, mapper);
                     String joinType;
                     if (fieldJoinClass.getJoinType() != null) {
@@ -1037,8 +1037,14 @@ public class SQLModelUtils {
             fieldJoinClass.setNickName(oldFieldJoinClass.getNickName());
             fieldJoinClass.setField(oldFieldJoinClass.getField());
             fieldJoinClass.setJoinClass(oldFieldJoinClass.getJoinClass());
+
+
+
+
+            FieldColumnRelationMapper mainMapper = localMapperMap.get(tableNickName);
+            fieldJoinClass.setJoinColumn(mainMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName());
+
             FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
-            fieldJoinClass.setJoinColumn(mapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName());
             fieldJoinClass.setAnotherJoinColumn(mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName());
             fieldJoinClass.setNickName(tableRelation.getJoinTableNickName());
             fieldJoinClass.setJoinType(tableRelation.getJoinType());
@@ -1235,6 +1241,9 @@ public class SQLModelUtils {
             Field field = null;
             Object oValue = entry.getValue();
             String nowPreFix = prefix + "." + key;
+            if(oValue instanceof byte[]){
+                oValue = new String((byte[])oValue);
+            }
             Object nowObject = oValue;
             if (oValue instanceof Map) {
                 FieldJoinClass fieldJoinClass = parentMapper.getFieldJoinClassByFieldName(key);

@@ -612,7 +612,7 @@ public class WsBeanUtils {
                 } else if (object.getClass() == Integer.class) {
                     return (T) Integer.valueOf((int) object);
                 } else {
-                    return (T) Integer.valueOf(Double.valueOf(String.valueOf(object)).intValue());
+                    return (T) Integer.valueOf(String.valueOf(object));
                 }
             } else if (tClass == Integer.class) {
                 if (object.getClass() == int.class) {
@@ -620,7 +620,7 @@ public class WsBeanUtils {
                 } else if (object.getClass() == Integer.class) {
                     return (T) object;
                 } else {
-                    return (T) Integer.valueOf(Double.valueOf(String.valueOf(object)).intValue());
+                    return (T) Integer.valueOf(String.valueOf(object));
                 }
             } else if (tClass == short.class) {
                 if (object.getClass() == short.class) {
@@ -628,7 +628,7 @@ public class WsBeanUtils {
                 } else if (object.getClass() == Short.class) {
                     return (T) ((Object) ((Short) object).shortValue());
                 } else {
-                    return (T) Short.valueOf(Double.valueOf(String.valueOf(object)).shortValue());
+                    return (T) Short.valueOf(String.valueOf(object));
                 }
             } else if (tClass == Short.class) {
                 if (object.getClass() == short.class) {
@@ -636,7 +636,7 @@ public class WsBeanUtils {
                 } else if (object.getClass() == Short.class) {
                     return (T) object;
                 } else {
-                    return (T) Short.valueOf(Double.valueOf(String.valueOf(object)).shortValue());
+                    return (T) Short.valueOf(String.valueOf(object));
                 }
             } else if (tClass == char.class) {
                 if (object.getClass() == char.class) {
@@ -725,7 +725,7 @@ public class WsBeanUtils {
                 } else if (object.getClass() == Long.class) {
                     return (T) ((Object) ((Long) object).longValue());
                 } else {
-                    return (T) Long.valueOf(Double.valueOf(String.valueOf(object)).longValue());
+                    return (T) Long.valueOf(String.valueOf(object));
                 }
             } else if (tClass == Long.class) {
                 if (object.getClass() == long.class) {
@@ -733,7 +733,7 @@ public class WsBeanUtils {
                 } else if (object.getClass() == Long.class) {
                     return (T) object;
                 } else {
-                    return (T) Long.valueOf(Double.valueOf(String.valueOf(object)).longValue());
+                    return (T) Long.valueOf(String.valueOf(object));
                 }
             } else if (tClass == BigInteger.class) {
                 if (object.getClass() == BigInteger.class) {
