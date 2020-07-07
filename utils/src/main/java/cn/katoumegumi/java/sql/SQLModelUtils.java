@@ -753,7 +753,7 @@ public class SQLModelUtils {
                 break;
             case SQL:
 
-                tableColumn.append(translateTableNickName(mySearch.getFieldName()));
+                tableColumn.append(translateTableNickName(prefix,mySearch.getFieldName()));
                 if (mySearch.getValue() != null) {
                     if (mySearch.getValue() instanceof Collection) {
                         Collection collection = (Collection) mySearch.getValue();
@@ -774,22 +774,22 @@ public class SQLModelUtils {
                 //tableColumn.append(mySearch.getValue());
                 break;
             case EQP:
-                tableColumn.append(" = ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" = ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case NEP:
-                tableColumn.append(" != ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" != ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case GTP:
-                tableColumn.append(" > ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" > ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case LTP:
-                tableColumn.append(" < ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" < ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case GTEP:
-                tableColumn.append(" >= ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" >= ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case LTEP:
-                tableColumn.append(" <= ").append(translateTableNickName(WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" <= ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             default:
                 break;
@@ -1583,6 +1583,7 @@ public class SQLModelUtils {
         for (MySearch mySearch : mySearchList.getAll()) {
             switch (mySearch.getOperator()) {
                 case SET:
+                case ADD:
                 case DIVIDE:
                 case MULTIPLY:
                 case SUBTRACT:
@@ -1754,7 +1755,7 @@ public class SQLModelUtils {
      * @param searchSql
      * @return
      */
-    private String translateTableNickName(String searchSql) {
+    private String translateTableNickName(String prefix,String searchSql) {
         char[] cs = searchSql.toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
         StringBuilder replaceSb = new StringBuilder();
@@ -1764,7 +1765,12 @@ public class SQLModelUtils {
             c = cs[i];
             if (isReplace) {
                 if (c == '}') {
-                    stringBuilder.append(getAbbreviation(replaceSb.toString()));
+                    if(replaceSb.toString().startsWith(prefix)){
+                        stringBuilder.append(getAbbreviation(replaceSb.toString()));
+                    }else {
+                        stringBuilder.append(getAbbreviation(prefix +"."+replaceSb.toString()));
+                    }
+
                     isReplace = false;
                 } else {
                     replaceSb.append(c);
