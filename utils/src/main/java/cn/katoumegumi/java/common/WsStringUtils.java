@@ -98,9 +98,9 @@ public class WsStringUtils {
         return jointListString(Arrays.asList(strings), sign);
     }
 
-    public static <T,R> String jointListString(List<T> list,String sign,Function<T,String> function){
+    public static <T, R> String jointListString(List<T> list, String sign, Function<T, String> function) {
         List<String> stringList = list.stream().map(function::apply).filter(WsStringUtils::isNotBlank).collect(Collectors.toList());
-        return jointListString(stringList,sign);
+        return jointListString(stringList, sign);
 
 
     }
@@ -492,7 +492,18 @@ public class WsStringUtils {
     }
 
     /**
+     * 判断是不是字母数字
+     *
+     * @param c 字符
+     * @return
+     */
+    public static boolean isAlphabetOrNumber(char c) {
+        return (48 <= c && c <= 57) || (97 <= c && c <= 122) || (65 <= c && c <= 90);
+    }
+
+    /**
      * 判断是不是汉字
+     *
      * @param c 字符
      * @return
      */
@@ -502,15 +513,6 @@ public class WsStringUtils {
         } else {
             return false;
         }
-    }
-
-    /**
-     * 判断是不是字母数字
-     * @param c 字符
-     * @return
-     */
-    public static boolean isAlphabetOrNumber(char c) {
-        return (48 <= c && c <= 57) || (97 <= c && c <= 122) || (65 <= c && c <= 90);
     }
 
 

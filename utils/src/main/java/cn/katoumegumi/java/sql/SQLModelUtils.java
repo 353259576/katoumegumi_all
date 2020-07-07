@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -488,7 +487,7 @@ public class SQLModelUtils {
                     for (FieldColumnRelation fieldColumnRelation : mapper.getFieldColumnRelations()) {
                         AbstractSqlInterceptor sqlInterceptor = selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
                         if (sqlInterceptor != null) {
-                            if(sqlInterceptor.useCondition(baseMapper)){
+                            if (sqlInterceptor.useCondition(baseMapper)) {
                                 Object o = sqlInterceptor.selectFill();
                                 if (o != null) {
                                     mySearchList.eq(tableRelation.getJoinTableNickName() + "." + sqlInterceptor.fieldName(), o);
@@ -753,7 +752,7 @@ public class SQLModelUtils {
                 break;
             case SQL:
 
-                tableColumn.append(translateTableNickName(prefix,mySearch.getFieldName()));
+                tableColumn.append(translateTableNickName(prefix, mySearch.getFieldName()));
                 if (mySearch.getValue() != null) {
                     if (mySearch.getValue() instanceof Collection) {
                         Collection collection = (Collection) mySearch.getValue();
@@ -774,22 +773,22 @@ public class SQLModelUtils {
                 //tableColumn.append(mySearch.getValue());
                 break;
             case EQP:
-                tableColumn.append(" = ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" = ").append(translateTableNickName(prefix, WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case NEP:
-                tableColumn.append(" != ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" != ").append(translateTableNickName(prefix, WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case GTP:
-                tableColumn.append(" > ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" > ").append(translateTableNickName(prefix, WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case LTP:
-                tableColumn.append(" < ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" < ").append(translateTableNickName(prefix, WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case GTEP:
-                tableColumn.append(" >= ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" >= ").append(translateTableNickName(prefix, WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             case LTEP:
-                tableColumn.append(" <= ").append(translateTableNickName(prefix,WsStringUtils.anyToString(mySearch.getValue())));
+                tableColumn.append(" <= ").append(translateTableNickName(prefix, WsStringUtils.anyToString(mySearch.getValue())));
                 break;
             default:
                 break;
@@ -893,7 +892,7 @@ public class SQLModelUtils {
     private String modelToSqlSelect(Class<?> clazz) {
 
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(clazz);
-        if(WsListUtils.isNotEmpty(selectSqlInterceptorMap)) {
+        if (WsListUtils.isNotEmpty(selectSqlInterceptorMap)) {
             for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationMapper.getFieldColumnRelations()) {
                 AbstractSqlInterceptor sqlInterceptor = selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
                 if (sqlInterceptor != null) {
@@ -943,9 +942,9 @@ public class SQLModelUtils {
                 }
 
                 if (WsStringUtils.isNotBlank(fieldJoinClass.getJoinColumn())) {
-                    if(fieldJoinClass.getNickName().contains(".")){
+                    if (fieldJoinClass.getNickName().contains(".")) {
                         lastTableNickName = analysisClassRelation(mainClass).getNickName() + '.' + fieldJoinClass.getNickName();
-                    }else {
+                    } else {
                         lastTableNickName = tableNickName + '.' + fieldJoinClass.getNickName();
                     }
 
@@ -1013,7 +1012,7 @@ public class SQLModelUtils {
         TableRelation tableRelation = null;
         while (iterator.hasNext()) {
             tableRelation = iterator.next();
-            if(usedTableRelation.contains(tableRelation)){
+            if (usedTableRelation.contains(tableRelation)) {
                 continue;
             }
             if (WsStringUtils.isNotBlank(tableRelation.getTableNickName())) {
@@ -1044,8 +1043,6 @@ public class SQLModelUtils {
             fieldJoinClass.setJoinClass(oldFieldJoinClass.getJoinClass());
 
 
-
-
             FieldColumnRelationMapper mainMapper = localMapperMap.get(tableNickName);
             fieldJoinClass.setJoinColumn(mainMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName());
 
@@ -1061,7 +1058,7 @@ public class SQLModelUtils {
                 for (FieldColumnRelation fieldColumnRelation : mapper.getFieldColumnRelations()) {
                     AbstractSqlInterceptor sqlInterceptor = selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
                     if (sqlInterceptor != null) {
-                        if(sqlInterceptor.useCondition(mapper)) {
+                        if (sqlInterceptor.useCondition(mapper)) {
                             Object o = sqlInterceptor.selectFill();
                             if (o != null) {
                                 mySearchList.eq(fieldJoinClass.getNickName() + "." + sqlInterceptor.fieldName(), o);
@@ -1246,8 +1243,8 @@ public class SQLModelUtils {
             Field field = null;
             Object oValue = entry.getValue();
             String nowPreFix = prefix + "." + key;
-            if(oValue instanceof byte[]){
-                oValue = new String((byte[])oValue);
+            if (oValue instanceof byte[]) {
+                oValue = new String((byte[]) oValue);
             }
             Object nowObject = oValue;
             if (oValue instanceof Map) {
@@ -1454,7 +1451,6 @@ public class SQLModelUtils {
         insertSqlEntity.setValueList(valueList);
         return insertSqlEntity;
     }
-
 
 
     /**
@@ -1755,7 +1751,7 @@ public class SQLModelUtils {
      * @param searchSql
      * @return
      */
-    private String translateTableNickName(String prefix,String searchSql) {
+    private String translateTableNickName(String prefix, String searchSql) {
         char[] cs = searchSql.toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
         StringBuilder replaceSb = new StringBuilder();

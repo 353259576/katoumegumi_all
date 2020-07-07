@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "ws_user")
 @Data
 @TableName(value = "ws_user")
-public class User  implements Serializable {
+public class User implements Serializable {
 
 
     private static final long serialVersionUID = 1L;

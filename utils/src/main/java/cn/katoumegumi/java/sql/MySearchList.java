@@ -678,7 +678,7 @@ public class MySearchList {
     }
 
     public <T> MySearchList innerJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null,joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.INNER);
+        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.INNER);
     }
 
     public <T> MySearchList innerJoin(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {

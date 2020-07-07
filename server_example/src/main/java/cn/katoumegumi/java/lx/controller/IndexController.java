@@ -1,7 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.datasource.WsJdbcUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
@@ -13,7 +12,6 @@ import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
 import cn.katoumegumi.java.lx.service.IndexService;
 import cn.katoumegumi.java.lx.service.UserService;
-import cn.katoumegumi.java.sql.AbstractSqlInterceptor;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.SelectSqlEntity;
@@ -213,8 +211,8 @@ public class IndexController implements IndexService {
 
 
         MySearchList searchList = MySearchList.create(User.class);
-        searchList.leftJoin(UserDetails.class,"userDetails","id","userId")
-                .leftJoin("userDetails",UserDetailsRemake.class,"userDetails.userDetailsRemakeList","id","userDetailsId");
+        searchList.leftJoin(UserDetails.class, "userDetails", "id", "userId")
+                .leftJoin("userDetails", UserDetailsRemake.class, "userDetails.userDetailsRemakeList", "id", "userDetailsId");
         mysqlClientTest(searchList);
 
     }
