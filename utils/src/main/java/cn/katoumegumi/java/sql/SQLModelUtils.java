@@ -1761,14 +1761,14 @@ public class SQLModelUtils {
         StringBuilder replaceSb = new StringBuilder();
         char c;
         boolean isReplace = false;
-        for (int i = 0; i < cs.length; i++) {
-            c = cs[i];
+        for (char value : cs) {
+            c = value;
             if (isReplace) {
                 if (c == '}') {
-                    if(replaceSb.toString().startsWith(prefix)){
+                    if (replaceSb.toString().startsWith(prefix)) {
                         stringBuilder.append(getAbbreviation(replaceSb.toString()));
-                    }else {
-                        stringBuilder.append(getAbbreviation(prefix +"."+replaceSb.toString()));
+                    } else {
+                        stringBuilder.append(getAbbreviation(prefix + "." + replaceSb.toString()));
                     }
 
                     isReplace = false;
