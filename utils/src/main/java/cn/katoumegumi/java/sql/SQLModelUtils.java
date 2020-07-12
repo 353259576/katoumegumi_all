@@ -298,6 +298,9 @@ public class SQLModelUtils {
                 fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
                 if (id == null) {
                     TableField column = field.getAnnotation(TableField.class);
+                    if(column != null && !column.exist()){
+                        continue;
+                    }
                     if (column == null || WsStringUtils.isBlank(column.value())) {
                         fieldColumnRelation.setColumnName(getChangeColumnName(field.getName()));
                     } else {
