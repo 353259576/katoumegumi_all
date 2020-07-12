@@ -1144,6 +1144,33 @@ public class SQLModelUtils {
         List<FieldJoinClass> fieldJoinClassList = fieldColumnRelationMapper.getFieldJoinClasses();
 
         if (WsListUtils.isEmpty(fieldJoinClassList)) {
+            List<String> idSet = null;
+            List<FieldColumnRelation> idFieldColumnRelationList = fieldColumnRelationMapper.getIdSet();
+            if (WsListUtils.isNotEmpty(idFieldColumnRelationList)) {
+                idSet = new LinkedList<>();
+                for (FieldColumnRelation fieldColumnRelation : idFieldColumnRelationList) {
+                    idSet.add(fieldColumnRelation.getFieldName());
+                }
+            }
+            Set<ResultMapIds> resultMapIdsSet = new HashSet<>();
+            ResultMapIds resultMapIds;
+            if(maps.size() > 1){
+                Iterator<Map> iterator = maps.iterator();
+                Map map;
+                while (iterator.hasNext()){
+                    map = iterator.next();
+                    resultMapIds = new ResultMapIds(map,idSet);
+                    if(resultMapIdsSet.contains(resultMapIds)){
+                        iterator.remove();
+                    }else {
+                        resultMapIdsSet.add(resultMapIds);
+                    }
+
+                }
+
+            }
+
+
             return maps;
         }
 
@@ -1216,6 +1243,10 @@ public class SQLModelUtils {
         return maps;
 
     }
+
+
+
+
 
     /**
      * 转化为对象
