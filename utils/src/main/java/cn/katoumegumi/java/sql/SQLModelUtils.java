@@ -731,7 +731,7 @@ public class SQLModelUtils {
                         symbols.add("?");
                         baseWhereValueList.add(WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
                     }
-                    tableColumn.append(" no in");
+                    tableColumn.append(" not in");
                     tableColumn.append('(');
                     tableColumn.append(WsStringUtils.jointListString(symbols, ","));
                     tableColumn.append(')');
