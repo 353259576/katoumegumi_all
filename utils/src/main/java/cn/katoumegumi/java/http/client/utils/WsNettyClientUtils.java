@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
+import java.net.URI;
 import java.util.List;
 
 
@@ -113,10 +114,17 @@ public class WsNettyClientUtils {
 
     public static HttpRequest setHttpHeaders(HttpRequest httpRequest, HttpRequestBody httpRequestBody, HttpContent httpContent) {
 
-        httpRequest.headers().set(HttpHeaderNames.HOST, httpRequestBody.getUri().getHost());
+        URI uri = httpRequestBody.getUri();
+        String host = null;
+        if(uri.getPort() == 0){
+            host = uri.getHost();
+        }else {
+            host = uri.getHost()+":"+uri.getPort();
+        }
+        httpRequest.headers().set(HttpHeaderNames.HOST, host);
         httpRequest.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         //fullHttpRequest.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-        httpRequest.headers().set(HttpHeaderNames.ACCEPT, "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2");
+        //httpRequest.headers().set(HttpHeaderNames.ACCEPT, "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2");
         httpRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, httpRequestBody.getMediaType().getCoed());
         httpRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpContent.content().readableBytes());
         List<WsRequestProperty> list = httpRequestBody.getRequestProperty();
