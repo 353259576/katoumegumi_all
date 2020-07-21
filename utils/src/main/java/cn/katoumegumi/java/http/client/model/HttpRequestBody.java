@@ -662,6 +662,20 @@ public class HttpRequestBody {
     }
 
     public int getPort() {
+        if(this.port == 0){
+            this.port = this.uri.getPort();
+        }
+        if(this.port == 0){
+            if(this.isHttps) {
+                this.port = 80;
+            }else {
+                this.port = 443;
+            }
+        }
+
+
+
+
         return port;
     }
 
