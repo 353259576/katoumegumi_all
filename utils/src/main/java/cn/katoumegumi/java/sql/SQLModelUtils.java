@@ -1658,9 +1658,13 @@ public class SQLModelUtils {
 
     public DeleteSqlEntity delete(){
         String searchSql = searchListBaseSQLProcessor();
-        searchSql = searchSql.substring(searchSql.indexOf(" where "));
+        int index = searchSql.indexOf(" where ");
+        if(index < 0){
+            throw new RuntimeException("删除不能没有条件");
+        }
+        searchSql = searchSql.substring(index);
         FieldColumnRelationMapper mapper = analysisClassRelation(mainClass);
-        String deleteSql = "DELETE FROM " + guardKeyword(mapper.getBaseSql()) + " " + guardKeyword(getAbbreviation(mapper.getNickName())) + " " + searchSql;
+        String deleteSql = "DELETE FROM " + guardKeyword(mapper.getTableName()) + " " + guardKeyword(getAbbreviation(mapper.getNickName())) + " " + searchSql;
         DeleteSqlEntity deleteSqlEntity = new DeleteSqlEntity();
         deleteSqlEntity.setDeleteSql(deleteSql);
         deleteSqlEntity.setValueList(baseWhereValueList);
