@@ -1656,6 +1656,17 @@ public class SQLModelUtils {
 
     }
 
+    public DeleteSqlEntity delete(){
+        String searchSql = searchListBaseSQLProcessor();
+        searchSql = searchSql.substring(searchSql.indexOf(" where "));
+        FieldColumnRelationMapper mapper = analysisClassRelation(mainClass);
+        String deleteSql = "DELETE FROM " + guardKeyword(mapper.getBaseSql()) + " " + guardKeyword(getAbbreviation(mapper.getNickName())) + " " + searchSql;
+        DeleteSqlEntity deleteSqlEntity = new DeleteSqlEntity();
+        deleteSqlEntity.setDeleteSql(deleteSql);
+        deleteSqlEntity.setValueList(baseWhereValueList);
+        return deleteSqlEntity;
+    }
+
     /**
      * 合并生成数据（没写完废弃）
      *

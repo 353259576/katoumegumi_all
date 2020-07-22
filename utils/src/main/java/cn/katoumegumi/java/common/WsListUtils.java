@@ -33,7 +33,7 @@ public class WsListUtils {
 
     /**
      * 判断是否为空
-     * @param os map
+     * @param map map
      * @return 布尔
      */
     public static boolean isEmpty(Map map) {

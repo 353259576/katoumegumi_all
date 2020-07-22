@@ -198,6 +198,50 @@ public class WsJdbcUtils {
         return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), updateSqlEntity.getValueList().toArray());
     }
 
+    public void updateBatch(List<MySearchList> mySearchLists) {
+
+        Map<String,List<Object[]>> map = new HashMap<>();
+        for(MySearchList mySearchList:mySearchLists){
+            SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+            UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
+            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(),sql->{
+                return new ArrayList<>();
+            });
+            objectList.add(updateSqlEntity.getValueList().toArray());
+        }
+        map.forEach((sql,listValue)->{
+            log.debug(sql);
+            jdbcTemplate.batchUpdate(sql,listValue);
+        });
+    }
+
+    public <T> void updateBatchByT(List<T> tList) {
+
+        Map<String,List<Object[]>> map = new HashMap<>();
+        List<String> sqlList = new ArrayList<>(tList.size());
+        List<Object[]> list = new ArrayList<>();
+        for(T t:tList){
+            MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(t.getClass());
+            SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+            UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t);
+            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(),sql->{
+                return new ArrayList<>();
+            });
+            objectList.add(updateSqlEntity.getValueList().toArray());
+        }
+        map.forEach((sql,listValue)->{
+            log.debug(sql);
+            jdbcTemplate.batchUpdate(sql,listValue);
+        });
+    }
+
+    public int delete(MySearchList mySearchList){
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        DeleteSqlEntity deleteSqlEntity = sqlModelUtils.delete();
+        log.debug(deleteSqlEntity.getDeleteSql());
+        return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(),deleteSqlEntity.getValueList().toArray());
+    }
+
 
     /**
      * 查询列表
