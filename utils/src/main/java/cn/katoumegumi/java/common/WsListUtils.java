@@ -204,7 +204,7 @@ public class WsListUtils {
      * @param <T> 泛型
      * @return 数组
      */
-    public static <T> T[] ListToArray(List<T> tList) {
+    public static <T> T[] listToArray(List<T> tList) {
         if(isEmpty(tList)){
             return null;
         }
