@@ -833,4 +833,31 @@ public class WsBeanUtils {
         }
 
     }
+
+
+    public static <T, E> T copyObject(E object, Class<T> tClass) {
+        Class c1 = object.getClass();
+        Field fields1[] = c1.getDeclaredFields();
+        Field fields2[] = c1.getFields();
+        HashSet<Field> fieldHashSet = new HashSet<>();
+        for (int i = 0; i < fields1.length; i++) {
+            fieldHashSet.add(fields1[i]);
+        }
+        for (int i = 0; i < fields2.length; i++) {
+            fieldHashSet.add(fields2[i]);
+        }
+        return null;
+    }
+
+    public static String objectGetMethodName(Field field) {
+        String fieldName = field.getName();
+        return "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1, fieldName.length());
+    }
+
+    public static String objectSetMethodName(Field field) {
+        String fieldName = field.getName();
+        return "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1, fieldName.length());
+    }
+
+
 }

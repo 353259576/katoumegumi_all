@@ -1,58 +1,70 @@
 package cn.katoumegumi.java.common;
 
 import com.alibaba.fastjson.JSON;
+import com.mysql.cj.x.protobuf.MysqlxExpr;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Function;
 
+/**
+ * @author ws
+ */
 public class WsListUtils {
 
-    public static void main(String[] args) {
 
-        /*ArrayList<String> l1 = new ArrayList<>();
-        List<String> l2 = new ArrayList<>();
-        l1.add("dfsd");
-        l2.add("dfs");
-        List<String> list = mergeList(l1,l2);
-        System.out.println(JSON.toJSONString(list));*/
-        String str = "1,2,3,4,5,6,7,8,9";
-        String str2 = "123456789";
-        List list2 = Arrays.asList(str2.split(""));
-        List list = Arrays.asList(str.split(","));
-        System.out.println(JSON.toJSONString(list));
-        System.out.println(JSON.toJSONString(list2));
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).equals(list2.get(i))) {
-                System.out.println(true);
-            } else {
-                System.out.println(false);
-            }
-        }
-    }
-
-
+    /**
+     * 判断是不是为空
+     * @param collection 集合
+     * @return 布尔
+     */
     public static boolean isEmpty(Collection collection) {
         return (collection == null || collection.size() == 0);
     }
 
+    /**
+     * 判断是否为空
+     * @param os 数组
+     * @return 布尔
+     */
     public static boolean isEmpty(Object[] os) {
         return os == null || os.length == 0;
     }
 
+    /**
+     * 判断是否为空
+     * @param os map
+     * @return 布尔
+     */
     public static boolean isEmpty(Map map) {
         return (map == null || map.isEmpty());
     }
 
-
+    /**
+     * 判断是否不为空
+     * @param collection 集合
+     * @return 布尔
+     */
     public static boolean isNotEmpty(Collection collection) {
         return !isEmpty(collection);
     }
 
-
+    /**
+     * 判断是否不为空
+     * @param map 集合
+     * @return 布尔
+     */
     public static boolean isNotEmpty(Map map) {
         return !isEmpty(map);
     }
 
+    /**
+     * 合并数组
+     * @param l1 参数
+     * @param l2 参数
+     * @param <T> 泛型
+     * @return 合并后数组
+     */
     public static <T> List<T> mergeList(List<T> l1, List<T> l2) {
         if (isEmpty(l1) && isEmpty(l2)) {
             return null;
@@ -70,6 +82,12 @@ public class WsListUtils {
     }
 
 
+    /**
+     * 原生数组转化为list
+     * @param array 数组
+     * @param <T> 泛型
+     * @return list
+     */
     public static <T> List<T> arrayToList(T[] array) {
         if (array == null || array.length == 0) {
             return null;
@@ -81,29 +99,121 @@ public class WsListUtils {
         return list;
     }
 
-
-    public static <T, E> T copyObject(E object, Class<T> tClass) {
-        Class c1 = object.getClass();
-        Field fields1[] = c1.getDeclaredFields();
-        Field fields2[] = c1.getFields();
-        HashSet<Field> fieldHashSet = new HashSet<>();
-        for (int i = 0; i < fields1.length; i++) {
-            fieldHashSet.add(fields1[i]);
+    /**
+     * list转为map
+     * @param tList 数组
+     * @param function 方法
+     * @param <T> 对象
+     * @param <I> id
+     * @return 图
+     */
+    public static  <T,I> Map<I,List<T>> listToMapList(List<T> tList, Function<T,I> function){
+        Map<I,List<T>> map = new HashMap<>();
+        if(isEmpty(tList)){
+            return new HashMap<>();
         }
-        for (int i = 0; i < fields2.length; i++) {
-            fieldHashSet.add(fields2[i]);
+        for(T t:tList){
+            I i = function.apply(t);
+            List<T> list = map.computeIfAbsent(i,id->{
+               return new ArrayList<>();
+            });
+            list.add(t);
         }
-        return null;
+        return map;
     }
 
-    public static String objectGetMethodName(Field field) {
-        String fieldName = field.getName();
-        return "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1, fieldName.length());
+    /**
+     * list转为map
+     * @param tList 数组
+     * @param function 方法
+     * @param <T> 对象
+     * @param <I> id
+     * @return 图
+     */
+    public static  <T,I> Map<I,Set<T>> listToMapSet(List<T> tList, Function<T,I> function){
+        Map<I,Set<T>> map = new HashMap<>();
+        if(isEmpty(tList)){
+            return new HashMap<>();
+        }
+        for(T t:tList){
+            I i = function.apply(t);
+            Set<T> set = map.computeIfAbsent(i,id->{
+               return new HashSet<>();
+            });
+            set.add(t);
+        }
+        return map;
     }
 
-    public static String objectSetMethodName(Field field) {
-        String fieldName = field.getName();
-        return "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1, fieldName.length());
+    /**
+     * list转为map
+     * @param tList list
+     * @param function 方法
+     * @param <T> 泛型
+     * @param <I> 泛型
+     * @return map
+     */
+    public static  <T,I> Map<I,T> listToMap(List<T> tList, Function<T,I> function){
+        Map<I,T> map = new HashMap<>();
+        if(isEmpty(tList)){
+            return new HashMap<>();
+        }
+        for(T t:tList){
+            I i = function.apply(t);
+            map.put(i,t);
+        }
+        return map;
     }
+
+    /**
+     * 获取list的子list
+     * @param tList 父list
+     * @param function 方法
+     * @param <T> 父
+     * @param <I> 子
+     * @return 子list
+     */
+    public static <T,I> List<I> listToList(List<T> tList,Function<T,I> function){
+        List<I> iList = new ArrayList<>(tList.size());
+        for(T t:tList){
+            iList.add(function.apply(t));
+        }
+        return iList;
+    }
+
+    /**
+     * 获取list的子Set
+     * @param tList 父list
+     * @param function 方法
+     * @param <T> 父
+     * @param <I> 子
+     * @return 子Set
+     */
+    public static <T,I> Set<I> listToSet(List<T> tList,Function<T,I> function){
+        Set<I> iSet = new HashSet<>(tList.size());
+        for(T t:tList){
+            iSet.add(function.apply(t));
+        }
+        return iSet;
+    }
+
+
+    /**
+     * 原生数组转化为list
+     * @param tList 数组
+     * @param <T> 泛型
+     * @return 数组
+     */
+    public static <T> T[] ListToArray(List<T> tList) {
+        if(isEmpty(tList)){
+            return null;
+        }
+        T[] ts = (T[]) new Object[tList.size()];
+        for(int i = 0; i < tList.size(); i++){
+            ts[i] = tList.get(i);
+        }
+        return ts;
+    }
+
 
 }

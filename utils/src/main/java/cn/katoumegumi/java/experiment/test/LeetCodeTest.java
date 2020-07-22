@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.experiment.test;
 
 import com.alibaba.fastjson.JSON;
+import io.vertx.core.json.jackson.JacksonCodec;
 
 import java.util.*;
 
@@ -29,7 +30,9 @@ public class LeetCodeTest {
         //System.out.println(climbStairs1(44));
         //System.out.println(JSON.toJSONString(countBits(5)));
         //longestPalindrome("qwerrewq");
-        System.out.println(translateNum(0));
+        //System.out.println(translateNum(0));
+        List<TreeNode> treeNodes = generateTrees(10);
+        System.out.println(JSON.toJSONString(treeNodes));
     }
 
     /**
@@ -424,5 +427,51 @@ public class LeetCodeTest {
         }
         return dp[n - 1][m - 1];
     }
+
+    /**
+     * 95. 不同的二叉搜索树 II
+     * @param n
+     * @return
+     */
+    public static List<TreeNode> generateTrees(int n) {
+
+        if(n == 0){
+            return new LinkedList<TreeNode>();
+        }
+
+        return generateTrees(1,n);
+    }
+
+
+    public static List<TreeNode> generateTrees(int start,int end) {
+        List<TreeNode> treeNodeList = new LinkedList<>();
+        if(start > end){
+            treeNodeList.add(null);
+            return treeNodeList;
+        }
+
+        for(int i = start; i <= end; i++){
+
+            List<TreeNode> leftList = generateTrees(start,i - 1);
+            //leftList.add(null);
+
+            List<TreeNode> rightList = generateTrees(i + 1,end);
+
+            for(TreeNode left:leftList){
+                for(TreeNode right:rightList){
+                    TreeNode treeNode = new TreeNode(i);
+                    treeNode.left = left;
+                    treeNode.right = right;
+                    treeNodeList.add(treeNode);
+                }
+
+            }
+
+        }
+        return treeNodeList;
+    }
+
+
+
 
 }
