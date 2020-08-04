@@ -8,6 +8,8 @@ import javax.persistence.criteria.JoinType;
 
 public class TableRelation {
 
+    private MySearchList mySearchList;
+
     private JoinType joinType;
 
     private Class<?> joinTableClass;
@@ -22,61 +24,97 @@ public class TableRelation {
 
     private String joinTableColumn;
 
+    /**
+     * 关联表别名
+     */
+    private String alias;
+
+
+
+    public TableRelation(){
+
+    }
+
+    public TableRelation(MySearchList mySearchList){
+        this.mySearchList = mySearchList;
+    }
 
     public JoinType getJoinType() {
         return joinType;
     }
 
-    public void setJoinType(JoinType joinType) {
+    public TableRelation setJoinType(JoinType joinType) {
         this.joinType = joinType;
+        return this;
     }
 
     public Class<?> getJoinTableClass() {
         return joinTableClass;
     }
 
-    public void setJoinTableClass(Class<?> joinTableClass) {
+    public TableRelation setJoinTableClass(Class<?> joinTableClass) {
         this.joinTableClass = joinTableClass;
+        return this;
     }
 
     public String getTableNickName() {
         return tableNickName;
     }
 
-    public void setTableNickName(String tableNickName) {
+    public TableRelation setTableNickName(String tableNickName) {
         this.tableNickName = tableNickName;
+        return this;
     }
 
     public String getTableColumn() {
         return tableColumn;
     }
 
-    public void setTableColumn(String tableColumn) {
+    public TableRelation setTableColumn(String tableColumn) {
         this.tableColumn = tableColumn;
+        return this;
     }
 
     public String getJoinTableName() {
         return joinTableName;
     }
 
-    public void setJoinTableName(String joinTableName) {
+    public TableRelation setJoinTableName(String joinTableName) {
         this.joinTableName = joinTableName;
+        return this;
     }
 
     public String getJoinTableNickName() {
         return joinTableNickName;
     }
 
-    public void setJoinTableNickName(String joinTableNickName) {
+    public TableRelation setJoinTableNickName(String joinTableNickName) {
         this.joinTableNickName = joinTableNickName;
+        return this;
     }
 
     public String getJoinTableColumn() {
         return joinTableColumn;
     }
 
-    public void setJoinTableColumn(String joinTableColumn) {
+    public TableRelation setJoinTableColumn(String joinTableColumn) {
         this.joinTableColumn = joinTableColumn;
+        return this;
+    }
+
+    public TableRelation on(String tableColumn,String joinTableColumn){
+        this.tableColumn = tableColumn;
+        this.joinTableColumn = joinTableColumn;
+        return this;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public TableRelation setAlias(String alias) {
+        this.alias = alias;
+        return this;
     }
 
     @Override
@@ -87,5 +125,10 @@ public class TableRelation {
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
+    }
+
+    public MySearchList end(){
+        this.mySearchList.getJoins().add(this);
+        return this.mySearchList;
     }
 }

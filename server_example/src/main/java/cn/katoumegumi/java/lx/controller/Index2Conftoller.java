@@ -77,6 +77,7 @@ public class Index2Conftoller {
         System.out.println(str);*/
 
 
+
         System.out.println(LocalDateTime.now() instanceof LocalDateTime);
 
         String date = WsDateUtils.objectDateFormatString(LocalDateTime.now());

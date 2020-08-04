@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 /**
  * 查询条件构造器
  *
- * @author 王松
+ * @author ws
  */
 public class MySearchList {
     private final List<MySearch> orderSearches = new ArrayList<>();
@@ -21,6 +21,7 @@ public class MySearchList {
     private final List<TableRelation> joins = new ArrayList<>();
     private List<MySearch> mySearches = new ArrayList<>();
     private Class mainClass;
+    private String alias;
 
     private JoinType defaultJoinType = JoinType.INNER;
 
@@ -117,26 +118,6 @@ public class MySearchList {
     public MySearchList setPageVO(Page pageVO) {
         this.pageVO = pageVO;
         return this;
-    }
-
-    public Map createMybaitsMap() {
-        Map map = new HashMap();
-        for (MySearch m1 : mySearches) {
-            map.put(m1.getFieldName(), m1.getValue());
-        }
-        if (pageVO != null) {
-            map.put("page", pageVO);
-        }
-        return map;
-    }
-
-
-    public Map createMybaitsMapNoPage() {
-        Map map = new HashMap();
-        for (MySearch m1 : mySearches) {
-            map.put(m1.getFieldName(), m1.getValue());
-        }
-        return map;
     }
 
 
@@ -724,5 +705,52 @@ public class MySearchList {
         return this;
     }
 
+    /**
+     * 内联
+     * @param tClass
+     * @return
+     */
+    public TableRelation innerJoin(Class<?> tClass){
+        TableRelation tableRelation = new TableRelation(this);
+        tableRelation.setJoinType(JoinType.INNER);
+        tableRelation.setJoinTableClass(tClass);
+        tableRelation.setJoinTableNickName(tClass.getSimpleName());
+        return tableRelation;
+    };
+
+    /**
+     * 左联
+     * @param tClass
+     * @return
+     */
+    public TableRelation leftJoin(Class<?> tClass){
+        TableRelation tableRelation = new TableRelation(this);
+        tableRelation.setJoinType(JoinType.LEFT);
+        tableRelation.setJoinTableClass(tClass);
+        tableRelation.setJoinTableNickName(tClass.getSimpleName());
+        return tableRelation;
+    };
+
+    /**
+     * 右连
+     * @param tClass
+     * @return
+     */
+    public TableRelation rightJoin(Class<?> tClass){
+        TableRelation tableRelation = new TableRelation(this);
+        tableRelation.setJoinType(JoinType.RIGHT);
+        tableRelation.setJoinTableClass(tClass);
+        tableRelation.setJoinTableNickName(tClass.getSimpleName());
+        return tableRelation;
+    };
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public MySearchList setAlias(String alias) {
+        this.alias = alias;
+        return this;
+    }
 }
 

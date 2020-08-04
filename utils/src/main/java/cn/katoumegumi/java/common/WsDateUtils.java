@@ -1,5 +1,9 @@
 package cn.katoumegumi.java.common;
 
+import cn.katoumegumi.java.common.model.WsRun;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,8 +12,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class WsDateUtils {
+
+
+    private static final Logger log = LoggerFactory.getLogger(WsDateUtils.class);
 
     public static final String[] CN_MONTH_NAMES = new String[]{"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"};
 
@@ -22,10 +30,27 @@ public class WsDateUtils {
     public static final String SMALLTIMESTRING = "yyyy-MM-dd";
     public static final String CNSMALLTIMESTRING = "yyyy年MM月dd日";
 
+    /**
+     * 获取一段程序的执行时间
+     */
+    public static final Consumer<WsRun> getExecutionTime = wsRun -> {
+      long start = System.currentTimeMillis();
+      wsRun.run();
+      long end = System.currentTimeMillis();
+      log.info("执行时间为：{}",(end - start));
+    };
+
 
     public static void main(String[] args) {
-        System.out.println(getCNWeekdayName(new Date()));
-        System.out.println(getCNMonthName(new Date()));
+
+        getExecutionTime.accept(()->{
+            for(int i = 0; i < 100000000; i++){
+
+            }
+        });
+
+        log.info(getCNWeekdayName(new Date()));
+        log.info(getCNMonthName(new Date()));
     }
 
     public static String dateStringFormat(String date) {

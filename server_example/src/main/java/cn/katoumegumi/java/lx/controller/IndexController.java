@@ -209,11 +209,30 @@ public class IndexController implements IndexService {
         //System.out.println(str);
         //System.out.println(countStr);
 
+        long start = System.currentTimeMillis();
 
-        MySearchList searchList = MySearchList.create(User.class);
-        searchList.leftJoin(UserDetails.class, "userDetails", "id", "userId")
-                .leftJoin("userDetails", UserDetailsRemake.class, "userDetails.userDetailsRemakeList", "id", "userDetailsId");
-        mysqlClientTest(searchList);
+        for(int i = 0; i < 1000000; i++){
+            MySearchList searchList = MySearchList.create(User.class);
+            searchList
+                    .leftJoin(UserDetails.class)
+                    .setJoinTableNickName("userDetails").setAlias("ud")
+                    .on("id", "userId").end()
+                    //.leftJoin(UserDetails.class, "userDetails", "id", "userId")
+                    .leftJoin(UserDetailsRemake.class)
+                    .setTableNickName("{ud}")
+                    .setJoinTableNickName("{ud}.userDetailsRemakeList")
+                    .setAlias("udr")
+                    .on("id", "userDetailsId").end()
+                    .eq("{ud}.userDetailsRemakeList.id",10);
+            //.leftJoin("userDetails",UserDetailsRemake.class, "userDetails.userDetailsRemakeList", "id", "userDetailsId");
+            SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList);
+            sqlModelUtils.select().getSelectSql();
+        }
+
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+
+        // mysqlClientTest(searchList);
 
     }
 

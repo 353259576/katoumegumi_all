@@ -607,130 +607,98 @@ public class WsBeanUtils {
     public static <T> T objectToT(Object object, Class<T> tClass) {
         try {
             if (tClass == int.class) {
-                if (object.getClass() == int.class) {
-                    return (T) object;
-                } else if (object.getClass() == Integer.class) {
+                if (object.getClass() == Integer.class) {
                     return (T) Integer.valueOf((int) object);
                 } else {
                     return (T) Integer.valueOf(String.valueOf(object));
                 }
             } else if (tClass == Integer.class) {
-                if (object.getClass() == int.class) {
-                    return (T) Integer.valueOf((int) object);
-                } else if (object.getClass() == Integer.class) {
+                if (object.getClass() == Integer.class) {
                     return (T) object;
                 } else {
                     return (T) Integer.valueOf(String.valueOf(object));
                 }
             } else if (tClass == short.class) {
-                if (object.getClass() == short.class) {
-                    return (T) object;
-                } else if (object.getClass() == Short.class) {
-                    return (T) ((Object) ((Short) object).shortValue());
+                if (object.getClass() == Short.class) {
+                    return (T) ((Object) (Short) object);
                 } else {
                     return (T) Short.valueOf(String.valueOf(object));
                 }
             } else if (tClass == Short.class) {
-                if (object.getClass() == short.class) {
-                    return (T) Short.valueOf((short) object);
-                } else if (object.getClass() == Short.class) {
+                if (object.getClass() == Short.class) {
                     return (T) object;
                 } else {
                     return (T) Short.valueOf(String.valueOf(object));
                 }
             } else if (tClass == char.class) {
-                if (object.getClass() == char.class) {
-                    return (T) object;
-                } else if (object.getClass() == Character.class) {
-                    return (T) ((Object) ((Character) object).charValue());
+                if (object.getClass() == Character.class) {
+                    return (T) ((Object) (Character) object);
                 } else {
                     return (T) (Object) String.valueOf(object).charAt(0);
                 }
 
             } else if (tClass == Character.class) {
-                if (object.getClass() == char.class) {
-                    return (T) object;
-                } else if (object.getClass() == Character.class) {
+                if (object.getClass() == Character.class) {
                     return (T) object;
                 } else {
                     return (T) (Object) String.valueOf(object).charAt(0);
                 }
             } else if (tClass == byte.class) {
-                if (object.getClass() == byte.class) {
-                    return (T) object;
-                } else if (object.getClass() == Byte.class) {
-                    return (T) ((Object) ((Byte) object).byteValue());
+                if (object.getClass() == Byte.class) {
+                    return (T) ((Object) (Byte) object);
                 } else {
                     return (T) ((Object) Byte.parseByte(String.valueOf(object)));
                 }
             } else if (tClass == Byte.class) {
-                if (object.getClass() == byte.class) {
-                    return (T) Byte.valueOf((byte) object);
-                } else if (object.getClass() == Byte.class) {
+                if (object.getClass() == Byte.class) {
                     return (T) object;
                 } else {
                     return (T) ((Object) Byte.valueOf(String.valueOf(object)));
                 }
             } else if (tClass == boolean.class) {
-                if (object.getClass() == boolean.class) {
-                    return (T) object;
-                } else if (object.getClass() == Boolean.class) {
-                    return (T) ((Object) ((Boolean) object).booleanValue());
+                if (object.getClass() == Boolean.class) {
+                    return (T) ((Object) (Boolean) object);
                 } else {
                     return (T) ((Object) Boolean.parseBoolean(String.valueOf(object)));
                 }
             } else if (tClass == Boolean.class) {
-                if (object.getClass() == boolean.class) {
-                    return (T) Boolean.valueOf((boolean) object);
-                } else if (object.getClass() == Boolean.class) {
+                if (object.getClass() == Boolean.class) {
                     return (T) object;
                 } else {
                     return (T) ((Object) Boolean.valueOf(String.valueOf(object)));
                 }
             } else if (tClass == float.class) {
-                if (object.getClass() == float.class) {
-                    return (T) object;
-                } else if (object.getClass() == Float.class) {
-                    return (T) ((Object) ((Float) object).floatValue());
+                if (object.getClass() == Float.class) {
+                    return (T) ((Object) (Float) object);
                 } else {
                     return (T) ((Object) Float.parseFloat(String.valueOf(object)));
                 }
             } else if (tClass == Float.class) {
-                if (object.getClass() == float.class) {
-                    return (T) Float.valueOf((float) object);
-                } else if (object.getClass() == Float.class) {
+                if (object.getClass() == Float.class) {
                     return (T) object;
                 } else {
                     return (T) ((Object) Float.valueOf(String.valueOf(object)));
                 }
             } else if (tClass == double.class) {
-                if (object.getClass() == double.class) {
-                    return (T) object;
-                } else if (object.getClass() == Double.class) {
-                    return (T) ((Object) ((Double) object).doubleValue());
+                if (object.getClass() == Double.class) {
+                    return (T) ((Object) (Double) object);
                 } else {
                     return (T) ((Object) Double.parseDouble(String.valueOf(object)));
                 }
             } else if (tClass == Double.class) {
-                if (object.getClass() == double.class) {
-                    return (T) Double.valueOf((double) object);
-                } else if (object.getClass() == Double.class) {
+                if (object.getClass() == Double.class) {
                     return (T) object;
                 } else {
                     return (T) ((Object) Double.valueOf(String.valueOf(object)));
                 }
             } else if (tClass == long.class) {
-                if (object.getClass() == long.class) {
-                    return (T) object;
-                } else if (object.getClass() == Long.class) {
-                    return (T) ((Object) ((Long) object).longValue());
+                if (object.getClass() == Long.class) {
+                    return (T) ((Object) (Long) object);
                 } else {
                     return (T) Long.valueOf(String.valueOf(object));
                 }
             } else if (tClass == Long.class) {
-                if (object.getClass() == long.class) {
-                    return (T) Long.valueOf((long) object);
-                } else if (object.getClass() == Long.class) {
+                if (object.getClass() == Long.class) {
                     return (T) object;
                 } else {
                     return (T) Long.valueOf(String.valueOf(object));
