@@ -1,6 +1,9 @@
 package cn.katoumegumi.java.sql;
 
 import javax.persistence.criteria.JoinType;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author ws
@@ -23,6 +26,8 @@ public class TableRelation {
     private String joinTableNickName;
 
     private String joinTableColumn;
+
+    private MySearchList conditionSearchList;
 
     /**
      * 关联表别名
@@ -127,8 +132,24 @@ public class TableRelation {
         return super.equals(obj);
     }
 
-    public MySearchList end(){
+    public MySearchList end() {
         this.mySearchList.getJoins().add(this);
         return this.mySearchList;
+    }
+
+    public MySearchList getConditionSearchList() {
+        return conditionSearchList;
+    }
+
+    public TableRelation condition(Consumer<MySearchList> searchList) {
+        MySearchList mySearchList = null;
+        if(this.conditionSearchList == null) {
+            mySearchList = MySearchList.newMySearchList();
+        }else {
+            mySearchList = this.conditionSearchList;
+        }
+        searchList.accept(mySearchList);
+        this.conditionSearchList = mySearchList;
+        return this;
     }
 }

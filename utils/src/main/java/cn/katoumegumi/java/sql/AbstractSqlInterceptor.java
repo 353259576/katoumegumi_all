@@ -4,7 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author 王松
+ * sql拦截器
+ * @author ws
  */
 public abstract class AbstractSqlInterceptor {
 

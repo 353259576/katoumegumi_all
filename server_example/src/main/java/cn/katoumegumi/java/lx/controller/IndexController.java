@@ -44,6 +44,8 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 @Service(version = "1.0.0", protocol = {"dubbo", "rest"})
@@ -209,24 +211,36 @@ public class IndexController implements IndexService {
         //System.out.println(str);
         //System.out.println(countStr);
 
+
         long start = System.currentTimeMillis();
 
-        for(int i = 0; i < 1000000; i++){
-            MySearchList searchList = MySearchList.create(User.class);
-            searchList
+        for(int i = 0; i < 1; i++){
+            MySearchList searchList = MySearchList.create(User.class).eq("id",10);
+            /*searchList
                     .leftJoin(UserDetails.class)
                     .setJoinTableNickName("userDetails").setAlias("ud")
-                    .on("id", "userId").end()
+                    .on("id", "userId")
+                    .condition(mySearchList -> mySearchList.eq("ud.id","10"))
+                    .end()
                     //.leftJoin(UserDetails.class, "userDetails", "id", "userId")
                     .leftJoin(UserDetailsRemake.class)
                     .setTableNickName("{ud}")
                     .setJoinTableNickName("{ud}.userDetailsRemakeList")
                     .setAlias("udr")
-                    .on("id", "userDetailsId").end()
-                    .eq("{ud}.userDetailsRemakeList.id",10);
-            //.leftJoin("userDetails",UserDetailsRemake.class, "userDetails.userDetailsRemakeList", "id", "userDetailsId");
+                    .on("id", "userDetailsId")
+                    .end()
+                    .leftJoin(UserDetailsRemake.class)
+                    .setAlias("udr2")
+                    .on("id","userDetailsId")
+                    .end()
+                    .eqp("u.id","ud.id")
+                    .sql("{u}.id = ? and {ud}.id = ?",new Integer[]{10,10})
+                    .and(s->s.eq("udr.id","10").gte("udr.remake","165"))
+                    .or(s->s.eq("udr.id","10").gte("udr.remake","165"))
+                    .eq("udr.id",10);*/
             SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList);
-            sqlModelUtils.select().getSelectSql();
+            String sql = sqlModelUtils.select().getSelectSql();
+            System.out.println(sql);
         }
 
         long end = System.currentTimeMillis();

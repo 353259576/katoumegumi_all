@@ -15,6 +15,7 @@ public class FieldJoinClass {
     private String joinColumn;
     private String anotherJoinColumn;
     private Field field;
+    private MySearchList conditionSearchList;
 
     public String getBaseTableNickName() {
         return baseTableNickName;
@@ -78,5 +79,14 @@ public class FieldJoinClass {
 
     public void setField(Field field) {
         this.field = field;
+    }
+
+    public MySearchList getConditionSearchList() {
+        return conditionSearchList;
+    }
+
+    public FieldJoinClass setConditionSearchList(MySearchList conditionSearchList) {
+        this.conditionSearchList = conditionSearchList;
+        return this;
     }
 }

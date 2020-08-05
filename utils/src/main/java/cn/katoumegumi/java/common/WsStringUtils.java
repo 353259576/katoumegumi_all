@@ -54,9 +54,9 @@ public class WsStringUtils {
         }*/
         /*String str = decodeUnicode("https://www.bilibili.com/v/douga/other/?rt=V/ymTlOu4ow/y4xxNWPUZ14LyI55s2fZ984sFJL2kpo%D");//https://www.bilibili.com/v/douga/other/?rt=V/ymTlOu4ow/y4xxNWPUZ14LyI55s2fZ984sFJL2kpo%D
         System.out.println(str);*/
-        System.out.println(decodeUnicode("\\u79DF\\u6237\\u9ED8\\u8BA4\\u89D2\\u8272"));
+        /*System.out.println(decodeUnicode("\\u79DF\\u6237\\u9ED8\\u8BA4\\u89D2\\u8272"));
         System.out.println(camel_case("dDFSDFgd"));
-        System.out.println(camelCase("d_d_f_s_d_fgd"));
+        System.out.println(camelCase("d_d_f_s_d_fgd"));*/
     }
 
     public static byte[] byteListToArray(List<Byte> bytes) {
@@ -99,22 +99,25 @@ public class WsStringUtils {
     }
 
     public static <T, R> String jointListString(List<T> list, String sign, Function<T, String> function) {
-        List<String> stringList = list.stream().map(function::apply).filter(WsStringUtils::isNotBlank).collect(Collectors.toList());
+        List<String> stringList = list.stream().map(function).filter(WsStringUtils::isNotBlank).collect(Collectors.toList());
         return jointListString(stringList, sign);
 
 
     }
 
+    public static String jointListString(List<String> strings, String sign){
+        return jointListString(strings,sign,0,strings.size());
+    }
 
-    public static String jointListString(List<String> strings, String sign) {
+    public static String jointListString(List<String> strings, String sign,int start,int end) {
         if (strings == null) {
             return "";
         }
         if (strings.size() == 0) {
             return "";
         }
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < strings.size(); i++) {
+        StringBuilder stringBuffer = new StringBuilder();
+        for (int i = start; i < end; i++) {
             if (strings.get(i) == null) {
                 continue;
             }
@@ -169,7 +172,7 @@ public class WsStringUtils {
         for (; i < chars.length; i++) {
             if (chars[i] < 48 || chars[i] > 58) {
                 if (chars[i] == '.') {
-                    if (i == 0 || i == chars.length - 1 || isHave == true) {
+                    if (i == 0 || i == chars.length - 1 || isHave) {
                         return false;
                     } else {
                         isHave = true;
@@ -378,13 +381,13 @@ public class WsStringUtils {
 
     public static String createRandomStr() {
         String str = WsDateUtils.dateToString(new Date(), WsDateUtils.LONGTIMESTRINGCOMPACT);
-        Integer i = new Random().nextInt(90000) + 10000;
+        int i = new Random().nextInt(90000) + 10000;
         return str + i;
     }
 
     public static String createRandomStr(String type, Integer size) {
         String str = WsDateUtils.dateToString(new Date(), WsDateUtils.LONGTIMESTRINGCOMPACT);
-        Integer i = new Random().nextInt(size * 1000 * 9) + 100 * size;
+        int i = new Random().nextInt(size * 1000 * 9) + 100 * size;
         return str + i;
     }
 
@@ -397,7 +400,7 @@ public class WsStringUtils {
     public static String camel_case(String str) {
         char g = '_';
         char chars[] = str.toCharArray();
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuffer = new StringBuilder();
         int length = str.length();
         char c = chars[0];
 
@@ -430,7 +433,7 @@ public class WsStringUtils {
         char g = '_';
         str = str.toLowerCase();
         char chars[] = str.toCharArray();
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuffer = new StringBuilder();
         int length = str.length();
         char c = chars[0];
         boolean nextToUp = false;

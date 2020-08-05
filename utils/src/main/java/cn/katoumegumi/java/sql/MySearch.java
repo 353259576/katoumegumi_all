@@ -1,5 +1,9 @@
 package cn.katoumegumi.java.sql;
 
+/**
+ * 查询条件
+ * @author ws
+ */
 public class MySearch {
     private String fieldName;
     private SqlOperator operator;

@@ -2,15 +2,16 @@ package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.SupplierFunc;
 import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.sql.entity.AbstractSearchList;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import javax.persistence.criteria.JoinType;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
  * 查询条件构造器
- *
  * @author ws
  */
 public class MySearchList {
@@ -56,7 +57,7 @@ public class MySearchList {
         mySearches.add(mySearch);
         return this;
     }
-
+    
     public MySearchList add(String fieldName, SqlOperator operator, Object value) {
         if (operator.equals(SqlOperator.SORT)) {
             orderSearches.add(new MySearch(fieldName, operator, value));
@@ -618,6 +619,20 @@ public class MySearchList {
         return this;
     }
 
+    public MySearchList and(Consumer<MySearchList> consumer){
+        MySearchList mySearchList = MySearchList.create();
+        consumer.accept(mySearchList);
+        ands.add(mySearchList);
+        return this;
+    }
+
+    public MySearchList or(Consumer<MySearchList> consumer){
+        MySearchList mySearchList = MySearchList.create();
+        consumer.accept(mySearchList);
+        ors.add(mySearchList);
+        return this;
+    }
+
     /**
      * 连接其他表
      *
@@ -744,10 +759,19 @@ public class MySearchList {
         return tableRelation;
     };
 
+    /**
+     * 获取主表别名
+     * @return
+     */
     public String getAlias() {
         return alias;
     }
 
+    /**
+     * 设置主表别名
+     * @param alias
+     * @return
+     */
     public MySearchList setAlias(String alias) {
         this.alias = alias;
         return this;
