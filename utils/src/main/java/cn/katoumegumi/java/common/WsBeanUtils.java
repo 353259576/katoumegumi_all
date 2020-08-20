@@ -610,27 +610,108 @@ public class WsBeanUtils {
                 if (object.getClass() == Integer.class) {
                     return (T) Integer.valueOf((int) object);
                 } else {
+                    if(object instanceof Number){
+                        return (T)Integer.valueOf(((Number)object).intValue());
+                    }
                     return (T) Integer.valueOf(String.valueOf(object));
                 }
             } else if (tClass == Integer.class) {
                 if (object.getClass() == Integer.class) {
                     return (T) object;
                 } else {
+                    if(object instanceof Number){
+                        return (T)Integer.valueOf(((Number)object).intValue());
+                    }
                     return (T) Integer.valueOf(String.valueOf(object));
                 }
             } else if (tClass == short.class) {
                 if (object.getClass() == Short.class) {
                     return (T) ((Object) (Short) object);
                 } else {
+                    if(object instanceof Number){
+                        return (T)Short.valueOf(((Number)object).shortValue());
+                    }
                     return (T) Short.valueOf(String.valueOf(object));
                 }
             } else if (tClass == Short.class) {
                 if (object.getClass() == Short.class) {
                     return (T) object;
                 } else {
+                    if(object instanceof Number){
+                        return (T)Short.valueOf(((Number)object).shortValue());
+                    }
                     return (T) Short.valueOf(String.valueOf(object));
                 }
-            } else if (tClass == char.class) {
+            }  else if (tClass == byte.class) {
+                if (object.getClass() == Byte.class) {
+                    return (T) ((Object) (Byte) object);
+                } else {
+                    if(object instanceof Number){
+                        return (T)Byte.valueOf(((Number)object).byteValue());
+                    }
+                    return (T) ((Object) Byte.parseByte(String.valueOf(object)));
+                }
+            } else if (tClass == Byte.class) {
+                if (object.getClass() == Byte.class) {
+                    return (T) object;
+                } else {
+                    return (T) ((Object) Byte.valueOf(String.valueOf(object)));
+                }
+            }else if (tClass == float.class) {
+                if (object.getClass() == Float.class) {
+                    return (T) ((Object) (Float) object);
+                } else {
+                    if(object instanceof Number){
+                        return (T)Float.valueOf(((Number)object).floatValue());
+                    }
+                    return (T) ((Object) Float.parseFloat(String.valueOf(object)));
+                }
+            } else if (tClass == Float.class) {
+                if (object.getClass() == Float.class) {
+                    return (T) object;
+                } else {
+                    if(object instanceof Number){
+                        return (T)Float.valueOf(((Number)object).floatValue());
+                    }
+                    return (T) ((Object) Float.valueOf(String.valueOf(object)));
+                }
+            } else if (tClass == double.class) {
+                if (object.getClass() == Double.class) {
+                    return (T) ((Object) (Double) object);
+                } else {
+                    if(object instanceof Number){
+                        return (T)Double.valueOf(((Number)object).doubleValue());
+                    }
+                    return (T) ((Object) Double.parseDouble(String.valueOf(object)));
+                }
+            } else if (tClass == Double.class) {
+                if (object.getClass() == Double.class) {
+                    return (T) object;
+                } else {
+                    if(object instanceof Number){
+                        return (T)Double.valueOf(((Number)object).doubleValue());
+                    }
+                    return (T) ((Object) Double.valueOf(String.valueOf(object)));
+                }
+            } else if (tClass == long.class) {
+                if (object.getClass() == Long.class) {
+                    return (T) ((Object) (Long) object);
+                } else {
+                    if(object instanceof Number){
+                        return (T)Long.valueOf(((Number)object).longValue());
+                    }
+                    return (T) Long.valueOf(String.valueOf(object));
+                }
+            } else if (tClass == Long.class) {
+                if (object.getClass() == Long.class) {
+                    return (T) object;
+                } else {
+                    if(object instanceof Number){
+                        return (T)Long.valueOf(((Number)object).longValue());
+                    }
+                    return (T) Long.valueOf(String.valueOf(object));
+                }
+            }else if (tClass == char.class) {
                 if (object.getClass() == Character.class) {
                     return (T) ((Object) (Character) object);
                 } else {
@@ -642,18 +723,6 @@ public class WsBeanUtils {
                     return (T) object;
                 } else {
                     return (T) (Object) String.valueOf(object).charAt(0);
-                }
-            } else if (tClass == byte.class) {
-                if (object.getClass() == Byte.class) {
-                    return (T) ((Object) (Byte) object);
-                } else {
-                    return (T) ((Object) Byte.parseByte(String.valueOf(object)));
-                }
-            } else if (tClass == Byte.class) {
-                if (object.getClass() == Byte.class) {
-                    return (T) object;
-                } else {
-                    return (T) ((Object) Byte.valueOf(String.valueOf(object)));
                 }
             } else if (tClass == boolean.class) {
                 if (object.getClass() == Boolean.class) {
@@ -667,43 +736,7 @@ public class WsBeanUtils {
                 } else {
                     return (T) ((Object) Boolean.valueOf(String.valueOf(object)));
                 }
-            } else if (tClass == float.class) {
-                if (object.getClass() == Float.class) {
-                    return (T) ((Object) (Float) object);
-                } else {
-                    return (T) ((Object) Float.parseFloat(String.valueOf(object)));
-                }
-            } else if (tClass == Float.class) {
-                if (object.getClass() == Float.class) {
-                    return (T) object;
-                } else {
-                    return (T) ((Object) Float.valueOf(String.valueOf(object)));
-                }
-            } else if (tClass == double.class) {
-                if (object.getClass() == Double.class) {
-                    return (T) ((Object) (Double) object);
-                } else {
-                    return (T) ((Object) Double.parseDouble(String.valueOf(object)));
-                }
-            } else if (tClass == Double.class) {
-                if (object.getClass() == Double.class) {
-                    return (T) object;
-                } else {
-                    return (T) ((Object) Double.valueOf(String.valueOf(object)));
-                }
-            } else if (tClass == long.class) {
-                if (object.getClass() == Long.class) {
-                    return (T) ((Object) (Long) object);
-                } else {
-                    return (T) Long.valueOf(String.valueOf(object));
-                }
-            } else if (tClass == Long.class) {
-                if (object.getClass() == Long.class) {
-                    return (T) object;
-                } else {
-                    return (T) Long.valueOf(String.valueOf(object));
-                }
-            } else if (tClass == BigInteger.class) {
+            }  else if (tClass == BigInteger.class) {
                 if (object.getClass() == BigInteger.class) {
                     return (T) object;
                 } else {
@@ -773,6 +806,12 @@ public class WsBeanUtils {
 
     }
 
+
+    public void numberChange(Object o){
+        if(o instanceof Number){
+            Number n = (Number) o;
+        }
+    }
 
     public static <T> List<T> mapToObjectList(List list, Class<T> clazz) {
         if (list == null || list.size() == 0) {

@@ -50,12 +50,12 @@ megumi:
     seata-enable: false
   redis:
     enable: true
-    host: 111.229.167.214
+    host: 127.0.0.1
     port: 6379
     defult-cache-time: 600
     caches:
       index1: 100
-    password: 199645
+    #password: 199645
   hibernate:
     dialect: cn.katoumegumi.java.hibernate.ExtendedMySQLDialect
     scan-package: cn.katoumegumi.java.lx.model

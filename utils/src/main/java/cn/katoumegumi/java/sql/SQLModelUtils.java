@@ -1,14 +1,18 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
+import cn.katoumegumi.java.sql.entity.SelectCallable;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
+import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.SQLRowStream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,13 +135,7 @@ public class SQLModelUtils {
             relation.setTableNickName(tableName);
             if(WsStringUtils.isNotBlank(relation.getAlias())){
                 joinTableName = translateToTableName(relation.getJoinTableNickName());
-                if(joinTableName.startsWith(prefix)){
-                    if(joinTableName.length() == prefix.length()){
-                        joinTableName = null;
-                    }else {
-                        joinTableName = joinTableName.substring(prefix.length()+1);
-                    }
-                }
+                joinTableName = getNoPrefixTableName(joinTableName);
                 relation.setJoinTableNickName(joinTableName);
                 joinTableName = prefix + "." + joinTableName;
                 setAbbreviation(joinTableName,relation.getAlias());
@@ -697,9 +695,20 @@ public class SQLModelUtils {
                 baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
                 break;
             case LIKE:
-                tableColumn.append(" like ?");
+                tableColumn.append(" like ");
                 assert fieldColumnRelation != null;
-                baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
+                String fuzzyWord = WsBeanUtils.objectToT(mySearch.getValue(),String.class);
+                assert fuzzyWord != null;
+                int start = 0;
+                int end = fuzzyWord.length();
+                if(fuzzyWord.charAt(0) == '%'){
+                    start = 1;
+                }
+                if(fuzzyWord.charAt(fuzzyWord.length() - 1) == '%'){
+                    end = end - 1;
+                }
+                tableColumn.append(" concat('%',?,'%') ");
+                baseWhereValueList.add(fuzzyWord.substring(start,end));
                 break;
             case GT:
                 tableColumn.append(" > ?");
@@ -994,12 +1003,12 @@ public class SQLModelUtils {
 
             for (FieldJoinClass fieldJoinClass : fieldColumnRelationMapper.getFieldJoinClasses()) {
 
-                if (!checkFieldJoinClass(fieldJoinClass)) {
+                //if (!checkFieldJoinClass(fieldJoinClass)) {
                     FieldJoinClass newFieldJoinClass = selfFieldJoinClass(tableNickName, fieldJoinClass, mySearchList.getJoins());
                     if (newFieldJoinClass != null) {
                         fieldJoinClass = newFieldJoinClass;
                     }
-                }
+                //}
 
                 if (WsStringUtils.isNotBlank(fieldJoinClass.getJoinColumn())) {
                     if (fieldJoinClass.getNickName().contains(".")) {
@@ -1970,11 +1979,12 @@ public class SQLModelUtils {
         }
         FieldColumnRelationMapper mapper = analysisClassRelation(mainClass);
         String prefix = mapper.getNickName();
+        prefix = prefix +".";
         if(tableName.startsWith(prefix)){
             if(tableName.length() == prefix.length()){
                 return null;
             }else {
-                tableName = tableName.substring(prefix.length() + 1);
+                tableName = tableName.substring(prefix.length());
             }
             return tableName;
         }else {
@@ -2033,6 +2043,44 @@ public class SQLModelUtils {
         columnBaseEntity.setFieldColumnRelation(fieldColumnRelation);
         return columnBaseEntity;
     }
+
+
+
+
+    public <T> Handler<AsyncResult<ResultSet>> getVertxHandler(SelectCallable<T> selectCallable){
+        return asyncResult->{
+            if(asyncResult.succeeded()){
+                ResultSet resultSet = asyncResult.result();
+                List<String> columnNameList = resultSet.getColumnNames();
+                List<JsonArray> list = resultSet.getResults();
+                int size = list.size();
+                int columnSize = columnNameList.size();
+                int mapSize = WsBeanUtils.objectToT((columnSize/0.75),int.class) + 1;
+                int j = 0;
+                Object o = null;
+                List<Map> mapList = new ArrayList<>(list.size());
+                for (JsonArray jsonArray : list) {
+                    Iterator<?> iterator = jsonArray.iterator();
+                    Map map = new HashMap(mapSize);
+                    while (iterator.hasNext()) {
+                        o = iterator.next();
+                        if (o != null) {
+                            map.put(columnNameList.get(j), o);
+                        }
+                        j++;
+                    }
+                    mapList.add(map);
+                    j = 0;
+                }
+                mapList = handleMap(mapList);
+                mapList = mergeMapList(mapList);
+                List<T> valueList = loadingObject(mapList);
+                selectCallable.put(valueList);
+            }
+        };
+    }
+
+
 
 
 }

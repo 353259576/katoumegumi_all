@@ -116,7 +116,7 @@ public class WsNettyClientUtils {
 
         URI uri = httpRequestBody.getUri();
         String host = null;
-        if(uri.getPort() == 0){
+        if(uri.getPort() <= 0){
             host = uri.getHost();
         }else {
             host = uri.getHost()+":"+uri.getPort();

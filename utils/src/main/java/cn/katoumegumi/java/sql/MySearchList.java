@@ -2,7 +2,7 @@ package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.SupplierFunc;
 import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.sql.entity.AbstractSearchList;
+import cn.katoumegumi.java.common.WsStringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import javax.persistence.criteria.JoinType;
@@ -757,6 +757,56 @@ public class MySearchList {
         tableRelation.setJoinTableClass(tClass);
         tableRelation.setJoinTableNickName(tClass.getSimpleName());
         return tableRelation;
+    };
+
+    /**
+     * 表连接
+     * @param consumer
+     * @return
+     */
+    public TableRelation join(Class<?> tClass,Consumer<TableRelation> consumer){
+        TableRelation tableRelation = new TableRelation(this);
+        tableRelation.setJoinTableClass(tClass);
+        consumer.accept(tableRelation);
+        if(WsStringUtils.isBlank(tableRelation.getJoinTableNickName())){
+            tableRelation.setJoinTableNickName(tableRelation.getJoinTableClass().getSimpleName());
+        }
+        joins.add(tableRelation);
+        return tableRelation;
+    }
+
+
+    /**
+     * 内联
+     * @param tClass
+     * @return
+     */
+    public MySearchList innerJoin(Class<?> tClass,Consumer<TableRelation> consumer){
+        TableRelation tableRelation = join(tClass,consumer);
+        tableRelation.setJoinType(JoinType.INNER);
+        return this;
+    };
+
+    /**
+     * 左联
+     * @param tClass
+     * @return
+     */
+    public MySearchList leftJoin(Class<?> tClass,Consumer<TableRelation> consumer){
+        TableRelation tableRelation = join(tClass,consumer);
+        tableRelation.setJoinType(JoinType.LEFT);
+        return this;
+    };
+
+    /**
+     * 右连
+     * @param tClass
+     * @return
+     */
+    public MySearchList rightJoin(Class<?> tClass,Consumer<TableRelation> consumer){
+        TableRelation tableRelation = join(tClass,consumer);
+        tableRelation.setJoinType(JoinType.RIGHT);
+        return this;
     };
 
     /**

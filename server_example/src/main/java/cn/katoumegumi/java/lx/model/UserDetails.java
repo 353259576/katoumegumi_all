@@ -6,34 +6,34 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
-//@Entity
+@Entity
 @Table(name = "ws_user_details")
 @Data
 @TableName(value = "ws_user_details")
 public class UserDetails {
-    //@Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    //@Column(name = "user_id")
+    @Column(name = "user_id")
     @TableField(value = "user_id")
     private Long userId;
 
-    //@Column(name = "nick_name")
+    @Column(name = "nick_name")
     @TableField(value = "nick_name")
     private String nickName;
 
-    //@Column(name = "sex")
+    @Column(name = "sex")
     private String sex;
 
 
-    //@OneToMany
-    //@JoinColumn(name = "user_details_id")
-    //private List<UserDetailsRemake> userDetailsRemake;
+    @OneToMany
+    @JoinColumn(name = "user_details_id")
+    private List<UserDetailsRemake> userDetailsRemake;
 
-    private List<UserDetailsRemake> userDetailsRemakeList;
+    //private List<UserDetailsRemake> userDetailsRemakeList;
 }

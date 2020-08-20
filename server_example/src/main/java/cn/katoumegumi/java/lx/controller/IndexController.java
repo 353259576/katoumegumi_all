@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.lx.controller;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.datasource.WsJdbcUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
@@ -15,8 +16,10 @@ import cn.katoumegumi.java.lx.service.UserService;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.SelectSqlEntity;
+import cn.katoumegumi.java.sql.entity.SelectCallable;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -29,6 +32,7 @@ import io.vertx.ext.sql.SQLConnection;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -79,318 +83,114 @@ public class IndexController implements IndexService {
     private EntityManager entityManager;
 
     @Autowired
-    private SQLClient sqlClient;
-
-    @Autowired
     private WsJdbcUtils jdbcUtils;
 
     public static void main(String[] args) {
-        /*User user = new User();
-        UserDetails userDetails = new UserDetails();
-        user.setUserDetails(userDetails);
-        System.out.println(WsFieldUtils.getFieldName(user.getUserDetails()::getId));*/
-
-/*        User user = new User();
-        Consumer<Runnable> consumer = runnable -> {
-            Long startTime = System.currentTimeMillis();
-            runnable.run();
-            Long endTime = System.currentTimeMillis();
-            System.out.println(endTime - startTime);
-        };
-
-        consumer.accept(() -> {
-            for (int i = 0; i < 100000; i++) {
-                MySearchList mySearchList = MySearchList.create(User.class)
-                        .innerJoin(UserDetails.class, "userDetails1", "id", "userId")
-                        .innerJoin("userDetails1",UserDetailsRemake.class, "userDetailsRemakeList", "id", "userDetailsId")
-                        //.innerJoin( UserDetails.class, "userDetails1", "id", "userId")
-                        //.eq("id",1)
-                        //.eqp("id","{User}.id")
-                        .sort("id", "desc");
-                SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-                SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
-                System.out.println(selectSqlEntity.getSelectSql());
-
-                MySearchList mySearchList = MySearchList.create(User.class);
-                mySearchList.set("name","你好世界");
-                mySearchList.eq("id",1L);
-                SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-                UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
-                System.out.println(updateSqlEntity.getUpdateSql());
-                //System.out.println(selectSqlEntity.getSelectSql());
-            }
-        });
-
-
-        List<User> list = new ArrayList<>();
-        for(int i = 0; i < 100; i++){
-            User user1 = new User();
-            user1.setId(WsBeanUtils.objectToT(i,Long.class));
-            list.add(user1);
-        }
-        System.out.println(WsStringUtils.jointListString(list,",",user1 -> {
-            return user1.getId().toString();
-        }));*/
-
-
-        //mySearchList/*.join(null,UserDetails.class,"UserDetails1","id","userId")*/
-        //.join("userDetails",UserDetailsRemake.class,"userDetailsRemake","id","userDetailsId");
-        //.eq("userDetails.sex","男").sort("id","desc");
-        /*mySearchList.join("",UserDetails.class,"userDetails11","id","userId");
-        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex","男").eq(user::getName,"你好"),
-                MySearchList.newMySearchList().eq(user::getPassword,"世界")
-        )
-                .eq(user::getId,1)
-                .eq("userDetails11.sex","男")
-                .lte(user::getCreateDate,"2019-12-13")
-                .sql(" (select count(*) from ws_user w where w.id = {User}.id)",null)
-                .sort("id","ASC")
-                .sort("userDetails.sex","DESC");*/
-        //mysqlClientTest(mySearchList);
-        //mysqlClientTest(mySearchList);
-        /*Page page = new Page();
-        page.setCurrent(1);
-        page.setSize(10);
-        mySearchList.setPageVO(page);*/
-        /*long startTIme = System.currentTimeMillis();
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        String str = sqlModelUtils.searchListBaseSQLProcessor();
-        long endTime = System.currentTimeMillis();
-        System.out.println("初次解析sql语句花费时间为："+(endTime - startTIme));
-        System.out.println(str);
-        str = sqlModelUtils.searchListBaseCountSQLProcessor();
-        System.out.println(str);
-        long start = System.nanoTime();
-        SQLModelUtils modelUtils = new SQLModelUtils(mySearchList);
-        str = modelUtils.searchListBaseSQLProcessor();
-        long end = System.nanoTime();
-        mysqlClientTest(mySearchList);
-        System.out.println(str);
-        System.out.println(end - start);
-
-        UserDetails userDetails = new UserDetails();
-
-        mySearchList = MySearchList.newMySearchList().setMainClass(UserDetails.class);
-        mySearchList.or(MySearchList.newMySearchList().eq("sex","男"), MySearchList.newMySearchList().eq(userDetails::getNickName,"世界"));
-        sqlModelUtils = new SQLModelUtils(mySearchList);
-        System.out.println(sqlModelUtils.searchListBaseSQLProcessor());*/
-        /*MySearchList mySearchList1 = MySearchList.newMySearchList();
-        mySearchList1.setMainClass(User.class)
-                .eq(user::getName, "你好");
-        SQLModelUtils sqlModelUtils1 = new SQLModelUtils(mySearchList1);
-        String str = sqlModelUtils1.searchListBaseSQLProcessor();
-        String countStr = sqlModelUtils1.searchListBaseCountSQLProcessor();
-
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(4, 8, 200, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-        CountDownLatch countDownLatch = new CountDownLatch(2);
-        long startTime = System.currentTimeMillis();
-        for (int i = 0; i < 2; i++) {
-            threadPoolExecutor.execute(() -> {
-                MySearchList mySearchList2 = MySearchList.newMySearchList();
-                mySearchList2.setMainClass(User.class)
-                        .join(null, UserDetails.class, "UserDetails", "id", "userId")
-                        .eq(user::getName, "你好");
-                SQLModelUtils sqlModelUtils2 = new SQLModelUtils(mySearchList2);
-                sqlModelUtils2.getValueMap();
-                String str1 = sqlModelUtils2.searchListBaseSQLProcessor();
-                String countStr1 = sqlModelUtils2.searchListBaseCountSQLProcessor();
-                System.out.println(str1);
-                System.out.println(countStr1);
-                countDownLatch.countDown();
-            });
-
-
-        }
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        long endTime = System.currentTimeMillis();
-        System.out.println(endTime - startTime);*/
-        //System.out.println(str);
-        //System.out.println(countStr);
-
-
-        long start = System.currentTimeMillis();
-
-        for(int i = 0; i < 1; i++){
-            MySearchList searchList = MySearchList.create(User.class).eq("id",10);
+        WsDateUtils.getExecutionTime.accept(()->{
+        for(int i = 0; i < 10; i++){
+            MySearchList searchList = MySearchList.create(User.class).setAlias("u");
+            searchList
+                    .innerJoin(UserDetails.class,
+                            t -> t.setJoinTableNickName("userDetails")
+                            .setAlias("ud")
+                            .on("id","userId")
+                    )
+                    .innerJoin(UserDetailsRemake.class,
+                            t->t.setTableNickName("userDetails")
+                                    .setJoinTableNickName("userDetails.userDetailsRemakeList")
+                                    .setAlias("udr")
+                                    .on("id","userDetailsId")
+                    );
             /*searchList
-                    .leftJoin(UserDetails.class)
-                    .setJoinTableNickName("userDetails").setAlias("ud")
-                    .on("id", "userId")
-                    .condition(mySearchList -> mySearchList.eq("ud.id","10"))
-                    .end()
-                    //.leftJoin(UserDetails.class, "userDetails", "id", "userId")
-                    .leftJoin(UserDetailsRemake.class)
-                    .setTableNickName("{ud}")
-                    .setJoinTableNickName("{ud}.userDetailsRemakeList")
-                    .setAlias("udr")
-                    .on("id", "userDetailsId")
-                    .end()
-                    .leftJoin(UserDetailsRemake.class)
-                    .setAlias("udr2")
-                    .on("id","userDetailsId")
-                    .end()
-                    .eqp("u.id","ud.id")
+                    .innerJoin(UserDetails.class,
+                            t -> t.setJoinTableNickName("userDetails")
+                                    .setAlias("ud")
+                                    .on("id","userId")
+                                    .condition(s->s.eq("ud.id",10))
+                    )
+                    .innerJoin(UserDetailsRemake.class,
+                            t->t.setTableNickName("userDetails")
+                            .setJoinTableNickName("userDetails.userDetailsRemakeList")
+                            .setAlias("udr")
+                            .on("id","userDetailsId")
+                    )
+                    .innerJoin(UserDetailsRemake.class,
+                            t->t.setAlias("udr2")
+                            .on("id","userDetailsId")
+                    )
+                    .eqp("id","ud.id")
                     .sql("{u}.id = ? and {ud}.id = ?",new Integer[]{10,10})
                     .and(s->s.eq("udr.id","10").gte("udr.remake","165"))
                     .or(s->s.eq("udr.id","10").gte("udr.remake","165"))
                     .eq("udr.id",10);*/
-            SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList);
-            String sql = sqlModelUtils.select().getSelectSql();
-            System.out.println(sql);
+            /*SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList);
+            String sql = sqlModelUtils.select().getSelectSql();*/
+            /*System.out.println(sql);*/
+            searchList.like("name","%你好%");
+            long start = System.currentTimeMillis();
+            List<User> userList = mysqlClientTest(searchList,User.class);
+            long end = System.currentTimeMillis();
+            System.out.println("执行时间为："+(end - start));
         }
+    });
 
-        long end = System.currentTimeMillis();
-        System.out.println(end - start);
+
 
         // mysqlClientTest(searchList);
 
     }
 
-    public static void mysqlClientTest(MySearchList mySearchList) {
-        /*Vertx vertx = VertUtils.vertx;
-        MySQLConnectOptions mySQLConnectOptions = new MySQLConnectOptions();
-        mySQLConnectOptions.setHost("localhost");
-        mySQLConnectOptions.setPort(3360);
-        mySQLConnectOptions.setUser("root");
-        mySQLConnectOptions.setPassword("199645");
-        mySQLConnectOptions.setDatabase("pigxx");
-        mySQLConnectOptions.setCharset("utf8mb4");
-        mySQLConnectOptions.setSsl(false);
+    private static final SQLClient client = getSqlClient();
 
-        Map<String,String> map = new HashMap<>();
-        map.put("zeroDateTimeBehavior","convertToNull");
-        map.put("useJDBCCompliantTimezoneShift","true");
-        map.put("useLegacyDatetimeCode","false");
-        map.put("serverTimezone","GMT%2B8");
-        map.put("allowMultiQueries","true");
-        map.put("allowPublicKeyRetrieval","true");
-        mySQLConnectOptions.setProperties(map);
-        PoolOptions poolOptions = new PoolOptions();
-
-        MySQLPool mySQLPool = MySQLPool.pool(vertx,mySQLConnectOptions,poolOptions);
-
-        mySQLPool.getConnection(new Handler<AsyncResult<SqlConnection>>() {
-            @Override
-            public void handle(AsyncResult<SqlConnection> event) {
-                if(event.succeeded()){
-                    SqlConnection sqlConnection = event.result();
-                    sqlConnection.query("select * from sys_user", new Handler<AsyncResult<RowSet<Row>>>() {
-                        @Override
-                        public void handle(AsyncResult<RowSet<Row>> event) {
-                            if(event.succeeded()){
-                                RowSet<Row> rows = event.result();
-                                System.out.println(rows.rowCount());
-                                System.out.println(JSON.toJSONString(rows.columnsNames()));
-                            }else {
-                                event.cause().printStackTrace();
-                            }
-                        }
-                    });
-                }else {
-                    event.cause().printStackTrace();
-                }
-            }
-        });*/
-        /*try {
-            Thread.sleep(30000);
-        }catch (InterruptedException e){
-            e.printStackTrace();
-        }*/
-
+    public static SQLClient getSqlClient(){
         JsonObject jsonObject = new JsonObject();
         jsonObject.put("provider_class", "cn.katoumegumi.java.vertx.DruidDataSourceProvider");
         jsonObject.put("url", "jdbc:mysql://127.0.0.1:3306/wslx?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&allowMultiQueries=true&allowPublicKeyRetrieval=true");
         jsonObject.put("user", "root");
         jsonObject.put("password", "199645");
         jsonObject.put("driver_class", "com.mysql.cj.jdbc.Driver");
-
-
         Vertx vertx = Vertx.vertx();
         SQLClient client = JDBCClient.create(vertx, jsonObject);
-        long timeStart = System.currentTimeMillis();
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        for (int i = 0; i < 1; i++) {
-            int finalI = i;
-            long startTime = System.currentTimeMillis();
-            SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-            SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
-            String sql = selectSqlEntity.getSelectSql();
-            System.out.println(sql);
-            Map<Integer, Object> valueMap = selectSqlEntity.getValueMap();
-            JsonArray jsonArray = new JsonArray();
-            for (Map.Entry<Integer, Object> entry : valueMap.entrySet()) {
-                System.out.println(entry.getKey());
-                if (entry.getValue() instanceof LocalDateTime) {
-                    jsonArray.add(WsBeanUtils.objectToT(entry.getValue(), String.class));
-                } else {
-                    jsonArray = jsonArray.add(entry.getValue());
-                }
+        return client;
+    }
 
+    public static <T> List<T> mysqlClientTest(MySearchList mySearchList,Class<T> tClass) {
+        SQLClient client = getSqlClient();
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+        String sql = selectSqlEntity.getSelectSql();
+        System.out.println(sql);
+        Map<Integer, Object> valueMap = selectSqlEntity.getValueMap();
+        JsonArray jsonArray = new JsonArray();
+        for (Map.Entry<Integer, Object> entry : valueMap.entrySet()) {
+            System.out.println(entry.getKey());
+            if (entry.getValue() instanceof LocalDateTime) {
+                jsonArray.add(WsBeanUtils.objectToT(entry.getValue(), String.class));
+            } else {
+                jsonArray = jsonArray.add(entry.getValue());
             }
-            JsonArray finalJsonArray = jsonArray;
-            long endTime = System.currentTimeMillis();
-            System.out.println("解析sql语句花费时间：" + (endTime - startTime));
-            client.getConnection(new Handler<AsyncResult<SQLConnection>>() {
-                @Override
-                public void handle(AsyncResult<SQLConnection> event) {
-                    if (event.succeeded()) {
-                        SQLConnection sqlConnection = event.result();
-                        sqlConnection.queryWithParams(sql, finalJsonArray, new Handler<AsyncResult<ResultSet>>() {
-                            @Override
-                            public void handle(AsyncResult<ResultSet> event) {
-                                if (event.succeeded()) {
-                                    long start = System.currentTimeMillis();
-                                    ResultSet resultSet = event.result();
-                                    System.out.println(resultSet.getNumRows());
-                                    List<JsonObject> list = resultSet.getRows();
-                                    List<Map> maps = new ArrayList<>();
-                                    for (JsonObject o : list) {
-                                        Map map = o.getMap();
-                                        maps.add(map);
-                                        //User user = SQLModelUtils.loadingObject(User.class, (Map<String, Object>) map);
-                                        //System.out.println(JSON.toJSONString(user));
 
-                                    }
-                                    long startTime = System.currentTimeMillis();
-                                    maps = sqlModelUtils.handleMap(maps);
-                                    long endTime = System.currentTimeMillis();
-                                    System.out.println("处理数据花费时间:" + (endTime - startTime));
-                                    startTime = System.currentTimeMillis();
-                                    maps = sqlModelUtils.mergeMapList(maps);
-                                    endTime = System.currentTimeMillis();
-                                    System.out.println("合并数据：" + (endTime - startTime));
-                                    startTime = System.currentTimeMillis();
-                                    List<User> users = sqlModelUtils.loadingObject(maps);
-                                    endTime = System.currentTimeMillis();
-                                    System.out.println("将map转换为对象花了：" + (endTime - startTime));
-                                    sqlConnection.close();
-                                    long end = System.currentTimeMillis();
-                                    System.out.println("线程" + finalI + "完成，共耗时：" + (end - start) + "毫秒，User数组大小为:" + users.size());
-                                    countDownLatch.countDown();
-                                } else {
-                                    event.cause().printStackTrace();
-                                }
-                            }
-                        });
-
-                    } else {
-                        event.cause().printStackTrace();
-                    }
-                }
-            });
         }
-
+        JsonArray finalJsonArray = jsonArray;
+        SelectCallable<T> selectCallable = new SelectCallable<>();
+        client.getConnection(new Handler<AsyncResult<SQLConnection>>() {
+            @Override
+            public void handle(AsyncResult<SQLConnection> event) {
+                if (event.succeeded()) {
+                    SQLConnection sqlConnection = event.result();
+                    sqlConnection.queryWithParams(sql,finalJsonArray,sqlModelUtils.getVertxHandler(selectCallable));
+                } else {
+                    event.cause().printStackTrace();
+                }
+            }
+        });
         try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
+            return selectCallable.call();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        long end = System.currentTimeMillis();
-        System.out.println("总共花费时间为：" + (end - timeStart));
+        return null;
+
 
 
     }
@@ -513,110 +313,14 @@ public class IndexController implements IndexService {
     @RequestMapping(value = "index4")
     @ResponseBody
     public String index4() {
-        Long startTime = System.currentTimeMillis();
-        MySearchList mySearchList = MySearchList.newMySearchList();
-        mySearchList.setMainClass(UserDetailsRemake.class);
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
-        String sql = selectSqlEntity.getSelectSql();
-        /*sqlClient.getConnection(sqlConnectionAsyncResult -> {
-            if(sqlConnectionAsyncResult.succeeded()){
-                sqlConnectionAsyncResult.result().query(sql,resultSetAsyncResult -> {
-                    if(resultSetAsyncResult.succeeded()){
-                        ResultSet resultSet = resultSetAsyncResult.result();
-                        List<JsonObject> list = resultSet.getRows();
-                        List<Map> maps = new ArrayList<>();
-                        for(JsonObject o:list){
-                            Map map = o.getMap();
-                            maps.add(map);
-                            //User user = SQLModelUtils.loadingObject(User.class, (Map<String, Object>) map);
-                            //System.out.println(JSON.toJSONString(user));
-
-                        }
-                        maps = sqlModelUtils.handleMap(maps);
-                        maps = sqlModelUtils.mergeMapList(maps);
-                        List<User> users = sqlModelUtils.loadingObject(maps);
-                        long endTime = System.currentTimeMillis();
-                        System.out.println(endTime - startTime);
-                    }
-                });
-            }else {
-                System.out.println(sqlConnectionAsyncResult.cause());
-            }
-        });*/
-        Consumer<Runnable> runnableSupplier = runnable -> {
-            long start = System.currentTimeMillis();
-            runnable.run();
-            long end = System.currentTimeMillis();
-            System.out.println(end - start);
-        };
-        Queue<List> queue = new LinkedList<>();
-        runnableSupplier.accept(() -> {
-
-            List<String> nameList = new ArrayList<>();
-
-            List list = jdbcTemplate.query(sql, new RowMapper<Map>() {
-                @Override
-                public Map mapRow(java.sql.ResultSet resultSet, int i) throws SQLException {
-                    if (i < 1) {
-                        int length = resultSet.getMetaData().getColumnCount();
-                        for (int j = 0; j < length; j++) {
-                            nameList.add(resultSet.getMetaData().getColumnLabel(j + 1));
-                        }
-                    }
-                    Map map = new HashMap();
-                    for (int j = 0; j < nameList.size(); j++) {
-                        map.put(nameList.get(j), resultSet.getObject(j + 1));
-                    }
-                    return map;
-                }
-            });
-
-
-            queue.add(list);
-
+        WsDateUtils.getExecutionTime.accept(()->{
+            MySearchList mySearchList = MySearchList.create(User.class)
+                    .leftJoin(UserDetails.class,t->t.setJoinTableNickName("userDetails").setAlias("ud").on("id","userId"))
+                    .leftJoin(UserDetailsRemake.class,t->t.setTableNickName("userDetails").setJoinTableNickName("userDetails.userDetailsRemake").setAlias("udr").on("id","userDetailsId"))
+                    .leftJoin(UserDetailsRemake.class,t->t.setTableNickName("userDetails").setJoinTableNickName("userDetails.userDetailsRemake1").setAlias("udr1").on("id","userDetailsId"));
+            jdbcUtils.getListT(mySearchList);
         });
-        /*runnableSupplier.accept(()->{
-            List list = sqlModelUtils.handleMap(queue.poll());
-            queue.offer(list);
-        });
-
-        runnableSupplier.accept(()->{
-            List list = sqlModelUtils.mergeMapList(queue.poll());
-            queue.offer(list);
-        });*/
-
-        runnableSupplier.accept(() -> {
-            //List list = jdbcTemplate.queryForList(sql);
-
-            /*List<String> nameList = new ArrayList<>();
-
-            List list = jdbcTemplate.query(sql, new RowMapper<Map>() {
-                @Override
-                public Map mapRow(java.sql.ResultSet resultSet, int i) throws SQLException {
-                    if(i < 1) {
-                        int length = resultSet.getMetaData().getColumnCount();
-                        for (int j = 0; j < length; j++) {
-                            nameList.add(resultSet.getMetaData().getColumnLabel(j + 1));
-                        }
-                    }
-                    Map map = new HashMap();
-                    for(int j = 0; j < nameList.size(); j++){
-                        map.put(nameList.get(j),resultSet.getObject(j + 1));
-                    }
-                    return map;
-                }
-            });
-
-            list = sqlModelUtils.handleMap(list);
-            sqlModelUtils.mergeMapList(list);*/
-            List<UserDetailsRemake> users = sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(queue.poll())));
-        });
-
-
-        return "JSON.toJSONString(users);";
-        /*mysqlClientTest(mySearchList);
-        return "";*/
+        return "成功";
     }
 
     @RequestMapping(value = "index6")
