@@ -139,8 +139,8 @@ public class WsUrlConnection {
                 //检查本地证书
                 @Override
                 public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                    httpResponseBody.setCilentCertificateName(s);
-                    httpResponseBody.setCilentX509Certificates(x509Certificates);
+                    httpResponseBody.setClientCertificateName(s);
+                    httpResponseBody.setClientX509Certificates(x509Certificates);
 					/*System.out.println("本地证书名称："+s);
 					if(x509Certificates != null){
 						System.out.println("本地证书内容为" + JSON.toJSONString(x509Certificates));
@@ -177,7 +177,7 @@ public class WsUrlConnection {
             }
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
             httpsURLConnection.setSSLSocketFactory(sslSocketFactory);
-            byte data[] = httpRequestBody.getbyteHttpRequestBody();
+            byte data[] = httpRequestBody.getByteHttpRequestBody();
             if (data != null && data.length > 0) {
                 httpsURLConnection.setDoInput(true);
             }
@@ -258,7 +258,7 @@ public class WsUrlConnection {
         try {
             URL url = new URL(httpRequestBody.getUrl());
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-            byte data[] = httpRequestBody.getbyteHttpRequestBody();
+            byte data[] = httpRequestBody.getByteHttpRequestBody();
             if (data != null && data.length > 0) {
                 httpURLConnection.setDoInput(true);
             }

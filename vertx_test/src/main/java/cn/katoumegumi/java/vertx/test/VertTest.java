@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.experiment.vert;
+package cn.katoumegumi.java.vertx.test;
 
 
 public class VertTest {

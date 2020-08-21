@@ -43,7 +43,6 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         WsChannelHttpRequestBodyBind.notCloseChannel.put(socketChannel.pipeline().channel().id().asLongText(), socketChannel.pipeline().channel());
-        long startTime = System.currentTimeMillis();
         socketChannel.pipeline().addLast(new HttpCloseHandler(id, httpRequestBody));
         if (httpRequestBody.isHttps()) {
             if (httpRequestBody.getPkcsPath() == null) {
@@ -58,7 +57,7 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
                         configureEndOfPipeline(p);
                         return;*/
 
-                            final Http2Connection connection = new DefaultHttp2Connection(false);
+                            /*final Http2Connection connection = new DefaultHttp2Connection(false);
                             HttpToHttp2ConnectionHandler connectionHandler = new HttpToHttp2ConnectionHandlerBuilder()
                                     .frameListener(new DelegatingDecompressorFrameListener(
                                             connection,
@@ -99,8 +98,7 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
                                     responseHandler.awaitResponses(5, TimeUnit.SECONDS);
                                 }
 
-                            }).start();
-
+                            }).start();*/
 
                         } else {
                             //包含编码器和解码器
@@ -119,10 +117,6 @@ public class HttpInitializer extends ChannelInitializer<SocketChannel> {
         } else {
             httpInitializer(socketChannel, httpRequestBody, id, true);
         }
-
-        long endTime = System.currentTimeMillis();
-        //log.info("解析https花费时间为：{}",endTime-startTime);
-
     }
 
 

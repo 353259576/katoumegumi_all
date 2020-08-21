@@ -17,6 +17,7 @@ import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.SelectSqlEntity;
 import cn.katoumegumi.java.sql.entity.SelectCallable;
+import cn.katoumegumi.java.vertx.sql.utils.SqlUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -144,7 +145,7 @@ public class IndexController implements IndexService {
 
     public static SQLClient getSqlClient(){
         JsonObject jsonObject = new JsonObject();
-        jsonObject.put("provider_class", "cn.katoumegumi.java.vertx.DruidDataSourceProvider");
+        jsonObject.put("provider_class", "cn.katoumegumi.java.vertx.sql.datasource.provider.DruidDataSourceProvider");
         jsonObject.put("url", "jdbc:mysql://127.0.0.1:3306/wslx?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&allowMultiQueries=true&allowPublicKeyRetrieval=true");
         jsonObject.put("user", "root");
         jsonObject.put("password", "199645");
@@ -178,7 +179,7 @@ public class IndexController implements IndexService {
             public void handle(AsyncResult<SQLConnection> event) {
                 if (event.succeeded()) {
                     SQLConnection sqlConnection = event.result();
-                    sqlConnection.queryWithParams(sql,finalJsonArray,sqlModelUtils.getVertxHandler(selectCallable));
+                    sqlConnection.queryWithParams(sql,finalJsonArray, SqlUtils.getVertxHandler(selectCallable,sqlModelUtils));
                 } else {
                     event.cause().printStackTrace();
                 }

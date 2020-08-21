@@ -31,7 +31,7 @@ public class MybatisConfig {
     @Bean
     public SQLClient sqlClient(DataSource dataSource) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.put("provider_class", "cn.katoumegumi.java.vertx.DruidDataSourceProvider");
+        jsonObject.put("provider_class", "cn.katoumegumi.java.vertx.sql.datasource.provider.DruidDataSourceProvider");
         jsonObject.put("url", "jdbc:mysql://127.0.0.1:3306/wslx?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&allowMultiQueries=true&allowPublicKeyRetrieval=true");
         jsonObject.put("user", "root");
         jsonObject.put("password", "199645");

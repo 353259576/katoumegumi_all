@@ -66,7 +66,7 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
                 }
                 ByteBuf byteBuf = fullHttpResponse.content();
                 //ByteBuf byteBuf = (ByteBuf)msg;
-                byte bytes[] = new byte[byteBuf.readableBytes()];
+                byte[] bytes = new byte[byteBuf.readableBytes()];
                 byteBuf.readBytes(bytes);
                 //System.out.println(new String(bytes));
                 byteBuf.release();

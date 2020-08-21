@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.http.client.model;
 
+import cn.katoumegumi.java.common.WsStringUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -17,12 +19,12 @@ public class HttpResponseBody {
     private boolean isKeepAlive;
     private String contentType;
     private String charSet;
-    private byte returnBytes[];
-    private byte errorReturnBytes[];
+    private byte[] returnBytes;
+    private byte[] errorReturnBytes;
     private Map<String, List<String>> headers;
 
-    private String cilentCertificateName;
-    private X509Certificate[] cilentX509Certificates;
+    private String clientCertificateName;
+    private X509Certificate[] clientX509Certificates;
     private String serverCertificateName;
     private X509Certificate[] serverX509Certificates;
 
@@ -32,7 +34,7 @@ public class HttpResponseBody {
         this.headers = new HashMap<>();
     }
 
-    private HttpResponseBody(int code, byte returnBytes[], Map<String, List<String>> headers) {
+    private HttpResponseBody(int code, byte[] returnBytes, Map<String, List<String>> headers) {
         this.code = code;
         this.returnBytes = returnBytes;
         this.headers = headers;
@@ -42,7 +44,7 @@ public class HttpResponseBody {
         return new HttpResponseBody();
     }
 
-    public static HttpResponseBody createHttpResponseBody(int code, byte returnBytes[], Map<String, List<String>> headers) {
+    public static HttpResponseBody createHttpResponseBody(int code, byte[] returnBytes, Map<String, List<String>> headers) {
         return new HttpResponseBody(code, returnBytes, headers);
     }
 
@@ -70,9 +72,7 @@ public class HttpResponseBody {
             list = new ArrayList<>(Arrays.asList(value.split(",")));
             headers.put(key, list);
         } else {
-            for (String str : value.split(",")) {
-                list.add(str);
-            }
+            list.addAll(Arrays.asList(value.split(",")));
         }
     }
 
@@ -92,7 +92,12 @@ public class HttpResponseBody {
     }
 
     public String getResponseBodyToString() {
-        return getResponseBodyToString("UTF-8");
+        if(WsStringUtils.isNotBlank(charSet)){
+            return getResponseBodyToString(charSet);
+        }else {
+            return getResponseBodyToString("UTF-8");
+        }
+
     }
 
     public String getErrorResponseBodyToString(String charset) {
@@ -158,10 +163,10 @@ public class HttpResponseBody {
                 if ("gzip".equals(str.toLowerCase())) {
                     isGzip = true;
                     if (!(returnBytes == null && returnBytes.length == 0)) {
-                        this.returnBytes = uncmpressByGZIP(this.returnBytes);
+                        this.returnBytes = uncompressByGZIP(this.returnBytes);
                     }
                     if (!(errorReturnBytes == null || errorReturnBytes.length == 0)) {
-                        this.errorReturnBytes = uncmpressByGZIP(this.errorReturnBytes);
+                        this.errorReturnBytes = uncompressByGZIP(this.errorReturnBytes);
                     }
                 }
             }
@@ -170,7 +175,7 @@ public class HttpResponseBody {
     }
 
 
-    public byte[] uncmpressByGZIP(byte bytes[]) {
+    public byte[] uncompressByGZIP(byte bytes[]) {
         if (bytes == null || bytes.length == 0) {
             return bytes;
         }
@@ -268,20 +273,20 @@ public class HttpResponseBody {
     }
 
 
-    public String getCilentCertificateName() {
-        return cilentCertificateName;
+    public String getClientCertificateName() {
+        return clientCertificateName;
     }
 
-    public void setCilentCertificateName(String cilentCertificateName) {
-        this.cilentCertificateName = cilentCertificateName;
+    public void setClientCertificateName(String clientCertificateName) {
+        this.clientCertificateName = clientCertificateName;
     }
 
-    public X509Certificate[] getCilentX509Certificates() {
-        return cilentX509Certificates;
+    public X509Certificate[] getClientX509Certificates() {
+        return clientX509Certificates;
     }
 
-    public void setCilentX509Certificates(X509Certificate[] cilentX509Certificates) {
-        this.cilentX509Certificates = cilentX509Certificates;
+    public void setClientX509Certificates(X509Certificate[] clientX509Certificates) {
+        this.clientX509Certificates = clientX509Certificates;
     }
 
     public String getServerCertificateName() {

@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.vertx;
+package cn.katoumegumi.java.vertx.sql.datasource.provider;
 
 import cn.katoumegumi.java.common.WsStringUtils;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /**
+ * DruidDatasourceProvider
  * @author ws
  */
 public class DruidDataSourceProvider implements DataSourceProvider {

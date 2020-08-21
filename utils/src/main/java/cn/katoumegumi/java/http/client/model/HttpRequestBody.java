@@ -2,13 +2,19 @@ package cn.katoumegumi.java.http.client.model;
 
 
 import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.http.client.WsNettyClient;
+import cn.katoumegumi.java.http.model.BaseEntity;
+import cn.katoumegumi.java.http.model.FileEntity;
+import cn.katoumegumi.java.http.model.ValueEntity;
+import cn.katoumegumi.java.http.utils.HttpUtils;
 import com.alibaba.fastjson.JSON;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -16,14 +22,17 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
 public class HttpRequestBody {
-    private static final char[] MULTIPART_CHARS = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-    private volatile List<HttpRequestBodyEntry> httpRequestBodyEntries = new ArrayList<>();
+    //private volatile List<HttpRequestBodyEntry> httpRequestBodyEntries = new ArrayList<>();
+
+    private final List<BaseEntity> bodyEntityList = new ArrayList<>();
+
     private String stringHttpRequestBody = null;
-    private volatile List<WsRequestProperty> requestProperty = new ArrayList<>();
-    private String charest = "UTF-8";
+    private final List<WsRequestProperty> requestProperty = new ArrayList<>();
+    private String charset = "UTF-8";
     private String method = "GET";
     private boolean isHttps = false;
     private String contextType;
@@ -36,7 +45,7 @@ public class HttpRequestBody {
     private int port;
     private boolean useChunked = false;
     private long expirationTime = 60L * 1000L;
-    private int retryNuumber = 3;
+    private int retryNumber = 3;
 
     private HttpRequestBody() {
 
@@ -96,7 +105,7 @@ public class HttpRequestBody {
     }*/
 
 
-    public HttpRequestBody addHttpRequestBodyEntry(HttpRequestBodyEntry httpRequestBodyEntry) {
+    /*public HttpRequestBody addHttpRequestBodyEntry(HttpRequestBodyEntry httpRequestBodyEntry) {
         httpRequestBodyEntries.add(httpRequestBodyEntry);
         if (httpRequestBodyEntry.getInputStreamValue() != null) {
             mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
@@ -104,13 +113,20 @@ public class HttpRequestBody {
             mediaType = MediaType.APPLICATION_JSON_VALUE;
         }
         return this;
-    }
+    }*/
 
     public HttpRequestBody addHttpRequestBodyEntry(Map<String, Object> map) {
-        if (!(map == null || map.isEmpty())) {
+        /*if (!(map == null || map.isEmpty())) {
             Set<Map.Entry<String, Object>> set = map.entrySet();
             for (Map.Entry<String, Object> e : set) {
                 httpRequestBodyEntries.add(new HttpRequestBodyEntry(e.getKey(), WsStringUtils.anyToString(e.getValue())));
+            }
+            this.mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
+        }*/
+        if (!(map == null || map.isEmpty())) {
+            Set<Map.Entry<String, Object>> set = map.entrySet();
+            for (Map.Entry<String, Object> e : set) {
+                bodyEntityList.add(new ValueEntity().setValue(e.getValue()).setName(e.getKey()));
             }
             this.mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
         }
@@ -119,19 +135,22 @@ public class HttpRequestBody {
 
 
     public HttpRequestBody addHttpRequestBodyEntry(String name, String value) {
-        httpRequestBodyEntries.add(new HttpRequestBodyEntry(name, value));
+        //httpRequestBodyEntries.add(new HttpRequestBodyEntry(name, value));
+        bodyEntityList.add(new ValueEntity().setValue(value).setName(name));
         this.mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
         return this;
     }
 
     public HttpRequestBody addHttpRequestBodyEntry(String name, File file) {
-        httpRequestBodyEntries.add(new HttpRequestBodyEntry(name, file));
+        //httpRequestBodyEntries.add(new HttpRequestBodyEntry(name, file));
+        bodyEntityList.add(new FileEntity().setValue(file).setName(name));
         this.mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         return this;
     }
 
     public HttpRequestBody addHttpRequestBodyEntry(String name, String fileName, InputStream inputStream) {
-        httpRequestBodyEntries.add(new HttpRequestBodyEntry(name, fileName, inputStream));
+        //httpRequestBodyEntries.add(new HttpRequestBodyEntry(name, fileName, inputStream));
+        bodyEntityList.add(new FileEntity().setValue(inputStream).setFileName(fileName).setName(name));
         this.mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         return this;
     }
@@ -165,12 +184,12 @@ public class HttpRequestBody {
         return requestProperty;
     }
 
-    public List<HttpRequestBodyEntry> getHttpRequestBodyEntries() {
+    /*public List<HttpRequestBodyEntry> getHttpRequestBodyEntries() {
         return this.httpRequestBodyEntries;
-    }
+    }*/
 
-    public byte[] getbyteHttpRequestBody() {
-        byte bytes[] = null;
+    public byte[] getByteHttpRequestBody() {
+        byte[] bytes = null;
         if (WsStringUtils.isBlank(this.stringHttpRequestBody)) {
             switch (mediaType) {
                 case APPLICATION_FORM_URLENCODED_VALUE:
@@ -188,21 +207,25 @@ public class HttpRequestBody {
             }
         } else {
             try {
-
-                bytes = this.stringHttpRequestBody.getBytes(charest);
+                bytes = this.stringHttpRequestBody.getBytes(charset);
             } catch (Exception e) {
                 e.printStackTrace();
                 bytes = this.stringHttpRequestBody.getBytes();
             }
         }
         if (isGZIP) {
-            bytes = cmpressByGZIP(bytes);
+            bytes = compressByGZIP(bytes);
         }
         return bytes;
     }
 
     public String getStringHttpRequestBody() {
-        return new String(getbyteHttpRequestBody());
+        try {
+            return new String(getByteHttpRequestBody(),charset);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public HttpRequestBody setStringHttpRequestBody(String stringHttpRequestBody) {
@@ -216,299 +239,29 @@ public class HttpRequestBody {
     }
 
 
-
-
-
-
- /*   public byte[] simpleFormData(HttpRequestBody httpRequestBody) throws RuntimeException {
-        StringBuffer stringBuffer = new StringBuffer();
-        if (httpRequestBody == null) {
-            return null;
-        }
-        if (isJson) {
-            Map map = new LinkedHashMap();
-            for (HttpRequestBodyEntry httpRequestBodyEntry : httpRequestBody.getHttpRequestBodyEntries()) {
-                if (!WsStringUtils.isBlank(httpRequestBodyEntry.getValue())) {
-                    map.put(httpRequestBodyEntry.getName(), httpRequestBodyEntry.getValue());
-                } else if (httpRequestBodyEntry.getObjectValue() != null) {
-                    map.put(httpRequestBodyEntry.getName(), httpRequestBodyEntry.getObjectValue());
-                }
-            }
-            String str = JSON.toJSONString(map);
-            httpRequestBody.setStringHttpRequestBody(str);
-            if (str.length() > 0) {
-                try {
-                    //return URLEncoder.encode(stringBuffer.toString(),charest).getBytes(charest);
-                    return str.getBytes(charest);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return str.getBytes();
-                }
-
-            }
-
-        } else {
-            for (HttpRequestBodyEntry httpRequestBodyEntry : httpRequestBody.getHttpRequestBodyEntries()) {
-                if (!httpRequestBodyEntry.isFile()) {
-                    stringBuffer.append('&');
-                    stringBuffer.append(httpRequestBodyEntry.getName());
-                    stringBuffer.append('=');
-                    stringBuffer.append(httpRequestBodyEntry.getValue());
-                }
-            }
-            if (stringBuffer.length() > 0) {
-                stringBuffer.delete(0, 1);
-                try {
-                    //return URLEncoder.encode(stringBuffer.toString(),charest).getBytes(charest);
-                    return stringBuffer.toString().getBytes(charest);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return stringBuffer.toString().getBytes();
-                }
-
-            }
-
-        }
-        return null;
-    }*/
-
-    //生成文件数据格式
+    //生成formData数据格式
     public byte[] multipartFormData(HttpRequestBody httpRequestBody) throws RuntimeException {
-        Random random = new Random();
-        int j;
-        String getLine = "\r\n";
-        String fileType = "Content-Type: application/octet-stream";
-        String doubleBar = "--";
-        String biaoshi = "----WebKitFormBoundary";
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < 16; i++) {
-            j = random.nextInt(MULTIPART_CHARS.length - 2) + 2;
-            sb.append(MULTIPART_CHARS[j]);
-        }
-        biaoshi = biaoshi + sb.toString();
-        httpRequestBody.setRequestProperty("content-type", "multipart/form-data; boundary=" + biaoshi);
-        StringBuffer stringBuffer = new StringBuffer();
-
-        List<HttpRequestBodyEntry> httpRequestBodyEntries = httpRequestBody.getHttpRequestBodyEntries();
-        if (httpRequestBodyEntries.isEmpty()) {
-            return null;
-        }
-        HttpRequestBodyEntry httpRequestBodyEntry = null;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-
-
-        ByteArrayOutputStream byteArrayOutputStream = null;
-        WritableByteChannel writableByteChannel = null;
-
-
-        byte[] bytes;
-        int size;
-        try {
-            byteArrayOutputStream = new ByteArrayOutputStream();
-            writableByteChannel = Channels.newChannel(byteArrayOutputStream);
-            for (int i = 0; i < httpRequestBodyEntries.size(); i++) {
-                httpRequestBodyEntry = httpRequestBodyEntries.get(i);
-                if (httpRequestBodyEntry.isFile()) {
-                    InputStream inputStream = null;
-                    ReadableByteChannel readableByteChannel = null;
-                    try {
-                        String name = "Content-Disposition: form-data; name=\"" + httpRequestBodyEntry.getName() + "\"; filename=\"" + httpRequestBodyEntry.getValue() + "\"";
-                        stringBuffer.append(doubleBar + biaoshi);
-                        stringBuffer.append(getLine);
-                        stringBuffer.append(name);
-                        stringBuffer.append(getLine);
-                        stringBuffer.append(fileType);
-                        stringBuffer.append(getLine);
-                        stringBuffer.append(getLine);
-                        //File f = entity.getValue();
-                        //FileInputStream fileInputStream = new FileInputStream(f);
-                        try {
-                            bytes = stringBuffer.toString().getBytes(httpRequestBody.getCharest());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            bytes = stringBuffer.toString().getBytes();
-                        }
-                        bytes = stringBuffer.toString().getBytes();
-                        size = bytes.length;
-                        for (int k = 0; k < size / 1024 + 1; k++) {
-                            byteBuffer.put(bytes, k * 1024, (k + 1) * 1024 > size ? size : (k + 1) * 1024);
-                            byteBuffer.flip();
-                            while (byteBuffer.hasRemaining()) {
-                                writableByteChannel.write(byteBuffer);
-                            }
-                            byteBuffer.clear();
-                        }
-                        stringBuffer = new StringBuffer();
-
-
-                        inputStream = httpRequestBodyEntry.getInputStreamValue();
-                        readableByteChannel = Channels.newChannel(inputStream);
-
-                        while (readableByteChannel.read(byteBuffer) != -1) {
-                            byteBuffer.flip();
-                            while (byteBuffer.hasRemaining()) {
-                                writableByteChannel.write(byteBuffer);
-                            }
-                            byteBuffer.clear();
-                        }
-
-
-                    /*byte[] by = byteArrayOutputStream.toByteArray();
-                    for (int k = 0; k < by.length; k++) {
-                        stringBuffer.append(by[k]);
-                    }*/
-                        //stringBuffer.append(getLine);
-                        try {
-                            byteBuffer.put(getLine.getBytes(httpRequestBody.getCharest()));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            byteBuffer.put(getLine.getBytes());
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (readableByteChannel != null) {
-                            try {
-                                readableByteChannel.close();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            } finally {
-                                readableByteChannel = null;
-                            }
-                        }
-
-
-                        if (inputStream != null) {
-                            try {
-                                inputStream.close();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            } finally {
-                                inputStream = null;
-                            }
-                        }
-                    }
-
-                } else {
-                    String name = "Content-Disposition: form-data; name=\"" + httpRequestBodyEntry.getName() + "\"";
-                    stringBuffer.append(doubleBar + biaoshi);
-                    stringBuffer.append(getLine);
-                    stringBuffer.append(name);
-                    stringBuffer.append(getLine);
-                    stringBuffer.append(getLine);
-                    stringBuffer.append(httpRequestBodyEntry.getValue());
-                    stringBuffer.append(getLine);
-
-                    try {
-                        bytes = stringBuffer.toString().getBytes(httpRequestBody.getCharest());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        bytes = stringBuffer.toString().getBytes();
-                    }
-
-
-                    size = bytes.length;
-                    for (int k = 0; k < size / 1024 + 1; k++) {
-                        byteBuffer.put(bytes, k * 1024, (k + 1) * 1024 > size ? size : (k + 1) * 1024);
-                        byteBuffer.flip();
-                        while (byteBuffer.hasRemaining()) {
-                            writableByteChannel.write(byteBuffer);
-                        }
-                        byteBuffer.clear();
-                    }
-                    stringBuffer = new StringBuffer();
-                }
-            }
-            stringBuffer.append(doubleBar + biaoshi + doubleBar);
-            try {
-                bytes = stringBuffer.toString().getBytes(httpRequestBody.getCharest());
-            } catch (Exception e) {
-                e.printStackTrace();
-                bytes = stringBuffer.toString().getBytes();
-            }
-            size = bytes.length;
-            for (int k = 0; k < size / 1024 + 1; k++) {
-                byteBuffer.put(bytes, k * 1024, (k + 1) * 1024 > size ? size : (k + 1) * 1024);
-                byteBuffer.flip();
-                while (byteBuffer.hasRemaining()) {
-                    writableByteChannel.write(byteBuffer);
-                }
-                byteBuffer.clear();
-            }
-            //return stringBuffer.toString();
-            return byteArrayOutputStream.toByteArray();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-
-                if (writableByteChannel != null) {
-                    try {
-                        writableByteChannel.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        writableByteChannel = null;
-                    }
-
-                }
-
-                if (byteArrayOutputStream != null) {
-                    try {
-                        byteArrayOutputStream.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        byteArrayOutputStream = null;
-                    }
-                }
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-        return null;
-
+        String boundary = HttpUtils.getFormDataBoundary();
+        httpRequestBody.setRequestProperty("content-type", "multipart/form-data; boundary=" + boundary);
+        return HttpUtils.toFormData(bodyEntityList,boundary,charset);
     }
 
 
     //生成默认数据格式
     public byte[] simpleFormData(HttpRequestBody httpRequestBody) {
-        httpRequestBody.setRequestProperty("content-type", mediaType.getCoed());
-        List<HttpRequestBodyEntry> list = httpRequestBody.getHttpRequestBodyEntries();
-        List<String> stringList = new ArrayList<>();
-        for (HttpRequestBodyEntry httpRequestBodyEntry : list) {
-            if (httpRequestBodyEntry.getValue() != null) {
-                stringList.add(httpRequestBodyEntry.getName() + "=" + httpRequestBodyEntry.getValue());
-            }
-        }
-        if (stringList.size() > 0) {
-            String str = WsStringUtils.jointListString(stringList, "&");
-            try {
-                return str.getBytes(charest);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return str.getBytes();
-            }
-        }
-        return null;
+        return HttpUtils.toBaseForm(bodyEntityList,charset);
     }
 
     //生成JSON数据格式
     public byte[] jsonFormData(HttpRequestBody httpRequestBody) {
         httpRequestBody.setRequestProperty("content-type", MediaType.APPLICATION_JSON_VALUE.getCoed());
-        List<HttpRequestBodyEntry> list = httpRequestBody.getHttpRequestBodyEntries();
-        Map map = new HashMap();
-        for (HttpRequestBodyEntry httpRequestBodyEntry : list) {
-            if (httpRequestBodyEntry.getObjectValue() != null) {
-                map.put(httpRequestBodyEntry.getName(), httpRequestBodyEntry.getObjectValue());
-            } else if (httpRequestBodyEntry.getValue() != null) {
-                map.put(httpRequestBodyEntry.getName(), httpRequestBodyEntry.getValue());
+        Map<String,Object> map = new HashMap<>();
+        for(BaseEntity entity:bodyEntityList){
+            if(entity instanceof ValueEntity){
+                map.put(entity.getName(),((ValueEntity) entity).getValue());
             }
         }
-        if (!map.isEmpty()) {
+        if(WsListUtils.isNotEmpty(map)){
             byte[] bytes = JSON.toJSONBytes(map);
             return bytes;
         }
@@ -521,7 +274,7 @@ public class HttpRequestBody {
     }
 
 
-    public byte[] cmpressByGZIP(byte bytes[]) {
+    public byte[] compressByGZIP(byte[] bytes) {
         if (bytes == null) {
             return bytes;
         }
@@ -539,7 +292,7 @@ public class HttpRequestBody {
             gzipOutputStream.close();
             byteArrayOutputStream.flush();
             byteArrayOutputStream.close();
-            byte newBytes[] = byteArrayOutputStream.toByteArray();
+            byte[] newBytes = byteArrayOutputStream.toByteArray();
             return newBytes;
         } catch (Exception e) {
             e.printStackTrace();
@@ -561,7 +314,7 @@ public class HttpRequestBody {
     public String getUrl() {
         if ("GET".equals(method)) {
             //byte[] bytes = simpleFormData(this);
-            byte bytes[] = getbyteHttpRequestBody();
+            byte[] bytes = getByteHttpRequestBody();
             if (bytes != null && bytes.length > 0) {
                 return url + "?" + new String(bytes);
             } else {
@@ -577,7 +330,7 @@ public class HttpRequestBody {
     public HttpRequestBody setUrl(String url) {
         try {
             URI uri = null;
-            String strs[] = url.split("/");
+            String[] strs = url.split("/");
             if (strs.length > 2) {
                 String newUrl = strs[0] + "//" + strs[2];
                 uri = new URI(newUrl);
@@ -631,12 +384,12 @@ public class HttpRequestBody {
         return this;
     }
 
-    public String getCharest() {
-        return charest;
+    public String getCharset() {
+        return this.charset;
     }
 
-    public HttpRequestBody setCharest(String charest) {
-        this.charest = charest;
+    public HttpRequestBody setCharset(String charset) {
+        this.charset = charset;
         return this;
     }
 
@@ -649,6 +402,10 @@ public class HttpRequestBody {
         return this;
     }
 
+    public HttpRequestBody setUserAgent(String userAgent){
+        setRequestProperty("User-Agent",userAgent);
+        return this;
+    }
 
     //*********************************************************
 
@@ -712,12 +469,12 @@ public class HttpRequestBody {
         return this;
     }
 
-    public int getRetryNuumber() {
-        return retryNuumber;
+    public int getRetryNumber() {
+        return this.retryNumber;
     }
 
-    public HttpRequestBody setRetryNuumber(int retryNuumber) {
-        this.retryNuumber = retryNuumber;
+    public HttpRequestBody setRetryNumber(int retryNumber) {
+        this.retryNumber = retryNumber;
         return this;
     }
 
@@ -733,6 +490,11 @@ public class HttpRequestBody {
 
     public HttpRequestBody sortBody(String sort) {
         if ("desc".equals(sort)) {
+            bodyEntityList.sort((o1, o2) -> -(o1.compareTo(o2)));
+        } else if ("asc".equals(sort)) {
+            bodyEntityList.sort((o1, o2) -> o1.compareTo(o2));
+        }
+        /*if ("desc".equals(sort)) {
             httpRequestBodyEntries.sort(new Comparator<HttpRequestBodyEntry>() {
                 @Override
                 public int compare(HttpRequestBodyEntry o1, HttpRequestBodyEntry o2) {
@@ -746,7 +508,7 @@ public class HttpRequestBody {
                     return o1.compareTo(o2);
                 }
             });
-        }
+        }*/
 
         return this;
     }

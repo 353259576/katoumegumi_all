@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.http.client;
+package cn.katoumegumi.java.vertx.http;
 
 import cn.katoumegumi.java.http.client.model.HttpRequestBody;
 import cn.katoumegumi.java.http.client.model.HttpResponseBody;
@@ -121,7 +121,7 @@ public class WsVertxClient {
         for (WsRequestProperty wsRequestProperty : list) {
             multiMap.add(wsRequestProperty.getKey(), wsRequestProperty.getValue());
         }
-        byte bytes[] = httpRequestBody.getbyteHttpRequestBody();
+        byte bytes[] = httpRequestBody.getByteHttpRequestBody();
         if (bytes == null) {
             bytes = new byte[0];
         }

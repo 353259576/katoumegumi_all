@@ -2,18 +2,10 @@ package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
-import cn.katoumegumi.java.sql.entity.SelectCallable;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonArray;
-import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.SQLRowStream;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -2047,38 +2039,6 @@ public class SQLModelUtils {
 
 
 
-    public <T> Handler<AsyncResult<ResultSet>> getVertxHandler(SelectCallable<T> selectCallable){
-        return asyncResult->{
-            if(asyncResult.succeeded()){
-                ResultSet resultSet = asyncResult.result();
-                List<String> columnNameList = resultSet.getColumnNames();
-                List<JsonArray> list = resultSet.getResults();
-                int size = list.size();
-                int columnSize = columnNameList.size();
-                int mapSize = WsBeanUtils.objectToT((columnSize/0.75),int.class) + 1;
-                int j = 0;
-                Object o = null;
-                List<Map> mapList = new ArrayList<>(list.size());
-                for (JsonArray jsonArray : list) {
-                    Iterator<?> iterator = jsonArray.iterator();
-                    Map map = new HashMap(mapSize);
-                    while (iterator.hasNext()) {
-                        o = iterator.next();
-                        if (o != null) {
-                            map.put(columnNameList.get(j), o);
-                        }
-                        j++;
-                    }
-                    mapList.add(map);
-                    j = 0;
-                }
-                mapList = handleMap(mapList);
-                mapList = mergeMapList(mapList);
-                List<T> valueList = loadingObject(mapList);
-                selectCallable.put(valueList);
-            }
-        };
-    }
 
 
 

@@ -42,7 +42,7 @@ public class HttpResponseTask implements Callable<HttpResponseBody> {
             try {
                 countDownLatch.await();
             } catch (InterruptedException e) {
-                throw new TimeoutException("请求被终端");
+                throw new TimeoutException("请求被中断");
             }
             if (httpResponseBody == null) {
                 throw new RuntimeException("获取失败");

@@ -265,7 +265,7 @@ public class WsChannelHttpRequestBodyBind {
                 ChannelTimeoutEntry channelTimeoutEntry = WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.get(id);
                 if (channelTimeoutEntry != null) {
                     //WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.remove(id);
-                    if (channelTimeoutEntry.getCount() > httpRequestBody.getRetryNuumber()) {
+                    if (channelTimeoutEntry.getCount() > httpRequestBody.getRetryNumber()) {
                         countDownLatch.countDown();
                         WsChannelHttpRequestBodyBind.httpResponseBodyMap.remove(id);
                         WsChannelHttpRequestBodyBind.idChannelTimeoutEntryMap.remove(id);

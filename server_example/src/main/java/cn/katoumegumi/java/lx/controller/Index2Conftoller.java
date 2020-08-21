@@ -4,6 +4,9 @@ import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
+import cn.katoumegumi.java.http.client.model.HttpRequestBody;
+import cn.katoumegumi.java.http.client.model.HttpResponseBody;
+import cn.katoumegumi.java.http.client.model.HttpResponseTask;
 import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserDetails;
@@ -17,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -77,8 +82,38 @@ public class Index2Conftoller {
         System.out.println(str);*/
 
 
+        /*HttpRequestBody httpRequestBody = HttpRequestBody.createHttpRequestBody()
+                .setRequestProperty("identityType","rawGrain")
+                .setRequestProperty("ClientType","webAdmin")
+                .setRequestProperty("accessToken","d14ce104fa7649c78f6ba8d8e093a65a")
+                .setMethod("POST")
+                .setUrl("http://www.apeclassic.com/wx/xboot/upload/file")
+                .addHttpRequestBodyEntry("file",new File("D:\\手机备份\\图片\\0D9037E3DCDEC74E0095915A8A69A2C2.jpg"));
+        HttpResponseTask httpResponseTask = httpRequestBody.nettyBuild();
+        try {
+            HttpResponseBody httpResponseBody = httpResponseTask.call();
+            System.out.println(httpResponseBody.getResponseBodyToString());
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }*/
 
-        System.out.println(LocalDateTime.now() instanceof LocalDateTime);
+        HttpRequestBody httpRequestBody = HttpRequestBody.createHttpRequestBody()
+                .setMethod("GET")
+                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36")
+                .setUrl("https://www.bilibili.com");
+        HttpResponseTask httpResponseTask = httpRequestBody.nettyBuild();
+        try {
+            HttpResponseBody httpResponseBody = httpResponseTask.call();
+            System.out.println(httpResponseBody.getResponseBodyToString());
+            System.out.println(httpResponseBody.getCharSet());
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+        /*System.out.println(LocalDateTime.now() instanceof LocalDateTime);
 
         String date = WsDateUtils.objectDateFormatString(LocalDateTime.now());
         System.out.println(date);
@@ -102,7 +137,7 @@ public class Index2Conftoller {
             for (int i = 0; i < 10000000; i++) {
                 boolean b = WsFieldUtils.classCompare(localDateTime.getClass(), LocalDateTime.class);
             }
-        });
+        });*/
 
     }
 
