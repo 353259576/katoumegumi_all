@@ -1,7 +1,11 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsListUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
+import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -623,8 +627,8 @@ public class SQLModelUtils {
             selectSql.append(" order by ")
                     .append(WsStringUtils.jointListString(list1, ","));
         }
-        if (mySearchList.getPageVO() != null) {
-            return mysqlPaging(mySearchList.getPageVO(), selectSql.toString());
+        if (mySearchList.getSqlLimit() != null) {
+            return mysqlPaging(mySearchList.getSqlLimit(), selectSql.toString());
         }
 
         return selectSql.toString();
@@ -638,11 +642,8 @@ public class SQLModelUtils {
         return "select count(*) from (" + searchSql + " ) as searchCount";
     }
 
-    private String mysqlPaging(Page page, String selectSql) {
-        if (page.getCurrent() == 0L) {
-            page.setCurrent(1);
-        }
-        return selectSql + " limit " + (page.getCurrent() - 1) * page.getSize() + "," + page.getSize();
+    private String mysqlPaging(SqlLimit limit, String selectSql) {
+        return selectSql + " limit " + limit.getOffset() + "," + limit.getSize();
     }
 
     /**
@@ -869,30 +870,47 @@ public class SQLModelUtils {
 
         List<MySearchList> ands = mySearchList.getAnds();
         if (!WsListUtils.isEmpty(ands)) {
+            List<String> andStrList = new ArrayList<>();
             for (MySearchList searchList : ands) {
                 List<String> andStrings = searchListWhereSqlProcessor(searchList, prefix);
                 int andStringsSize = andStrings.size();
                 if (andStringsSize != 0) {
                     if (andStringsSize == 1) {
-                        stringList.add(WsStringUtils.jointListString(andStrings, " and "));
+                        andStrList.add(WsStringUtils.jointListString(andStrings, " and "));
                     } else {
-                        stringList.add("(" + WsStringUtils.jointListString(andStrings, " and ") + ")");
+                        andStrList.add("(" + WsStringUtils.jointListString(andStrings, " and ") + ")");
                     }
+                }
+            }
+            if(WsListUtils.isNotEmpty(andStrList)){
+                if(andStrList.size() == 1){
+                    stringList.add(WsStringUtils.jointListString(andStrList," and "));
+                }else {
+                    stringList.add("("+WsStringUtils.jointListString(andStrList," and ") + ")");
                 }
 
             }
         }
         List<MySearchList> ors = mySearchList.getOrs();
         if (!WsListUtils.isEmpty(ors)) {
+            List<String> orStrList = new ArrayList<>();
             for (MySearchList searchList : ors) {
                 List<String> orStrings = searchListWhereSqlProcessor(searchList, prefix);
                 int orStringsSize = orStrings.size();
                 if (orStringsSize != 0) {
                     if (orStringsSize == 1) {
-                        stringList.add(WsStringUtils.jointListString(orStrings, " or "));
+                        orStrList.add(WsStringUtils.jointListString(orStrings, " and "));
                     } else {
-                        stringList.add("(" + WsStringUtils.jointListString(orStrings, " or ") + ")");
+                        orStrList.add("(" + WsStringUtils.jointListString(orStrings, " and ") + ")");
                     }
+                }
+
+            }
+            if(WsListUtils.isNotEmpty(orStrList)){
+                if(orStrList.size() == 1){
+                    stringList.add(WsStringUtils.jointListString(orStrList, " or "));
+                }else {
+                    stringList.add("(" + WsStringUtils.jointListString(orStrList, " or ") + ")");
                 }
 
             }
@@ -1630,8 +1648,13 @@ public class SQLModelUtils {
         if (mySearchList.getMainClass() == null) {
             mySearchList.setMainClass(mainClass);
         }
-        String searchSql = searchListBaseSQLProcessor();
+        //String searchSql = searchListBaseSQLProcessor();
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
+        localMapperMap.put(fieldColumnRelationMapper.getNickName(),fieldColumnRelationMapper);
+        List<String> whereStringList = searchListWhereSqlProcessor(mySearchList,fieldColumnRelationMapper.getNickName());
+        String searchSql = WsStringUtils.jointListString(whereStringList," and ");
+
+
         List<AbstractSqlInterceptor> interceptorList = new ArrayList<>();
         List<FieldColumnRelation> fieldColumnRelationList = fieldColumnRelationMapper.getFieldColumnRelations();
         for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
@@ -1654,7 +1677,7 @@ public class SQLModelUtils {
                 + fieldColumnRelationMapper.getTableName()
                 + "` `" + getAbbreviation(fieldColumnRelationMapper.getNickName())
                 + "` SET "
-                + WsStringUtils.jointListString(setList, ",") + " " + searchSql.substring(searchSql.indexOf(" where "));
+                + WsStringUtils.jointListString(setList, ",") + " where " + searchSql;
         List valueList = new ArrayList();
         List setValueList = new ArrayList();
         for (MySearch mySearch : mySearchList.getAll()) {

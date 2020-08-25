@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.http.model;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 
 /**

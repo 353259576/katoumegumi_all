@@ -1,29 +1,23 @@
 package cn.katoumegumi.java.http.client.initializer;
 
-import cn.katoumegumi.java.http.client.handler.Http2SettingsHandler;
 import cn.katoumegumi.java.http.client.handler.HttpCloseHandler;
-import cn.katoumegumi.java.http.client.handler.HttpResponseHandler;
 import cn.katoumegumi.java.http.client.handler.NettyHttpClientResponseHandler;
 import cn.katoumegumi.java.http.client.model.HttpRequestBody;
 import cn.katoumegumi.java.http.client.processor.WsChannelHttpRequestBodyBind;
 import cn.katoumegumi.java.http.client.utils.WsNettyClientUtils;
 import cn.katoumegumi.java.http.client.utils.WsSSLContext;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http2.*;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http2.Http2FrameLogger;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.TimeUnit;
-
-import static io.netty.handler.codec.http.HttpMethod.GET;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static io.netty.handler.logging.LogLevel.INFO;
 
 public class HttpInitializer extends ChannelInitializer<SocketChannel> {

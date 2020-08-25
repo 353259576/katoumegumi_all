@@ -19,23 +19,20 @@ import cn.katoumegumi.java.sql.SelectSqlEntity;
 import cn.katoumegumi.java.sql.entity.SelectCallable;
 import cn.katoumegumi.java.vertx.sql.utils.SqlUtils;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLClient;
 import io.vertx.ext.sql.SQLConnection;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,12 +42,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.persistence.EntityManager;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @Service(version = "1.0.0", protocol = {"dubbo", "rest"})
@@ -91,6 +86,7 @@ public class IndexController implements IndexService {
         for(int i = 0; i < 10; i++){
             MySearchList searchList = MySearchList.create(User.class).setAlias("u");
             searchList
+                    .setPageVO(new Page(2,10))
                     .innerJoin(UserDetails.class,
                             t -> t.setJoinTableNickName("userDetails")
                             .setAlias("ud")
@@ -227,7 +223,8 @@ public class IndexController implements IndexService {
         //List<User> list = userJpaDao.selectUser();
         LocalDateTime localDateTime = LocalDateTime.now();
         User user = new User();
-        MySearchList mySearchList = MySearchList.newMySearchList();
+        MySearchList mySearchList = MySearchList.create(User.class);
+        mySearchList.setPageVO(new Page(2,20));
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex", "男").eq(user::getName, "你好"),
                 MySearchList.newMySearchList().eq(user::getPassword, "世界")
         )
@@ -239,7 +236,7 @@ public class IndexController implements IndexService {
         //List<User> list = userService.selectList(mySearchList);
         //List list = new ArrayList();
         long start = System.currentTimeMillis();
-        List<User> list = userService.selectList(mySearchList);
+        IPage<User> list = jdbcUtils.getTPage(mySearchList);
         JSON.toJSONString(list);
         long end = System.currentTimeMillis();
         System.out.println(end - start);

@@ -19,10 +19,8 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
 public class HttpRequestBody {

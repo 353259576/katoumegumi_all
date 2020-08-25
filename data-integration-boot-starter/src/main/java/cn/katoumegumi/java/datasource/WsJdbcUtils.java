@@ -5,6 +5,7 @@ import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.*;
+import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
@@ -346,7 +347,10 @@ public class WsJdbcUtils {
         if (count == null) {
             count = 0L;
         }
-        Page iPage = mySearchList.getPageVO();
+        Page<T> iPage = new Page<>();
+        SqlLimit sqlLimit = mySearchList.getSqlLimit();
+        iPage.setCurrent(sqlLimit.getCurrent());
+        iPage.setSize(sqlLimit.getSize());
         iPage.setRecords(tList);
         iPage.setTotal(count);
         return iPage;

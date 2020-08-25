@@ -1,7 +1,5 @@
 package cn.katoumegumi.java.lx.controller;
 
-import cn.katoumegumi.java.common.WsDateUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
 import cn.katoumegumi.java.http.client.model.HttpRequestBody;
@@ -12,6 +10,8 @@ import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
 import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.SQLModelUtils;
+import cn.katoumegumi.java.sql.UpdateSqlEntity;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
 import java.time.LocalDateTime;
+import java.time.Year;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 
 /**
  * @author ws
@@ -97,7 +97,7 @@ public class Index2Conftoller {
             e.printStackTrace();
         }*/
 
-        HttpRequestBody httpRequestBody = HttpRequestBody.createHttpRequestBody()
+        /*HttpRequestBody httpRequestBody = HttpRequestBody.createHttpRequestBody()
                 .setMethod("GET")
                 .setUserAgent("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36")
                 .setUrl("https://www.bilibili.com");
@@ -108,7 +108,18 @@ public class Index2Conftoller {
             System.out.println(httpResponseBody.getCharSet());
         } catch (TimeoutException e) {
             e.printStackTrace();
-        }
+        }*/
+
+        User user = new User();
+        MySearchList mySearchList = MySearchList.create(User.class);
+        mySearchList.set(user::getName,"你好")
+                .set(user::getPassword,"哈哈")
+                .set(user::getCreateDate,new Date())
+                .eq(user::getId,1);
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
+        System.out.println(updateSqlEntity.getUpdateSql());
+        System.out.println(JSON.toJSONString(updateSqlEntity.getValueList()));
 
 
 

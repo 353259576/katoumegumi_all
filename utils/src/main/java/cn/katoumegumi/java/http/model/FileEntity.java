@@ -2,7 +2,6 @@ package cn.katoumegumi.java.http.model;
 
 
 import cn.katoumegumi.java.common.WsStringUtils;
-import io.netty.buffer.ByteBuf;
 
 import java.io.*;
 import java.nio.ByteBuffer;

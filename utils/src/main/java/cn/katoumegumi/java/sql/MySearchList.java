@@ -2,12 +2,15 @@ package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.SupplierFunc;
 import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import javax.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -26,7 +29,7 @@ public class MySearchList {
 
     private JoinType defaultJoinType = JoinType.INNER;
 
-    private Page pageVO;
+    private SqlLimit sqlLimit;
 
     public MySearchList() {
 
@@ -112,15 +115,29 @@ public class MySearchList {
         return null;
     }
 
-    public Page getPageVO() {
-        return pageVO;
-    }
 
     public MySearchList setPageVO(Page pageVO) {
-        this.pageVO = pageVO;
+        SqlLimit sqlLimit = new SqlLimit();
+        sqlLimit.setCurrent(pageVO.getCurrent());
+        if(pageVO.getCurrent() < 1L){
+            pageVO.setCurrent(1L);
+        }
+        sqlLimit.setOffset((pageVO.getCurrent() - 1) * pageVO.getSize());
+        sqlLimit.setSize(pageVO.getSize());
+        this.sqlLimit = sqlLimit;
         return this;
     }
 
+    public SqlLimit getSqlLimit() {
+        return sqlLimit;
+    }
+
+    public MySearchList setSqlLimit(Consumer<SqlLimit> sqlLimitConsumer) {
+        SqlLimit sqlLimit = new SqlLimit();
+        sqlLimitConsumer.accept(sqlLimit);
+        this.sqlLimit = sqlLimit;
+        return this;
+    }
 
     public MySearch get(String value) {
         for (MySearch m : mySearches) {
@@ -619,17 +636,28 @@ public class MySearchList {
         return this;
     }
 
-    public MySearchList and(Consumer<MySearchList> consumer){
-        MySearchList mySearchList = MySearchList.create();
-        consumer.accept(mySearchList);
-        ands.add(mySearchList);
+    @SafeVarargs
+    public final MySearchList and(Consumer<MySearchList>... consumers){
+        for(Consumer<MySearchList> consumer:consumers){
+            MySearchList mySearchList = MySearchList.create();
+            consumer.accept(mySearchList);
+            if(WsListUtils.isNotEmpty(mySearchList.getAll()) || WsListUtils.isNotEmpty(mySearchList.getAnds()) || WsListUtils.isNotEmpty(mySearchList.getOrs())){
+                ands.add(mySearchList);
+            }
+        }
+
         return this;
     }
 
-    public MySearchList or(Consumer<MySearchList> consumer){
-        MySearchList mySearchList = MySearchList.create();
-        consumer.accept(mySearchList);
-        ors.add(mySearchList);
+    @SafeVarargs
+    public final MySearchList or(Consumer<MySearchList>... consumers){
+        for(Consumer<MySearchList> consumer:consumers){
+            MySearchList mySearchList = MySearchList.create();
+            consumer.accept(mySearchList);
+            if(WsListUtils.isNotEmpty(mySearchList.getAll()) || WsListUtils.isNotEmpty(mySearchList.getAnds()) || WsListUtils.isNotEmpty(mySearchList.getOrs())){
+                ors.add(mySearchList);
+            }
+        }
         return this;
     }
 

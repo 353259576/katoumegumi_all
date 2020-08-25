@@ -2,6 +2,7 @@ package cn.katoumegumi.java.utils;
 
 import cn.katoumegumi.java.hibernate.JpaDataHandle;
 import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,15 +25,18 @@ public class PageConvertUtils {
 
     public static <T, K extends JpaSpecificationExecutor> IPage<T> createPageInfo(K jpaSpecificationExecutor, MySearchList mySearchList) {
         Specification<T> specification = JpaDataHandle.<T>getSpecification(mySearchList);
-        Page<T> pageVO = mySearchList.getPageVO();
-        if (pageVO == null) {
-            pageVO = new Page<T>();
+        SqlLimit sqlLimit = mySearchList.getSqlLimit();
+        if (sqlLimit == null) {
+            sqlLimit = new SqlLimit();
         }
-        Pageable pageable = PageRequest.of(Long.valueOf(pageVO.getCurrent() - 1).intValue(), Long.valueOf(pageVO.getSize()).intValue());
+        Pageable pageable = PageRequest.of(Long.valueOf(sqlLimit.getCurrent() - 1).intValue(), Long.valueOf(sqlLimit.getSize()).intValue());
         org.springframework.data.domain.Page<T> tPage = jpaSpecificationExecutor.findAll(specification, pageable);
         if (tPage == null) {
             return null;
         }
+        Page<T> pageVO = new Page<>();
+        pageVO.setCurrent(sqlLimit.getCurrent());
+        pageVO.setSize(sqlLimit.getSize());
         pageVO.setRecords(tPage.getContent());
         pageVO.setTotal(tPage.getTotalElements());
         return pageVO;

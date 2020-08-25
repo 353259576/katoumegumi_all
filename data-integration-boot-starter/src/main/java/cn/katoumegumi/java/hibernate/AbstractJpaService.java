@@ -2,6 +2,7 @@ package cn.katoumegumi.java.hibernate;
 
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,20 +56,23 @@ public abstract class AbstractJpaService<K, P, D extends JpaDao<K, P>> implement
     @Override
     public IPage<P> selectPage(MySearchList mySearchList) {
         Specification<P> specification = JpaDataHandle.getSpecification(mySearchList);
-        Page<P> pageVO = mySearchList.getPageVO();
-        if (pageVO == null) {
-            pageVO = new Page();
+        SqlLimit sqlLimit = mySearchList.getSqlLimit();
+        if (sqlLimit == null) {
+            sqlLimit = new SqlLimit();
         }
-        Pageable pageable = PageRequest.of(Long.valueOf(pageVO.getCurrent() - 1).intValue(), Long.valueOf(pageVO.getSize()).intValue());
+        Pageable pageable = PageRequest.of(Long.valueOf(sqlLimit.getCurrent() - 1).intValue(), Long.valueOf(sqlLimit.getSize()).intValue());
         org.springframework.data.domain.Page<P> tPage = getEntityDao().findAll(specification, pageable);
-        return convertPage(pageVO, tPage);
+        return convertPage(tPage);
     }
 
 
-    public IPage<P> convertPage(Page<P> pageVO, org.springframework.data.domain.Page<P> tPage) {
+    public IPage<P> convertPage(org.springframework.data.domain.Page<P> tPage) {
         if (tPage == null) {
             return null;
         }
+        Page<P> pageVO = new Page<>();
+        pageVO.setCurrent(tPage.getNumber());
+        pageVO.setSize(tPage.getSize());
         pageVO.setRecords(tPage.getContent());
         pageVO.setTotal(tPage.getTotalElements());
         return pageVO;

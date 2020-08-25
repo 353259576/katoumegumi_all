@@ -3,8 +3,6 @@ package cn.katoumegumi.java.http.model;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 
 /**
  * 基础参数实体

@@ -1,17 +1,18 @@
 package cn.katoumegumi.java.http.utils;
 
-import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.http.model.BaseEntity;
 import cn.katoumegumi.java.http.model.FileEntity;
 import cn.katoumegumi.java.http.model.ValueEntity;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 /**
  * @author ws

@@ -2,8 +2,6 @@ package cn.katoumegumi.java.sql;
 
 import javax.persistence.criteria.JoinType;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author ws

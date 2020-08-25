@@ -4,6 +4,7 @@ import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SqlOperator;
+import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.hibernate.HibernateException;
@@ -126,12 +127,12 @@ public class HibernateDao {
      */
     public <T> IPage<T> selectValueToPage(MySearchList mySearchList, Class<T> clazz) {
         DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz, mySearchList);
-        Page pageVO = mySearchList.getPageVO();
-        if (pageVO == null) {
-            pageVO = new Page();
+        SqlLimit sqlLimit = mySearchList.getSqlLimit();
+        if (sqlLimit == null) {
+            sqlLimit = new SqlLimit();
         }
-        Integer firstResult = Integer.parseInt(Long.valueOf((pageVO.getCurrent() - 1) * pageVO.getSize()).toString());
-        List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria, firstResult, Integer.parseInt(Long.valueOf(pageVO.getSize()).toString()));
+        Integer firstResult = Integer.parseInt(Long.valueOf((sqlLimit.getCurrent() - 1) * sqlLimit.getSize()).toString());
+        List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria, firstResult, Integer.parseInt(Long.valueOf(sqlLimit.getSize()).toString()));
         Integer count = 0;
         if (list.size() == 0) {
             count = list.size();
@@ -140,7 +141,9 @@ public class HibernateDao {
             List counts = hibernateTemplate.findByCriteria(detachedCriteria, 0, 1);
             count = Integer.parseInt(counts.get(0).toString());
         }
-
+        Page<T> pageVO = new Page<>();
+        pageVO.setCurrent(sqlLimit.getCurrent());
+        pageVO.setSize(sqlLimit.getSize());
         pageVO.setTotal(count);
         pageVO.setRecords(list);
         return pageVO;

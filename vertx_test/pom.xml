@@ -5,7 +5,7 @@
     <parent>
         <artifactId>katoumegumi_all</artifactId>
         <groupId>cn.katoumegumi.java</groupId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +15,7 @@
         <dependency>
             <groupId>cn.katoumegumi.java</groupId>
             <artifactId>utils</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>${megumi.version}</version>
         </dependency>
 
 
