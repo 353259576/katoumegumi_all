@@ -48,7 +48,7 @@
         <lombok.version>1.18.12</lombok.version>
         <fastjson.version>1.2.70</fastjson.version>
         <dubbo-version>2.7.5</dubbo-version>
-        <netty-version>4.1.50.Final</netty-version>
+        <netty-version>4.1.51.Final</netty-version>
         <zxing.version>3.4.0</zxing.version>
         <fastjson.version>1.2.59</fastjson.version>
         <reactor.version>3.3.4.RELEASE</reactor.version>

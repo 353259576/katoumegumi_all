@@ -21,17 +21,7 @@ public class LeetCodeTest {
     public static int leftValue;
 
     public static void main(String[] args) {
-        /*TreeNode treeNode = new TreeNode(0);
-        TreeNode treeNode1 = new TreeNode(-1);
-        treeNode.left = treeNode1;
-        int k = findBottomLeftValue1(treeNode);
-        System.out.println(k);*/
-        //System.out.println(climbStairs1(44));
-        //System.out.println(JSON.toJSONString(countBits(5)));
-        //longestPalindrome("qwerrewq");
-        //System.out.println(translateNum(0));
-        List<TreeNode> treeNodes = generateTrees(10);
-        System.out.println(JSON.toJSONString(treeNodes));
+        repeatedSubstringPattern("1434");
     }
 
     /**
@@ -470,7 +460,30 @@ public class LeetCodeTest {
         return treeNodeList;
     }
 
+    /**
+     * 459. 重复的子字符串
+     * @param s
+     * @return
+     */
+    public static boolean repeatedSubstringPattern(String s) {
+        int n = s.length();
+        for(int i = 1; i <= n/2; ++i){
+            if(n % i == 0){
+                boolean k = true;
+                for(int j = i; j < n; ++j){
+                    if(s.charAt(j) != s.charAt(j-i)){
+                        k = false;
+                        break;
+                    }
+                }
+                if(k){
+                    return k;
+                }
+            }
+        }
 
+        return false;
+    }
 
 
 }

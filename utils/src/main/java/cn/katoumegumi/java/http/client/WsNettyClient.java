@@ -295,7 +295,7 @@ public class WsNettyClient {
                         @Override
                         public void operationComplete(Future<? super Void> future) throws Exception {
                             if (future.isSuccess()) {
-                                System.out.println("关闭成功");
+                                log.info("关闭成功");
                             }
                         }
                     });
