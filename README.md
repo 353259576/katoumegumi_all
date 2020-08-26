@@ -1,12 +1,15 @@
 # ws_all
-#### 目录介绍
+ 目录介绍
+=================
+
  1. data-integration-boot-starter 一个spring的starter包，包含对于jpa和hibernate还有spring jdbc的配置
  2. server_example 工具使用示例
  3. utils 工具包，包含一个基于netty的http client还有一个兼容一部分hibernate注解和mybatis plus注解的sql生成器
  4. vertx_test vertx的练习测试
  
- ### 基本使用：
- 1. 引用项目
+  基本使用
+ =================
+ ### 引用项目
  ```
         <dependency>
             <groupId>cn.katoumegumi.java</groupId>
@@ -14,7 +17,7 @@
             <version>1.0.3-SNAPSHOT</version>
         </dependency>
  ```
- 2. yml基本配置
+ ### yml基本配置
  ``` 
  megumi:
    datasource:
@@ -54,11 +57,11 @@
      mapping-resources: cn.katoumegumi.java.lx.jpa
      show-sql: true
 ```
-3. 多数据库切换使用 @DataBase(dataBaseName = "") 进行切换
+### 多数据库切换使用 @DataBase(dataBaseName = "") 进行切换
 
-4. hibernate需要使用事务使用@HibernateTransactional hibernate与jpa事务不兼容
+### hibernate需要使用事务使用@HibernateTransactional hibernate与jpa事务不兼容
 
-5. jdbc hibernate jpa 使用
+### jdbc hibernate jpa 使用
 
 jdbc
 ```
