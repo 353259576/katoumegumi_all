@@ -5,6 +5,7 @@ import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
+import cn.katoumegumi.java.sql.entity.ReturnEntity;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -46,11 +47,11 @@ public class SQLModelUtils {
     /**
      * 缓存实体对应的对象属性与列名的关联
      */
-    public static Map<Class<?>, FieldColumnRelationMapper> mapperMap = new ConcurrentHashMap<>();
+    public static final Map<Class<?>, FieldColumnRelationMapper> mapperMap = new ConcurrentHashMap<>();
     /**
      * 是否转换列名
      */
-    public static volatile boolean fieldNameChange = true;
+    public static boolean fieldNameChange = true;
     /**
      * 记录where所需要的值
      */
@@ -1177,21 +1178,39 @@ public class SQLModelUtils {
     public List<Map> handleMap(List<Map> mapList) {
         List<Map> list = new ArrayList<>(mapList.size());
 
-        Map<String, List<String>> stringListMap = new HashMap<>();
+        //Map<String, List<String>> stringListMap = new HashMap<>();
 
+        List<List<String>> nameListList = new ArrayList<>();
+
+        int index = -1;
+        List<String> keyPrefixs;
         for (Map map : mapList) {
-            Map<String, Map> stringMapMap = new HashMap<>();
+            Map<String, Map> stringMapMap = new HashMap<>(map.size());
             Set<Map.Entry> entries = map.entrySet();
             for (Map.Entry entry : entries) {
+
+
+                if(index == -1){
+                    String keyString = getParticular((String) entry.getKey());
+                    keyPrefixs = WsStringUtils.split(keyString, '.');
+                    nameListList.add(keyPrefixs);
+                }else {
+                    keyPrefixs = nameListList.get(index);
+                    ++index;
+                }
+
                 if (entry.getValue() == null) {
                     continue;
                 }
+                /*if (entry.getValue() == null) {
+                    continue;
+                }
                 String keyString = getParticular((String) entry.getKey());
-                List<String> keyPrefixs = stringListMap.get(keyString);
+                keyPrefixs = stringListMap.get(keyString);
                 if (keyPrefixs == null) {
                     keyPrefixs = WsStringUtils.split(keyString, '.');
                     stringListMap.put(keyString, keyPrefixs);
-                }
+                }*/
 
                 Map valueMap = stringMapMap;
                 Map prevMap = valueMap;
@@ -1208,6 +1227,7 @@ public class SQLModelUtils {
                 }
                 valueMap.put(keyPrefixs.get(length - 1), entry.getValue());
             }
+            index = 0;
             list.add(stringMapMap);
             map.clear();
         }
@@ -1226,10 +1246,14 @@ public class SQLModelUtils {
     }
 
     private List<Map> mergeMapList(List<Map> maps, Class<?> tClass) {
+        if(WsListUtils.isEmpty(maps)){
+            return maps;
+        }
         FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(tClass);
 
         List<FieldJoinClass> fieldJoinClassList = fieldColumnRelationMapper.getFieldJoinClasses();
 
+        //去除最后重复的数据
         if (WsListUtils.isEmpty(fieldJoinClassList)) {
             List<String> idSet = null;
             List<FieldColumnRelation> idFieldColumnRelationList = fieldColumnRelationMapper.getIdSet();
@@ -1241,33 +1265,30 @@ public class SQLModelUtils {
             }
             Set<ResultMapIds> resultMapIdsSet = new HashSet<>();
             ResultMapIds resultMapIds;
-            if(maps.size() > 1){
+            if(maps.size() > 1) {
                 Iterator<Map> iterator = maps.iterator();
                 Map map;
-                while (iterator.hasNext()){
+                while (iterator.hasNext()) {
                     map = iterator.next();
-                    resultMapIds = new ResultMapIds(map,idSet);
-                    if(resultMapIdsSet.contains(resultMapIds)){
+                    resultMapIds = new ResultMapIds(map, idSet);
+                    if (resultMapIdsSet.contains(resultMapIds)) {
                         iterator.remove();
-                    }else {
+                    } else {
                         resultMapIdsSet.add(resultMapIds);
                     }
-
                 }
-
             }
-
-
             return maps;
         }
 
+        //别名与class对应关系
         Map<String, Class<?>> objectMap = new HashMap<>();
-        Set<String> objectTypeSet = new HashSet<>();
+        //Set<String> objectTypeSet = new HashSet<>();
         for (FieldJoinClass fieldJoinClass : fieldJoinClassList) {
             if (WsFieldUtils.isArrayType(fieldJoinClass.getField())) {
                 objectMap.put(fieldJoinClass.getNickName(), WsFieldUtils.getClassListType(fieldJoinClass.getField()));
             } else {
-                objectTypeSet.add(fieldJoinClass.getNickName());
+                //objectTypeSet.add(fieldJoinClass.getNickName());
                 objectMap.put(fieldJoinClass.getNickName(), fieldJoinClass.getField().getType());
             }
         }
@@ -1291,10 +1312,53 @@ public class SQLModelUtils {
             m2 = set.get(resultMapIds);
             if (m2 == null) {
                 set.put(resultMapIds, m1);
+                if(WsListUtils.isNotEmpty(objectMap)){
+                    for (String name:objectMap.keySet()){
+                        Object value = m1.get(name);
+                        if(value != null){
+                            if(value instanceof Map){
+                                List list = new ArrayList();
+                                list.add(value);
+                                m1.put(name,list);
+                                nameSet.add(name);
+                            }
+                        }
+                    }
+                }
                 //newMaps.add(m1);
             } else {
                 iterator.remove();
-                Set<Map.Entry> entries = m2.entrySet();
+
+                if(WsListUtils.isNotEmpty(objectMap)){
+                    Object mainValue = null;
+                    Object value = null;
+                    for(String name:objectMap.keySet()){
+                        mainValue = m2.get(name);
+                        value = m1.get(name);
+                        if(value == null){
+                            continue;
+                        }
+                        if(mainValue == null){
+                            mainValue = new ArrayList<>();
+                            ((List)mainValue).add(value);
+                            m2.put(name,mainValue);
+                        }else if (mainValue instanceof Map){
+                            List list = new ArrayList();
+                            list.add(mainValue);
+                            list.add(value);
+                            m2.put(name,list);
+                        }else if (mainValue instanceof List){
+                            ((List)mainValue).add(value);
+                        }
+
+                        nameSet.add(name);
+
+                    }
+
+
+                }
+
+                /*Set<Map.Entry> entries = m2.entrySet();
                 for (Map.Entry entry : entries) {
                     if (entry.getValue() instanceof Map) {
                         List list = new ArrayList();
@@ -1306,13 +1370,36 @@ public class SQLModelUtils {
                         nameSet.add((String) entry.getKey());
                         ((List) entry.getValue()).add(m1.get(entry.getKey()));
                     }
-                }
+                }*/
             }
         }
         set.clear();
         set = null;
         if (nameSet.size() > 0) {
-            for (Map map : maps) {
+
+            if(WsListUtils.isNotEmpty(objectMap)){
+                Object o;
+                String name;
+                List<Map> mapList;
+                for (Map map : maps) {
+
+                    for(Map.Entry<String,Class<?>> entry:objectMap.entrySet()){
+                        name = entry.getKey();
+                        o = map.get(name);
+                        if(o != null){
+                            mapList = mergeMapList((List<Map>) o, objectMap.get(name));
+                            if (mapList.size() != 0) {
+                                map.put(name, mapList);
+                            }
+                        }
+                        mapList = null;
+                        name = null;
+                        o = null;
+                    }
+                }
+            }
+
+            /*for (Map map : maps) {
                 for (String name : nameSet) {
                     Object o = map.get(name);
                     if (o instanceof List) {
@@ -1322,7 +1409,7 @@ public class SQLModelUtils {
                         }
                     }
                 }
-            }
+            }*/
         }
         nameSet = null;
 
@@ -1771,47 +1858,66 @@ public class SQLModelUtils {
      * @param <T>
      * @return
      */
-    /*@Deprecated
-    private <T> List<T> oneLoopMargeMap(List<Map> mapList) {
-        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mainClass);
-        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
-        List<FieldJoinClass> joinClasses = fieldColumnRelationMapper.getFieldJoinClasses();
-        Map<String, List<String>> cacheNameList = new HashMap<>();
-        List tList = new ArrayList();
-        for (Map map : mapList) {
-
-            Object o = WsBeanUtils.createObject(mainClass);
-            tList.add(o);
-
-
-            Map<String, Object> objectMap = new HashMap<>();
-            Map<Class<?>, Object> classObjectMap = new HashMap<>();
-            classObjectMap.put(mainClass, o);
-            objectMap.put(fieldColumnRelationMapper.getNickName(), o);
-
-            Set<Map.Entry> entrySet = map.entrySet();
-            for (Map.Entry entry : entrySet) {
-                String keyName = (String) entry.getKey();
-                List<String> keyNameList = cacheNameList.get(keyName);
-                if (keyNameList == null) {
-                    keyNameList = WsStringUtils.split(keyName, '.');
-                    cacheNameList.put(keyName, keyNameList);
-                }
-                Object nowObject = objectMap.get(keyNameList.get(0));
-                FieldColumnRelation fieldColumnRelation = fieldColumnRelationMapper.getFieldColumnRelationByField(keyNameList.get(keyNameList.size() - 1));
-                Field field = fieldColumnRelation.getField();
-                if (WsBeanUtils.isBaseType(field.getType())) {
-
-                }
-                try {
-                    field.set(nowObject, WsBeanUtils.objectToT(entry.getValue(), field.getType()));
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
+    @Deprecated
+    public  <T> List<T> oneLoopMargeMap(List<Map> mapList) {
+        if(WsListUtils.isEmpty(mapList)) {
+            return new ArrayList<>(0);
         }
-        return (List<T>) tList;
-    }*/
+
+
+        List<ReturnEntity> returnEntityList = new ArrayList<>(mapList.size());
+        List<List<String>> columnNameListList = new ArrayList<>();
+        Map firstMap = mapList.get(0);
+        Set<Map.Entry> entrySet = firstMap.entrySet();
+        for(Map.Entry entry:entrySet){
+            List<String> nameList = WsStringUtils.split((String) entry.getKey(),'.');
+            nameList.set(0,getParticular(nameList.get(0)));
+            columnNameListList.add(nameList);
+
+        }
+
+
+
+
+
+        //FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
+
+
+        List<FieldColumnRelationMapper> fieldColumnRelationMapperList = new ArrayList<>();
+        List<FieldColumnRelation> fieldColumnRelationList = new ArrayList<>();
+
+        int i = -1;
+        for(Map map:mapList){
+            Set<Map.Entry> set = map.entrySet();
+            for(Map.Entry entry:set){
+                List<String> nameList;
+                if(i == -1){
+                    nameList = WsStringUtils.split((String)entry.getKey(),'.');
+                    columnNameListList.add(nameList);
+                    nameList.set(0,getParticular(nameList.get(0)));
+                    /*FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
+                    FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
+                    fieldColumnRelationMapperList.add(mapper);
+                    fieldColumnRelationList.add(fieldColumnRelation);*/
+                }else {
+                    nameList = columnNameListList.get(i);
+                    /*FieldColumnRelationMapper mapper = fieldColumnRelationMapperList.get(i);
+                    FieldColumnRelation fieldColumnRelation = fieldColumnRelationList.get(i);*/
+                    ++i;
+                }
+
+                FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
+                FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
+
+            }
+            i = 0;
+
+        }
+
+        return null;
+    }
+
+
 
     /**
      * 创建table nick name

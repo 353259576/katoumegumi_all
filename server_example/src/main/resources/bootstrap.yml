@@ -75,8 +75,9 @@ megumi:
 
 mybatis-plus:
   type-aliases-package: cn.katoumegumi.java.lx.model
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  #configuration:
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath*:/mybatisMapper/**/*.xml
 dubbo:
   cloud:
     subscribed-services: "*"

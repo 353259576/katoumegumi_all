@@ -5,6 +5,8 @@ import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.datasource.WsJdbcUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
+import cn.katoumegumi.java.http.client.model.HttpRequestBody;
+import cn.katoumegumi.java.http.client.model.HttpResponseTask;
 import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.mapper.UserMapper;
 import cn.katoumegumi.java.lx.model.User;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -46,6 +49,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 @Service(version = "1.0.0", protocol = {"dubbo", "rest"})
@@ -68,7 +72,7 @@ public class IndexController implements IndexService {
     @Autowired
     private UserService userService;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     @Autowired
@@ -82,7 +86,7 @@ public class IndexController implements IndexService {
     private WsJdbcUtils jdbcUtils;
 
     public static void main(String[] args) {
-        WsDateUtils.getExecutionTime.accept(()->{
+        /*WsDateUtils.getExecutionTime.accept(()->{
         for(int i = 0; i < 10; i++){
             MySearchList searchList = MySearchList.create(User.class).setAlias("u");
             searchList
@@ -98,7 +102,7 @@ public class IndexController implements IndexService {
                                     .setAlias("udr")
                                     .on("id","userDetailsId")
                     );
-            /*searchList
+            *//*searchList
                     .innerJoin(UserDetails.class,
                             t -> t.setJoinTableNickName("userDetails")
                                     .setAlias("ud")
@@ -119,21 +123,29 @@ public class IndexController implements IndexService {
                     .sql("{u}.id = ? and {ud}.id = ?",new Integer[]{10,10})
                     .and(s->s.eq("udr.id","10").gte("udr.remake","165"))
                     .or(s->s.eq("udr.id","10").gte("udr.remake","165"))
-                    .eq("udr.id",10);*/
-            /*SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList);
-            String sql = sqlModelUtils.select().getSelectSql();*/
-            /*System.out.println(sql);*/
-            searchList.like("name","%你好%");
+                    .eq("udr.id",10);*//*
+            *//*SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList);
+            String sql = sqlModelUtils.select().getSelectSql();*//*
+            *//*System.out.println(sql);*//*
+            //searchList.like("name","%你好%");
             long start = System.currentTimeMillis();
             List<User> userList = mysqlClientTest(searchList,User.class);
             long end = System.currentTimeMillis();
             System.out.println("执行时间为："+(end - start));
         }
-    });
+    });*/
+        User user = new User();
 
-
+        MySearchList mySearchList = MySearchList.create(User.class);
+        List<User> list = mysqlClientTest(mySearchList,User.class);
+        //System.out.println(JSON.toJSONString(list));
 
         // mysqlClientTest(searchList);
+
+       /* for(int i = 0; i < 10000; i++){
+            HttpResponseTask httpResponseTask = HttpRequestBody.createHttpRequestBody()
+                    .setUrl("http://localhost:1920/index4").setMethod("GET").nettyBuild();
+        }*/
 
     }
 
@@ -312,11 +324,12 @@ public class IndexController implements IndexService {
     @ResponseBody
     public String index4() {
         WsDateUtils.getExecutionTime.accept(()->{
-            MySearchList mySearchList = MySearchList.create(User.class)
-                    .leftJoin(UserDetails.class,t->t.setJoinTableNickName("userDetails").setAlias("ud").on("id","userId"))
-                    .leftJoin(UserDetailsRemake.class,t->t.setTableNickName("userDetails").setJoinTableNickName("userDetails.userDetailsRemake").setAlias("udr").on("id","userDetailsId"))
-                    .leftJoin(UserDetailsRemake.class,t->t.setTableNickName("userDetails").setJoinTableNickName("userDetails.userDetailsRemake1").setAlias("udr1").on("id","userDetailsId"));
-            jdbcUtils.getListT(mySearchList);
+            MySearchList mySearchList = MySearchList.create(User.class);
+                    //.leftJoin(UserDetails.class,t->t.setJoinTableNickName("userDetails").setAlias("ud").on("id","userId"))
+                    //.leftJoin(UserDetailsRemake.class,t->t.setTableNickName("userDetails").setJoinTableNickName("userDetails.userDetailsRemake").setAlias("udr").on("id","userDetailsId"));
+                    //.leftJoin(UserDetailsRemake.class,t->t.setTableNickName("userDetails").setJoinTableNickName("userDetails.userDetailsRemake1").setAlias("udr1").on("id","userDetailsId"));
+            List<User> userList = jdbcUtils.getListT(mySearchList);
+            //System.out.println(JSON.toJSONString(userList));
         });
         return "成功";
     }

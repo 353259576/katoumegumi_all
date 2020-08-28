@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
+import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
 import cn.katoumegumi.java.http.client.model.HttpRequestBody;
@@ -9,6 +10,8 @@ import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
+import cn.katoumegumi.java.lx.service.IndexService;
+import cn.katoumegumi.java.lx.service.UserService;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.UpdateSqlEntity;
@@ -36,6 +39,9 @@ public class Index2Conftoller {
     private UserJpaDao userJpaDao;
     @Autowired
     private HibernateDao hibernateDao;
+
+    @Autowired
+    private UserService userService;
 
     public static void main(String[] args) {
         /*String str = new BCryptPasswordEncoder().encode("nacos");
@@ -165,7 +171,7 @@ public class Index2Conftoller {
                 .eqp(user::getName, user::getPassword)
                 .sort("id", "ASC")
                 .sort("userDetails.sex", "DESC");
-        List<User> users = hibernateDao.selectValueToList(mySearchList, User.class);
+        List<User> users = userService.selectList(mySearchList);
         return JSON.toJSONString(user);
     }
 
@@ -173,6 +179,7 @@ public class Index2Conftoller {
     @RequestMapping(value = "index2")
     @ResponseBody
     @HibernateTransactional
+    @DataBase(dataBaseName = "")
     public Mono<String> index(ServerHttpRequest serverHttpRequest) {
         System.out.println(serverHttpRequest.getId());
         System.out.println(serverHttpRequest.getMethod().name());

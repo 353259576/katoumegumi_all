@@ -4,7 +4,9 @@ import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.http.model.ValueEntity;
 import cn.katoumegumi.java.sql.*;
+import cn.katoumegumi.java.sql.entity.ReturnColumnEntity;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -266,6 +268,12 @@ public class WsJdbcUtils {
     }
 
     private List handleJdbcReturnValue(String sql, List finalList) {
+
+        /*jdbcTemplate.query(sql, finalList.toArray(),(resultSet)->{
+            int length = resultSet.getMetaData().getColumnCount();
+            List<String> nameList = new ArrayList<>();
+
+        });*/
         List<String> nameList = new ArrayList<>();
         List list = jdbcTemplate.query(sql, finalList.toArray(), (resultSet, i) -> {
             if (i < 1) {
@@ -274,11 +282,16 @@ public class WsJdbcUtils {
                     nameList.add(resultSet.getMetaData().getColumnLabel(j + 1));
                 }
             }
-            Map map = new HashMap();
-            for (int j = 0; j < nameList.size(); j++) {
+            int length = nameList.size();
+            Map map = new HashMap((int) (length/0.75));
+            //List<ReturnColumnEntity> valueList = new ArrayList<>(nameListLength);
+            for (int j = 0; j < length; ++j) {
+                //valueList.add(new ReturnColumnEntity(nameList.get(j),resultSet.getObject(j+1)));
                 map.put(nameList.get(j), resultSet.getObject(j + 1));
+
             }
             return map;
+            //return valueList;
         });
         return list;
     }

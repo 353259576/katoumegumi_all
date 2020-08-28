@@ -45,5 +45,14 @@
                  inner join user_details_remake udr on udr.user_details_id = ud.id
     </select>
 
+    <!--<select id="selectUserList" resultMap="userBaseResultMap">
+        select u.id                as uid,
+               u.name              as uname,
+               u.password          as upassword,
+               u.create_date       as ucreate_date
+        from ws_user u
+
+    </select>-->
+
 
 </mapper>

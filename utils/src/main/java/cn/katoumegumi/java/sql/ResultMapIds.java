@@ -11,8 +11,6 @@ public class ResultMapIds {
 
     private List<Object> set;
 
-    private String md5;
-
     /**
      * 构造函数
      *
@@ -84,13 +82,5 @@ public class ResultMapIds {
 
     public void setSet(List<Object> set) {
         this.set = set;
-    }
-
-    public String getMd5() {
-        return md5;
-    }
-
-    public void setMd5(String md5) {
-        this.md5 = md5;
     }
 }

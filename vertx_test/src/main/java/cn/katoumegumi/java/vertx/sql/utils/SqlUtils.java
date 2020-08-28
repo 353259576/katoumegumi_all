@@ -3,6 +3,7 @@ package cn.katoumegumi.java.vertx.sql.utils;
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.entity.SelectCallable;
+import com.alibaba.fastjson.JSON;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -34,18 +35,33 @@ public class SqlUtils {
                     Map map = new HashMap(mapSize);
                     while (iterator.hasNext()) {
                         o = iterator.next();
-                        if (o != null) {
+                        //if (o != null) {
                             map.put(columnNameList.get(j), o);
-                        }
+                        //}
                         j++;
                     }
                     mapList.add(map);
                     j = 0;
                 }
+                long start = System.currentTimeMillis();
                 mapList = sqlModelUtils.handleMap(mapList);
+                long end = System.currentTimeMillis();
+                System.out.println("整理格式花费时间为："+(end - start));
+                start = System.currentTimeMillis();
                 mapList = sqlModelUtils.mergeMapList(mapList);
+                end = System.currentTimeMillis();
+                System.out.println("合并数据花费时间为："+(end - start));
+                start = System.currentTimeMillis();
                 List<T> valueList = sqlModelUtils.loadingObject(mapList);
+                end = System.currentTimeMillis();
+                System.out.println("转换为对象花费时间为："+(end - start));
+                /*long start = System.currentTimeMillis();
+                List<T> valueList = sqlModelUtils.oneLoopMargeMap(mapList);
+                long end = System.currentTimeMillis();
+                System.out.println("查询时间为："+(end - start));*/
                 selectCallable.put(valueList);
+            }else {
+                asyncResult.cause().printStackTrace();
             }
         };
     }
