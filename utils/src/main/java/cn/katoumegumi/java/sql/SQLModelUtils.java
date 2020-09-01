@@ -2031,8 +2031,6 @@ public class SQLModelUtils {
                 ReturnEntity nextEntity = returnEntityMap.get(nextTableName);
                 if(nextEntity != null){
                     ReturnEntity entity = getReturnEntity(idReturnEntityMap,returnEntityMap,nextEntity);
-
-
                     if(fieldJoinClass.isArray()){
                         if(nextEntity == entity){
                             Field field = fieldJoinClass.getField();
@@ -2042,7 +2040,6 @@ public class SQLModelUtils {
                                     value = new String((byte[])value);
                                 }
                                 if(value == null){
-
                                     List list = new ArrayList();
                                     list.add(entity.getValue());
                                     field.set(o,list);
