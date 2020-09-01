@@ -7,7 +7,7 @@
         <result property="name" column="uname"/>
         <result property="password" column="upassword"/>
         <result property="createDate" column="ucreate_date"/>
-        <collection property="userDetails" ofType="cn.katoumegumi.java.lx.model.UserDetails">
+        <association property="userDetails" javaType="cn.katoumegumi.java.lx.model.UserDetails">
             <id property="userId" column="uduser_id"/>
             <result property="id" column="udid"/>
             <result property="nickName" column="udnick_name"/>
@@ -17,7 +17,7 @@
                 <result property="id" column="udrid"/>
                 <result property="remake" column="udrremake"/>
             </collection>
-        </collection>
+        </association>
     </resultMap>
 
 
@@ -41,8 +41,8 @@
                udr.remake          as udrremake,
                udr.user_details_id as udruser_details_id
         from ws_user u
-                 inner join ws_user_details ud on ud.user_id = u.id
-                 inner join user_details_remake udr on udr.user_details_id = ud.id
+                 left join ws_user_details ud on ud.user_id = u.id
+                 left join user_details_remake udr on udr.user_details_id = ud.id
     </select>
 
     <!--<select id="selectUserList" resultMap="userBaseResultMap">

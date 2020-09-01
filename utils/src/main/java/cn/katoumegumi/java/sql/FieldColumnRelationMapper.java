@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.sql;
 
+import cn.katoumegumi.java.common.WsListUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +16,28 @@ public class FieldColumnRelationMapper {
     private String nickName;
     private String tableName;
     private Class<?> clazz;
+
+    /**
+     * id
+     */
     private List<FieldColumnRelation> idSet = new ArrayList<>();
+
+    /**
+     * 非Id
+     */
     private List<FieldColumnRelation> fieldColumnRelations = new ArrayList<>();
+
+    /**
+     * 关联对象
+     */
     private List<FieldJoinClass> fieldJoinClasses = new ArrayList<>();
     private Map<String, FieldColumnRelation> fieldColumnRelationMap = new HashMap<>();
+
+    /**
+     * 位置
+     */
+    private Map<Object,Integer> locationMap = new HashMap<>();
+
     private Map<String, FieldColumnRelationMapper> map;
 
 
@@ -36,22 +56,11 @@ public class FieldColumnRelationMapper {
     }
 
     public FieldColumnRelation getFieldColumnRelationByField(String fieldName) {
-        /*for(FieldColumnRelation fieldColumnRelation:idSet){
-            if(fieldColumnRelation.getFieldName().equals(fieldName)){
-                return fieldColumnRelation;
-            }
-        }
-        for(FieldColumnRelation fieldColumnRelation:fieldColumnRelations){
-            if(fieldColumnRelation.getFieldName().equals(fieldName)){
-                return fieldColumnRelation;
-            }
-        }*/
         FieldColumnRelation fieldColumnRelation = fieldColumnRelationMap.get(fieldName);
         if (fieldColumnRelation == null) {
             throw new RuntimeException("未发现对象含有属性：" + fieldName);
         }
         return fieldColumnRelation;
-        //return null;
     }
 
 
@@ -144,6 +153,24 @@ public class FieldColumnRelationMapper {
 
     public void setFieldColumnRelationMap(Map<String, FieldColumnRelation> fieldColumnRelationMap) {
         this.fieldColumnRelationMap = fieldColumnRelationMap;
+    }
+
+    public void markSignLocation(){
+        for(int i = 0; i < idSet.size(); i++){
+            locationMap.put(idSet.get(i),i);
+        }
+        for(int i = 0; i < fieldColumnRelations.size(); i++){
+            locationMap.put(fieldColumnRelations.get(i),i);
+        }
+        if(WsListUtils.isNotEmpty(fieldJoinClasses)){
+            for(int i = 0; i < fieldJoinClasses.size(); i++){
+                locationMap.put(fieldJoinClasses.get(i),i);
+            }
+        }
+    }
+
+    public Integer getLocation(Object o){
+        return locationMap.get(o);
     }
 
     @Override

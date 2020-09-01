@@ -86,67 +86,12 @@ public class IndexController implements IndexService {
     private WsJdbcUtils jdbcUtils;
 
     public static void main(String[] args) {
-        /*WsDateUtils.getExecutionTime.accept(()->{
-        for(int i = 0; i < 10; i++){
-            MySearchList searchList = MySearchList.create(User.class).setAlias("u");
-            searchList
-                    .setPageVO(new Page(2,10))
-                    .innerJoin(UserDetails.class,
-                            t -> t.setJoinTableNickName("userDetails")
-                            .setAlias("ud")
-                            .on("id","userId")
-                    )
-                    .innerJoin(UserDetailsRemake.class,
-                            t->t.setTableNickName("userDetails")
-                                    .setJoinTableNickName("userDetails.userDetailsRemakeList")
-                                    .setAlias("udr")
-                                    .on("id","userDetailsId")
-                    );
-            *//*searchList
-                    .innerJoin(UserDetails.class,
-                            t -> t.setJoinTableNickName("userDetails")
-                                    .setAlias("ud")
-                                    .on("id","userId")
-                                    .condition(s->s.eq("ud.id",10))
-                    )
-                    .innerJoin(UserDetailsRemake.class,
-                            t->t.setTableNickName("userDetails")
-                            .setJoinTableNickName("userDetails.userDetailsRemakeList")
-                            .setAlias("udr")
-                            .on("id","userDetailsId")
-                    )
-                    .innerJoin(UserDetailsRemake.class,
-                            t->t.setAlias("udr2")
-                            .on("id","userDetailsId")
-                    )
-                    .eqp("id","ud.id")
-                    .sql("{u}.id = ? and {ud}.id = ?",new Integer[]{10,10})
-                    .and(s->s.eq("udr.id","10").gte("udr.remake","165"))
-                    .or(s->s.eq("udr.id","10").gte("udr.remake","165"))
-                    .eq("udr.id",10);*//*
-            *//*SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList);
-            String sql = sqlModelUtils.select().getSelectSql();*//*
-            *//*System.out.println(sql);*//*
-            //searchList.like("name","%你好%");
-            long start = System.currentTimeMillis();
-            List<User> userList = mysqlClientTest(searchList,User.class);
-            long end = System.currentTimeMillis();
-            System.out.println("执行时间为："+(end - start));
-        }
-    });*/
+
         User user = new User();
 
         MySearchList mySearchList = MySearchList.create(User.class);
         List<User> list = mysqlClientTest(mySearchList,User.class);
-        //System.out.println(JSON.toJSONString(list));
-
-        // mysqlClientTest(searchList);
-
-       /* for(int i = 0; i < 10000; i++){
-            HttpResponseTask httpResponseTask = HttpRequestBody.createHttpRequestBody()
-                    .setUrl("http://localhost:1920/index4").setMethod("GET").nettyBuild();
-        }*/
-
+        System.out.println(JSON.toJSONString(list));
     }
 
     private static final SQLClient client = getSqlClient();
@@ -301,6 +246,7 @@ public class IndexController implements IndexService {
         };
         runnableSupplier.accept(() -> {
             List<User> users = userMapper.selectUserList();
+            return;
         });
         //List<User> users = userMapper.selectList(Wrappers.emptyWrapper());
         /*for (int i = 0; i < 1; i++){

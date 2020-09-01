@@ -43,7 +43,7 @@ public class SqlUtils {
                     mapList.add(map);
                     j = 0;
                 }
-                long start = System.currentTimeMillis();
+                /*long start = System.currentTimeMillis();
                 mapList = sqlModelUtils.handleMap(mapList);
                 long end = System.currentTimeMillis();
                 System.out.println("整理格式花费时间为："+(end - start));
@@ -54,11 +54,11 @@ public class SqlUtils {
                 start = System.currentTimeMillis();
                 List<T> valueList = sqlModelUtils.loadingObject(mapList);
                 end = System.currentTimeMillis();
-                System.out.println("转换为对象花费时间为："+(end - start));
-                /*long start = System.currentTimeMillis();
+                System.out.println("转换为对象花费时间为："+(end - start));*/
+                long start = System.currentTimeMillis();
                 List<T> valueList = sqlModelUtils.oneLoopMargeMap(mapList);
                 long end = System.currentTimeMillis();
-                System.out.println("查询时间为："+(end - start));*/
+                System.out.println("查询时间为："+(end - start));
                 selectCallable.put(valueList);
             }else {
                 asyncResult.cause().printStackTrace();

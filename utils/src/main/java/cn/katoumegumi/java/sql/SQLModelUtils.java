@@ -6,16 +6,19 @@ import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
 import cn.katoumegumi.java.sql.entity.ReturnEntity;
+import cn.katoumegumi.java.sql.entity.ReturnEntityId;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.core.toolkit.BeanUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.persistence.criteria.JoinType;
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -299,6 +302,7 @@ public class SQLModelUtils {
             }
         }
         fieldColumnRelationMapper.setClazz(clazz);
+        fieldColumnRelationMapper.markSignLocation();
         mapperMap.put(clazz, fieldColumnRelationMapper);
 
         return fieldColumnRelationMapper;
@@ -397,6 +401,7 @@ public class SQLModelUtils {
                 }
             }
         }
+        fieldColumnRelationMapper.markSignLocation();
         mapperMap.put(clazz, fieldColumnRelationMapper);
         return fieldColumnRelationMapper;
     }
@@ -1864,57 +1869,209 @@ public class SQLModelUtils {
             return new ArrayList<>(0);
         }
 
+        FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
+        String baseTableName = mainMapper.getNickName();
 
         List<ReturnEntity> returnEntityList = new ArrayList<>(mapList.size());
         List<List<String>> columnNameListList = new ArrayList<>();
+        List<FieldColumnRelationMapper> mapperList = new ArrayList<>(mapList.size());
+        List<FieldColumnRelation> columnRelationList = new ArrayList<>(mapList.size());
         Map firstMap = mapList.get(0);
         Set<Map.Entry> entrySet = firstMap.entrySet();
+
+
+
+
         for(Map.Entry entry:entrySet){
             List<String> nameList = WsStringUtils.split((String) entry.getKey(),'.');
             nameList.set(0,getParticular(nameList.get(0)));
+            FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
+            FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
+
             columnNameListList.add(nameList);
+            mapperList.add(mapper);
+            columnRelationList.add(fieldColumnRelation);
+
+
+
 
         }
+        Map<ReturnEntityId,ReturnEntity> idReturnEntityMap = new HashMap<>();
 
-
-
-
-
-        //FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
-
-
-        List<FieldColumnRelationMapper> fieldColumnRelationMapperList = new ArrayList<>();
-        List<FieldColumnRelation> fieldColumnRelationList = new ArrayList<>();
-
-        int i = -1;
+        Map<String,ReturnEntity> returnEntityMap;
         for(Map map:mapList){
-            Set<Map.Entry> set = map.entrySet();
-            for(Map.Entry entry:set){
-                List<String> nameList;
-                if(i == -1){
-                    nameList = WsStringUtils.split((String)entry.getKey(),'.');
-                    columnNameListList.add(nameList);
-                    nameList.set(0,getParticular(nameList.get(0)));
-                    /*FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
-                    FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
-                    fieldColumnRelationMapperList.add(mapper);
-                    fieldColumnRelationList.add(fieldColumnRelation);*/
+            returnEntityMap = new HashMap<>();
+            entrySet = map.entrySet();
+            int i = 0;
+            for(Map.Entry entry:entrySet){
+                List<String> nameList = columnNameListList.get(i);
+                FieldColumnRelationMapper mapper = mapperList.get(i);
+                FieldColumnRelation fieldColumnRelation = columnRelationList.get(i);
+                ReturnEntity returnEntity = returnEntityMap.computeIfAbsent(nameList.get(0),columnTypeName->{
+                    ReturnEntity entity = new ReturnEntity();
+                    entity.setFieldColumnRelationMapper(mapper);
+                    Object[] idList = new Object[mapper.getIdSet().size()];
+                    Object[] columnList = new Object[mapper.getFieldColumnRelations().size()];
+                    ReturnEntity[] returnEntities = new ReturnEntity[mapper.getFieldJoinClasses().size()];
+                    entity.setIdValueList(idList);
+                    entity.setColumnValueList(columnList);
+                    entity.setJoinEntityList(returnEntities);
+                    return entity;
+                });
+
+                if(fieldColumnRelation.isId()){
+                    returnEntity.getIdValueList()[mapper.getLocation(fieldColumnRelation)] = entry.getValue();
                 }else {
-                    nameList = columnNameListList.get(i);
-                    /*FieldColumnRelationMapper mapper = fieldColumnRelationMapperList.get(i);
-                    FieldColumnRelation fieldColumnRelation = fieldColumnRelationList.get(i);*/
-                    ++i;
+                    returnEntity.getColumnValueList()[mapper.getLocation(fieldColumnRelation)] = entry.getValue();
                 }
-
-                FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
-                FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
-
+                ++i;
             }
-            i = 0;
+            ReturnEntity returnEntity = returnEntityMap.get(baseTableName);
+            ReturnEntity mainEntity = getReturnEntity(idReturnEntityMap,returnEntityMap,returnEntity);
+            packageReturnEntity(idReturnEntityMap,returnEntityMap,mainEntity,baseTableName);
+            if(returnEntity.equals(mainEntity)){
+                returnEntityList.add(mainEntity);
+            }
+
+
 
         }
 
-        return null;
+        List list = new ArrayList(returnEntityList.size());
+        for(ReturnEntity returnEntity:returnEntityList){
+            list.add(returnEntity.getValue());
+        }
+
+        return list;
+    }
+
+
+    /**
+     * 把returnEntity转换为相应的对象
+     * @param returnEntity
+     * @return
+     */
+    private Object returnEntityToObject(ReturnEntity returnEntity){
+        FieldColumnRelationMapper mapper = returnEntity.getFieldColumnRelationMapper();
+        Object o = WsBeanUtils.createObject(mapper.getClazz());
+        List<FieldColumnRelation> list = mapper.getIdSet();
+        if(WsListUtils.isNotEmpty(list)){
+            int length = list.size();
+            for(int i = 0; i < length; ++i){
+
+                Object value = returnEntity.getIdValueList()[i];
+                if(value != null){
+                    FieldColumnRelation fieldColumnRelation = list.get(i);
+                    try {
+                        fieldColumnRelation.getField().set(o,value);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        list = mapper.getFieldColumnRelations();
+        if(WsListUtils.isNotEmpty(list)){
+            int length = list.size();
+            for(int i = 0; i < length; ++i){
+
+                Object value = returnEntity.getColumnValueList()[i];
+                if(value != null){
+                    FieldColumnRelation fieldColumnRelation = list.get(i);
+                    try {
+                        fieldColumnRelation.getField().set(o,WsBeanUtils.objectToT(value,fieldColumnRelation.getFieldClass()));
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return o;
+    }
+
+    /**
+     * 获取id对应的returnEntity
+     * @param idReturnEntityMap
+     * @param returnEntityMap
+     * @param returnEntity
+     * @return
+     */
+    private ReturnEntity getReturnEntity(Map<ReturnEntityId,ReturnEntity> idReturnEntityMap,Map<String,ReturnEntity> returnEntityMap,ReturnEntity returnEntity){
+
+        FieldColumnRelationMapper fieldColumnRelationMapper = returnEntity.getFieldColumnRelationMapper();
+        if(WsListUtils.isNotEmpty(fieldColumnRelationMapper.getIdSet())){
+            ReturnEntityId returnEntityId = new ReturnEntityId(fieldColumnRelationMapper.getIdSet(),returnEntity.getIdValueList());
+            return idReturnEntityMap.computeIfAbsent(returnEntityId,id-> {
+                returnEntity.setValue(returnEntityToObject(returnEntity));
+                return returnEntity;
+            });
+        }else {
+            returnEntity.setValue(returnEntityToObject(returnEntity));
+            return returnEntity;
+        }
+    }
+
+    /**
+     * 包装returnEntity
+     * @param idReturnEntityMap
+     * @param returnEntityMap
+     * @param returnEntity
+     * @param tableName
+     * @return
+     */
+    private ReturnEntity packageReturnEntity(Map<ReturnEntityId,ReturnEntity> idReturnEntityMap,Map<String,ReturnEntity> returnEntityMap,ReturnEntity returnEntity,String tableName){
+        FieldColumnRelationMapper mapper = returnEntity.getFieldColumnRelationMapper();
+        if(WsListUtils.isNotEmpty(mapper.getFieldJoinClasses())){
+            List<FieldJoinClass> fieldJoinClassList = mapper.getFieldJoinClasses();
+            int length = fieldJoinClassList.size();
+            Object o = returnEntity.getValue();
+            for(int i = 0; i < length; ++i){
+                FieldJoinClass fieldJoinClass = fieldJoinClassList.get(i);
+                String nextTableName = tableName +"." + fieldJoinClass.getNickName();
+                ReturnEntity nextEntity = returnEntityMap.get(nextTableName);
+                if(nextEntity != null){
+                    ReturnEntity entity = getReturnEntity(idReturnEntityMap,returnEntityMap,nextEntity);
+
+
+                    if(fieldJoinClass.isArray()){
+                        if(nextEntity == entity){
+                            Field field = fieldJoinClass.getField();
+                            try {
+                                Object value = field.get(o);
+                                if(value instanceof byte[]){
+                                    value = new String((byte[])value);
+                                }
+                                if(value == null){
+
+                                    List list = new ArrayList();
+                                    list.add(entity.getValue());
+                                    field.set(o,list);
+
+                                }else {
+                                    if(value instanceof Collection) {
+                                        ((Collection) value).add(entity.getValue());
+                                    }
+                                }
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }else {
+                        if(nextEntity == entity){
+                            Field field = fieldJoinClass.getField();
+                            try {
+                                field.set(o,entity.getValue());
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+                    ReturnEntity r1 = packageReturnEntity(idReturnEntityMap,returnEntityMap,entity,nextTableName);
+                }
+            }
+        }
+        return returnEntity;
     }
 
 

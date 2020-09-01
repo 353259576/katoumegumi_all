@@ -1,5 +1,8 @@
 package cn.katoumegumi.java.sql.entity;
 
+import cn.katoumegumi.java.sql.FieldColumnRelation;
+import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,26 +12,54 @@ import java.util.List;
  */
 public class ReturnEntity {
 
-    private List<ReturnColumnEntity> columnEntityList;
+    private Object value;
 
-    private int idIndex = 0;
+    private FieldColumnRelationMapper fieldColumnRelationMapper;
+
+    private Object[] idValueList;
+
+    private Object[] columnValueList;
+
+    private ReturnEntity[] joinEntityList;
 
 
-    public List<ReturnColumnEntity> getColumnEntityList() {
-        return columnEntityList;
+    public FieldColumnRelationMapper getFieldColumnRelationMapper() {
+        return fieldColumnRelationMapper;
     }
 
-    public ReturnEntity setColumnEntityList(List<ReturnColumnEntity> columnEntityList) {
-        this.columnEntityList = columnEntityList;
-        return this;
+    public void setFieldColumnRelationMapper(FieldColumnRelationMapper fieldColumnRelationMapper) {
+        this.fieldColumnRelationMapper = fieldColumnRelationMapper;
     }
 
-    public int getIdIndex() {
-        return idIndex;
+    public Object[] getIdValueList() {
+        return idValueList;
     }
 
-    public ReturnEntity setIdIndex(int idIndex) {
-        this.idIndex = idIndex;
-        return this;
+    public void setIdValueList(Object[] idValueList) {
+        this.idValueList = idValueList;
+    }
+
+    public Object[] getColumnValueList() {
+        return columnValueList;
+    }
+
+    public void setColumnValueList(Object[] columnValueList) {
+        this.columnValueList = columnValueList;
+    }
+
+    public ReturnEntity[] getJoinEntityList() {
+        return joinEntityList;
+    }
+
+    public void setJoinEntityList(ReturnEntity[] joinEntityList) {
+        this.joinEntityList = joinEntityList;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
     }
 }
