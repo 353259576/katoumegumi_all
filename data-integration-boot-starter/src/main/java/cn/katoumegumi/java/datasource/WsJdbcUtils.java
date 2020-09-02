@@ -4,16 +4,16 @@ import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
-import cn.katoumegumi.java.http.model.ValueEntity;
 import cn.katoumegumi.java.sql.*;
-import cn.katoumegumi.java.sql.entity.ReturnColumnEntity;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author 王松
@@ -261,11 +262,24 @@ public class WsJdbcUtils {
 
         List finalList = selectSqlEntity.getValueList();
 
+        return handleJdbcReturnValue(sql,finalList,sqlModelUtils);
 
-        List list = handleJdbcReturnValue(sql, finalList);
+        //List list = handleJdbcReturnValue(sql, finalList);
 
-        return sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
+        //return sqlModelUtils.oneLoopMargeMap(list);
+        //return sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
     }
+
+    private <T> List<T> handleJdbcReturnValue(String sql,List finalList,SQLModelUtils sqlModelUtils){
+        return jdbcTemplate.query(sql, finalList.toArray(), new ResultSetExtractor<List<T>>() {
+            @Override
+            public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
+                List<T> list = sqlModelUtils.oneLoopMargeMap(rs);
+                return list;
+            }
+        });
+    }
+
 
     private List handleJdbcReturnValue(String sql, List finalList) {
 
@@ -275,6 +289,7 @@ public class WsJdbcUtils {
 
         });*/
         List<String> nameList = new ArrayList<>();
+
         List list = jdbcTemplate.query(sql, finalList.toArray(), (resultSet, i) -> {
             if (i < 1) {
                 int length = resultSet.getMetaData().getColumnCount();
@@ -353,9 +368,9 @@ public class WsJdbcUtils {
         log.debug(sql);
         String countSql = selectSqlEntity.getCountSql();
         List finalList = selectSqlEntity.getValueList();
-        List list = handleJdbcReturnValue(sql, finalList);
+        //List list = handleJdbcReturnValue(sql, finalList);
 
-        List<T> tList = sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
+        List<T> tList = handleJdbcReturnValue(sql,finalList,sqlModelUtils);//sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
         Long count = jdbcTemplate.queryForObject(countSql, finalList.toArray(), Long.class);
         if (count == null) {
             count = 0L;

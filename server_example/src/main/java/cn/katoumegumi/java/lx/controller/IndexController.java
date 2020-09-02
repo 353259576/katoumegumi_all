@@ -91,7 +91,7 @@ public class IndexController implements IndexService {
 
         MySearchList mySearchList = MySearchList.create(User.class);
         List<User> list = mysqlClientTest(mySearchList,User.class);
-        System.out.println(JSON.toJSONString(list));
+        //System.out.println(JSON.toJSONString(list));
     }
 
     private static final SQLClient client = getSqlClient();
@@ -271,6 +271,7 @@ public class IndexController implements IndexService {
     public String index4() {
         WsDateUtils.getExecutionTime.accept(()->{
             MySearchList mySearchList = MySearchList.create(User.class);
+            mySearchList.eq("id","87244");
                     //.leftJoin(UserDetails.class,t->t.setJoinTableNickName("userDetails").setAlias("ud").on("id","userId"))
                     //.leftJoin(UserDetailsRemake.class,t->t.setTableNickName("userDetails").setJoinTableNickName("userDetails.userDetailsRemake").setAlias("udr").on("id","userDetailsId"));
                     //.leftJoin(UserDetailsRemake.class,t->t.setTableNickName("userDetails").setJoinTableNickName("userDetails.userDetailsRemake1").setAlias("udr1").on("id","userDetailsId"));

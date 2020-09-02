@@ -11,8 +11,6 @@ import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.core.toolkit.BeanUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,12 +20,16 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author ws
@@ -316,6 +318,7 @@ public class SQLModelUtils {
      */
     private static FieldColumnRelationMapper mybatisPlusAnalysisClassRelation(Class<?> clazz) {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
+        fieldColumnRelationMapper.setClazz(clazz);
         TableName table = clazz.getAnnotation(TableName.class);
         if (table == null) {
             fieldColumnRelationMapper.setTableName(getChangeColumnName(clazz.getSimpleName()));
@@ -357,12 +360,12 @@ public class SQLModelUtils {
                     fieldColumnRelation.setId(false);
                     fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
                 } else {
+                    fieldColumnRelation.setId(true);
                     if (WsStringUtils.isBlank(id.value())) {
                         fieldColumnRelation.setColumnName(getChangeColumnName(getChangeColumnName(field.getName())));
                     } else {
                         fieldColumnRelation.setColumnName(id.value());
                     }
-
                     fieldColumnRelationMapper.getIdSet().add(fieldColumnRelation);
                 }
             } else {
@@ -1856,6 +1859,99 @@ public class SQLModelUtils {
         return deleteSqlEntity;
     }
 
+
+
+    public <T> List<T> oneLoopMargeMap(ResultSet resultSet){
+        try {
+            int length = 0;
+            int classNum = localMapperMap.size();
+            ResultSetMetaData resultSetMetaData = null;
+
+            resultSetMetaData = resultSet.getMetaData();
+            length = resultSetMetaData.getColumnCount();
+
+            if(length == 0){
+                return Collections.emptyList();
+            }
+            FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
+            String baseTableName = mainMapper.getNickName();
+
+
+            List<List<String>> columnNameListList = new ArrayList<>(length);
+            List<FieldColumnRelationMapper> mapperList = new ArrayList<>(length);
+            List<FieldColumnRelation> columnRelationList = new ArrayList<>(length);
+
+
+            String columnName = null;
+            for(int i = 0; i < length; i++){
+                columnName = resultSetMetaData.getColumnLabel(i + 1);
+                List<String> nameList = WsStringUtils.split(columnName,'.');
+                nameList.set(0,getParticular(nameList.get(0)));
+                FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
+                FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
+                columnNameListList.add(nameList);
+                mapperList.add(mapper);
+                columnRelationList.add(fieldColumnRelation);
+            }
+
+            List<ReturnEntity> returnEntityList = new ArrayList<>();
+            Map<ReturnEntityId,ReturnEntity> idReturnEntityMap = new HashMap<>();
+
+            Map<String,ReturnEntity> returnEntityMap;
+            while (resultSet.next()){
+                returnEntityMap = new HashMap<>(classNum);
+                Object value;
+                for(int i = 0;i < length; ++i){
+                    value = resultSet.getObject(i + 1);
+                    List<String> nameList = columnNameListList.get(i);
+                    FieldColumnRelationMapper mapper = mapperList.get(i);
+                    FieldColumnRelation fieldColumnRelation = columnRelationList.get(i);
+                    ReturnEntity returnEntity = returnEntityMap.computeIfAbsent(nameList.get(0),columnTypeName->{
+                        ReturnEntity entity = new ReturnEntity();
+                        entity.setFieldColumnRelationMapper(mapper);
+                        Object[] idList = new Object[mapper.getIdSet().size()];
+                        Object[] columnList = new Object[mapper.getFieldColumnRelations().size()];
+                        ReturnEntity[] returnEntities = new ReturnEntity[mapper.getFieldJoinClasses().size()];
+                        entity.setIdValueList(idList);
+                        entity.setColumnValueList(columnList);
+                        entity.setJoinEntityList(returnEntities);
+                        return entity;
+                    });
+
+                    if(fieldColumnRelation.isId()){
+                        returnEntity.getIdValueList()[mapper.getLocation(fieldColumnRelation)] = value;
+                    }else {
+                        returnEntity.getColumnValueList()[mapper.getLocation(fieldColumnRelation)] = value;
+                    }
+                }
+                ReturnEntity returnEntity = returnEntityMap.get(baseTableName);
+                ReturnEntity mainEntity = getReturnEntity(idReturnEntityMap,returnEntityMap,returnEntity);
+                packageReturnEntity(idReturnEntityMap,returnEntityMap,mainEntity,baseTableName);
+                if(returnEntity.equals(mainEntity)){
+                    returnEntityList.add(mainEntity);
+                }
+            }
+            if(returnEntityList.size() == 0){
+                return Collections.emptyList();
+            }
+            List<T> list = (List<T>)new ArrayList(returnEntityList.size());
+            for(ReturnEntity returnEntity:returnEntityList){
+                list.add((T)returnEntity.getValue());
+            }
+
+            return list;
+
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return Collections.emptyList();
+        }
+
+
+
+
+    }
+
     /**
      * 合并生成数据（没写完废弃）
      *
@@ -1876,11 +1972,10 @@ public class SQLModelUtils {
         List<List<String>> columnNameListList = new ArrayList<>();
         List<FieldColumnRelationMapper> mapperList = new ArrayList<>(mapList.size());
         List<FieldColumnRelation> columnRelationList = new ArrayList<>(mapList.size());
+        Map<ReturnEntityId,ReturnEntity> idReturnEntityMap = new HashMap<>(mapList.size());
+
         Map firstMap = mapList.get(0);
         Set<Map.Entry> entrySet = firstMap.entrySet();
-
-
-
 
         for(Map.Entry entry:entrySet){
             List<String> nameList = WsStringUtils.split((String) entry.getKey(),'.');
@@ -1891,12 +1986,8 @@ public class SQLModelUtils {
             columnNameListList.add(nameList);
             mapperList.add(mapper);
             columnRelationList.add(fieldColumnRelation);
-
-
-
-
         }
-        Map<ReturnEntityId,ReturnEntity> idReturnEntityMap = new HashMap<>();
+
 
         Map<String,ReturnEntity> returnEntityMap;
         for(Map map:mapList){
@@ -1963,7 +2054,10 @@ public class SQLModelUtils {
                 if(value != null){
                     FieldColumnRelation fieldColumnRelation = list.get(i);
                     try {
-                        fieldColumnRelation.getField().set(o,value);
+                        if(value instanceof byte[]) {
+                            value = new String((byte[]) value);
+                        }
+                        fieldColumnRelation.getField().set(o,WsBeanUtils.objectToT(value,fieldColumnRelation.getFieldClass()));
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                     }
@@ -1979,6 +2073,9 @@ public class SQLModelUtils {
                 if(value != null){
                     FieldColumnRelation fieldColumnRelation = list.get(i);
                     try {
+                        if(value instanceof byte[]){
+                            value = new String((byte[]) value);
+                        }
                         fieldColumnRelation.getField().set(o,WsBeanUtils.objectToT(value,fieldColumnRelation.getFieldClass()));
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
@@ -2036,9 +2133,6 @@ public class SQLModelUtils {
                             Field field = fieldJoinClass.getField();
                             try {
                                 Object value = field.get(o);
-                                if(value instanceof byte[]){
-                                    value = new String((byte[])value);
-                                }
                                 if(value == null){
                                     List list = new ArrayList();
                                     list.add(entity.getValue());

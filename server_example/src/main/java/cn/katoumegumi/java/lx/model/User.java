@@ -37,7 +37,7 @@ public class User implements Serializable {
     private LocalDateTime createDate;
 
     //@Transient
-    @OneToOne
-    @JoinColumn(referencedColumnName = "user_id")
-    private /*List<*/UserDetails/*>*/ userDetails;
+    /*@OneToMany
+    @JoinColumn(name= "user_id")
+    private List<UserDetails> userDetails;*/
 }
