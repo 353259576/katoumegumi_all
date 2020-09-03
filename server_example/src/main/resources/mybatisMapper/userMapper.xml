@@ -7,7 +7,7 @@
         <result property="name" column="uname"/>
         <result property="password" column="upassword"/>
         <result property="createDate" column="ucreate_date"/>
-        <association property="userDetails" javaType="cn.katoumegumi.java.lx.model.UserDetails">
+        <collection property="userDetails" ofType="cn.katoumegumi.java.lx.model.UserDetails">
             <id property="userId" column="uduser_id"/>
             <result property="id" column="udid"/>
             <result property="nickName" column="udnick_name"/>
@@ -17,7 +17,7 @@
                 <result property="id" column="udrid"/>
                 <result property="remake" column="udrremake"/>
             </collection>
-        </association>
+        </collection>
     </resultMap>
 
 

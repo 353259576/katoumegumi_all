@@ -12,6 +12,8 @@ import java.util.List;
  */
 public class ReturnEntity {
 
+    private ReturnEntityId returnEntityId;
+
     private Object value;
 
     private FieldColumnRelationMapper fieldColumnRelationMapper;
@@ -21,6 +23,8 @@ public class ReturnEntity {
     private Object[] columnValueList;
 
     private ReturnEntity[] joinEntityList;
+
+    private ReturnEntity parentReturnEntity;
 
 
     public FieldColumnRelationMapper getFieldColumnRelationMapper() {
@@ -61,5 +65,21 @@ public class ReturnEntity {
 
     public void setValue(Object value) {
         this.value = value;
+    }
+
+    public ReturnEntity getParentReturnEntity() {
+        return parentReturnEntity;
+    }
+
+    public void setParentReturnEntity(ReturnEntity parentReturnEntity) {
+        this.parentReturnEntity = parentReturnEntity;
+    }
+
+    public ReturnEntityId getReturnEntityId() {
+        return returnEntityId;
+    }
+
+    public void setReturnEntityId(ReturnEntityId returnEntityId) {
+        this.returnEntityId = returnEntityId;
     }
 }

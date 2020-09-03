@@ -1895,7 +1895,7 @@ public class SQLModelUtils {
             }
 
             List<ReturnEntity> returnEntityList = new ArrayList<>();
-            Map<ReturnEntityId,ReturnEntity> idReturnEntityMap = new HashMap<>();
+            Map<Class,Map<ReturnEntityId,ReturnEntity>> idReturnEntityMap = new HashMap<>();
 
             Map<String,ReturnEntity> returnEntityMap;
             while (resultSet.next()){
@@ -1972,7 +1972,7 @@ public class SQLModelUtils {
         List<List<String>> columnNameListList = new ArrayList<>();
         List<FieldColumnRelationMapper> mapperList = new ArrayList<>(mapList.size());
         List<FieldColumnRelation> columnRelationList = new ArrayList<>(mapList.size());
-        Map<ReturnEntityId,ReturnEntity> idReturnEntityMap = new HashMap<>(mapList.size());
+        Map<Class,Map<ReturnEntityId,ReturnEntity>> idReturnEntityMap = new HashMap<>(mapList.size());
 
         Map firstMap = mapList.get(0);
         Set<Map.Entry> entrySet = firstMap.entrySet();
@@ -2093,12 +2093,14 @@ public class SQLModelUtils {
      * @param returnEntity
      * @return
      */
-    private ReturnEntity getReturnEntity(Map<ReturnEntityId,ReturnEntity> idReturnEntityMap,Map<String,ReturnEntity> returnEntityMap,ReturnEntity returnEntity){
+    private ReturnEntity getReturnEntity(Map<Class,Map<ReturnEntityId,ReturnEntity>> idReturnEntityMap,Map<String,ReturnEntity> returnEntityMap,ReturnEntity returnEntity){
 
         FieldColumnRelationMapper fieldColumnRelationMapper = returnEntity.getFieldColumnRelationMapper();
         if(WsListUtils.isNotEmpty(fieldColumnRelationMapper.getIdSet())){
-            ReturnEntityId returnEntityId = new ReturnEntityId(fieldColumnRelationMapper.getIdSet(),returnEntity.getIdValueList());
-            return idReturnEntityMap.computeIfAbsent(returnEntityId,id-> {
+            ReturnEntityId returnEntityId = new ReturnEntityId(fieldColumnRelationMapper.getIdSet(),returnEntity);
+            returnEntity.setReturnEntityId(returnEntityId);
+            Map<ReturnEntityId,ReturnEntity> map = idReturnEntityMap.computeIfAbsent(fieldColumnRelationMapper.getClazz(),c->new HashMap<>());
+            return map.computeIfAbsent(returnEntityId,id-> {
                 returnEntity.setValue(returnEntityToObject(returnEntity));
                 return returnEntity;
             });
@@ -2116,7 +2118,7 @@ public class SQLModelUtils {
      * @param tableName
      * @return
      */
-    private ReturnEntity packageReturnEntity(Map<ReturnEntityId,ReturnEntity> idReturnEntityMap,Map<String,ReturnEntity> returnEntityMap,ReturnEntity returnEntity,String tableName){
+    private ReturnEntity packageReturnEntity(Map<Class,Map<ReturnEntityId,ReturnEntity>> idReturnEntityMap,Map<String,ReturnEntity> returnEntityMap,ReturnEntity returnEntity,String tableName){
         FieldColumnRelationMapper mapper = returnEntity.getFieldColumnRelationMapper();
         if(WsListUtils.isNotEmpty(mapper.getFieldJoinClasses())){
             List<FieldJoinClass> fieldJoinClassList = mapper.getFieldJoinClasses();
@@ -2127,6 +2129,7 @@ public class SQLModelUtils {
                 String nextTableName = tableName +"." + fieldJoinClass.getNickName();
                 ReturnEntity nextEntity = returnEntityMap.get(nextTableName);
                 if(nextEntity != null){
+                    nextEntity.setParentReturnEntity(returnEntity);
                     ReturnEntity entity = getReturnEntity(idReturnEntityMap,returnEntityMap,nextEntity);
                     if(fieldJoinClass.isArray()){
                         if(nextEntity == entity){

@@ -6,9 +6,10 @@ import java.util.List;
 
 public class ReturnEntityId {
 
-    private int hashCode;
+    private String idSign;
 
-    public ReturnEntityId(List<FieldColumnRelation> idList,Object[] valueList){
+    public ReturnEntityId(List<FieldColumnRelation> idList,ReturnEntity returnEntity){
+        Object[] valueList = returnEntity.getIdValueList();
         StringBuilder stringBuilder = new StringBuilder();
         int length = idList.size();
         for(int i = 0; i < length; i++){
@@ -21,16 +22,17 @@ public class ReturnEntityId {
             }
             stringBuilder.append("_");
         }
-        hashCode = stringBuilder.toString().hashCode();
-    }
-
-    public ReturnEntityId(ReturnEntity returnEntity){
-        this.hashCode = returnEntity.hashCode();
+        ReturnEntity entity = returnEntity.getParentReturnEntity();
+        if (entity != null){
+            stringBuilder.append(";");
+            stringBuilder.append(entity.getReturnEntityId().getIdSign());
+        }
+        idSign = stringBuilder.toString();
     }
 
     @Override
     public int hashCode() {
-        return hashCode;
+        return idSign.hashCode();
     }
 
     @Override
@@ -38,6 +40,17 @@ public class ReturnEntityId {
         if(!(obj instanceof ReturnEntityId)){
             return false;
         }
-        return obj.hashCode() == this.hashCode();
+        if(obj.hashCode() != this.hashCode()){
+            return false;
+        }
+        return ((ReturnEntityId) obj).getIdSign().equals(this.getIdSign());
+    }
+
+    public String getIdSign() {
+        return idSign;
+    }
+
+    public void setIdSign(String idSign) {
+        this.idSign = idSign;
     }
 }

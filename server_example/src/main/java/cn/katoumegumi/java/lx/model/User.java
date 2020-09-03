@@ -37,7 +37,7 @@ public class User implements Serializable {
     private LocalDateTime createDate;
 
     //@Transient
-    /*@OneToMany
+    @OneToMany
     @JoinColumn(name= "user_id")
-    private List<UserDetails> userDetails;*/
+    private List<UserDetails> userDetails;
 }

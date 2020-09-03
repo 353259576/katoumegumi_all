@@ -27,6 +27,8 @@ import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -44,6 +46,14 @@ public class Index2Conftoller {
     private UserService userService;
 
     public static void main(String[] args) {
+
+        for(int i = 0; i < 100; i++){
+            HttpRequestBody httpRequestBody = HttpRequestBody.createHttpRequestBody();
+            httpRequestBody.setUrl("http://127.0.0.1:1920/index3")
+                    .setMethod("GET");
+            httpRequestBody.nettyBuild();
+
+        }
 
     }
 
