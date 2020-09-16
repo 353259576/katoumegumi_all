@@ -90,6 +90,8 @@ public class IndexController implements IndexService {
         User user = new User();
 
         MySearchList mySearchList = MySearchList.create(User.class);
+        mySearchList.setAlias("u");
+        mySearchList.exists("select * from ws_user_details ud where {u}.id = ud.user_id",null);
         List<User> list = mysqlClientTest(mySearchList,User.class);
         System.out.println(JSON.toJSONString(list));
     }

@@ -310,18 +310,6 @@ public class MySearchList {
     }
 
     /**
-     * sql语句 sql语句表名用{}包围
-     *
-     * @param supplierFunc
-     * @param value
-     * @param <T>
-     * @return
-     */
-    public <T> MySearchList sql(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.SQL, value);
-    }
-
-    /**
      * 排序
      *
      * @param supplierFunc
@@ -556,16 +544,12 @@ public class MySearchList {
         return add(column, SqlOperator.NE, value);
     }
 
-    /**
-     * 嵌入sql语句
-     *
-     * @param column
-     * @param value
-     * @param <T>
-     * @return
-     */
-    public <T> MySearchList sql(String column, Object value) {
-        return add(column, SqlOperator.SQL, value);
+    public <T> MySearchList sql(String sql, Object value) {
+        return add(sql, SqlOperator.SQL, value);
+    }
+
+    public <T> MySearchList exists(String sql, Object value) {
+        return add(sql, SqlOperator.EXISTS, value);
     }
 
     public <T> MySearchList sort(String column, Object value) {

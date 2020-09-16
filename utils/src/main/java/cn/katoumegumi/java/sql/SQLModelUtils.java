@@ -678,7 +678,7 @@ public class SQLModelUtils {
         ColumnBaseEntity columnBaseEntity = null;
         FieldColumnRelation fieldColumnRelation = null;
         String value = null;
-        if(mySearch.getOperator().equals(SqlOperator.SQL)){
+        if(mySearch.getOperator().equals(SqlOperator.SQL) || mySearch.getOperator().equals(SqlOperator.EXISTS)){
             tableColumn = new StringBuilder();
         }else {
             tableColumn = new StringBuilder();
@@ -815,6 +815,24 @@ public class SQLModelUtils {
             case SQL:
 
                 tableColumn.append(translateTableNickName(prefix, mySearch.getFieldName()));
+                if (mySearch.getValue() != null) {
+                    if (mySearch.getValue() instanceof Collection) {
+                        Collection<?> collection = (Collection<?>) mySearch.getValue();
+                        baseWhereValueList.addAll(collection);
+                    } else if (mySearch.getValue().getClass().isArray()) {
+                        Object[] os = (Object[]) mySearch.getValue();
+                        baseWhereValueList.addAll(Arrays.asList(os));
+                    } else {
+                        baseWhereValueList.add(mySearch.getValue());
+                    }
+                }
+
+                //tableColumn.append(mySearch.getValue());
+                break;
+            case EXISTS:
+                tableColumn.append(" exists (");
+                tableColumn.append(translateTableNickName(prefix, mySearch.getFieldName()));
+                tableColumn.append(") ");
                 if (mySearch.getValue() != null) {
                     if (mySearch.getValue() instanceof Collection) {
                         Collection<?> collection = (Collection<?>) mySearch.getValue();
@@ -1677,7 +1695,7 @@ public class SQLModelUtils {
      * @param <T>
      * @return
      */
-    public <T> UpdateSqlEntity update(T t) {
+    public <T> UpdateSqlEntity update(T t,boolean isAll) {
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(t.getClass());
         List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
         List<FieldColumnRelation> columnList = fieldColumnRelationMapper.getFieldColumnRelations();
@@ -1701,7 +1719,7 @@ public class SQLModelUtils {
                     e.printStackTrace();
                 }
             }
-            if (o != null) {
+            if (isAll || o != null) {
                 String str = guardKeyword(fieldColumnRelation.getColumnName()) + " = ? ";
                 columnStrList.add(str);
                 valueList.add(o);
@@ -1953,13 +1971,12 @@ public class SQLModelUtils {
     }
 
     /**
-     * 合并生成数据（没写完废弃）
+     * 合并生成数据
      *
      * @param mapList
      * @param <T>
      * @return
      */
-    @Deprecated
     public  <T> List<T> oneLoopMargeMap(List<Map> mapList) {
         if(WsListUtils.isEmpty(mapList)) {
             return new ArrayList<>(0);
@@ -2404,6 +2421,9 @@ public class SQLModelUtils {
             }
             prefixString = sb.toString();
             mapper = localMapperMap.get(prefixString);
+            if(mapper == null){
+                throw new RuntimeException(prefixString+"不存在");
+            }
             fieldName = fieldNameList.get(size - 1);
             fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
         }

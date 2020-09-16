@@ -60,6 +60,7 @@ public enum SqlOperator {
      * 嵌入sql 只有hibernate支持
      */
     SQL,
+    EXISTS,
     /**
      * 排序
      */

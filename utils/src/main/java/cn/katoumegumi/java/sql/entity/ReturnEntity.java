@@ -11,19 +11,39 @@ import java.util.List;
  * @author ws
  */
 public class ReturnEntity {
-
+    /**
+     * id
+     */
     private ReturnEntityId returnEntityId;
 
+    /**
+     * 对象
+     */
     private Object value;
 
+    /**
+     * 对象关系数据
+     */
     private FieldColumnRelationMapper fieldColumnRelationMapper;
 
+    /**
+     * id的值
+     */
     private Object[] idValueList;
 
+    /**
+     * 其他值
+     */
     private Object[] columnValueList;
 
+    /**
+     * 关联的对象
+     */
     private ReturnEntity[] joinEntityList;
 
+    /**
+     * 父对象
+     */
     private ReturnEntity parentReturnEntity;
 
 

@@ -186,11 +186,13 @@ public class WsJdbcUtils {
         return preparedStatementCreator;
     }
 
-
-    public <T> int update(T t) {
+    public <T> int update(T t){
+        return update(t,false);
+    }
+    public <T> int update(T t,boolean isAll) {
         MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t);
+        UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t,isAll);
         log.debug(updateSqlEntity.getUpdateSql());
         return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), updateSqlEntity.getValueList().toArray());
     }
@@ -219,7 +221,11 @@ public class WsJdbcUtils {
         });
     }
 
-    public <T> void updateBatchByT(List<T> tList) {
+    public <T> void updateBatchByT(List<T> tList){
+        updateBatchByT(tList,false);
+    }
+
+    public <T> void updateBatchByT(List<T> tList,boolean isAll) {
 
         Map<String,List<Object[]>> map = new HashMap<>();
         List<String> sqlList = new ArrayList<>(tList.size());
@@ -227,7 +233,7 @@ public class WsJdbcUtils {
         for(T t:tList){
             MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(t.getClass());
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-            UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t);
+            UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t,isAll);
             List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(),sql->{
                 return new ArrayList<>();
             });
