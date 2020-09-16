@@ -16,9 +16,11 @@ import cn.katoumegumi.java.lx.model.UserDetailsRemake;
 import cn.katoumegumi.java.lx.service.IndexService;
 import cn.katoumegumi.java.lx.service.UserService;
 import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.PageConvertUtil;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.SelectSqlEntity;
 import cn.katoumegumi.java.sql.entity.SelectCallable;
+import cn.katoumegumi.java.utils.PageConvertUtils;
 import cn.katoumegumi.java.vertx.sql.utils.SqlUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -94,6 +96,10 @@ public class IndexController implements IndexService {
         mySearchList.exists("select * from ws_user_details ud where {u}.id = ud.user_id",null);
         List<User> list = mysqlClientTest(mySearchList,User.class);
         System.out.println(JSON.toJSONString(list));
+        Page<User> page = new Page<>();
+        page.setRecords(list);
+        IPage<User> userIPage = PageConvertUtils.copyPage(page,User.class);
+        System.out.println(JSON.toJSONString(userIPage));
     }
 
     private static final SQLClient client = getSqlClient();
