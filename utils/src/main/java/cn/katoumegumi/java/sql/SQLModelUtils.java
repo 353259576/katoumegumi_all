@@ -2046,9 +2046,6 @@ public class SQLModelUtils {
             if(returnEntity.equals(mainEntity)){
                 returnEntityList.add(mainEntity);
             }
-
-
-
         }
 
         List list = new ArrayList(returnEntityList.size());
