@@ -681,12 +681,18 @@ public class SQLModelUtils {
         if(mySearch.getOperator().equals(SqlOperator.SQL) || mySearch.getOperator().equals(SqlOperator.EXISTS)){
             tableColumn = new StringBuilder();
         }else {
-            tableColumn = new StringBuilder();
-            columnBaseEntity = getColumnBaseEntity(mySearch.getFieldName(),prefix);
-            tableColumn.append(guardKeyword(columnBaseEntity.getAlias()));
-            tableColumn.append(".");
-            tableColumn.append(guardKeyword(columnBaseEntity.getColumnName()));
-            fieldColumnRelation = columnBaseEntity.getFieldColumnRelation();
+            if(mySearch.getOperator().equals(SqlOperator.SORT) && mySearch.getFieldName().endsWith(")")){
+                tableColumn =new StringBuilder();
+                tableColumn.append(mySearch.getFieldName());
+            }else {
+                tableColumn = new StringBuilder();
+                columnBaseEntity = getColumnBaseEntity(mySearch.getFieldName(),prefix);
+                tableColumn.append(guardKeyword(columnBaseEntity.getAlias()));
+                tableColumn.append(".");
+                tableColumn.append(guardKeyword(columnBaseEntity.getColumnName()));
+                fieldColumnRelation = columnBaseEntity.getFieldColumnRelation();
+            }
+
         }
 
 
@@ -2063,12 +2069,14 @@ public class SQLModelUtils {
         FieldColumnRelationMapper mapper = returnEntity.getFieldColumnRelationMapper();
         Object o = WsBeanUtils.createObject(mapper.getClazz());
         List<FieldColumnRelation> list = mapper.getIdSet();
+        boolean haveValue = false;
         if(WsListUtils.isNotEmpty(list)){
             int length = list.size();
             for(int i = 0; i < length; ++i){
 
                 Object value = returnEntity.getIdValueList()[i];
                 if(value != null){
+                    haveValue = true;
                     FieldColumnRelation fieldColumnRelation = list.get(i);
                     try {
                         if(value instanceof byte[]) {
@@ -2088,6 +2096,7 @@ public class SQLModelUtils {
 
                 Object value = returnEntity.getColumnValueList()[i];
                 if(value != null){
+                    haveValue = true;
                     FieldColumnRelation fieldColumnRelation = list.get(i);
                     try {
                         if(value instanceof byte[]){
@@ -2100,7 +2109,12 @@ public class SQLModelUtils {
                 }
             }
         }
-        return o;
+        if(haveValue){
+            return o;
+        }else {
+            return null;
+        }
+
     }
 
     /**
@@ -2148,6 +2162,9 @@ public class SQLModelUtils {
                 if(nextEntity != null){
                     nextEntity.setParentReturnEntity(returnEntity);
                     ReturnEntity entity = getReturnEntity(idReturnEntityMap,returnEntityMap,nextEntity);
+                    if(entity.getValue() == null){
+                        continue;
+                    }
                     if(fieldJoinClass.isArray()){
                         if(nextEntity == entity){
                             Field field = fieldJoinClass.getField();
