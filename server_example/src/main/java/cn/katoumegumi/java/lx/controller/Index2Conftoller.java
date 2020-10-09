@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
+import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
@@ -47,13 +48,26 @@ public class Index2Conftoller {
 
     public static void main(String[] args) {
 
-        for(int i = 0; i < 100; i++){
+        /*for(int i = 0; i < 100; i++){
             HttpRequestBody httpRequestBody = HttpRequestBody.createHttpRequestBody();
             httpRequestBody.setUrl("http://127.0.0.1:1920/index3")
                     .setMethod("GET");
             httpRequestBody.nettyBuild();
 
-        }
+        }*/
+
+        WsDateUtils.getExecutionTime.accept(()->{
+            boolean k = false;
+
+            for(int i = 0; i < 100000000; ++i){
+                //if(!k) {
+                    k = true;
+                //}
+            }
+        });
+
+
+
 
     }
 

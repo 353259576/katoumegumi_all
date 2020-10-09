@@ -1870,7 +1870,7 @@ public class SQLModelUtils {
         }
         searchSql = searchSql.substring(index);
         FieldColumnRelationMapper mapper = analysisClassRelation(mainClass);
-        String deleteSql = "DELETE FROM " + guardKeyword(mapper.getTableName()) + " " + guardKeyword(getAbbreviation(mapper.getNickName())) + " " + searchSql;
+        String deleteSql = "DELETE "+getAbbreviation(mapper.getNickName())+" FROM " + guardKeyword(mapper.getTableName()) + " " + guardKeyword(getAbbreviation(mapper.getNickName())) + " " + searchSql;
         DeleteSqlEntity deleteSqlEntity = new DeleteSqlEntity();
         deleteSqlEntity.setDeleteSql(deleteSql);
         deleteSqlEntity.setValueList(baseWhereValueList);
@@ -1942,10 +1942,12 @@ public class SQLModelUtils {
                     }
                 }
                 ReturnEntity returnEntity = returnEntityMap.get(baseTableName);
-                ReturnEntity mainEntity = getReturnEntity(idReturnEntityMap, returnEntityMap, returnEntity);
-                packageReturnEntity(idReturnEntityMap, returnEntityMap, mainEntity, baseTableName);
-                if (returnEntity.equals(mainEntity)) {
-                    returnEntityList.add(mainEntity);
+                if(returnEntity != null) {
+                    ReturnEntity mainEntity = getReturnEntity(idReturnEntityMap, returnEntityMap, returnEntity);
+                    packageReturnEntity(idReturnEntityMap, returnEntityMap, mainEntity, baseTableName);
+                    if (returnEntity.equals(mainEntity)) {
+                        returnEntityList.add(mainEntity);
+                    }
                 }
             }
             if (returnEntityList.size() == 0) {
@@ -2009,6 +2011,10 @@ public class SQLModelUtils {
             entrySet = map.entrySet();
             int i = 0;
             for (Map.Entry entry : entrySet) {
+                if(entry.getValue() == null){
+                    ++i;
+                    continue;
+                }
                 List<String> nameList = columnNameListList.get(i);
                 FieldColumnRelationMapper mapper = mapperList.get(i);
                 FieldColumnRelation fieldColumnRelation = columnRelationList.get(i);
@@ -2032,10 +2038,12 @@ public class SQLModelUtils {
                 ++i;
             }
             ReturnEntity returnEntity = returnEntityMap.get(baseTableName);
-            ReturnEntity mainEntity = getReturnEntity(idReturnEntityMap, returnEntityMap, returnEntity);
-            packageReturnEntity(idReturnEntityMap, returnEntityMap, mainEntity, baseTableName);
-            if (returnEntity.equals(mainEntity)) {
-                returnEntityList.add(mainEntity);
+            if(returnEntity != null) {
+                ReturnEntity mainEntity = getReturnEntity(idReturnEntityMap, returnEntityMap, returnEntity);
+                packageReturnEntity(idReturnEntityMap, returnEntityMap, mainEntity, baseTableName);
+                if (returnEntity.equals(mainEntity)) {
+                    returnEntityList.add(mainEntity);
+                }
             }
         }
 
@@ -2058,14 +2066,20 @@ public class SQLModelUtils {
         FieldColumnRelationMapper mapper = returnEntity.getFieldColumnRelationMapper();
         Object o = WsBeanUtils.createObject(mapper.getClazz());
         List<FieldColumnRelation> list = mapper.getIdSet();
+        Object[] values = null;
         boolean haveValue = false;
-        if (WsListUtils.isNotEmpty(list)) {
-            int length = list.size();
+
+
+        values = returnEntity.getIdValueList();
+        if(values != null) {
+            int length = values.length;
             for (int i = 0; i < length; ++i) {
 
-                Object value = returnEntity.getIdValueList()[i];
+                Object value = values[i];
                 if (value != null) {
+
                     haveValue = true;
+
                     FieldColumnRelation fieldColumnRelation = list.get(i);
                     try {
                         if (value instanceof byte[]) {
@@ -2078,14 +2092,20 @@ public class SQLModelUtils {
                 }
             }
         }
+
+
+
         list = mapper.getFieldColumnRelations();
-        if (WsListUtils.isNotEmpty(list)) {
-            int length = list.size();
+        values = returnEntity.getColumnValueList();
+        if(values != null) {
+            int length = values.length;
             for (int i = 0; i < length; ++i) {
 
-                Object value = returnEntity.getColumnValueList()[i];
+                Object value = values[i];
                 if (value != null) {
+
                     haveValue = true;
+
                     FieldColumnRelation fieldColumnRelation = list.get(i);
                     try {
                         if (value instanceof byte[]) {
@@ -2098,6 +2118,7 @@ public class SQLModelUtils {
                 }
             }
         }
+
         if (haveValue) {
             return o;
         } else {

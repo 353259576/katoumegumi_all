@@ -37,7 +37,7 @@ public class WsDateUtils {
       long start = System.currentTimeMillis();
       wsRun.run();
       long end = System.currentTimeMillis();
-      log.info("执行时间为：{}",(end - start));
+        System.out.println("执行时间为："+(end - start));
     };
 
 

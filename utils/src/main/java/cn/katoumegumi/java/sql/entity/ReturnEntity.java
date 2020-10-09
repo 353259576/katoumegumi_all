@@ -47,6 +47,7 @@ public class ReturnEntity {
     private ReturnEntity parentReturnEntity;
 
 
+
     public FieldColumnRelationMapper getFieldColumnRelationMapper() {
         return fieldColumnRelationMapper;
     }
@@ -102,4 +103,5 @@ public class ReturnEntity {
     public void setReturnEntityId(ReturnEntityId returnEntityId) {
         this.returnEntityId = returnEntityId;
     }
+
 }
