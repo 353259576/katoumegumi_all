@@ -40,4 +40,5 @@ public class User implements Serializable {
     @OneToMany
     @JoinColumn(name= "user_id")
     private List<UserDetails> userDetails;
+
 }

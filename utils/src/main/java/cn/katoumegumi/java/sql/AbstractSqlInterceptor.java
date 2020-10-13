@@ -24,7 +24,8 @@ public abstract class AbstractSqlInterceptor {
     }
 
 
-    protected boolean useCondition(FieldColumnRelationMapper fieldColumnRelationMapper) {
+    protected boolean
+    useCondition(FieldColumnRelationMapper fieldColumnRelationMapper) {
         return true;
     }
 

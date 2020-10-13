@@ -807,11 +807,11 @@ public class WsBeanUtils {
     }
 
 
-    public void numberChange(Object o){
+    /*public void numberChange(Object o){
         if(o instanceof Number){
             Number n = (Number) o;
         }
-    }
+    }*/
 
     public static <T> List<T> mapToObjectList(List list, Class<T> clazz) {
         if (list == null || list.size() == 0) {
@@ -828,6 +828,10 @@ public class WsBeanUtils {
 
     public static boolean isBaseType(Class clazz) {
         return BaseTypeCommon.CLASS_SET.contains(clazz);
+    }
+
+    public static boolean isArray(Class<?> clazz){
+        return clazz.isArray() || WsFieldUtils.classCompare(clazz,Collection.class);
     }
 
 

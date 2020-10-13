@@ -48,10 +48,7 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Service(version = "1.0.0", protocol = {"dubbo", "rest"})
@@ -94,6 +91,7 @@ public class IndexController implements IndexService {
         MySearchList mySearchList = MySearchList.create(User.class);
         mySearchList.setAlias("u");
         mySearchList.exists("select * from ws_user_details ud where {u}.id = ud.user_id",null);
+        mySearchList.nIn(user::getId, Collections.singletonList(1));
         List<User> list = mysqlClientTest(mySearchList,User.class);
         System.out.println(JSON.toJSONString(list));
         Page<User> page = new Page<>();

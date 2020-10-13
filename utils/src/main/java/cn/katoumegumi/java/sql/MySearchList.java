@@ -1,9 +1,6 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.SupplierFunc;
-import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -21,10 +18,10 @@ public class MySearchList {
     private final List<MySearch> orderSearches = new ArrayList<>();
     private final List<MySearchList> ands = new ArrayList<>();
     private final List<MySearchList> ors = new ArrayList<>();
-    private final Map<Class, String> tableAndNickNameMap = new HashMap<>();
+    //private final Map<Class, String> tableAndNickNameMap = new HashMap<>();
     private final List<TableRelation> joins = new ArrayList<>();
     private List<MySearch> mySearches = new ArrayList<>();
-    private Class mainClass;
+    private Class<?> mainClass;
     private String alias;
 
     private JoinType defaultJoinType = JoinType.INNER;
@@ -62,28 +59,24 @@ public class MySearchList {
     }
     
     public MySearchList add(String fieldName, SqlOperator operator, Object value) {
-        if (operator.equals(SqlOperator.SORT)) {
-            orderSearches.add(new MySearch(fieldName, operator, value));
-            return this;
-        }
-
         if (value instanceof SupplierFunc) {
             value = WsFieldUtils.getFieldName((SupplierFunc<?>) value);
         }
-
-        if (mainClass != null) {
-            String tableName = tableAndNickNameMap.get(mainClass);
-            mySearches.add(new MySearch(mainClass, tableName, fieldName, operator, value));
-        } else {
-            mySearches.add(new MySearch(fieldName, operator, value));
+        checkValue(fieldName,operator,value);
+        if(operator.equals(SqlOperator.SORT)){
+            orderSearches.add(new MySearch(fieldName,operator,value));
+            return this;
         }
-
+        mySearches.add(new MySearch(fieldName, operator, value));
         return this;
     }
 
     public <T> MySearchList add(SupplierFunc<T> supplierFunc, SqlOperator operator, Object value) {
-        String name = WsFieldUtils.getFieldName(supplierFunc);
-        return add(name, operator, value);
+        return add(null,supplierFunc,operator,value);
+    }
+
+    public <T> MySearchList add(String tableName,SupplierFunc<T> supplierFunc, SqlOperator operator, Object value) {
+        return add(getColumnName(tableName,supplierFunc), operator, value);
     }
 
     public MySearch get(int i) {
@@ -115,6 +108,24 @@ public class MySearchList {
         return null;
     }
 
+    public MySearch get(String value) {
+        for (MySearch m : mySearches) {
+            if (m.getFieldName().equals(value)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    public MySearch get(String value, SqlOperator sqlOperator) {
+        for (MySearch m : mySearches) {
+            if (m.getFieldName().equals(value) && m.getOperator().equals(sqlOperator)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
 
     public MySearchList setPageVO(Page pageVO) {
         SqlLimit sqlLimit = new SqlLimit();
@@ -139,466 +150,820 @@ public class MySearchList {
         return this;
     }
 
-    public MySearch get(String value) {
-        for (MySearch m : mySearches) {
-            if (m.getFieldName().equals(value)) {
-                return m;
-            }
-        }
-        return null;
-    }
 
-    public MySearch get(String value, SqlOperator sqlOperator) {
-        for (MySearch m : mySearches) {
-            if (m.getFieldName().equals(value) && m.getOperator().equals(sqlOperator)) {
-                return m;
-            }
-        }
-        return null;
-    }
 
-    public Class getMainClass() {
+    public Class<?> getMainClass() {
         return mainClass;
     }
 
-    public MySearchList setMainClass(Class mainClass) {
-        if (!tableAndNickNameMap.containsKey(mainClass)) {
-            tableAndNickNameMap.put(mainClass, mainClass.getName());
-        }
+    public MySearchList setMainClass(Class<?> mainClass) {
         this.mainClass = mainClass;
         return this;
     }
 
     /**
      * 等于
-     *
-     * @param supplierFunc
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList eq(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.EQ, value);
+    public MySearchList eq(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.EQ,value);
     }
 
+    public MySearchList eq(String columnFieldName,Object value){
+        return eq(null,columnFieldName,value);
+    }
+
+    public MySearchList eq(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.EQ,value);
+    }
+
+    public MySearchList eq(SupplierFunc<?> columnFieldName,Object value){
+        return eq(null,columnFieldName,value);
+    }
+
+
     /**
-     * 模糊查询
-     *
-     * @param supplierFunc
-     * @param value        需要自己传入%
-     * @param <T>
+     * 不等于
+     * @param tableName
+     * @param columnFieldName
+     * @param value
      * @return
      */
-    public <T> MySearchList like(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.LIKE, value);
+    public MySearchList ne(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NE,value);
     }
+
+    public MySearchList ne(String columnFieldName,Object value){
+        return ne(null,columnFieldName,value);
+    }
+
+    public MySearchList ne(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NE,value);
+    }
+
+    public MySearchList ne(SupplierFunc<?> columnFieldName,Object value){
+        return eq(null,columnFieldName,value);
+    }
+
 
     /**
      * 大于
-     *
-     * @param supplierFunc
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList gt(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.GT, value);
+    public MySearchList gt(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GT,value);
+    }
+
+    public MySearchList gt(String columnFieldName,Object value){
+        return gt(null,columnFieldName,value);
+    }
+
+    public MySearchList gt(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GT,value);
+    }
+
+    public MySearchList gt(SupplierFunc<?> columnFieldName,Object value){
+        return gt(null,columnFieldName,value);
     }
 
     /**
      * 大于等于
-     *
-     * @param supplierFunc
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList gte(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.GTE, value);
+    public MySearchList gte(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GTE,value);
+    }
+
+    public MySearchList gte(String columnFieldName,Object value){
+        return gte(null,columnFieldName,value);
+    }
+
+    public MySearchList gte(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GTE,value);
+    }
+
+    public MySearchList gte(SupplierFunc<?> columnFieldName,Object value){
+        return gte(null,columnFieldName,value);
     }
 
     /**
      * 小于
-     *
-     * @param supplierFunc
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList lt(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.LT, value);
+    public MySearchList lt(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LT,value);
     }
+
+    public MySearchList lt(String columnFieldName,Object value){
+        return lt(null,columnFieldName,value);
+    }
+
+    public MySearchList lt(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LT,value);
+    }
+
+    public MySearchList lt(SupplierFunc<?> columnFieldName,Object value){
+        return lt(null,columnFieldName,value);
+    }
+
 
     /**
      * 小于等于
-     *
-     * @param supplierFunc
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList lte(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.LTE, value);
+    public MySearchList lte(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LTE,value);
+    }
+
+    public MySearchList lte(String columnFieldName,Object value){
+        return lte(null,columnFieldName,value);
+    }
+
+    public MySearchList lte(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.EQ,value);
+    }
+
+    public MySearchList lte(SupplierFunc<?> columnFieldName,Object value){
+        return lte(null,columnFieldName,value);
     }
 
     /**
      * in
-     *
-     * @param supplierFunc
-     * @param value        必须为list类型
-     * @param <T>
+     * @param tableName
+     * @param columnFieldName
+     * @param value
      * @return
      */
-    public <T> MySearchList in(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.IN, value);
+    public MySearchList in(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.IN,value);
+    }
+
+    public MySearchList in(String columnFieldName,Object value){
+        return in(null,columnFieldName,value);
+    }
+
+    public MySearchList in(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.IN,value);
+    }
+
+    public MySearchList in(SupplierFunc<?> columnFieldName,Object value){
+        return in(null,columnFieldName,value);
     }
 
     /**
      * not in
-     *
-     * @param supplierFunc
-     * @param value        必须为list类型
-     * @param <T>
-     * @return
-     */
-    public <T> MySearchList nin(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.NIN, value);
-    }
-
-    /**
-     * 字段为空
-     *
-     * @param supplierFunc
-     * @param value        不传
-     * @param <T>
-     * @return
-     */
-    public <T> MySearchList notNull(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.NOTNULL, value);
-    }
-
-    public <T> MySearchList notNull(SupplierFunc<T> supplierFunc) {
-        return add(supplierFunc, SqlOperator.NOTNULL, null);
-    }
-
-    /**
-     * 字段不为空
-     *
-     * @param supplierFunc
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList isNull(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.NULL, value);
+    public MySearchList nIn(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NIN,value);
     }
 
-    public <T> MySearchList isNull(SupplierFunc<T> supplierFunc) {
-        return add(supplierFunc, SqlOperator.NULL, null);
+    public MySearchList nIn(String columnFieldName,Object value){
+        return nIn(null,columnFieldName,value);
+    }
+
+    public MySearchList nIn(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NIN,value);
+    }
+
+    public MySearchList nIn(SupplierFunc<?> columnFieldName,Object value){
+        return nIn(null,columnFieldName,value);
     }
 
     /**
-     * 不等于
-     *
-     * @param supplierFunc
+     * 模糊查询
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList ne(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.NE, value);
+    public MySearchList like(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LIKE,value);
+    }
+
+    public MySearchList like(String columnFieldName,Object value){
+        return like(null,columnFieldName,value);
+    }
+
+    public MySearchList like(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LIKE,value);
+    }
+
+    public MySearchList like(SupplierFunc<?> columnFieldName,Object value){
+        return like(null,columnFieldName,value);
+    }
+
+
+    /**
+     * 为空
+     * @param tableName
+     * @param columnFieldName
+     * @param value
+     * @return
+     */
+    public MySearchList isNull(String tableName,String columnFieldName){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NULL,null);
+    }
+
+    public MySearchList isNull(String columnFieldName){
+        return isNull(null,columnFieldName);
+    }
+
+    public MySearchList isNull(String tableName,SupplierFunc<?> columnFieldName){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NULL,null);
+    }
+
+    public MySearchList isNull(SupplierFunc<?> columnFieldName){
+        return isNull(null,columnFieldName);
+    }
+
+
+
+
+
+    /**
+     * 不为空
+     * @param tableName
+     * @param columnFieldName
+     * @param value
+     * @return
+     */
+    public MySearchList isNotNull(String tableName,String columnFieldName){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NOTNULL,null);
+    }
+
+    public MySearchList isNotNull(String columnFieldName){
+        return isNotNull(null,columnFieldName);
+    }
+
+    public MySearchList isNotNull(String tableName,SupplierFunc<?> columnFieldName){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NOTNULL,null);
+    }
+
+    public MySearchList isNotNull(SupplierFunc<?> columnFieldName){
+        return isNotNull(null,columnFieldName);
     }
 
     /**
      * 排序
-     *
-     * @param supplierFunc
-     * @param value        desc 或 asc
-     * @param <T>
+     * @param tableName
+     * @param columnFieldName
+     * @param value
      * @return
      */
-    public <T> MySearchList sort(SupplierFunc<T> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.SORT, value);
+    public MySearchList sort(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.SORT,value);
     }
 
-    public <T> MySearchList eqp(SupplierFunc<?> supplierFunc, SupplierFunc<?> value) {
-        return add(supplierFunc, SqlOperator.EQP, WsFieldUtils.getFieldName(value));
+    public MySearchList sort(String columnFieldName,Object value){
+        return sort(null,columnFieldName,value);
     }
 
-    public <T> MySearchList nep(SupplierFunc<?> supplierFunc, SupplierFunc<?> value) {
-        return add(supplierFunc, SqlOperator.NEP, WsFieldUtils.getFieldName(value));
+    public MySearchList sort(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.SORT,value);
     }
 
-    public <T> MySearchList gtp(SupplierFunc<?> supplierFunc, SupplierFunc<?> value) {
-        return add(supplierFunc, SqlOperator.GTP, WsFieldUtils.getFieldName(value));
+    public MySearchList sort(SupplierFunc<?> columnFieldName,Object value){
+        return sort(null,columnFieldName,value);
     }
 
-    public <T> MySearchList ltp(SupplierFunc<?> supplierFunc, SupplierFunc<?> value) {
-        return add(supplierFunc, SqlOperator.LTP, WsFieldUtils.getFieldName(value));
+
+    /**
+     * between
+     * @param tableName
+     * @param columnFieldName
+     * @param value
+     * @return
+     */
+    public MySearchList between(String tableName,String columnFieldName,Object value1,Object value2){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.BETWEEN,Arrays.asList(value1,value2));
     }
 
-    public <T> MySearchList gtep(SupplierFunc<?> supplierFunc, SupplierFunc<?> value) {
-        return add(supplierFunc, SqlOperator.GTEP, WsFieldUtils.getFieldName(value));
+    public MySearchList between(String columnFieldName,Object value1,Object value2){
+        return between(null,columnFieldName,value1,value2);
     }
 
-    public <T> MySearchList ltep(SupplierFunc<?> supplierFunc, SupplierFunc<?> value) {
-        return add(supplierFunc, SqlOperator.LTEP, WsFieldUtils.getFieldName(value));
+    public MySearchList between(String tableName,SupplierFunc<?> columnFieldName,Object value1,Object value2){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.BETWEEN,Arrays.asList(value1,value2));
+    }
+
+    public MySearchList between(SupplierFunc<?> columnFieldName,Object value1,Object value2){
+        return between(null,columnFieldName,value1,value2);
+    }
+
+
+    /**
+     * not between
+     * @param tableName
+     * @param columnFieldName
+     * @param value
+     * @return
+     */
+    public MySearchList notBetween(String tableName,String columnFieldName,Object value1,Object value2){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NOT_BETWEEN,Arrays.asList(value1,value2));
+    }
+
+    public MySearchList notBetween(String columnFieldName,Object value1,Object value2){
+        return notBetween(null,columnFieldName,value1,value2);
+    }
+
+    public MySearchList notBetween(String tableName,SupplierFunc<?> columnFieldName,Object value1,Object value2){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.NOT_BETWEEN,Arrays.asList(value1,value2));
+    }
+
+    public MySearchList notBetween(SupplierFunc<?> columnFieldName,Object value1,Object value2){
+        return notBetween(null,columnFieldName,value1,value2);
     }
 
     /**
-     * 修改使用 set
-     *
-     * @param supplierFunc
+     * 插入sql语句
+     * @param sql
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList set(SupplierFunc<?> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.SET, value);
+    public MySearchList sql(String sql,Object value){
+        return add(sql,SqlOperator.SQL,value);
     }
 
     /**
-     * 增加
-     *
-     * @param supplierFunc
+     * exists
+     * @param sql
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList add(SupplierFunc<?> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.ADD, value);
+    public MySearchList exists(String sql,Object value){
+        return add(sql,SqlOperator.EXISTS,value);
     }
 
     /**
-     * 减
-     *
-     * @param supplierFunc
+     * not exists
+     * @param sql
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList subtract(SupplierFunc<?> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.SUBTRACT, value);
+    public MySearchList notExists(String sql,Object value){
+        return add(sql,SqlOperator.NOT_EXISTS,value);
     }
 
-    /**
-     * 乘
-     *
-     * @param supplierFunc
-     * @param value
-     * @param <T>
-     * @return
-     */
-    public <T> MySearchList multiply(SupplierFunc<?> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.MULTIPLY, value);
-    }
-
-    /**
-     * 除
-     *
-     * @param supplierFunc
-     * @param value
-     * @param <T>
-     * @return
-     */
-    public <T> MySearchList divide(SupplierFunc<?> supplierFunc, Object value) {
-        return add(supplierFunc, SqlOperator.DIVIDE, value);
-    }
 
     /**
      * 等于
-     *
-     * @param column
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList eq(String column, Object value) {
-        return add(column, SqlOperator.EQ, value);
+    public MySearchList eqp(String tableName,String columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.EQP,getColumnName(valueTableName,value));
     }
 
-    /**
-     * 模糊查询
-     *
-     * @param column
-     * @param value
-     * @param <T>
-     * @return
-     */
-    public <T> MySearchList like(String column, Object value) {
-        return add(column, SqlOperator.LIKE, value);
+    public MySearchList eqp(String tableName,String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.EQP,getColumnName(valueTableName,value));
     }
+
+    public MySearchList eqp(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,SupplierFunc<?> value) {
+        return add(getColumnName(tableName, columnFieldName), SqlOperator.EQP, getColumnName(valueTableName, value));
+    }
+
+    public MySearchList eqp(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.EQP,getColumnName(valueTableName,value));
+    }
+
+    public MySearchList eqp(String columnFieldName,String value){
+        return eqp(null,columnFieldName,null,value);
+    }
+
+    public MySearchList eqp(String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return eqp(null,columnFieldName,valueTableName,value);
+    }
+
+    public MySearchList eqp(String columnFieldName,SupplierFunc<?> value) {
+        return eqp(null, columnFieldName, null, value);
+    }
+
+    public MySearchList eqp(SupplierFunc<?> columnFieldName,SupplierFunc<?> value){
+        return eqp(null,columnFieldName,null,value);
+    }
+
+    public MySearchList eqp(String tableName,SupplierFunc<?> columnFieldName,String value){
+        return eqp(tableName,columnFieldName,null,value);
+    }
+
 
     /**
      * 大于
-     *
-     * @param column
+     * @param tableName
+     * @param columnFieldName
+     * @param valueTableName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList gt(String column, Object value) {
-        return add(column, SqlOperator.GT, value);
+    public MySearchList gtp(String tableName,String columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GTP,getColumnName(valueTableName,value));
     }
+
+    public MySearchList gtp(String tableName,String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GTP,getColumnName(valueTableName,value));
+    }
+
+    public MySearchList gtp(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,SupplierFunc<?> value) {
+        return add(getColumnName(tableName, columnFieldName), SqlOperator.GTP, getColumnName(valueTableName, value));
+    }
+
+    public MySearchList gtp(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GTP,getColumnName(valueTableName,value));
+    }
+
+    public MySearchList gtp(String columnFieldName,String value){
+        return gtp(null,columnFieldName,null,value);
+    }
+
+    public MySearchList gtp(String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return gtp(null,columnFieldName,valueTableName,value);
+    }
+
+    public MySearchList gtp(String columnFieldName,SupplierFunc<?> value) {
+        return gtp(null, columnFieldName, null, value);
+    }
+
+    public MySearchList gtp(SupplierFunc<?> columnFieldName,SupplierFunc<?> value){
+        return gtp(null,columnFieldName,null,value);
+    }
+
+    public MySearchList gtp(String tableName,SupplierFunc<?> columnFieldName,String value){
+        return gtp(tableName,columnFieldName,null,value);
+    }
+
 
     /**
      * 大于等于
-     *
-     * @param column
+     * @param tableName
+     * @param columnFieldName
+     * @param valueTableName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList gte(String column, Object value) {
-        return add(column, SqlOperator.GTE, value);
+    public MySearchList gtep(String tableName,String columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GTEP,getColumnName(valueTableName,value));
     }
+
+    public MySearchList gtep(String tableName,String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GTEP,getColumnName(valueTableName,value));
+    }
+
+    public MySearchList gtep(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,SupplierFunc<?> value) {
+        return add(getColumnName(tableName, columnFieldName), SqlOperator.GTEP, getColumnName(valueTableName, value));
+    }
+
+    public MySearchList gtep(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.GTEP,getColumnName(valueTableName,value));
+    }
+
+    public MySearchList gtep(String columnFieldName,String value){
+        return gtep(null,columnFieldName,null,value);
+    }
+
+    public MySearchList gtep(String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return gtep(null,columnFieldName,valueTableName,value);
+    }
+
+    public MySearchList gtep(String columnFieldName,SupplierFunc<?> value) {
+        return gtep(null, columnFieldName, null, value);
+    }
+
+    public MySearchList gtep(SupplierFunc<?> columnFieldName,SupplierFunc<?> value){
+        return gtep(null,columnFieldName,null,value);
+    }
+
+    public MySearchList gtep(String tableName,SupplierFunc<?> columnFieldName,String value){
+        return gtep(tableName,columnFieldName,null,value);
+    }
+
 
     /**
      * 小于
-     *
-     * @param column
+     * @param tableName
+     * @param columnFieldName
+     * @param valueTableName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList lt(String column, Object value) {
-        return add(column, SqlOperator.LT, value);
+    public MySearchList ltp(String tableName,String columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LTP,getColumnName(valueTableName,value));
+    }
+
+    public MySearchList ltp(String tableName,String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LTP,getColumnName(valueTableName,value));
+    }
+
+    public MySearchList ltp(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,SupplierFunc<?> value) {
+        return add(getColumnName(tableName, columnFieldName), SqlOperator.LTP, getColumnName(valueTableName, value));
+    }
+
+    public MySearchList ltp(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LTP,getColumnName(valueTableName,value));
+    }
+
+    public MySearchList ltp(String columnFieldName,String value){
+        return ltp(null,columnFieldName,null,value);
+    }
+
+    public MySearchList ltp(String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return ltp(null,columnFieldName,valueTableName,value);
+    }
+
+    public MySearchList ltp(String columnFieldName,SupplierFunc<?> value) {
+        return ltp(null, columnFieldName, null, value);
+    }
+
+    public MySearchList ltp(SupplierFunc<?> columnFieldName,SupplierFunc<?> value){
+        return ltp(null,columnFieldName,null,value);
+    }
+
+    public MySearchList ltp(String tableName,SupplierFunc<?> columnFieldName,String value){
+        return ltp(tableName,columnFieldName,null,value);
     }
 
     /**
      * 小于等于
-     *
-     * @param column
+     * @param tableName
+     * @param columnFieldName
+     * @param valueTableName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList lte(String column, Object value) {
-        return add(column, SqlOperator.LTE, value);
+    public MySearchList ltep(String tableName,String columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LTEP,getColumnName(valueTableName,value));
     }
 
-    /**
-     * in
-     *
-     * @param column
-     * @param value  需要参数为list
-     * @param <T>
-     * @return
-     */
-    public <T> MySearchList in(String column, Object value) {
-        return add(column, SqlOperator.IN, value);
+    public MySearchList ltep(String tableName,String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LTEP,getColumnName(valueTableName,value));
     }
 
+    public MySearchList ltep(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,SupplierFunc<?> value) {
+        return add(getColumnName(tableName, columnFieldName), SqlOperator.LTEP, getColumnName(valueTableName, value));
+    }
+
+    public MySearchList ltep(String tableName,SupplierFunc<?> columnFieldName,String valueTableName,String value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LTEP,getColumnName(valueTableName,value));
+    }
+
+    public MySearchList ltep(String columnFieldName,String value){
+        return ltep(null,columnFieldName,null,value);
+    }
+
+    public MySearchList ltep(String columnFieldName,String valueTableName,SupplierFunc<?> value){
+        return ltep(null,columnFieldName,valueTableName,value);
+    }
+
+    public MySearchList ltep(String columnFieldName,SupplierFunc<?> value) {
+        return ltep(null, columnFieldName, null, value);
+    }
+
+    public MySearchList ltep(SupplierFunc<?> columnFieldName,SupplierFunc<?> value){
+        return ltep(null,columnFieldName,null,value);
+    }
+
+    public MySearchList ltep(String tableName,SupplierFunc<?> columnFieldName,String value){
+        return ltep(tableName,columnFieldName,null,value);
+    }
+
+
+
+
+
+    //update
+
     /**
-     * not in
-     *
-     * @param column
+     * set
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList nin(String column, Object value) {
-        return add(column, SqlOperator.NIN, value);
+    public MySearchList set(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.SET,value);
+    }
+
+    public MySearchList set(String columnFieldName,Object value){
+        return set(null,columnFieldName,value);
+    }
+
+    public MySearchList set(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.SET,value);
+    }
+
+    public MySearchList set(SupplierFunc<?> columnFieldName,Object value){
+        return set(null,columnFieldName,value);
     }
 
     /**
-     * 不为空
-     *
-     * @param column
+     * 加
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList notNull(String column, Object value) {
-        return add(column, SqlOperator.NOTNULL, value);
+    public MySearchList add(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.ADD,value);
     }
 
-    public <T> MySearchList notNull(String column) {
-        return add(column, SqlOperator.NOTNULL, null);
+    public MySearchList add(String columnFieldName,Object value){
+        return add(null,columnFieldName,value);
     }
 
-    public <T> MySearchList isNull(String column, Object value) {
-        return add(column, SqlOperator.NULL, value);
+    public MySearchList add(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.ADD,value);
+    }
+
+    public MySearchList add(SupplierFunc<?> columnFieldName,Object value) {
+        return add(null, columnFieldName, value);
     }
 
     /**
-     * 为空
-     *
-     * @param column
-     * @param <T>
-     * @return
-     */
-    public <T> MySearchList isNull(String column) {
-        return add(column, SqlOperator.NULL, null);
-    }
-
-    /**
-     * 不等于
-     *
-     * @param column
+     * 减
+     * @param tableName
+     * @param columnFieldName
      * @param value
-     * @param <T>
      * @return
      */
-    public <T> MySearchList ne(String column, Object value) {
-        return add(column, SqlOperator.NE, value);
+    public MySearchList subtract(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.SUBTRACT,value);
     }
 
-    public <T> MySearchList sql(String sql, Object value) {
-        return add(sql, SqlOperator.SQL, value);
+    public MySearchList subtract(String columnFieldName,Object value){
+        return subtract(null,columnFieldName,value);
     }
 
-    public <T> MySearchList exists(String sql, Object value) {
-        return add(sql, SqlOperator.EXISTS, value);
+    public MySearchList subtract(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.SUBTRACT,value);
     }
 
-    public <T> MySearchList sort(String column, Object value) {
-        return add(column, SqlOperator.SORT, value);
+    public MySearchList subtract(SupplierFunc<?> columnFieldName,Object value) {
+        return subtract(null, columnFieldName, value);
     }
 
-    public <T> MySearchList eqp(String column, String value) {
-        return add(column, SqlOperator.EQP, value);
+    /**
+     * 乘
+     * @param tableName
+     * @param columnFieldName
+     * @param value
+     * @return
+     */
+    public MySearchList multiply(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.MULTIPLY,value);
     }
 
-    public <T> MySearchList nep(String column, String value) {
-        return add(column, SqlOperator.NEP, value);
+    public MySearchList multiply(String columnFieldName,Object value){
+        return multiply(null,columnFieldName,value);
     }
 
-    public <T> MySearchList gtp(String column, String value) {
-        return add(column, SqlOperator.GTP, value);
+    public MySearchList multiply(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.MULTIPLY,value);
     }
 
-    public <T> MySearchList ltp(String column, String value) {
-        return add(column, SqlOperator.LTP, value);
+    public MySearchList multiply(SupplierFunc<?> columnFieldName,Object value){
+        return multiply(null,columnFieldName,value);
     }
 
-    public <T> MySearchList gtep(String column, String value) {
-        return add(column, SqlOperator.GTEP, value);
+    /**
+     * 除
+     * @param tableName
+     * @param columnFieldName
+     * @param value
+     * @return
+     */
+    public MySearchList divide(String tableName,String columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.DIVIDE,value);
     }
 
-    public <T> MySearchList ltep(String column, String value) {
-        return add(column, SqlOperator.LTEP, value);
+    public MySearchList divide(String columnFieldName,Object value){
+        return divide(null,columnFieldName,value);
     }
 
-    public <T> MySearchList set(String column, Object value) {
-        return add(column, SqlOperator.SET, value);
+    public MySearchList divide(String tableName,SupplierFunc<?> columnFieldName,Object value){
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.DIVIDE,value);
     }
 
-    public <T> MySearchList add(String column, Object value) {
-        return add(column, SqlOperator.ADD, value);
+    public MySearchList divide(SupplierFunc<?> columnFieldName,Object value){
+        return divide(null,columnFieldName,value);
     }
 
-    public <T> MySearchList subtract(String column, Object value) {
-        return add(column, SqlOperator.SUBTRACT, value);
+
+
+
+
+
+
+
+
+    /**
+     * 拼装列名
+     * @param tableName
+     * @param columnName
+     * @return
+     */
+    private static String getColumnName(String tableName,SupplierFunc<?> columnName){
+        return getColumnName(tableName,WsFieldUtils.getFieldName(columnName));
     }
 
-    public <T> MySearchList multiply(String column, Object value) {
-        return add(column, SqlOperator.MULTIPLY, value);
+    private static String getColumnName(String tableName,String columnName){
+        if(WsStringUtils.isBlank(tableName)){
+            return columnName;
+        }else {
+            return tableName + '.' + columnName;
+        }
     }
 
-    public <T> MySearchList divide(String column, Object value) {
-        return add(column, SqlOperator.DIVIDE, value);
+    /**
+     * 判断值是不是正确
+     * @param fieldName
+     * @param operator
+     * @param value
+     */
+    private static void checkValue(String fieldName,SqlOperator operator,Object value){
+        switch (operator){
+            case EQ:
+            case NE:
+            case GT:
+            case GTE:
+            case LT:
+            case LTE:
+            case LIKE:
+            case SET:
+            case ADD:
+            case SUBTRACT:
+            case DIVIDE:
+            case MULTIPLY:
+                if(!WsBeanUtils.isBaseType(value.getClass())){
+                    throw new IllegalArgumentException(fieldName+"的参数必须为基本类型，当前的类型是："+value.getClass());
+                }
+                break;
+            case SORT:
+            case EQP:
+            case LTP:
+            case GTP:
+            case GTEP:
+            case LTEP:
+            case NEP:
+                if(!(value instanceof String)){
+                    throw new RuntimeException(fieldName+"的参数必须为字符串类型，当前的类型是："+value.getClass());
+                }else {
+                    if(WsStringUtils.isBlank((String)value)){
+                        throw new RuntimeException(fieldName+"参数不能为空");
+                    }
+                }
+                break;
+            case SQL:
+            case EXISTS:
+            case NOT_EXISTS:
+                if(value != null){
+                    if(!(value instanceof String)){
+                        throw new RuntimeException(fieldName+"的参数必须为字符串类型，当前的类型是："+value.getClass());
+                    }else {
+                        if(WsStringUtils.isBlank((String)value)){
+                            throw new RuntimeException(fieldName+"参数不能为空");
+                        }
+                    }
+                }
+                break;
+            case IN:
+            case NIN:
+            case BETWEEN:
+            case NOT_BETWEEN:
+                if(!WsBeanUtils.isArray(value.getClass())){
+                    throw new RuntimeException(fieldName+"的参数必须是数组类型，当前的类型是："+value.getClass());
+                }
+                break;
+            case NULL:
+            case NOTNULL:
+            case OR:
+            case AND:break;
+            default:
+                throw new RuntimeException("不支持的查询方式");
+        }
     }
+
+
+
 
     public MySearchList and(MySearchList... mySearchLists) {
         ands.addAll(Arrays.asList(mySearchLists));
@@ -699,11 +1064,6 @@ public class MySearchList {
 
     public <T> MySearchList rightJoin(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
         return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.RIGHT);
-    }
-
-
-    public Map<Class, String> getTableAndNickNameMap() {
-        return tableAndNickNameMap;
     }
 
     public List<TableRelation> getJoins() {

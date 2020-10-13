@@ -736,6 +736,7 @@ public class SQLModelUtils {
                 assert fieldColumnRelation != null;
                 baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), fieldColumnRelation.getFieldClass()));
                 break;
+            case NIN: tableColumn.append(" not");
             case IN:
                 if (WsFieldUtils.classCompare(mySearch.getValue().getClass(), Collection.class)) {
                     Collection<?> collection = (Collection<?>) mySearch.getValue();
@@ -765,41 +766,9 @@ public class SQLModelUtils {
                     tableColumn.append(WsStringUtils.jointListString(symbols, ","));
                     tableColumn.append(')');
                 } else {
-                    throw new RuntimeException("非数组类型");
+                    throw new RuntimeException(columnBaseEntity.getFieldName()+"参数非数组类型");
                 }
 
-                break;
-            case NIN:
-                if (WsFieldUtils.classCompare(mySearch.getValue().getClass(), Collection.class)) {
-                    Collection<?> collection = (Collection<?>) mySearch.getValue();
-                    Iterator<?> iterator = collection.iterator();
-                    List<String> symbols = new ArrayList<>();
-                    while (iterator.hasNext()) {
-                        Object o = iterator.next();
-                        symbols.add("?");
-                        assert fieldColumnRelation != null;
-                        baseWhereValueList.add(WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
-                    }
-                    tableColumn.append(" not in");
-                    tableColumn.append('(');
-                    tableColumn.append(WsStringUtils.jointListString(symbols, ","));
-                    tableColumn.append(')');
-
-                } else if (mySearch.getValue().getClass().isArray()) {
-                    Object[] os = (Object[]) mySearch.getValue();
-                    List<String> symbols = new ArrayList<>();
-                    for (Object o : os) {
-                        symbols.add("?");
-                        assert fieldColumnRelation != null;
-                        baseWhereValueList.add(WsBeanUtils.objectToT(o, fieldColumnRelation.getFieldClass()));
-                    }
-                    tableColumn.append(" not in");
-                    tableColumn.append('(');
-                    tableColumn.append(WsStringUtils.jointListString(symbols, ","));
-                    tableColumn.append(')');
-                } else {
-                    throw new RuntimeException("非数组类型");
-                }
                 break;
             case NULL:
                 tableColumn.append(" is null");
@@ -833,6 +802,7 @@ public class SQLModelUtils {
 
                 //tableColumn.append(mySearch.getValue());
                 break;
+            case NOT_EXISTS:tableColumn.append(" not");
             case EXISTS:
                 tableColumn.append(" exists (");
                 tableColumn.append(translateTableNickName(prefix, mySearch.getFieldName()));
@@ -880,6 +850,37 @@ public class SQLModelUtils {
                 columnBaseEntity = getColumnBaseEntity(WsStringUtils.anyToString(mySearch.getValue()), prefix);
                 value = guardKeyword(columnBaseEntity.getAlias()) + "." + guardKeyword(columnBaseEntity.getColumnName());
                 tableColumn.append(" <= ").append(value);
+                break;
+            case NOT_BETWEEN: tableColumn.append(" not");
+            case BETWEEN:
+                assert columnBaseEntity != null;
+                if(WsBeanUtils.isArray(mySearch.getValue().getClass())) {
+                    tableColumn.append(" between ");
+                    if (mySearch.getValue().getClass().isArray()) {
+                        Object[] objects = (Object[]) mySearch.getValue();
+                        if (objects.length != 2) {
+
+                            throw new RuntimeException(columnBaseEntity.getFieldName() + "between只能允许有两个值");
+                        }
+                        tableColumn
+                                .append(WsBeanUtils.objectToT(objects[0], columnBaseEntity.getField().getType()))
+                                .append(" AND ")
+                                .append(WsBeanUtils.objectToT(objects[1], columnBaseEntity.getField().getType()));
+                        baseWhereValueList.add(objects[0]);
+                        baseWhereValueList.add(objects[1]);
+                    } else {
+                        Collection<?> collection = (Collection<?>) mySearch.getValue();
+                        if (collection.size() != 2) {
+                            throw new RuntimeException(columnBaseEntity.getFieldName() + "between只能允许有两个值");
+                        }
+                        Iterator<?> iterator = collection.iterator();
+                        tableColumn
+                                .append(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType()))
+                                .append(" AND ")
+                                .append(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType()));
+                        baseWhereValueList.addAll(collection);
+                    }
+                }
                 break;
             default:
                 break;
@@ -1278,7 +1279,8 @@ public class SQLModelUtils {
         if (WsListUtils.isEmpty(maps)) {
             return maps;
         }
-        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(tClass);
+        //FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(tClass);
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(tClass);
 
         List<FieldJoinClass> fieldJoinClassList = fieldColumnRelationMapper.getFieldJoinClasses();
 
@@ -1456,7 +1458,8 @@ public class SQLModelUtils {
      * @return
      */
     public <T> List<T> loadingObject(List<Map> list) {
-        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mainClass);
+        //FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(mainClass);
+        FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
         String prefix = fieldColumnRelationMapper.getNickName();
         List<T> newList = new ArrayList<>(list.size());
 
@@ -1827,7 +1830,7 @@ public class SQLModelUtils {
                 default:
                     continue;
             }
-            FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearch.getTableClass());
+            FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
             FieldColumnRelation fieldColumnRelation = fieldColumnRelationMapper.getFieldColumnRelationByField(mySearch.getFieldName());
             String columnName = fieldColumnRelation.getColumnName();
             switch (mySearch.getOperator()) {
@@ -2446,6 +2449,12 @@ public class SQLModelUtils {
                 if (key == null) {
                     sb.deleteCharAt(sb.length() - 1);
                 } else {
+                    if(i == 0){
+                        if(prefix.equals(key)){
+                            sb.deleteCharAt(sb.length() - 1);
+                            continue;
+                        }
+                    }
                     sb.append(key);
                 }
 

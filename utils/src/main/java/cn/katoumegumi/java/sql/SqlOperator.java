@@ -61,6 +61,9 @@ public enum SqlOperator {
      */
     SQL,
     EXISTS,
+    NOT_EXISTS,
+    BETWEEN,
+    NOT_BETWEEN,
     /**
      * 排序
      */
