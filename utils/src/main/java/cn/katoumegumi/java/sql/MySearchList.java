@@ -932,19 +932,6 @@ public class MySearchList {
                     }
                 }
                 break;
-            case SQL:
-            case EXISTS:
-            case NOT_EXISTS:
-                if(value != null){
-                    if(!(value instanceof String)){
-                        throw new RuntimeException(fieldName+"的参数必须为字符串类型，当前的类型是："+value.getClass());
-                    }else {
-                        if(WsStringUtils.isBlank((String)value)){
-                            throw new RuntimeException(fieldName+"参数不能为空");
-                        }
-                    }
-                }
-                break;
             case IN:
             case NIN:
             case BETWEEN:
@@ -955,6 +942,9 @@ public class MySearchList {
                 break;
             case NULL:
             case NOTNULL:
+            case SQL:
+            case EXISTS:
+            case NOT_EXISTS:
             case OR:
             case AND:break;
             default:
