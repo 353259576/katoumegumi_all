@@ -346,7 +346,7 @@ public class WsJdbcUtils {
     }
 
     public <T> T getOne(Class<T> tClass, Object... objects) {
-        FieldColumnRelationMapper mapper = SQLModelUtils.analysisClassRelation(tClass);
+        FieldColumnRelationMapper mapper = FieldColumnRelationMapperFactory.analysisClassRelation(tClass);
         List<FieldColumnRelation> ids = mapper.getIdSet();
         if (ids.size() != objects.length) {
             throw new RuntimeException("主键信息需要填写完整");

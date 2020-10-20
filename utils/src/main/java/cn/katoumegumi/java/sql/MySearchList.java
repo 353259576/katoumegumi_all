@@ -908,12 +908,19 @@ public class MySearchList {
             case LT:
             case LTE:
             case LIKE:
-            case SET:
             case ADD:
             case SUBTRACT:
             case DIVIDE:
             case MULTIPLY:
+                if(value == null){
+                    throw new IllegalArgumentException(fieldName+"的参数不能为空");
+                }
                 if(!WsBeanUtils.isBaseType(value.getClass())){
+                    throw new IllegalArgumentException(fieldName+"的参数必须为基本类型，当前的类型是："+value.getClass());
+                }
+                break;
+            case SET:
+                if(value != null && !WsBeanUtils.isBaseType(value.getClass())){
                     throw new IllegalArgumentException(fieldName+"的参数必须为基本类型，当前的类型是："+value.getClass());
                 }
                 break;

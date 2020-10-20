@@ -21,7 +21,11 @@ public class LeetCodeTest {
     public static int leftValue;
 
     public static void main(String[] args) {
-        repeatedSubstringPattern("1434");
+        //repeatedSubstringPattern("1434");
+        /*int i = totalNQueens(1);
+        System.out.println(i);*/
+        boolean k = backspaceCompare("","");
+        System.out.println(k);
     }
 
     /**
@@ -511,6 +515,183 @@ public class LeetCodeTest {
             preMinimumDifferenceTreeNode = local;
         }
         getMinimumDifference(local.right,local);
+    }
+
+
+    /**
+     * 977. 有序数组的平方
+     * @param A
+     * @return
+     */
+    public int[] sortedSquares(int[] A) {
+        int[] returnArray = new int[A.length];
+        int max = A.length - 1;
+        int start = 0;
+        for(int i = 0; i < A.length; i++){
+            start = i;
+            if(A[i] >= 0){
+                break;
+            }
+        }
+        int left = start - 1;
+        int index = 0;
+        while (left >= 0 || start <= max){
+            int l,r;
+            if(left < 0){
+                l = Integer.MAX_VALUE;
+            }else {
+                l = A[left];
+                l *= l;
+            }
+            if(start > max){
+                r = Integer.MAX_VALUE;
+            }else {
+                r = A[start];
+                r *= r;
+            }
+            if(l < r){
+                returnArray[index] = l;
+                left--;
+            }else {
+                returnArray[index] = r;
+                start++;
+            }
+            index++;
+
+        }
+        return returnArray;
+
+    }
+
+    /**
+     * 52. N皇后 II
+     * @param n
+     * @return
+     */
+    public static int totalNQueensNum = 0;
+    public static int totalNQueens(int n) {
+        totalNQueensNum = 0;
+        //已占用的格子
+        int[] columns = new int[n];
+        Arrays.fill(columns,0);
+        int[] lefts = new int[2*n-1];
+        Arrays.fill(lefts,0);
+        int[] rights = new int[2*n -1];
+        Arrays.fill(rights,0);
+        totalNQueens(columns,lefts,rights,0,n);
+        return totalNQueensNum;
+    }
+
+    public static void totalNQueens(int[] columns,int[] lefts,int[] rights,int rowNum,int columnEnd){
+        if(rowNum >= columnEnd){
+            totalNQueensNum++;
+            return;
+        }
+        for(int i = 0; i < columnEnd; i++) {
+            if (columns[i] == 0 && lefts[i - rowNum + columnEnd - 1] == 0 && rights[rowNum + i] == 0) {
+                columns[i] = 1;
+                lefts[i - rowNum + columnEnd - 1] = 1;
+                rights[rowNum + i] = 1;
+                totalNQueens(columns, lefts, rights, rowNum + 1, columnEnd);
+                columns[i] = 0;
+                lefts[i - rowNum + columnEnd - 1] = 0;
+                rights[rowNum + i] = 0;
+            }
+        }
+    }
+
+
+    public static boolean backspaceCompare(String S, String T) {
+        char[] sc = S.toCharArray();
+        char[] tc = T.toCharArray();
+        LinkedList<Character> sq = new LinkedList<>();
+        LinkedList<Character> tq = new LinkedList<>();
+        for(Character c:sc){
+            if(c.equals('#')){
+                if(sq.size() > 0) {
+                    sq.removeLast();
+                }
+            }else {
+                sq.add(c);
+            }
+        }
+        for(Character c:tc){
+            if(c.equals('#')){
+                if(tq.size() > 0) {
+                    tq.removeLast();
+                }
+            }else {
+                tq.add(c);
+            }
+        }
+        StringBuilder s = new StringBuilder();
+        for (Character c:sq){
+            s.append(c);
+        }
+        StringBuilder t = new StringBuilder();
+        for(Character c:tq){
+            t.append(c);
+        }
+        if(s.length() != t.length()){
+            return false;
+        }else {
+            if(s.length() == 0){
+                return true;
+            }else {
+                return s.toString().equals(t.toString());
+            }
+        }
+    }
+
+
+    /**
+     * 143. 重排链表
+     * @param head
+     */
+    public void reorderList(ListNode head) {
+        LinkedList<ListNode> listNodeLinkedList = new LinkedList<>();
+        ListNode start = head;
+        while (start != null){
+            listNodeLinkedList.add(start);
+            start = start.next;
+        }
+        ListNode prev = null;
+        ListNode node = null;
+        boolean k = true;
+        while (listNodeLinkedList.size() > 0){
+            if(k){
+                node = listNodeLinkedList.pollFirst();
+            }else {
+                node = listNodeLinkedList.pollLast();
+            }
+            if(prev != null){
+                prev.next = node;
+            }
+            prev = node;
+            k = !k;
+        }
+        if(prev != null) {
+            prev.next = null;
+        }
+
+    }
+
+    /**
+     * 876. 链表的中间结点(快慢指针)
+     * @param head
+     * @return
+     */
+    public ListNode middleNode(ListNode head) {
+        ListNode fast = head;
+        ListNode slow = head;
+        while (fast.next != null && fast.next.next != null){
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        if(fast.next != null){
+            slow = slow.next;
+        }
+        return slow;
     }
 
 
