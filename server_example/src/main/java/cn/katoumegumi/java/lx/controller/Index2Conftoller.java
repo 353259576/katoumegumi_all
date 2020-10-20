@@ -81,7 +81,7 @@ public class Index2Conftoller {
         )
                 .eq(user::getId, 1)
                 .lte(user::getCreateDate, "2019-12-13")
-                .eqp(user::getName, user::getPassword)
+                .eqp(User::getName, User::getPassword)
                 .sort("id", "ASC")
                 .sort("userDetails.sex", "DESC");
         List<User> users = userService.selectList(mySearchList);

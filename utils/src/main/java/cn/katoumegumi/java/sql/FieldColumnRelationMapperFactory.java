@@ -46,9 +46,11 @@ public class FieldColumnRelationMapperFactory {
             annotation = clazz.getAnnotation(Table.class);
         }
         if (annotation != null) {
-            return hibernateAnalysisClassRelation(clazz);
+            fieldColumnRelationMapper = hibernateAnalysisClassRelation(clazz);
+        }else {
+            fieldColumnRelationMapper = mybatisPlusAnalysisClassRelation(clazz);
         }
-        return mybatisPlusAnalysisClassRelation(clazz);
+        return fieldColumnRelationMapper;
     }
 
     /**

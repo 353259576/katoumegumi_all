@@ -1,17 +1,20 @@
 package cn.katoumegumi.java.common;
 
 import java.lang.invoke.SerializedLambda;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WsFieldUtils {
 
     private static final String METHOD_NAME_GET = "get";
     private static final String METHOD_NAME_IS = "is";
 
+    private static final Map<String, WeakReference<String>> FIELD_NAME_MAP = new ConcurrentHashMap<>();
 
     public static Field getFieldForObject(String name, Object object) {
         Class clazz = object.getClass();
@@ -180,16 +183,45 @@ public class WsFieldUtils {
 
 
     public static <T> String getFieldName(SupplierFunc<T> supplierFunc) {
-        try {
-            Method method = supplierFunc.getClass().getDeclaredMethod("writeReplace");
-            method.setAccessible(true);
-            SerializedLambda serializedLambda = (SerializedLambda) method.invoke(supplierFunc);
-            String name = serializedLambda.getImplMethodName();
-            return methodToFieldName(name);
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
-            return null;
-        }
+            String n = supplierFunc.getClass().getName();
+            return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(()->{
+                try {
+                    Method method = supplierFunc.getClass().getDeclaredMethod("writeReplace");
+                    method.setAccessible(true);
+                    SerializedLambda serializedLambda = (SerializedLambda) method.invoke(supplierFunc);
+                    String name = serializedLambda.getImplMethodName();
+                    String value = methodToFieldName(name);
+                    FIELD_NAME_MAP.put(n,new WeakReference<>(value));
+                    return value;
+                } catch (ReflectiveOperationException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            });
+
+
+
+    }
+
+    public static <T> String getFieldName(SFunction<T,?> sFunction) {
+
+            String n = sFunction.getClass().getName();
+
+            return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(()->{
+                try {Method method = sFunction.getClass().getDeclaredMethod("writeReplace");
+                    method.setAccessible(true);
+                    SerializedLambda serializedLambda = (SerializedLambda) method.invoke(sFunction);
+                    String name = serializedLambda.getImplMethodName();
+                    String value = methodToFieldName(name);
+                    FIELD_NAME_MAP.put(n,new WeakReference<>(value));
+                    return value;
+                } catch (ReflectiveOperationException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            });
+
+
 
     }
 

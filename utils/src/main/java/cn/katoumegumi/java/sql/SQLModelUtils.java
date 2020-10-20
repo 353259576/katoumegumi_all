@@ -89,8 +89,6 @@ public class SQLModelUtils {
     public SQLModelUtils(MySearchList mySearchList) {
         this.mySearchList = mySearchList;
         mainClass = mySearchList.getMainClass();
-
-
         if (WsStringUtils.isEmpty(mySearchList.getAlias())) {
             getAbbreviation(mainClass.getSimpleName());
         } else {
@@ -125,31 +123,6 @@ public class SQLModelUtils {
             tableName = null;
             joinTableName = null;
 
-        }
-    }
-
-    public static <T> int getSqlType(Class<T> tClass) {
-        if (WsBeanUtils.isBaseType(tClass)) {
-            if (WsFieldUtils.classCompare(tClass, String.class)) {
-                return Types.VARCHAR;
-            } else if (tClass.equals(Integer.class) || tClass.equals(int.class)) {
-                return Types.INTEGER;
-            } else if (tClass.equals(Long.class) || tClass.equals(long.class)) {
-                return Types.BIGINT;
-            } else if (tClass.equals(Short.class) || tClass.equals(short.class)) {
-                return Types.SMALLINT;
-            } else if (tClass.equals(Float.class) || tClass.equals(float.class)) {
-                return Types.FLOAT;
-            } else if (tClass.equals(Double.class) || tClass.equals(double.class)) {
-                return Types.DOUBLE;
-            } else if (tClass.equals(Date.class) || tClass.equals(LocalDateTime.class) || tClass.equals(LocalDate.class) || tClass.equals(java.sql.Date.class)) {
-                return Types.TIME;
-            } else if (tClass.equals(BigDecimal.class)) {
-                return Types.DECIMAL;
-            }
-            return Types.JAVA_OBJECT;
-        } else {
-            return Types.JAVA_OBJECT;
         }
     }
 
