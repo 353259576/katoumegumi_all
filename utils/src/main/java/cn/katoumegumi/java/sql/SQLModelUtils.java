@@ -1265,7 +1265,7 @@ public class SQLModelUtils {
             length = resultSetMetaData.getColumnCount();
 
             if (length == 0) {
-                return Collections.emptyList();
+                return new ArrayList<>(0);
             }
             FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
             String baseTableName = mainMapper.getNickName();

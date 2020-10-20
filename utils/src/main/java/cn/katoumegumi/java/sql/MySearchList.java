@@ -927,11 +927,11 @@ public class MySearchList {
         return subtract(null,columnFieldName,value);
     }
 
-    public MySearchList subtract(String tableName,SupplierFunc<?> columnFieldName,Object value){
+    public MySearchList subtract(SupplierFunc<?> columnFieldName,Object value){
         return add(getColumnName(null,columnFieldName),SqlOperator.SUBTRACT,value);
     }
 
-    public <T> MySearchList subtract(String tableName,SFunction<T,?> columnFieldName,Object value){
+    public <T> MySearchList subtract(SFunction<T,?> columnFieldName,Object value){
         return add(getColumnName(null,columnFieldName),SqlOperator.SUBTRACT,value);
     }
 
