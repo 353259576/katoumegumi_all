@@ -694,5 +694,35 @@ public class LeetCodeTest {
         return slow;
     }
 
+    /**
+     * 925. 长按键入
+     * @param name
+     * @param typed
+     * @return
+     */
+    public boolean isLongPressedName(String name, String typed) {
+
+        char[] nameCh = name.toCharArray();
+        char[] typedCh = typed.toCharArray();
+        int nIndex = 0;
+        int tIndex = 0;
+        int nLength = nameCh.length;
+        int tLength = typedCh.length;
+        while (tIndex < tLength){
+            if(nIndex < nLength && nameCh[nIndex] == typedCh[tIndex]){
+                nIndex++;
+                tIndex++;
+            }else if(nIndex > 0 && nameCh[nIndex - 1] == typedCh[tIndex]){
+                tIndex++;
+            }else {
+                return false;
+            }
+        }
+        return nIndex == nLength;
+
+
+
+
+    }
 
 }

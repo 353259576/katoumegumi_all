@@ -1328,7 +1328,7 @@ public class SQLModelUtils {
                 }
             }
             if (returnEntityList.size() == 0) {
-                return Collections.emptyList();
+                return new ArrayList<>(0);
             }
             List<T> list = (List<T>) new ArrayList(returnEntityList.size());
             for (ReturnEntity returnEntity : returnEntityList) {
@@ -1340,7 +1340,7 @@ public class SQLModelUtils {
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-            return Collections.emptyList();
+            return new ArrayList<>(0);
         }
 
 

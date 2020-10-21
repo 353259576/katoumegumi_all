@@ -1,5 +1,8 @@
 package cn.katoumegumi.java.sql;
 
+import cn.katoumegumi.java.common.SFunction;
+import cn.katoumegumi.java.common.WsFieldUtils;
+
 import javax.persistence.criteria.JoinType;
 import java.util.function.Consumer;
 
@@ -87,12 +90,18 @@ public class TableRelation {
         return this;
     }
 
+
     public String getJoinTableNickName() {
         return joinTableNickName;
     }
 
     public TableRelation setJoinTableNickName(String joinTableNickName) {
         this.joinTableNickName = joinTableNickName;
+        return this;
+    }
+
+    public <T> TableRelation setJoinTableNickName(SFunction<T,?> joinTableNickName) {
+        this.joinTableNickName = WsFieldUtils.getFieldName(joinTableNickName);
         return this;
     }
 
@@ -108,6 +117,13 @@ public class TableRelation {
     public TableRelation on(String tableColumn,String joinTableColumn){
         this.tableColumn = tableColumn;
         this.joinTableColumn = joinTableColumn;
+        return this;
+    }
+
+
+    public <T,R> TableRelation on(SFunction<T,?> tableColumn, SFunction<R,?> joinTableColumn){
+        this.tableColumn = WsFieldUtils.getFieldName(tableColumn);
+        this.joinTableColumn = WsFieldUtils.getFieldName(joinTableColumn);
         return this;
     }
 

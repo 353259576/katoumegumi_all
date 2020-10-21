@@ -213,7 +213,7 @@ public class MySearchList {
     }
 
     public MySearchList ne(SupplierFunc<?> columnFieldName,Object value){
-        return eq(null,columnFieldName,value);
+        return ne(null,columnFieldName,value);
     }
 
     public <T> MySearchList ne(String tableName,SFunction<T,?> columnFieldName,Object value){
@@ -221,7 +221,7 @@ public class MySearchList {
     }
 
     public <T> MySearchList ne(SFunction<T,?> columnFieldName,Object value){
-        return eq(null,columnFieldName,value);
+        return ne(null,columnFieldName,value);
     }
 
 

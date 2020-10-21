@@ -4,6 +4,7 @@ import cn.katoumegumi.java.common.SupplierFunc;
 import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.lx.model.User;
+import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.SelectSqlEntity;
@@ -27,6 +28,7 @@ public class TestController {
         User user = new User();
         MySearchList mySearchList = MySearchList.create(User.class);
         mySearchList.setPageVO(new Page(2,20));
+        mySearchList.innerJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId));
         mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex", "男").eq(user::getName, "你好"),
                 MySearchList.newMySearchList().eq(user::getPassword, "世界")
         )
