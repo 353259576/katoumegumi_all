@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import javax.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -97,7 +96,7 @@ public class MySearchList {
 
 
     public MySearch remove(String name) {
-        MySearch mySearch = null;
+        MySearch mySearch;
         for (int i = 0; i < mySearches.size(); i++) {
             mySearch = mySearches.get(i);
             if (mySearch.getFieldName().equals(name)) {
@@ -448,7 +447,6 @@ public class MySearchList {
      * 为空
      * @param tableName
      * @param columnFieldName
-     * @param value
      * @return
      */
     public MySearchList isNull(String tableName,String columnFieldName){
@@ -483,7 +481,6 @@ public class MySearchList {
      * 不为空
      * @param tableName
      * @param columnFieldName
-     * @param value
      * @return
      */
     public MySearchList isNotNull(String tableName,String columnFieldName){
@@ -546,7 +543,8 @@ public class MySearchList {
      * between
      * @param tableName
      * @param columnFieldName
-     * @param value
+     * @param value1
+     * @param value2
      * @return
      */
     public MySearchList between(String tableName,String columnFieldName,Object value1,Object value2){
@@ -578,7 +576,8 @@ public class MySearchList {
      * not between
      * @param tableName
      * @param columnFieldName
-     * @param value
+     * @param value1
+     * @param value2
      * @return
      */
     public MySearchList notBetween(String tableName,String columnFieldName,Object value1,Object value2){
@@ -1220,7 +1219,7 @@ public class MySearchList {
         tableRelation.setJoinTableClass(tClass);
         tableRelation.setJoinTableNickName(tClass.getSimpleName());
         return tableRelation;
-    };
+    }
 
     /**
      * 左联
@@ -1233,7 +1232,7 @@ public class MySearchList {
         tableRelation.setJoinTableClass(tClass);
         tableRelation.setJoinTableNickName(tClass.getSimpleName());
         return tableRelation;
-    };
+    }
 
     /**
      * 右连
@@ -1246,7 +1245,7 @@ public class MySearchList {
         tableRelation.setJoinTableClass(tClass);
         tableRelation.setJoinTableNickName(tClass.getSimpleName());
         return tableRelation;
-    };
+    }
 
     /**
      * 表连接
@@ -1274,7 +1273,7 @@ public class MySearchList {
         TableRelation tableRelation = join(tClass,consumer);
         tableRelation.setJoinType(JoinType.INNER);
         return this;
-    };
+    }
 
     /**
      * 左联
@@ -1285,7 +1284,7 @@ public class MySearchList {
         TableRelation tableRelation = join(tClass,consumer);
         tableRelation.setJoinType(JoinType.LEFT);
         return this;
-    };
+    }
 
     /**
      * 右连
@@ -1296,7 +1295,7 @@ public class MySearchList {
         TableRelation tableRelation = join(tClass,consumer);
         tableRelation.setJoinType(JoinType.RIGHT);
         return this;
-    };
+    }
 
     /**
      * 获取主表别名

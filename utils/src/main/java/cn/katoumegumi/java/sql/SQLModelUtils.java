@@ -91,8 +91,8 @@ public class SQLModelUtils {
             setAbbreviation(mainClass.getSimpleName(), mySearchList.getAlias());
         }
         String prefix = mainClass.getSimpleName();
-        String tableName = null;
-        String joinTableName = null;
+        String tableName;
+        String joinTableName;
         for (TableRelation relation : mySearchList.getJoins()) {
             tableName = relation.getTableNickName();
             if (WsStringUtils.isNotBlank(tableName)) {
@@ -113,7 +113,7 @@ public class SQLModelUtils {
                 joinTableName = translateToTableName(relation.getJoinTableNickName());
                 joinTableName = getNoPrefixTableName(joinTableName);
                 relation.setJoinTableNickName(joinTableName);
-                joinTableName = prefix + "." + joinTableName;
+                joinTableName = prefix + '.' + joinTableName;
                 setAbbreviation(joinTableName, relation.getAlias());
             }
             tableName = null;
@@ -1570,7 +1570,6 @@ public class SQLModelUtils {
     /**
      * 把简写转换成详细
      *
-     * @param prefix
      * @param searchSql
      * @return
      */
@@ -1630,7 +1629,8 @@ public class SQLModelUtils {
     /**
      * 根据查询条件生成列基本信息
      *
-     * @param mySearch
+     * @param originalFieldName
+     * @param prefix
      * @return
      */
     private ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String prefix) {
