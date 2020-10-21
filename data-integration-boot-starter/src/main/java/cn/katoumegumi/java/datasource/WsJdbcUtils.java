@@ -38,8 +38,7 @@ public class WsJdbcUtils {
 
 
     public <T> int insert(T t) {
-        MySearchList mySearchList = MySearchList.newMySearchList();
-        mySearchList.setMainClass(t.getClass());
+        MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSql(t);
         log.debug(insertSqlEntity.getInsertSql());
@@ -88,8 +87,7 @@ public class WsJdbcUtils {
     }
 
     public <T> int insert(List<T> tList) {
-        MySearchList mySearchList = MySearchList.newMySearchList();
-        mySearchList.setMainClass(tList.get(0).getClass());
+        MySearchList mySearchList = MySearchList.create(tList.get(0).getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSqlBatch(tList);
         log.debug(insertSqlEntity.getInsertSql());
@@ -190,7 +188,7 @@ public class WsJdbcUtils {
         return update(t,false);
     }
     public <T> int update(T t,boolean isAll) {
-        MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(t.getClass());
+        MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t,isAll);
         log.debug(updateSqlEntity.getUpdateSql());
@@ -231,7 +229,7 @@ public class WsJdbcUtils {
         List<String> sqlList = new ArrayList<>(tList.size());
         List<Object[]> list = new ArrayList<>();
         for(T t:tList){
-            MySearchList mySearchList = MySearchList.newMySearchList().setMainClass(t.getClass());
+            MySearchList mySearchList = MySearchList.create(t.getClass());
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
             UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t,isAll);
             List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(),sql->{

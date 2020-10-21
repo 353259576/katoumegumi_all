@@ -43,9 +43,9 @@ public class TestController {
         SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
         System.out.println(selectSqlEntity.getSelectSql());
 
-       /* LambdaQueryWrapper<User> queryWrapper = new QueryWrapper<User>()
+        LambdaQueryWrapper<User> queryWrapper = new QueryWrapper<User>()
                 .lambda()
-                .ge(User::getId, 18);*/
+                .ge(User::getId, 18);
 
         //System.out.println(str);
 

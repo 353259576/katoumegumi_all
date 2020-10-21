@@ -193,7 +193,7 @@ public class IndexController implements IndexService {
         )
                 .eq(user::getId, 1)
                 .lte(user::getCreateDate, "2019-12-13")
-                .eqp(User::getName, User::getPassword)
+                //.eqp(User::getName, User::getPassword)
                 .sort("id", "ASC")
                 .sort("userDetails.sex", "DESC");
         //List<User> list = userService.selectList(mySearchList);
@@ -300,7 +300,7 @@ public class IndexController implements IndexService {
             //users.add(user);
             jdbcUtils.insert(user);
             jdbcUtils.update(user);
-            jdbcUtils.update(MySearchList.newMySearchList().setMainClass(User.class).set(user::getName, "你好世界改").eq(user::getId, user.getId()));
+            jdbcUtils.update(MySearchList.create(User.class).set(user::getName, "你好世界改").eq(user::getId, user.getId()));
             System.out.println(JSON.toJSONString(user));
         }
         //jdbcUtils.insert(users);
