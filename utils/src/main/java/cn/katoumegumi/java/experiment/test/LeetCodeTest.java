@@ -24,8 +24,9 @@ public class LeetCodeTest {
         //repeatedSubstringPattern("1434");
         /*int i = totalNQueens(1);
         System.out.println(i);*/
-        boolean k = backspaceCompare("","");
-        System.out.println(k);
+        //boolean k = backspaceCompare("","");
+        //System.out.println(k);
+        System.out.println(JSON.toJSONString(partitionLabels("ababcbacadefegdehijhklij")));
     }
 
     /**
@@ -649,6 +650,10 @@ public class LeetCodeTest {
      * @param head
      */
     public void reorderList(ListNode head) {
+
+
+
+        //用队列的方式慢了
         LinkedList<ListNode> listNodeLinkedList = new LinkedList<>();
         ListNode start = head;
         while (start != null){
@@ -719,10 +724,80 @@ public class LeetCodeTest {
             }
         }
         return nIndex == nLength;
+    }
+
+    /**
+     * 763. 划分字母区间
+     * @param S
+     * @return
+     */
+    public static List<Integer> partitionLabels(String S) {
+        int[] locationArray = new int[26];
+        char[] chars = S.toCharArray();
+        int length = chars.length;
+        for(int i = 0; i < length; ++i){
+            locationArray[chars[i] - 'a'] = i;
+        }
+
+        int end = 0;
+        int prevEnd = 0;
+        List<Integer> list = new ArrayList<>();
+        for(int i = 0; i < length; ++i) {
+            end = Math.max(locationArray[chars[i] - 'a'], end);
+            if (end == i) {
+                list.add(end - prevEnd + 1);
+                prevEnd = end + 1;
+            }
+        }
+        return list;
 
 
+        //速度慢还占内存
+        /*int length = S.length();
+        Map<Character, Integer> locationMap = new HashMap<>();
+        for(int i = 0; i < length; i++){
+            locationMap.put(S.charAt(i),i);
+        }
+        List<Integer> integerList = new ArrayList<>();
+        Character character = null;
+        int end = 0;
+        int prevEnd = 0;
+        for(int i = 0; i < length; i++){
+            character = S.charAt(i);
+            int cEnd = locationMap.get(character);
+            end = Math.max(cEnd,end);
+            if(end == i){
+                integerList.add(end - prevEnd);
+                prevEnd = end;
+            }
+        }
+        if(prevEnd != end){
+            integerList.add(end - prevEnd);
+        }
+        return integerList;*/
+    }
 
+    /**
+     * 206. 反转链表
+     * @param head
+     * @return
+     */
+    public ListNode reverseList(ListNode head) {
+        if(head == null){
+            return null;
+        }
+        return reverseList(head,head.next);
+    }
 
+    public ListNode reverseList(ListNode first,ListNode next) {
+        if(next != null){
+            ListNode node = reverseList(next,next.next);
+            next.next = first;
+            first.next = null;
+            return node;
+        }else {
+            return first;
+        }
     }
 
 }
