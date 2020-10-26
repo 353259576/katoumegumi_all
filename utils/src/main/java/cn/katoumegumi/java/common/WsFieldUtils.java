@@ -105,7 +105,7 @@ public class WsFieldUtils {
         if (fieldSet.isEmpty()) {
             return null;
         } else {
-            return fieldSet.toArray(new Field[fieldSet.size()]);
+            return fieldSet.toArray(new Field[0]);
         }
     }
 
@@ -127,7 +127,7 @@ public class WsFieldUtils {
                 methodList.add(method);
             }
         });
-        return methodList.toArray(new Method[methodList.size()]);
+        return methodList.toArray(new Method[0]);
 
     }
 
@@ -249,12 +249,6 @@ public class WsFieldUtils {
             while (iterator.hasNext()) {
                 nowName = iterator.next();
                 nowField = nowC.getDeclaredField(nowName);
-                if (nowField == null) {
-                    nowField = tClass.getField(nowName);
-                    if (nowField == null) {
-                        return null;
-                    }
-                }
                 nowC = nowField.getType();
             }
             return nowField;
@@ -278,11 +272,19 @@ public class WsFieldUtils {
     }
 
 
-    public static <T> Class<?> getClassListType(Field field) {
+    public static <T> Class<?> getClassTypeof(Field field) {
         Class<?> tClass = field.getType();
         if (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class)) {
             String listClassName = field.getGenericType().getTypeName();
-            String className = listClassName.substring(listClassName.indexOf("<") + 1, listClassName.lastIndexOf(">"));
+            int start = listClassName.indexOf("<") + 1;
+            if(start == 0){
+                return null;
+            }
+            int end = listClassName.lastIndexOf(">");
+            if(end == -1){
+                return null;
+            }
+            String className = listClassName.substring(start,end);
             try {
                 return Class.forName(className);
             } catch (ClassNotFoundException e) {
@@ -299,6 +301,43 @@ public class WsFieldUtils {
         Class<?> tClass = field.getType();
         return (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class));
 
+    }
+
+    /**
+     * 获得值
+     * @param o
+     * @param field
+     * @return
+     */
+    public static Object getValue(Object o,Field field){
+        try {
+            field.setAccessible(true);
+            return field.get(o);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 设置值
+     * @param o
+     * @param value
+     * @param field
+     * @return
+     */
+    public static boolean setValue(Object o,Object value,Field field){
+        if(value == null){
+            return true;
+        }
+        try {
+            field.setAccessible(true);
+            field.set(o,value);
+            return true;
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 

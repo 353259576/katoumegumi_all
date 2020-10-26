@@ -212,7 +212,7 @@ public class HibernateDao {
                 if (field == null) {
                     throw new RuntimeException(strings.get(i) + "不存在");
                 }
-                lastc = WsFieldUtils.getClassListType(field);
+                lastc = WsFieldUtils.getClassTypeof(field);
                 if (map.get(stringBuilder.toString()) == null) {
                     last = detachedCriteria.createCriteria(strings.get(i), strings.get(i));
                     map.put(stringBuilder.toString(), last);
@@ -277,7 +277,7 @@ public class HibernateDao {
                 if (field == null) {
                     throw new RuntimeException(strings.get(i) + "不存在");
                 }
-                lastc = WsFieldUtils.getClassListType(field);
+                lastc = WsFieldUtils.getClassTypeof(field);
                 if (nameMap.get(stringBuilder.toString()) == null) {
                     last = detachedCriteria.createCriteria(strings.get(i), strings.get(i), joinType);
                     nameMap.put(stringBuilder.toString(), last);

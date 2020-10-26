@@ -11,8 +11,8 @@
     <modules>
         <module>data-integration-boot-starter</module>
         <module>utils</module>
-        <!--<module>vertx_test</module>
-        <module>server_example</module>-->
+        <module>vertx_test</module>
+        <module>server_example</module>
     </modules>
 
     <licenses>

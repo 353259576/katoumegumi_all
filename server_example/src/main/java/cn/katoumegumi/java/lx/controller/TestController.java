@@ -1,23 +1,26 @@
 package cn.katoumegumi.java.lx.controller;
 
 import cn.katoumegumi.java.common.SupplierFunc;
+import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.lx.model.User;
+import cn.katoumegumi.java.lx.model.UserCC;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.SelectSqlEntity;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.beans.BeanUtils;
+
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Date;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -25,27 +28,31 @@ public class TestController {
 
 
     public static void main(String[] args) {
+
+
         User user = new User();
-        MySearchList mySearchList = MySearchList.create(User.class);
-        mySearchList.setPageVO(new Page(2,20));
-        mySearchList.innerJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId));
-        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex", "男").eq(user::getName, "你好"),
-                MySearchList.newMySearchList().eq(user::getPassword, "世界")
-        )
-                .eq(User::getId, 1)
-                .lte(User::getCreateDate, "2019-12-13")
-                .eqp(User::getName, User::getPassword)
-                .sort("id", "ASC")
-                .sort("userDetails.sex", "DESC");
+        user.setId(1L);
+        user.setName("你好世界");
+        user.setPassword("世界你好");
+        user.setCreateDate(LocalDateTime.now());
+        UserDetails userDetails = new UserDetails();
+        userDetails.setId(2L);
+        user.setUserDetails(Collections.singletonList(userDetails));
 
 
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
-        System.out.println(selectSqlEntity.getSelectSql());
+        WsDateUtils.getExecutionTime.accept(()->{
+            for(int i = 0; i < 1; i++){
+                UserCC userCC = WsBeanUtils.convertBean(user, UserCC.class);
+                //UserCC userCC = new UserCC();
+                //BeanUtils.copyProperties(user,userCC);
+                System.out.println(JSON.toJSONString(userCC));
+            }
+        });
 
-        LambdaQueryWrapper<User> queryWrapper = new QueryWrapper<User>()
-                .lambda()
-                .ge(User::getId, 18);
+
+
+        Field field = WsFieldUtils.getFieldByName(user.getClass(),"userDetails");
+        System.out.println(field.getGenericType());
 
         //System.out.println(str);
 

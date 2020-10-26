@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
+//@Entity
 @Table(name = "ws_user")
 @Data
 @TableName(value = "ws_user")
@@ -40,5 +40,7 @@ public class User implements Serializable {
     @OneToMany
     @JoinColumn(name= "user_id")
     private List<UserDetails> userDetails;
+
+    private int[] ints = new int[]{1,2,3};
 
 }

@@ -8,8 +8,9 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Entity
+//@Entity
 @Table(name = "ws_user_CC")
 @Data
 @TableName(value = "ws_user_cc")
@@ -32,6 +33,8 @@ public class UserCC {
     private LocalDateTime createDate;
 
     /*@OneToMany
-    @JoinColumn(name = "user_id")
-    private List<UserDetails> userDetails;*/
+    @JoinColumn(name = "user_id")*/
+    private List<UserDetailsRemake> userDetails;
+
+    private List ints;
 }

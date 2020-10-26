@@ -800,4 +800,45 @@ public class LeetCodeTest {
         }
     }
 
+    /**
+     * 234. 回文链表
+     * @param head
+     * @return
+     */
+    public boolean isPalindrome(ListNode head) {
+        if(head == null){
+            return true;
+        }
+        ListNode fast = head;
+        ListNode slow = head;
+        ListNode prevSlow = null;
+        while (fast.next != null && fast.next.next != null){
+            fast = fast.next.next;
+            ListNode next = slow.next;
+            slow.next = prevSlow;
+            prevSlow = slow;
+            slow = next;
+        }
+        ListNode leftStart;
+        ListNode rightStart;
+        if(fast.next == null){
+            rightStart = slow.next;
+            leftStart = prevSlow;
+        }else {
+            leftStart = slow;
+            rightStart = slow.next;
+            slow.next = prevSlow;
+        }
+        while (rightStart != null){
+            if(!(leftStart.val == rightStart.val)){
+                return false;
+            }
+            leftStart = leftStart.next;
+            rightStart = rightStart.next;
+        }
+        return true;
+
+
+    }
+
 }
