@@ -17,7 +17,6 @@ import java.util.function.Consumer;
 public class WsDateUtils {
 
 
-    private static final Logger log = LoggerFactory.getLogger(WsDateUtils.class);
 
     public static final String[] CN_MONTH_NAMES = new String[]{"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"};
 
@@ -41,17 +40,6 @@ public class WsDateUtils {
     };
 
 
-    public static void main(String[] args) {
-
-        getExecutionTime.accept(()->{
-            for(int i = 0; i < 100000000; i++){
-
-            }
-        });
-
-        log.info(getCNWeekdayName(new Date()));
-        log.info(getCNMonthName(new Date()));
-    }
 
     public static String dateStringFormat(String date) {
         char[] chars = date.toCharArray();

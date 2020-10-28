@@ -211,5 +211,34 @@ public class WsListUtils {
         return ts;
     }
 
+    /**
+     * 合并两个数组成一个新的数组
+     * @param list1
+     * @param list2
+     * @param <T>
+     * @return
+     */
+    public static <T> T[] mergeList(T[] list1, T[] list2) {
+        if (list1 == null || list2 == null || list1.length == 0 || list2.length == 0) {
+            if (!(list1 == null || list1.length == 0)) {
+                return list1;
+            }
+            if (!(list2 == null || list2.length == 0)) {
+                return list2;
+            }
+        }
+        T[] list = (T[]) new Object[list1.length + list2.length];
+        int k = 0;
+        for (int i = 0; i < list1.length; i++) {
+            list[k] = list1[i];
+            k++;
+        }
+        for (int i = 0; i < list2.length; i++) {
+            list[k] = list2[i];
+            k++;
+        }
+        return list;
+    }
+
 
 }

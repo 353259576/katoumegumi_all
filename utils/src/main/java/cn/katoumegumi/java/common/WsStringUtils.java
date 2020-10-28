@@ -1,100 +1,35 @@
 package cn.katoumegumi.java.common;
 
 
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class WsStringUtils {
-    public static final byte TRIM = 32;
+    public static final byte SPACE = 32;
+
+    //private static final SecureRandom RANDOM = new SecureRandom();
 
 
     public static void main(String[] args) {
-        /*System.out.println(" ".getBytes()[0]);
-        System.out.println(stringTrim("sdf dfsfhh4ghg            6545-*-/-++d"));
-        System.out.println((int) '-');
-        System.out.println(isNumber("-7.84785555555555877777777777777777777777777771111111111111777777777777777777777777777"));
-        System.out.println(stringNotHaveTrim("fd dsf "));
-        Integer list1[] = new Integer[]{1,2,3,4,5,6,7,8,9};
-        Integer list2[] = new Integer[]{11,22,33,44,55,66,77,88,99};
-        System.out.println(JSON.toJSONString(mergeList(list1,list2)));
-        List<Byte> bytes = new ArrayList<>();
-        bytes.add(Byte.valueOf("1"));
-        bytes.add(Byte.valueOf("2"));
-        bytes.add(Byte.valueOf("3"));
-        bytes.add(Byte.valueOf("4"));
-        bytes.add(Byte.valueOf("5"));
-        bytes.add(Byte.valueOf("6"));
-        bytes.add(Byte.valueOf("7"));
-        bytes.add(Byte.valueOf("8"));
-        bytes.add(Byte.valueOf("9"));
-        bytes.add(Byte.valueOf("10"));
-        bytes.add(Byte.valueOf("11"));
-        bytes.add(Byte.valueOf("12"));
-        bytes.add(Byte.valueOf("13"));
-        byte by[] = byteListToArray(bytes);
-        for(int i = 0; i < by.length; i++){
-            System.out.print(by[i]);
-        }
-        System.out.println();
-        System.out.println(createOrderNo());*/
-        /*System.out.println(decodeUnicode("\\U83b7\\U53d6\\U652f\\U4ed8\\U6570\\U636e\\U6210\\U529f"));
-        System.out.println(createRandomStr().hashCode());*/
-        //System.out.println("你好世界".contains(""));
 
-/*        Date data = stringToDate("2018/12/12 12:12:12");
-        System.out.println(data);
-        System.out.println(objectDateFormatString("4187848418414198"));*/
-        /*try {
-            System.out.println(new String(Base64.getDecoder().decode("38hK7fsURA0vt3ef-IW72hvbczDNVASfIlMkBKA6hLWxbe1Vt9ow2snACRPfgjQwGhZ_kWaCLRt0kwnP09pJQw"),"UTF-8"));
-        }catch (Exception e){
-            e.printStackTrace();
-        }*/
-        /*String str = decodeUnicode("https://www.bilibili.com/v/douga/other/?rt=V/ymTlOu4ow/y4xxNWPUZ14LyI55s2fZ984sFJL2kpo%D");//https://www.bilibili.com/v/douga/other/?rt=V/ymTlOu4ow/y4xxNWPUZ14LyI55s2fZ984sFJL2kpo%D
-        System.out.println(str);*/
-        /*System.out.println(decodeUnicode("\\u79DF\\u6237\\u9ED8\\u8BA4\\u89D2\\u8272"));
-        System.out.println(camel_case("dDFSDFgd"));
-        System.out.println(camelCase("d_d_f_s_d_fgd"));*/
-    }
-
-    public static byte[] byteListToArray(List<Byte> bytes) {
-        if (bytes == null || bytes.size() == 0) {
-            return null;
-        }
-        byte bys[] = new byte[bytes.size()];
-        for (int i = 0; i < bytes.size(); i++) {
-            bys[i] = bytes.get(i).byteValue();
-        }
-        return bys;
-    }
-
-
-    public static <T> T[] mergeList(T[] list1, T[] list2) {
-        if (list1 == null || list2 == null || list1.length == 0 || list2.length == 0) {
-            if (!(list1 == null || list1.length == 0)) {
-                return list1;
+        WsDateUtils.getExecutionTime.accept(()->{
+            for(int i = 0; i < 10000000; i++) {
+                createRandomStr("CS", WsDateUtils.LONGTIMESTRINGCOMPACT, 22);
+                //createRandomStr();
             }
-            if (!(list2 == null || list2.length == 0)) {
-                return list2;
-            }
-        }
-        T[] list = (T[]) new Object[list1.length + list2.length];
-        int k = 0;
-        for (int i = 0; i < list1.length; i++) {
-            list[k] = list1[i];
-            k++;
-        }
-        for (int i = 0; i < list2.length; i++) {
-            list[k] = list2[i];
-            k++;
-        }
-        return list;
+        });
+        //System.out.println();
     }
 
 
-    public static String jointListString(String strings[], String sign) {
+    public static String jointListString(String[] strings, String sign) {
         return jointListString(Arrays.asList(strings), sign);
     }
 
@@ -156,6 +91,11 @@ public class WsStringUtils {
     }
 
 
+    /**
+     * 判断字符串是否都是数字
+     * @param str
+     * @return
+     */
     public static boolean isNumber(String str) {
         if (str == null) {
             return false;
@@ -185,14 +125,18 @@ public class WsStringUtils {
         return true;
     }
 
-
-    public static boolean stringNotHaveTrim(String str) {
+    /**
+     * 判断字符串是否含有空格
+     * @param str
+     * @return
+     */
+    public static boolean stringExistSpace(String str) {
         if (str == null) {
             return false;
         }
-        byte bytes[] = null;
+        byte[] bytes = null;
         try {
-            bytes = str.getBytes("utf-8");
+            bytes = str.getBytes(StandardCharsets.UTF_8);
         } catch (Exception e) {
             bytes = str.getBytes();
         }
@@ -200,8 +144,8 @@ public class WsStringUtils {
         if (bytes.length == 0) {
             return false;
         }
-        for (int i = 0; i < bytes.length; i++) {
-            if (bytes[i] == TRIM) {
+        for (byte aByte : bytes) {
+            if (aByte == SPACE) {
                 return false;
             }
         }
@@ -209,6 +153,11 @@ public class WsStringUtils {
 
     }
 
+    /**
+     * 去掉string里的空格
+     * @param str
+     * @return
+     */
     public static String stringTrim(String str) {
         if (str == null) {
             return str;
@@ -219,7 +168,7 @@ public class WsStringUtils {
         }
         List list = new ArrayList();
         for (int i = 0; i < bytes.length; i++) {
-            if (bytes[i] != TRIM) {
+            if (bytes[i] != SPACE) {
                 list.add(bytes[i]);
             }
         }
@@ -369,6 +318,11 @@ public class WsStringUtils {
         return null;
     }
 
+    /**
+     * 字符串脱敏
+     * @param string
+     * @return
+     */
     public static String hideString(String string) {
         if (isBlank(string)) {
             return "**";
@@ -381,14 +335,69 @@ public class WsStringUtils {
 
     public static String createRandomStr() {
         String str = WsDateUtils.dateToString(new Date(), WsDateUtils.LONGTIMESTRINGCOMPACT);
-        int i = new Random().nextInt(90000) + 10000;
+        int i = new SecureRandom().nextInt(90000) + 10000;
         return str + i;
     }
 
-    public static String createRandomStr(String type, Integer size) {
-        String str = WsDateUtils.dateToString(new Date(), WsDateUtils.LONGTIMESTRINGCOMPACT);
-        int i = new Random().nextInt(size * 1000 * 9) + 100 * size;
-        return str + i;
+    public static String createRandomStr(String startStr,String timeTemplates,Integer size){
+        StringBuilder stringBuilder = new StringBuilder();
+        if(isNotBlank(startStr)){
+            stringBuilder.append(startStr);
+        }
+        if(isNotBlank(timeTemplates)){
+            stringBuilder.append(WsDateUtils.dateToString(new Date(),timeTemplates));
+        }
+        int length = stringBuilder.length() - size;
+        if(length > 0){
+            return stringBuilder.substring(0,size);
+        }else if(length  < 0){
+            length = -length;
+            stringBuilder.append(createRandomNum(length));
+            return stringBuilder.toString();
+
+        }else {
+            return stringBuilder.toString();
+        }
+
+
+    }
+
+    public static String createRandomNum(int size){
+        StringBuilder stringBuilder = new StringBuilder();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int length = size / 9;
+        int endSize = size % 9;
+        int i;
+        String si;
+        int sLength;
+        int replenishSize;
+        while (length > 0) {
+            i = random.nextInt(999999999);
+            si = Integer.toString(i);
+            sLength = si.length();
+            replenishSize = 9 - sLength;
+            while (replenishSize > 0) {
+                stringBuilder.append(0);
+                replenishSize--;
+            }
+            stringBuilder.append(si);
+            length--;
+        }
+        if(endSize > 0){
+            double value = Math.pow(10,endSize);
+            i = random.nextInt((int) value);
+            si = Integer.toString(i);
+            sLength = si.length();
+            replenishSize = endSize - sLength;
+            while (replenishSize > 0){
+                stringBuilder.append(0);
+                replenishSize--;
+            }
+            stringBuilder.append(si);
+        }
+        return  stringBuilder.toString();
+
+
     }
 
     /**
@@ -470,7 +479,12 @@ public class WsStringUtils {
         return str.substring(0, 1).toLowerCase() + str.substring(1, length);
     }
 
-
+    /**
+     * 拆分字符串
+     * @param str
+     * @param c
+     * @return
+     */
     public static List<String> split(String str, char c) {
         char[] cs = str.toCharArray();
         List<String> list = new ArrayList<>();

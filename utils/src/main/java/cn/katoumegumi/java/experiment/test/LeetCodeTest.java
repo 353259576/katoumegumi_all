@@ -26,7 +26,8 @@ public class LeetCodeTest {
         System.out.println(i);*/
         //boolean k = backspaceCompare("","");
         //System.out.println(k);
-        System.out.println(JSON.toJSONString(partitionLabels("ababcbacadefegdehijhklij")));
+        //System.out.println(JSON.toJSONString(partitionLabels("ababcbacadefegdehijhklij")));
+        System.out.println(uniqueOccurrences(new int[]{1,1}));
     }
 
     /**
@@ -840,5 +841,84 @@ public class LeetCodeTest {
 
 
     }
+
+    /**
+     * 1365. 有多少小于当前数字的数字
+     * @param nums
+     * @return
+     */
+    public int[] smallerNumbersThanCurrent(int[] nums) {
+        List<Integer> list = new ArrayList<>();
+        for(int i:nums){
+            list.add(i);
+        }
+        list.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o1-o2;
+            }
+        });
+        for(int i = 0; i < nums.length; i++){
+            nums[i] = list.indexOf(nums[i]);
+        }
+        return nums;
+    }
+
+    /**
+     * 144. 二叉树的前序遍历(递归解法)
+     * @param root
+     * @return
+     */
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> returnList = new ArrayList<>();
+        preorderTraversal(root,returnList);
+        return returnList;
+    }
+
+    public void preorderTraversal(TreeNode root,List<Integer> list) {
+        if (root != null) {
+            list.add(root.val);
+            preorderTraversal(root.left, list);
+            preorderTraversal(root.right, list);
+        }
+    }
+
+    /**
+     * 1207. 独一无二的出现次数
+     * @param arr
+     * @return
+     */
+    public static boolean uniqueOccurrences(int[] arr) {
+        Arrays.sort(arr);
+        int prev = arr[0];
+        int prevIndex = 0;
+        Set<Integer> set = new HashSet<>();
+        int length = arr.length;
+        int v;
+        int j;
+        int i = 1;
+        for(; i < length; ++i){
+            v = arr[i];
+            if(v != prev){
+                prev = v;
+                j = i - prevIndex;
+                prevIndex = i;
+                if(set.contains(j)){
+                    return false;
+                }else {
+                    set.add(j);
+                }
+            }
+        }
+        j = i - prevIndex;
+        if(set.contains(j)){
+            return false;
+        }
+
+        return true;
+
+
+    }
+
 
 }
