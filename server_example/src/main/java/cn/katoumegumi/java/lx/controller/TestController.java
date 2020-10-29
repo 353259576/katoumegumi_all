@@ -54,7 +54,24 @@ public class TestController {
         Field field = WsFieldUtils.getFieldByName(user.getClass(),"userDetails");
         System.out.println(field.getGenericType());
 
-        //System.out.println(str);
+        MySearchList mySearchList = MySearchList.create(User.class)
+                .setSqlLimit(sqlLimit -> sqlLimit.setOffset(0).setSize(10))
+                .innerJoin(UserDetails.class,t->t
+                        .setJoinTableNickName(User::getUserDetails)
+                        .setAlias("ud")
+                        .on(User::getId,UserDetails::getUserId)
+                        .condition(s->s.eq(User::getName,"你好"))
+                ).eq("ud",UserDetails::getSex,"1").sort(User::getName,"desc");
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+        System.out.println(selectSqlEntity.getSelectSql());
+        System.out.println(selectSqlEntity.getCountSql());
+        sqlModelUtils = new SQLModelUtils(SQLModelUtils.ObjectToMySearchList(user));
+        System.out.println(sqlModelUtils.update(user,true).getUpdateSql());
+        sqlModelUtils = new SQLModelUtils(MySearchList.create(User.class).eq(User::getId,1));
+        System.out.println(sqlModelUtils.delete().getDeleteSql());
+        System.out.println();
+
 
 
     }

@@ -41,6 +41,6 @@ public class User implements Serializable {
     @JoinColumn(name= "user_id")
     private List<UserDetails> userDetails;
 
-    private int[] ints = new int[]{1,2,3};
+    //private int[] ints = new int[]{1,2,3};
 
 }

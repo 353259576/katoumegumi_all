@@ -371,6 +371,7 @@ public class WsJdbcUtils {
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
         String countSql = selectSqlEntity.getCountSql();
+        log.info(countSql);
         List finalList = selectSqlEntity.getValueList();
         //List list = handleJdbcReturnValue(sql, finalList);
 

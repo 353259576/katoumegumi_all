@@ -920,5 +920,64 @@ public class LeetCodeTest {
 
     }
 
+    /**
+     * 129. 求根到叶子节点数字之和(深度优先算法)
+     * @param root
+     * @return
+     */
+    public int sumNumbers(TreeNode root) {
+        return sumNumbers(root,0);
+    }
+
+    public int sumNumbers(TreeNode root,Integer value) {
+        if(root != null){
+            if(root.left == null && root.right == null){
+                return value*10 + root.val;
+            }else if(root.right == null) {
+                return sumNumbers(root.left,value*10 + root.val);
+            }else if(root.left == null){
+                return sumNumbers(root.right,value* 10 + root.val);
+            }else {
+                return sumNumbers(root.left,value*10 + root.val) + sumNumbers(root.right,value*10 + root.val);
+            }
+        }else {
+            return value;
+        }
+    }
+
+    /**
+     * 129. 求根到叶子节点数字之和(广度优先算法)
+     * @param root
+     * @return
+     */
+    public int sumNumbersBfs(TreeNode root){
+        if(root == null){
+            return 0;
+        }
+        int sum = 0;
+        Queue<TreeNode> queue = new ArrayDeque<>();
+        Queue<Integer> numQueue = new ArrayDeque<>();
+        queue.offer(root);
+        numQueue.offer(root.val);
+        while (queue.size() > 0){
+            TreeNode node = queue.poll();
+            Integer value = numQueue.poll();
+
+            if(node.left == null && node.right == null){
+                sum += value;
+            }
+
+            if(node.left != null){
+                queue.offer(node.left);
+                numQueue.offer(value*10 + node.left.val);
+            }
+            if(node.right != null){
+                queue.add(node.right);
+                numQueue.offer(value * 10 + node.right.val);
+            }
+        }
+        return sum;
+    }
+
 
 }
