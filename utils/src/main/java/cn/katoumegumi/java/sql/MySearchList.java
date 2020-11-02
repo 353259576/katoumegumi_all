@@ -334,7 +334,7 @@ public class MySearchList {
     }
 
     public MySearchList lte(String tableName,SupplierFunc<?> columnFieldName,Object value){
-        return add(getColumnName(tableName,columnFieldName),SqlOperator.EQ,value);
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LTE,value);
     }
 
     public MySearchList lte(SupplierFunc<?> columnFieldName,Object value){
@@ -342,7 +342,7 @@ public class MySearchList {
     }
 
     public <T> MySearchList lte(String tableName,SFunction<T,?> columnFieldName,Object value){
-        return add(getColumnName(tableName,columnFieldName),SqlOperator.EQ,value);
+        return add(getColumnName(tableName,columnFieldName),SqlOperator.LTE,value);
     }
 
     public <T> MySearchList lte(SFunction<T,?> columnFieldName,Object value){

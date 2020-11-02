@@ -979,5 +979,45 @@ public class LeetCodeTest {
         return sum;
     }
 
+    /**
+     * 349. 两个数组的交集
+     * @param nums1
+     * @param nums2
+     * @return
+     */
+    public int[] intersection(int[] nums1, int[] nums2) {
+        Arrays.sort(nums1);
+        Arrays.sort(nums2);
+
+        int index1 = 0;
+        int index2 = 0;
+
+        int num1Length = nums1.length;
+        int num2Length = nums2.length;
+
+        Set<Integer> set = new HashSet<>();
+
+        while (index1 < num1Length && index2 < num2Length){
+            if(nums1[index1] == nums2[index2]){
+                set.add(nums1[index1]);
+                index1++;
+                index2++;
+            }else if(nums1[index1] > nums2[index2]){
+                index2++;
+            }else {
+                index1++;
+            }
+
+        }
+
+        int[] ints = new int[set.size()];
+        int index = 0;
+        for(Integer i:set){
+            ints[index] = i;
+            index++;
+        }
+        return ints;
+    }
+
 
 }
