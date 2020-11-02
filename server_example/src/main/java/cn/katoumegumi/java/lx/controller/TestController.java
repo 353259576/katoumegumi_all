@@ -1,9 +1,6 @@
 package cn.katoumegumi.java.lx.controller;
 
-import cn.katoumegumi.java.common.SupplierFunc;
-import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsDateUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserCC;
 import cn.katoumegumi.java.lx.model.UserDetails;
@@ -13,14 +10,14 @@ import cn.katoumegumi.java.sql.SelectSqlEntity;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.vertx.core.json.Json;
 import org.springframework.beans.BeanUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -30,7 +27,9 @@ public class TestController {
     public static void main(String[] args) {
 
 
-        User user = new User();
+
+
+        /*User user = new User();
         user.setId(1L);
         user.setName("你好世界");
         user.setPassword("世界你好");
@@ -70,11 +69,59 @@ public class TestController {
         System.out.println(sqlModelUtils.update(user,true).getUpdateSql());
         sqlModelUtils = new SQLModelUtils(MySearchList.create(User.class).eq(User::getId,1));
         System.out.println(sqlModelUtils.delete().getDeleteSql());
-        System.out.println();
+        System.out.println();*/
 
 
+        //lx(new int[]{3,8,12,5,24,3,1,9,27,36,43,11,6,2,7,15,25,56});
+        lx(new int[]{55,47,36,27,18,9,4,1,3,2,6});
 
     }
 
+
+
+    public static void lx(int[] ints){
+
+        Arrays.sort(ints);
+
+        int[] ints1 = new int[]{0,0,0};
+
+        List<Integer> list1 = new ArrayList<>();
+
+        List<Integer> list2 = new ArrayList<>();
+
+        List<Integer> list3 = new ArrayList<>();
+
+        int l;
+        int index;
+        for(int i = ints.length - 1; i > -1; i--){
+            l = ints[i];
+            index = min(ints1[0],ints1[1],ints1[2]);
+            ints1[index] = ints1[index] + l;
+            switch (index){
+                case 0:list1.add(l);break;
+                case 1:list2.add(l);break;
+                case 2:list3.add(l);break;
+            }
+        }
+        System.out.println(JSON.toJSONString(list1));
+        System.out.println(list1.stream().mapToInt(o->o).sum());
+        System.out.println(JSON.toJSONString(list2));
+        System.out.println(list2.stream().mapToInt(o->o).sum());
+        System.out.println(JSON.toJSONString(list3));
+        System.out.println(list3.stream().mapToInt(o->o).sum());
+
+    }
+
+
+    public static int min(int x,int y,int z){
+        if(x <= y && x <= z){
+            return 0;
+        }
+        if(y <= x && y <=z){
+            return 1;
+        }
+        return 2;
+
+    }
 
 }

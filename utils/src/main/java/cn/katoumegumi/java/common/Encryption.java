@@ -31,52 +31,6 @@ public class Encryption {
     private static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 
-    public static void main(String[] args) {
-        /*Map map = createKeys(4096);
-        System.out.println(map.get("privateKey"));
-        System.out.println(map.get("publicKey"));*/
-        /*try {
-            byte[] compressBytes = Base64.getEncoder().encode("你好世界".getBytes("UTF-8"));
-            Inflater decompression =  new Inflater();
-            decompression.setInput(compressBytes, 0, compressBytes.length);
-            byte [] decompressBytes = new byte [1024];
-            int decompressLength = decompression.inflate(decompressBytes);
-            decompression.end();
-            String jsonString = new String(Arrays.copyOfRange(decompressBytes, 0, decompressLength));
-            JSONObject jsonObject= new JSONObject(jsonString);
-            String sigTLS = jsonObject.getString("TLS.sig");
-            System.out.println(sigTLS);
-        }catch (Exception e){
-            e.printStackTrace();
-        }*/
-
-        //String privateKey = "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgy1T7YaaJMd2aj46JUJIMMLH7jeHSbyyXcdfN4I5LIPahRANCAARsdKt2Z3HotSIg6KFEU5ofMueU+0Ii0uin4veILy6aADpTLPGyvpOy0KOqUTfGxdsGFQs7ZOI02uvPn1m/amt0";
-        String publicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEbHSrdmdx6LUiIOihRFOaHzLnlPtCItLop+L3iC8umgA6Uyzxsr6TstCjqlE3xsXbBhULO2TiNNrrz59Zv2prdA==";
-
-        String privateKey = "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgy1T7YaaJMd2aj46JUJIMMLH7jeHSbyyXcdfN4I5LIPahRANCAARsdKt2Z3HotSIg6KFEU5ofMueU+0Ii0uin4veILy6aADpTLPGyvpOy0KOqUTfGxdsGFQs7ZOI02uvPn1m/amt0";
-        //String publicKey = "-----BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEbHSrdmdx6LUiIOihRFOaHzLnlPtCItLop+L3iC8umgA6Uyzxsr6TstCjqlE3xsXbBhULO2TiNNrrz59Zv2prdA==\r\n-----END PUBLIC KEY-----";
-
-        /*Map<String,String> map = createSecp256k1Key(256);
-        System.out.println(JSON.toJSONString(map));*/
-        /*PublicKey privateKey = getECPublicKey("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5E5AQsxbq0UIRxukyoiSAgfRD/x8YIWXi+YcrTODcPj6E2ksyUomLL0ZsN0em83OkHa+8663yr2/q3y/cQgN3g==");
-        System.out.println(Base64.getEncoder().encodeToString(privateKey.getEncoded()).equals("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5E5AQsxbq0UIRxukyoiSAgfRD/x8YIWXi+YcrTODcPj6E2ksyUomLL0ZsN0em83OkHa+8663yr2/q3y/cQgN3g=="));*/
-
-/*        String serialString =
-                "TLS.appid_at_3rd:" + 0 + "\n" +
-                        "TLS.account_type:" + 0 + "\n" +
-                        "TLS.identifier:" + "admin" + "\n" +
-                        "TLS.sdk_appid:" + "" + "\n" +
-                        "TLS.time:" + "10000000000" + "\n" +
-                        "TLS.expire_after:" + "1800" + "\n";
-
-
-        String sign = signEC(serialString,privateKey);
-        System.out.println(sign);
-        System.out.println(verifyEC(serialString,publicKey,sign));*/
-
-
-    }
-
 
     //*****************************************************************************************************
     public static String desEncoder(String str, String password) {

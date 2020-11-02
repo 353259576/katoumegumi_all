@@ -31,6 +31,11 @@ public class ExcelColumnProperty<T> {
      */
     private ExcelColumnStyle excelColumnStyle;
 
+    /**
+     * 表尾部设置
+     */
+    private ExcelColumnEndFill excelColumnEndFill;
+
 
     public Integer getIndex() {
         return index;
@@ -75,5 +80,14 @@ public class ExcelColumnProperty<T> {
 
     public Integer getColumnWidth() {
         return columnWidth;
+    }
+
+    public ExcelColumnEndFill getExcelColumnEndFill() {
+        return excelColumnEndFill;
+    }
+
+    public ExcelColumnProperty<T> setExcelColumnEndFill(ExcelColumnEndFill excelColumnEndFill) {
+        this.excelColumnEndFill = excelColumnEndFill;
+        return this;
     }
 }

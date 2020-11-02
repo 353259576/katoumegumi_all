@@ -118,11 +118,22 @@ public class ExcelGenerator<T> {
                 cell = row.createCell(i);
                 columnProperty = excelColumnPropertyList.get(i);
                 if (columnProperty.getExcelCellFill() != null) {
-                    ExcelPointLocation excelPointLocation = new ExcelPointLocation(i,rowNum,columnProperty.getColumnName(),cell,row,sheet,workbook);
+                    ExcelPointLocation excelPointLocation = new ExcelPointLocation(i,rowNum - 1,columnProperty.getColumnName(),cell,row,sheet,workbook);
                     columnProperty.getExcelCellFill().fill(excelPointLocation, t);
                 }
             }
         }
+        row = sheet.createRow(rowNum);
+        rowNum++;
+        for(int i = 0; i < excelColumnPropertyList.size(); i++){
+            ExcelColumnProperty<T> excelColumnProperty = excelColumnPropertyList.get(i);
+            ExcelColumnEndFill columnEndFill = excelColumnProperty.getExcelColumnEndFill();
+            if(columnEndFill != null){
+                ExcelPointLocation excelPointLocation = new ExcelPointLocation(i,rowNum,excelColumnProperty.getColumnName(),row.createCell(i),row,sheet,workbook);
+                columnEndFill.fill(excelPointLocation);
+            }
+        }
+
         byte[] returnBytes = null;
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
