@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-//@Entity
+@Entity
 @Table(name = "ws_user")
 @Data
 @TableName(value = "ws_user")

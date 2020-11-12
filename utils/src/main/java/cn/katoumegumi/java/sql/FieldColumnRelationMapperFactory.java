@@ -47,7 +47,7 @@ public class FieldColumnRelationMapperFactory {
         }
         if (annotation != null) {
             fieldColumnRelationMapper = hibernateAnalysisClassRelation(clazz);
-        }else {
+        } else {
             fieldColumnRelationMapper = mybatisPlusAnalysisClassRelation(clazz);
         }
         return fieldColumnRelationMapper;
@@ -72,7 +72,7 @@ public class FieldColumnRelationMapperFactory {
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields) {
-
+            field.setAccessible(true);
             Transient aTransient = field.getAnnotation(Transient.class);
             if (aTransient != null) {
                 continue;
@@ -85,19 +85,14 @@ public class FieldColumnRelationMapperFactory {
                     isId = true;
                 }
                 Column column = field.getAnnotation(Column.class);
-
-                FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
-                fieldColumnRelation.setFieldClass(field.getType());
-                fieldColumnRelation.setFieldName(field.getName());
-                field.setAccessible(true);
-                fieldColumnRelation.setField(field);
-                fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
+                String columnName = null;
                 if (column == null || WsStringUtils.isBlank(column.name())) {
-                    fieldColumnRelation.setColumnName(getChangeColumnName(field.getName()));
+                    columnName = getChangeColumnName(field.getName());
                 } else {
-                    fieldColumnRelation.setColumnName(column.name());
+                    columnName = column.name();
                 }
-                fieldColumnRelation.setId(isId);
+                FieldColumnRelation fieldColumnRelation = new FieldColumnRelation(isId, field.getName(), field, columnName, field.getType());
+                fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
                 if (isId) {
                     fieldColumnRelationMapper.getIdSet().add(fieldColumnRelation);
                 } else {
@@ -196,35 +191,34 @@ public class FieldColumnRelationMapperFactory {
             if (aTransient != null) {
                 continue;
             }
+            field.setAccessible(true);
             if (WsBeanUtils.isBaseType(field.getType())) {
                 TableId id = field.getAnnotation(TableId.class);
-                FieldColumnRelation fieldColumnRelation = new FieldColumnRelation();
-                fieldColumnRelation.setFieldClass(field.getType());
-                fieldColumnRelation.setFieldName(field.getName());
-                field.setAccessible(true);
-                fieldColumnRelation.setField(field);
-                fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
+                FieldColumnRelation fieldColumnRelation = null;
                 if (id == null) {
                     TableField column = field.getAnnotation(TableField.class);
                     if (column != null && !column.exist()) {
                         continue;
                     }
+                    String columnName = null;
                     if (column == null || WsStringUtils.isBlank(column.value())) {
-                        fieldColumnRelation.setColumnName(getChangeColumnName(field.getName()));
+                        columnName = getChangeColumnName(field.getName());
                     } else {
-                        fieldColumnRelation.setColumnName(column.value());
+                        columnName = column.value();
                     }
-                    fieldColumnRelation.setId(false);
+                    fieldColumnRelation = new FieldColumnRelation(false, field.getName(), field, columnName, field.getType());
                     fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
                 } else {
-                    fieldColumnRelation.setId(true);
+                    String columnName = null;
                     if (WsStringUtils.isBlank(id.value())) {
-                        fieldColumnRelation.setColumnName(getChangeColumnName(getChangeColumnName(field.getName())));
+                        columnName = getChangeColumnName(getChangeColumnName(field.getName()));
                     } else {
-                        fieldColumnRelation.setColumnName(id.value());
+                        columnName = id.value();
                     }
+                    fieldColumnRelation = new FieldColumnRelation(true, field.getName(), field, columnName, field.getType());
                     fieldColumnRelationMapper.getIdSet().add(fieldColumnRelation);
                 }
+                fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
             } else {
                 boolean isArray = false;
                 Class<?> joinClass = field.getType();
@@ -268,6 +262,7 @@ public class FieldColumnRelationMapperFactory {
 
     /**
      * 对没有指定名称的列名自动驼峰更改
+     *
      * @param fieldName
      * @return
      */

@@ -8,49 +8,44 @@ import java.lang.reflect.Field;
  * 对象参数与数据库列名对应关系
  */
 public class FieldColumnRelation {
-    private boolean id;
-    private String fieldName;
-    private Field field;
-    private String columnName;
-    private Class<?> fieldClass;
+    private final boolean id;
+    private final String fieldName;
+    private final Field field;
+    private final String columnName;
+    private final Class<?> fieldClass;
+
+
+    public FieldColumnRelation(boolean id, String fieldName,Field field,String columnName,Class<?> fieldClass){
+        this.id = id;
+        this.fieldName = fieldName;
+        this.field = field;
+        this.columnName = columnName;
+        this.fieldClass = fieldClass;
+    }
 
     public boolean isId() {
         return id;
     }
 
-    public void setId(boolean id) {
-        this.id = id;
-    }
 
     public String getFieldName() {
         return fieldName;
     }
 
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
 
     public Field getField() {
+        this.field.setAccessible(true);
         return field;
     }
 
-    public void setField(Field field) {
-        this.field = field;
-    }
 
     public String getColumnName() {
         return columnName;
     }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
 
     public Class<?> getFieldClass() {
         return fieldClass;
     }
 
-    public void setFieldClass(Class<?> fieldClass) {
-        this.fieldClass = fieldClass;
-    }
 }

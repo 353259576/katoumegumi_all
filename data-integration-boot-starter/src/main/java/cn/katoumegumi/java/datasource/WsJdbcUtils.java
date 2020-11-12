@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * @author 王松
+ * @author ws
  */
 public class WsJdbcUtils {
 
@@ -104,7 +104,6 @@ public class WsJdbcUtils {
             for (int i = 0; i < keyMapList.size(); i++) {
                 Map<String, Object> objectMap = keyMapList.get(i);
                 List<String> unUsedSet = new ArrayList<>();
-                T t = tList.get(i);
                 int finalI = i;
                 objectMap.forEach((s, o) -> {
                     FieldColumnRelation fieldColumnRelation = stringFieldColumnRelationMap.get(s);
@@ -149,7 +148,6 @@ public class WsJdbcUtils {
                 PreparedStatement statement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS);
                 Object o;
                 List valueList = insertSqlEntity.getValueList();
-                List<FieldColumnRelation> validList = insertSqlEntity.getUsedField();
                 for (int i = 0; i < valueList.size(); i++) {
                     o = valueList.get(i);
                     if (o == null) {
@@ -287,11 +285,6 @@ public class WsJdbcUtils {
 
     private List handleJdbcReturnValue(String sql, List finalList) {
 
-        /*jdbcTemplate.query(sql, finalList.toArray(),(resultSet)->{
-            int length = resultSet.getMetaData().getColumnCount();
-            List<String> nameList = new ArrayList<>();
-
-        });*/
         List<String> nameList = new ArrayList<>();
 
         List list = jdbcTemplate.query(sql, finalList.toArray(), (resultSet, i) -> {

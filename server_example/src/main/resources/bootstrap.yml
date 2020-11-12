@@ -5,6 +5,8 @@ spring:
     jdbc:
       repositories:
         enabled: true
+  application:
+    name: lxSpring
   cloud:
     nacos:
       discovery:
@@ -19,10 +21,9 @@ spring:
         health-indicator:
           enabled: true
           include-description: true
-  application:
-    name: lxSpring
-  profiles:
-    active: dev
+
+  #profiles:
+    #active: dev
 megumi:
   datasource:
     enable: true
@@ -75,8 +76,8 @@ megumi:
 
 mybatis-plus:
   type-aliases-package: cn.katoumegumi.java.lx.model
-  #configuration:
-    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #configuration:
+  #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath*:/mybatisMapper/**/*.xml
 dubbo:
   cloud:
@@ -84,7 +85,7 @@ dubbo:
   application:
     name: lxSpring
   registry:
-    address: spring-cloud://192.168.1.91:8848
+    address: spring-cloud://127.0.0.1:8848
   protocols:
     dubbo:
       name: dubbo
@@ -95,6 +96,11 @@ dubbo:
       server: netty
 logging:
   level:
+    cn:
+      katoumegumi:
+        java:
+          datasource:
+            WsJdbcUtils: debug
     com:
       alibaba:
         seata: debug

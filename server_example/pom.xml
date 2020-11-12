@@ -11,25 +11,10 @@
 
     <artifactId>server_example</artifactId>
 
-    <!--<properties>
-        <springboot.version>2.1.6.RELEASE</springboot.version>
-        <lombok.version>1.18.2</lombok.version>
-        <spring-data-releasetrain.version>Moore-SR6</spring-data-releasetrain.version>
-        <springdata.version>2.1.9.RELEASE</springdata.version>
-        <fastjson.version>1.2.59</fastjson.version>
-        <hibernate.version>5.4.4.Final</hibernate.version>
-        <dubbo.version>2.7.4.1</dubbo.version>
-    </properties>-->
 
 
     <dependencies>
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -319,6 +304,19 @@
 
 
     </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+
+
 
 
 </project>
