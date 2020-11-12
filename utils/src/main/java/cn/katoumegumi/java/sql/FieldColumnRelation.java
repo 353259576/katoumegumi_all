@@ -2,6 +2,7 @@ package cn.katoumegumi.java.sql;
 
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 /**
  * @author ws
@@ -48,4 +49,20 @@ public class FieldColumnRelation {
         return fieldClass;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FieldColumnRelation that = (FieldColumnRelation) o;
+        return id == that.id &&
+                Objects.equals(fieldName, that.fieldName) &&
+                Objects.equals(field, that.field) &&
+                Objects.equals(columnName, that.columnName) &&
+                Objects.equals(fieldClass, that.fieldClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, fieldName, field, columnName, fieldClass);
+    }
 }

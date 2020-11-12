@@ -60,15 +60,15 @@ public class FieldColumnRelationMapperFactory {
      * @return
      */
     private static FieldColumnRelationMapper hibernateAnalysisClassRelation(Class<?> clazz) {
-        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
-        Table table = clazz.getAnnotation(Table.class);
-        if (WsStringUtils.isBlank(table.name())) {
-            fieldColumnRelationMapper.setTableName(getChangeColumnName(table.name()));
-        } else {
-            fieldColumnRelationMapper.setTableName(table.name());
-        }
 
-        fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
+        Table table = clazz.getAnnotation(Table.class);
+        String tableName = null;
+        if (WsStringUtils.isBlank(table.name())) {
+            tableName = getChangeColumnName(table.name());
+        } else {
+            tableName = table.name();
+        }
+        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(),tableName,clazz);
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields) {
@@ -156,7 +156,6 @@ public class FieldColumnRelationMapperFactory {
                 }
             }
         }
-        fieldColumnRelationMapper.setClazz(clazz);
         fieldColumnRelationMapper.markSignLocation();
         mapperMap.put(clazz, fieldColumnRelationMapper);
         return fieldColumnRelationMapper;
@@ -169,21 +168,19 @@ public class FieldColumnRelationMapperFactory {
      * @return
      */
     private static FieldColumnRelationMapper mybatisPlusAnalysisClassRelation(Class<?> clazz) {
-        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper();
-        fieldColumnRelationMapper.setClazz(clazz);
+
         TableName table = clazz.getAnnotation(TableName.class);
+        String tableName = null;
         if (table == null) {
-            fieldColumnRelationMapper.setTableName(getChangeColumnName(clazz.getSimpleName()));
-            fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
+            tableName = getChangeColumnName(clazz.getSimpleName());
         } else {
             if (WsStringUtils.isBlank(table.value())) {
-                fieldColumnRelationMapper.setTableName(getChangeColumnName(clazz.getSimpleName()));
-                fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
+                tableName = getChangeColumnName(clazz.getSimpleName());
             } else {
-                fieldColumnRelationMapper.setTableName(table.value());
-                fieldColumnRelationMapper.setNickName(clazz.getSimpleName());
+                tableName = table.value();
             }
         }
+        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(),tableName,clazz);
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields) {

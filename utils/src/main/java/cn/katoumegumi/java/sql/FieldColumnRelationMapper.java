@@ -12,33 +12,39 @@ import java.util.Map;
  * 对象数据库列名关系集合
  */
 public class FieldColumnRelationMapper {
-    private String baseSql;
-    private String nickName;
-    private String tableName;
-    private Class<?> clazz;
+    private final String nickName;
+    private final String tableName;
+    private final Class<?> clazz;
 
     /**
      * id
      */
-    private List<FieldColumnRelation> idSet = new ArrayList<>();
+    private final List<FieldColumnRelation> idSet = new ArrayList<>();
 
     /**
      * 非Id
      */
-    private List<FieldColumnRelation> fieldColumnRelations = new ArrayList<>();
+    private final List<FieldColumnRelation> fieldColumnRelations = new ArrayList<>();
 
     /**
      * 关联对象
      */
-    private List<FieldJoinClass> fieldJoinClasses = new ArrayList<>();
-    private Map<String, FieldColumnRelation> fieldColumnRelationMap = new HashMap<>();
+    private final List<FieldJoinClass> fieldJoinClasses = new ArrayList<>();
+    private final Map<String, FieldColumnRelation> fieldColumnRelationMap = new HashMap<>();
 
     /**
      * 位置
      */
-    private Map<Object,Integer> locationMap = new HashMap<>();
+    private final Map<Object,Integer> locationMap = new HashMap<>();
 
     private Map<String, FieldColumnRelationMapper> map;
+
+
+    public FieldColumnRelationMapper(String nickName,String tableName,Class<?> clazz){
+        this.nickName = nickName;
+        this.tableName = tableName;
+        this.clazz = clazz;
+    }
 
 
     public FieldColumnRelation getFieldColumnRelationByColumn(String column) {
@@ -83,61 +89,54 @@ public class FieldColumnRelationMapper {
     }
 
 
-    public String getBaseSql() {
-        return baseSql;
-    }
-
-    public void setBaseSql(String baseSql) {
-        this.baseSql = baseSql;
-    }
 
     public String getNickName() {
         return nickName;
     }
 
-    public void setNickName(String nickName) {
+    /*public void setNickName(String nickName) {
         this.nickName = nickName;
-    }
+    }*/
 
     public String getTableName() {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
+    /*public void setTableName(String tableName) {
         this.tableName = tableName;
-    }
+    }*/
 
     public Class<?> getClazz() {
         return clazz;
     }
 
-    public void setClazz(Class<?> clazz) {
+    /*public void setClazz(Class<?> clazz) {
         this.clazz = clazz;
-    }
+    }*/
 
     public List<FieldColumnRelation> getIdSet() {
         return idSet;
     }
 
-    public void setIdSet(List<FieldColumnRelation> idSet) {
+    /*public void setIdSet(List<FieldColumnRelation> idSet) {
         this.idSet = idSet;
-    }
+    }*/
 
     public List<FieldColumnRelation> getFieldColumnRelations() {
         return fieldColumnRelations;
     }
 
-    public void setFieldColumnRelations(List<FieldColumnRelation> fieldColumnRelations) {
+   /* public void setFieldColumnRelations(List<FieldColumnRelation> fieldColumnRelations) {
         this.fieldColumnRelations = fieldColumnRelations;
-    }
+    }*/
 
     public List<FieldJoinClass> getFieldJoinClasses() {
         return fieldJoinClasses;
     }
 
-    public void setFieldJoinClasses(List<FieldJoinClass> fieldJoinClasses) {
+    /*public void setFieldJoinClasses(List<FieldJoinClass> fieldJoinClasses) {
         this.fieldJoinClasses = fieldJoinClasses;
-    }
+    }*/
 
     public Map<String, FieldColumnRelationMapper> getMap() {
         return map;
@@ -151,9 +150,9 @@ public class FieldColumnRelationMapper {
         return fieldColumnRelationMap;
     }
 
-    public void setFieldColumnRelationMap(Map<String, FieldColumnRelation> fieldColumnRelationMap) {
+    /*public void setFieldColumnRelationMap(Map<String, FieldColumnRelation> fieldColumnRelationMap) {
         this.fieldColumnRelationMap = fieldColumnRelationMap;
-    }
+    }*/
 
     public void markSignLocation(){
         for(int i = 0; i < idSet.size(); i++){
@@ -175,6 +174,6 @@ public class FieldColumnRelationMapper {
 
     @Override
     public String toString() {
-        return baseSql;
+        return nickName+"_"+tableName;
     }
 }
