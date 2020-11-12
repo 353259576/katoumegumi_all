@@ -339,6 +339,13 @@ public class WsStringUtils {
         return str + i;
     }
 
+    /**
+     * 创建随机字符串
+     * @param startStr 开始字符串
+     * @param timeTemplates 日期格式
+     * @param size 总大小
+     * @return
+     */
     public static String createRandomStr(String startStr,String timeTemplates,Integer size){
         StringBuilder stringBuilder = new StringBuilder();
         if(isNotBlank(startStr)){
@@ -362,6 +369,11 @@ public class WsStringUtils {
 
     }
 
+    /**
+     * 随机数字字符串
+     * @param size 长度
+     * @return
+     */
     public static String createRandomNum(int size){
         StringBuilder stringBuilder = new StringBuilder();
         ThreadLocalRandom random = ThreadLocalRandom.current();

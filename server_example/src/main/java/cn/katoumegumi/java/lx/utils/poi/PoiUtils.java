@@ -36,6 +36,7 @@ public class PoiUtils {
                 .setTitle("测试数据")
                 .addColumnProperty(p -> p.setColumnName("姓名")
                         .setColumnWidth(100*256)
+                        .setColumnSize(2)
                         .setExcelColumnStyle(cellStyle -> {
                             cellStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
                             cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -47,13 +48,22 @@ public class PoiUtils {
                     Cell cell = location.getCell();
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(user.getName());
-                })))
-                .addColumnProperty(p -> p.setColumnName("密码").setExcelCellFill(((location, user) -> {
+                })).setExcelColumnEndFill(e->{
+                    Cell cell = e.getCell();
+                    cell.setCellValue("结束1");
+                        }))
+                .addColumnProperty(p -> p.setColumnName("密码").setColumnSize(3).setExcelCellFill(((location, user) -> {
                     location.getCell().setCellValue(user.getPassword());
-                })))
-                .addColumnProperty(p -> p.setColumnName("创建时间").setExcelCellFill(((location, user) -> {
+                })).setExcelColumnEndFill(e->{
+                    Cell cell = e.getCell();
+                    cell.setCellValue("结束2");
+                }))
+                .addColumnProperty(p -> p.setColumnName("创建时间").setColumnSize(4).setExcelCellFill(((location, user) -> {
                     location.getCell().setCellValue(WsBeanUtils.objectToT(user.getCreateDate(),String.class));
-                })))
+                })).setExcelColumnEndFill(e->{
+                    Cell cell = e.getCell();
+                    cell.setCellValue("结束3");
+                }))
                 .build();
         File file = WsFileUtils.createFile("D:\\网页\\1.xls");
         try {

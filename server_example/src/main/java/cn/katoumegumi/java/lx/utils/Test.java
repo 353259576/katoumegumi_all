@@ -1,9 +1,15 @@
 package cn.katoumegumi.java.lx.utils;
 
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.lx.model.User;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * @author ws
@@ -11,19 +17,11 @@ import java.util.function.Consumer;
 public class Test {
 
     public static void main(String[] args) {
-        Consumer<Runnable> consumer = runnable -> {
-            long start = System.currentTimeMillis();
-            runnable.run();
-            long end = System.currentTimeMillis();
-            System.out.println(end - start);
-        };
-        consumer.accept(() -> {
-            for (int i = 0; i < 100000; i++) {
-                List<String> keyPrefixs = WsStringUtils.split("userdetailsremake.usernameremake", '.');
-            }
-        });
+        
+
 
     }
+
 
 
     public static String addBinary(String a, String b) {

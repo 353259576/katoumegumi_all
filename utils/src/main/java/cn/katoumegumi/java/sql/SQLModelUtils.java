@@ -326,14 +326,7 @@ public class SQLModelUtils {
                     joinTableList.add(selectSql.toString());
 
                 }
-
-
             }
-
-
-
-
-
             if (!(mySearchList.getAll().isEmpty() && mySearchList.getAnds().isEmpty() && mySearchList.getOrs().isEmpty())) {
                 List<String> whereStrings = searchListWhereSqlProcessor(mySearchList, baseTableName);
                 sqlEntity.setConditionList(whereStrings);
@@ -359,8 +352,6 @@ public class SQLModelUtils {
 
         }
         return  "select " + cacheSqlEntity.getColumnStr() + " " + cacheSqlEntity.getTableStr() +" "+ cacheSqlEntity.getCondition() + cacheSqlEntity.getSubjoin();
-        //return searchSql + cacheSqlEntity.getSubjoin();
-
     }
 
     private String searchListBaseCountSQLProcessor() {

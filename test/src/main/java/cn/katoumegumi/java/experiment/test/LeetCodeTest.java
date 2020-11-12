@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.experiment.test;
 
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -27,7 +28,16 @@ public class LeetCodeTest {
         //boolean k = backspaceCompare("","");
         //System.out.println(k);
         //System.out.println(JSON.toJSONString(partitionLabels("ababcbacadefegdehijhklij")));
-        System.out.println(uniqueOccurrences(new int[]{1,1}));
+        //System.out.println(uniqueOccurrences(new int[]{1,1}));
+        //String string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        //List<String> wordList = Arrays.asList("a","aa","aaa","aaaa","aaaaa","aaaaaa","aaaaaaa","aaaaaaaa","aaaaaaaaa","aaaaaaaaaa");
+
+       /* String string = "abcd";
+        List<String> wordList = Arrays.asList("a","abc","b","cd");
+        System.out.println(JSON.toJSONString(wordBreak(string,wordList)));*/
+
+        System.out.println(JSON.toJSONString(kClosest(new int[][]{{68,97},{34,-84},{60,100},{2,31},{-27,-38},{-73,-74},{-55,-39},{62,91},{62,92},{-57,-67}},5)));
+
     }
 
     /**
@@ -997,14 +1007,14 @@ public class LeetCodeTest {
 
         Set<Integer> set = new HashSet<>();
 
-        while (index1 < num1Length && index2 < num2Length){
-            if(nums1[index1] == nums2[index2]){
+        while (index1 < num1Length && index2 < num2Length) {
+            if (nums1[index1] == nums2[index2]) {
                 set.add(nums1[index1]);
                 index1++;
                 index2++;
-            }else if(nums1[index1] > nums2[index2]){
+            } else if (nums1[index1] > nums2[index2]) {
                 index2++;
-            }else {
+            } else {
                 index1++;
             }
 
@@ -1012,12 +1022,140 @@ public class LeetCodeTest {
 
         int[] ints = new int[set.size()];
         int index = 0;
-        for(Integer i:set){
+        for (Integer i : set) {
             ints[index] = i;
             index++;
         }
         return ints;
     }
 
+    /**
+     * 140. 单词拆分 II
+     * @param s
+     * @param wordDict
+     * @return
+     */
+    public static List<String> wordBreak(String s, List<String> wordDict) {
+        Map<Character,Word> wordMap = new HashMap<>();
+        for(String str:wordDict){
+            char[] chars = str.toCharArray();
+            Word word = null;
+            Map<Character,Word> map = wordMap;
+            for(Character c:chars){
+                if(map == null){
+                    word.wordMap = new HashMap<>();
+                    map = word.wordMap;
+                }
+                word = map.computeIfAbsent(c,k->new Word());
+                map = word.wordMap;
+            }
+            word.end = true;
+        }
+        List<String> lists = new ArrayList<>();
+        Map<Integer,List<List<String>>> listMap = new HashMap<>();
+        List<List<String>> list = wordBreak(0,s,wordMap,listMap);
+        for(List<String> stringList:list){
+            lists.add(String.join(" ",stringList));
+        }
+        return lists;
+    }
+
+    private static List<List<String>> wordBreak(Integer index,String s,Map<Character,Word> wordMap,Map<Integer,List<List<String>>> listMap){
+
+        List<List<String>> list = listMap.get(index);
+        if(list == null){
+            list = new ArrayList<>();
+            List<String> strings = new LinkedList<>();
+            //list.add(strings);
+            int i = index;
+            Map<Character,Word> localMap = wordMap;
+            char c;
+            Word word;
+            int prevIndex = index;
+            for(; i < s.length(); i++){
+                c = s.charAt(i);
+                word = localMap.get(c);
+                if(word == null){
+                    listMap.put(index,list);
+                    return list;
+                }
+                if(word.end){
+                    if(word.wordMap == null){
+                        localMap = wordMap;
+                        strings.add(s.substring(prevIndex,i + 1));
+                        prevIndex = i + 1;
+                        if(prevIndex == s.length()){
+                            list.add(strings);
+                        }
+                    }else {
+                        if(i + 1 < s.length()) {
+                            List<List<String>> nextList = wordBreak(i + 1, s, wordMap, listMap);
+                            if (nextList != null) {
+                                for (List<String> stringList : nextList) {
+                                    List<String> newList = new LinkedList<>(strings);
+                                    newList.add(s.substring(prevIndex, i + 1));
+                                    newList.addAll(stringList);
+                                    list.add(newList);
+                                }
+                            }
+                        }else {
+                            strings.add(s.substring(prevIndex,i + 1));
+                            list.add(strings);
+                        }
+                        localMap = word.wordMap;
+                    }
+                }else {
+                    localMap = word.wordMap;
+                }
+            }
+
+            listMap.put(index,list);
+            return list;
+        }else {
+            return list;
+        }
+
+    }
+
+
+    private static class Word{
+        public char c;
+        public boolean end;
+        public Map<Character,Word> wordMap;
+    }
+
+
+    /**
+     * 973. 最接近原点的 K 个点
+     * @param points
+     * @param K
+     * @return
+     */
+    public static int[][] kClosest(int[][] points, int K) {
+        double[] distance = new double[points.length];
+
+        for(int i = 0; i < distance.length; i++){
+            distance[i] = Math.sqrt(Math.pow(points[i][0],2)+Math.pow(points[i][1],2));
+        }
+        int[][] r = new int[K][];
+
+        int minIndex = 0;
+        for(int i = 0; i < K; i++){
+            minIndex = i;
+            for(int j = i + 1; j < distance.length; j++){
+                if(distance[j] < distance[minIndex]){
+                    minIndex = j;
+                    //distance[i] = distance[j];
+                }
+            }
+            double d = distance[minIndex];
+            distance[minIndex] = distance[i];
+            distance[i] = d;
+            int[] ints = points[minIndex];
+            points[minIndex] = points[i];
+            points[i] = ints;
+        }
+        return Arrays.copyOf(points,K);
+    }
 
 }

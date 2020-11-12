@@ -21,6 +21,13 @@ public class ExcelColumnProperty<T> {
      */
     private Integer columnWidth;
 
+
+    /**
+     * 行的大小
+     */
+    private Integer columnSize = 1;
+
+
     /**
      * cell填充方法
      */
@@ -88,6 +95,15 @@ public class ExcelColumnProperty<T> {
 
     public ExcelColumnProperty<T> setExcelColumnEndFill(ExcelColumnEndFill excelColumnEndFill) {
         this.excelColumnEndFill = excelColumnEndFill;
+        return this;
+    }
+
+    public Integer getColumnSize() {
+        return columnSize;
+    }
+
+    public ExcelColumnProperty<T> setColumnSize(Integer columnSize) {
+        this.columnSize = columnSize;
         return this;
     }
 }

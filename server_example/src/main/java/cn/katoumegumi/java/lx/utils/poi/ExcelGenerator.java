@@ -18,13 +18,24 @@ import java.util.function.Consumer;
  * @author ws
  */
 public class ExcelGenerator<T> {
-
+    /**
+     * 表格名称
+     */
     private String title;
 
+    /**
+     * 行的处理方式
+     */
     private List<ExcelColumnProperty<T>> excelColumnPropertyList = new ArrayList<>();
 
+    /**
+     * 数据
+     */
     private List<T> valueList;
 
+    /**
+     * 表格标题样式
+     */
     private ExcelColumnStyle excelColumnStyle;
 
     public static <T> ExcelGenerator<T> create(List<T> tList){
@@ -96,42 +107,58 @@ public class ExcelGenerator<T> {
             rowNum++;
         }
         row = sheet.createRow(rowNum);
-        rowNum++;
+
+
+
         ExcelColumnProperty<T> columnProperty = null;
+        int columnNum = 0;
         for(int i = 0; i < excelColumnPropertyList.size(); i++){
-            cell = row.createCell(i);
+            cell = row.createCell(columnNum);
             columnProperty = excelColumnPropertyList.get(i);
+            if(columnProperty.getColumnSize() > 1){
+                CellRangeAddress addresses = new CellRangeAddress(rowNum,rowNum,columnNum, columnNum+columnProperty.getColumnSize() - 1);
+                sheet.addMergedRegion(addresses);
+            }
+
             if(columnProperty.getExcelColumnStyle() != null){
                 CellStyle cellStyle = workbook.createCellStyle();
                 columnProperty.getExcelColumnStyle().setStyle(cellStyle);
                 cell.setCellStyle(cellStyle);
             }
             if(columnProperty.getColumnWidth() != null){
-                sheet.setColumnWidth(i,columnProperty.getColumnWidth());
+                sheet.setColumnWidth(columnNum,columnProperty.getColumnWidth());
             }
             cell.setCellValue(columnProperty.getColumnName());
+            columnNum += columnProperty.getColumnSize();
         }
+        rowNum++;
+
         for (T t : valueList) {
             row = sheet.createRow(rowNum);
-            rowNum++;
+            columnNum = 0;
             for (int i = 0; i < excelColumnPropertyList.size(); i++) {
-                cell = row.createCell(i);
+                cell = row.createCell(columnNum);
                 columnProperty = excelColumnPropertyList.get(i);
                 if (columnProperty.getExcelCellFill() != null) {
-                    ExcelPointLocation excelPointLocation = new ExcelPointLocation(i,rowNum - 1,columnProperty.getColumnName(),cell,row,sheet,workbook);
+                    ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum,rowNum,columnProperty.getColumnSize(),columnProperty.getColumnName(),cell,row,sheet,workbook);
                     columnProperty.getExcelCellFill().fill(excelPointLocation, t);
                 }
+                columnNum += columnProperty.getColumnSize();
             }
+            rowNum++;
         }
+
+
         row = sheet.createRow(rowNum);
-        rowNum++;
+        columnNum = 0;
         for(int i = 0; i < excelColumnPropertyList.size(); i++){
             ExcelColumnProperty<T> excelColumnProperty = excelColumnPropertyList.get(i);
             ExcelColumnEndFill columnEndFill = excelColumnProperty.getExcelColumnEndFill();
             if(columnEndFill != null){
-                ExcelPointLocation excelPointLocation = new ExcelPointLocation(i,rowNum,excelColumnProperty.getColumnName(),row.createCell(i),row,sheet,workbook);
+                ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum,rowNum,excelColumnProperty.getColumnSize(),excelColumnProperty.getColumnName(),row.createCell(columnNum),row,sheet,workbook);
                 columnEndFill.fill(excelPointLocation);
             }
+            columnNum += excelColumnProperty.getColumnSize();
         }
 
         byte[] returnBytes = null;

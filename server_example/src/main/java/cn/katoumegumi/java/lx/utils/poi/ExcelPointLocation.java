@@ -22,12 +22,15 @@ public class ExcelPointLocation {
 
     private final Workbook workbook;
 
+    private final Integer columnSize;
+
     private CellStyle cellStyle;
 
 
-    public ExcelPointLocation(Integer columnNum, Integer rowNum, String columnName, Cell cell,Row row,Sheet sheet,Workbook workbook) {
+    public ExcelPointLocation(Integer columnNum, Integer rowNum,Integer columnSize, String columnName, Cell cell,Row row,Sheet sheet,Workbook workbook) {
         this.columnNum = columnNum;
         this.rowNum = rowNum;
+        this.columnSize = columnSize;
         this.columnName = columnName;
         this.cell = cell;
         this.row = row;
@@ -68,5 +71,9 @@ public class ExcelPointLocation {
             this.cellStyle = workbook.createCellStyle();
         }
         return cellStyle;
+    }
+
+    public Integer getColumnSize() {
+        return columnSize;
     }
 }

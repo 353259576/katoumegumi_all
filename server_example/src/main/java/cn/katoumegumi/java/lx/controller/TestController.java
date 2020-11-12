@@ -4,15 +4,15 @@ import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserCC;
 import cn.katoumegumi.java.lx.model.UserDetails;
-import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.SQLModelUtils;
-import cn.katoumegumi.java.sql.SelectSqlEntity;
+import cn.katoumegumi.java.sql.*;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mysql.cj.jdbc.Driver;
 import io.vertx.core.json.Json;
 import org.springframework.beans.BeanUtils;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -73,9 +73,25 @@ public class TestController {
 
 
         //lx(new int[]{3,8,12,5,24,3,1,9,27,36,43,11,6,2,7,15,25,56});
-        lx(new int[]{55,47,36,27,18,9,4,1,3,2,6});
+        //lx(new int[]{55,47,36,27,18,9,4,1,3,2,6});
+        String url = "jdbc:mysql://rm-bp13t5e43e9312u79co.mysql.rds.aliyuncs.com:3306/apes_cloud_test?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai";
+        String userName = "yd_test";
+        String password = "123456";
+        String className = Driver.class.getName();
+        DataSource dataSource = HikariCPDataSourceFactory.getDataSource(url,userName,password,className);
+        SqlTableToBeanUtils sqlTableToBeanUtils = new SqlTableToBeanUtils(dataSource,"apes_cloud_test");
+        List<SqlTableToBeanUtils.Table> tableList = sqlTableToBeanUtils.selectTables(null);
+        for (SqlTableToBeanUtils.Table table:tableList){
+            List<SqlTableToBeanUtils.Column> columnList = sqlTableToBeanUtils.selectTableColumns(table.getTableName());
+            columnList.forEach(column -> {
+                System.out.printf("@Column(name=\"%s\")\n",column.getColumnName());
+                System.out.printf("private %s %s;%n",column.getColumnClass().getSimpleName(),column.getBeanFieldName());
+            });
+        }
+
 
     }
+
 
 
 
