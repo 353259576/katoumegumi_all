@@ -5,6 +5,7 @@ import cn.katoumegumi.java.sql.common.SqlType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * sql语句
@@ -14,11 +15,13 @@ public class SqlEntity {
 
     private SqlType sqlType;
 
-    private List<String> columnNameList = new ArrayList<>();
+    //private final List<String> columnNameList = new ArrayList<>();
 
-    private List<String> tableNameList = new ArrayList<>();
+    private final List<ColumnBaseEntity> columnList = new ArrayList<>();
 
-    private List<String> conditionList = new ArrayList<>();
+    private final List<String> tableNameList = new ArrayList<>();
+
+    private final List<String> conditionList = new ArrayList<>();
 
     /**
      * 行
@@ -50,36 +53,24 @@ public class SqlEntity {
         return this;
     }
 
-    public List<String> getColumnNameList() {
+    /*public List<String> getColumnNameList() {
         return columnNameList;
-    }
+    }*/
 
-    public SqlEntity setColumnNameList(List<String> columnNameList) {
-        this.columnNameList = columnNameList;
-        return this;
-    }
 
     public List<String> getTableNameList() {
         return tableNameList;
     }
 
-    public SqlEntity setTableNameList(List<String> tableNameList) {
-        this.tableNameList = tableNameList;
-        return this;
-    }
 
     public List<String> getConditionList() {
         return conditionList;
     }
 
-    public SqlEntity setConditionList(List<String> conditionList) {
-        this.conditionList = conditionList;
-        return this;
-    }
 
     public String getColumnStr() {
         if(columnStr == null){
-            columnStr = String.join(",",columnNameList);
+            columnStr = columnList.stream().map(ColumnBaseEntity::getColumnValue).collect(Collectors.joining(","));
         }
         return columnStr;
     }
@@ -116,5 +107,9 @@ public class SqlEntity {
     public SqlEntity setSubjoin(String subjoin) {
         this.subjoin = subjoin;
         return this;
+    }
+
+    public List<ColumnBaseEntity> getColumnList() {
+        return columnList;
     }
 }

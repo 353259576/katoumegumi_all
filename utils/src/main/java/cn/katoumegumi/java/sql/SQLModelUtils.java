@@ -45,29 +45,11 @@ public class SQLModelUtils {
     private final List<Object> baseWhereValueList = new ArrayList<>();
 
     /**
-     * 简写数据
-     */
-    //private final Map<String, String> abbreviationMap = new HashMap<>();
-
-    /**
-     * 详细数据
-     */
-    //private final Map<String, String> particularMap = new HashMap<>();
-
-    /**
-     * 缩写防重复
-     */
-    //private final AtomicInteger abbreviationNum = new AtomicInteger();
-
-    /**
      * 表面和列名转换
       */
-    private final TranslateNameUtils translateNameUtils = new TranslateNameUtils();
+    private final TranslateNameUtils translateNameUtils;
 
-    /**
-     * 本地对象与表的对应关系
-     */
-    private final Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
+
 
 
     /**
@@ -85,9 +67,13 @@ public class SQLModelUtils {
      */
     private SqlEntity cacheSqlEntity;
 
+    public SQLModelUtils(MySearchList mySearchList){
+        this(mySearchList,new TranslateNameUtils());
+    }
 
-    public SQLModelUtils(MySearchList mySearchList) {
+    public SQLModelUtils(MySearchList mySearchList,TranslateNameUtils translateNameUtils) {
         this.mySearchList = mySearchList;
+        this.translateNameUtils = translateNameUtils;
         mainClass = mySearchList.getMainClass();
         if (WsStringUtils.isEmpty(mySearchList.getAlias())) {
             translateNameUtils.getAbbreviation(mainClass.getSimpleName());
@@ -134,11 +120,10 @@ public class SQLModelUtils {
 
     /**
      * 预防数据库关键词
-     *
      * @param keyword
      * @return
      */
-    private static String guardKeyword(String keyword) {
+    public static String guardKeyword(String keyword) {
         return '`' + keyword + '`';
     }
 
@@ -227,10 +212,8 @@ public class SQLModelUtils {
         StringBuilder selectSql;// = new StringBuilder();
         FieldColumnRelationMapper fieldColumnRelationMapper;
         if (cacheSqlEntity == null) {
-            //mainClass = mySearchList.getMainClass();
             SqlEntity sqlEntity = modelToSqlSelect(mySearchList.getMainClass());
             List<String> joinTableList = sqlEntity.getTableNameList();
-            //selectSql.append(modelToSqlSelect(mySearchList.getMainClass()));
             List<TableRelation> list = mySearchList.getJoins();
             fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
             String baseTableName = fieldColumnRelationMapper.getNickName();
@@ -242,13 +225,13 @@ public class SQLModelUtils {
                 String tableNickName;
                 FieldColumnRelationMapper mapper = analysisClassRelation(tableRelation.getJoinTableClass());
                 String joinTableNickName = baseTableName + "." + tableRelation.getJoinTableNickName();
-                localMapperMap.put(joinTableNickName, mapper);
+                translateNameUtils.addLocalMapper(joinTableNickName, mapper);
                 if (WsStringUtils.isBlank(tableRelation.getTableNickName())) {
                     tableNickName = baseTableName;
                 } else {
                     tableNickName = baseTableName + "." + tableRelation.getTableNickName();
                 }
-                FieldColumnRelationMapper baseMapper = localMapperMap.get(tableNickName);
+                FieldColumnRelationMapper baseMapper = translateNameUtils.getLocalMapper(tableNickName);
 
                 if (WsListUtils.isNotEmpty(selectSqlInterceptorMap)) {
                     for (FieldColumnRelation fieldColumnRelation : mapper.getFieldColumnRelations()) {
@@ -287,9 +270,9 @@ public class SQLModelUtils {
                 if (WsStringUtils.isNotBlank(tableRelation.getTableNickName())) {
                     FieldColumnRelationMapper tableMapper = null;
                     if (tableRelation.getTableNickName().startsWith(baseTableName)) {
-                        tableMapper = localMapperMap.get(tableRelation.getTableNickName());
+                        tableMapper = translateNameUtils.getLocalMapper(tableRelation.getTableNickName());
                     } else {
-                        tableMapper = localMapperMap.get(baseTableName + "." + tableRelation.getTableNickName());
+                        tableMapper = translateNameUtils.getLocalMapper(baseTableName + "." + tableRelation.getTableNickName());
                     }
                     FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
                     String tableName;
@@ -329,7 +312,7 @@ public class SQLModelUtils {
             }
             if (!(mySearchList.getAll().isEmpty() && mySearchList.getAnds().isEmpty() && mySearchList.getOrs().isEmpty())) {
                 List<String> whereStrings = searchListWhereSqlProcessor(mySearchList, baseTableName);
-                sqlEntity.setConditionList(whereStrings);
+                sqlEntity.getConditionList().addAll(whereStrings);
             }
 
             List<MySearch> orderSearches = mySearchList.getOrderSearches();
@@ -673,18 +656,13 @@ public class SQLModelUtils {
      * @param fieldName  属性名
      * @return
      */
-    private String createOneSelectColumn(String nickName, String columnName, String fieldName) {
+    /*private String createOneSelectColumn(String nickName, String columnName, String fieldName) {
         String sNickName = translateNameUtils.getAbbreviation(nickName);
-        //String columnNickName = getAbbreviation(createColumnNickName(nickName,fieldName));
-
-        String sColumnNickName = sNickName + '.' + fieldName;
-        String columnNickName = nickName + '.' + fieldName;
-        translateNameUtils.setAbbreviation(columnNickName,sColumnNickName);
-        //abbreviationMap.put(columnNickName, sColumnNickName);
-        //particularMap.put(sColumnNickName, columnNickName);
-
-        return createColumnName(sNickName, columnName) + " " + guardKeyword(sNickName + '.' + fieldName);
-    }
+        //String sColumnNickName = sNickName + '.' + fieldName;
+        //String columnNickName = nickName + '.' + fieldName;
+        //translateNameUtils.setAbbreviation(columnNickName,sColumnNickName);
+        return createColumnName(sNickName, columnName) + " " + createColumnNickName(sNickName,fieldName);
+    }*/
 
     /**
      * 创建表连接语句
@@ -736,8 +714,9 @@ public class SQLModelUtils {
         }
         String tableName = fieldColumnRelationMapper.getTableName();
         String tableNickName = fieldColumnRelationMapper.getNickName();
-        localMapperMap.put(tableNickName, fieldColumnRelationMapper);
-        List<String> list = sqlEntity.getColumnNameList();
+        translateNameUtils.addLocalMapper(tableNickName, fieldColumnRelationMapper);
+        //List<String> list = sqlEntity.getColumnNameList();
+        List<ColumnBaseEntity> list = sqlEntity.getColumnList();
         List<String> joinString = sqlEntity.getTableNameList();
         joinString.add(" from " + guardKeyword(tableName) + ' ' + guardKeyword(translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName())));
         selectJoin(tableNickName, list, joinString, fieldColumnRelationMapper);
@@ -747,13 +726,18 @@ public class SQLModelUtils {
     /**
      * 拼接查询
      */
-    private void selectJoin(String tableNickName, List<String> selectString, List<String> joinString, FieldColumnRelationMapper fieldColumnRelationMapper) {
+    private void selectJoin(String tableNickName, List<ColumnBaseEntity> selectString, List<String> joinString, FieldColumnRelationMapper fieldColumnRelationMapper) {
 
+        ColumnBaseEntity entity = null;
         for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationMapper.getIdSet()) {
-            selectString.add(createOneSelectColumn(tableNickName, fieldColumnRelation.getColumnName(), fieldColumnRelation.getFieldName()));
+            entity = new ColumnBaseEntity(fieldColumnRelation,fieldColumnRelationMapper.getTableName(),tableNickName,translateNameUtils.getAbbreviation(tableNickName));
+            selectString.add(entity);
+            //selectString.add(createOneSelectColumn(tableNickName, fieldColumnRelation.getColumnName(), fieldColumnRelation.getFieldName()));
         }
         for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationMapper.getFieldColumnRelations()) {
-            selectString.add(createOneSelectColumn(tableNickName, fieldColumnRelation.getColumnName(), fieldColumnRelation.getFieldName()));
+            entity = new ColumnBaseEntity(fieldColumnRelation,fieldColumnRelationMapper.getTableName(),tableNickName,translateNameUtils.getAbbreviation(tableNickName));
+            selectString.add(entity);
+            //selectString.add(createOneSelectColumn(tableNickName, fieldColumnRelation.getColumnName(), fieldColumnRelation.getFieldName()));
         }
         String lastTableNickName;
         if (!fieldColumnRelationMapper.getFieldJoinClasses().isEmpty()) {
@@ -774,7 +758,7 @@ public class SQLModelUtils {
                     }
 
                     FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
-                    localMapperMap.put(lastTableNickName, mapper);
+                    translateNameUtils.addLocalMapper(lastTableNickName, mapper);
                     String joinType;
                     if (fieldJoinClass.getJoinType() != null) {
                         switch (fieldJoinClass.getJoinType()) {
@@ -876,7 +860,7 @@ public class SQLModelUtils {
             fieldJoinClass.setJoinClass(oldFieldJoinClass.getJoinClass());
 
 
-            FieldColumnRelationMapper mainMapper = localMapperMap.get(tableNickName);
+            FieldColumnRelationMapper mainMapper = translateNameUtils.getLocalMapper(tableNickName);
             fieldJoinClass.setJoinColumn(mainMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName());
 
             FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
@@ -1144,7 +1128,7 @@ public class SQLModelUtils {
         }
         //String searchSql = searchListBaseSQLProcessor();
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
-        localMapperMap.put(fieldColumnRelationMapper.getNickName(), fieldColumnRelationMapper);
+        translateNameUtils.addLocalMapper(fieldColumnRelationMapper.getNickName(), fieldColumnRelationMapper);
         List<String> whereStringList = searchListWhereSqlProcessor(mySearchList, fieldColumnRelationMapper.getNickName());
         if (WsListUtils.isEmpty(whereStringList)) {
             throw new RuntimeException("不允许全局修改");
@@ -1266,7 +1250,7 @@ public class SQLModelUtils {
     public <T> List<T> oneLoopMargeMap(ResultSet resultSet) {
         try {
             int length = 0;
-            int classNum = localMapperMap.size();
+            int classNum = translateNameUtils.locationMapperSize();
             ResultSetMetaData resultSetMetaData = null;
 
             resultSetMetaData = resultSet.getMetaData();
@@ -1289,7 +1273,7 @@ public class SQLModelUtils {
                 columnName = resultSetMetaData.getColumnLabel(i + 1);
                 List<String> nameList = WsStringUtils.split(columnName, '.');
                 nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
-                FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
+                FieldColumnRelationMapper mapper = translateNameUtils.getLocalMapper(nameList.get(0));
                 FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
                 columnNameListList.add(nameList);
                 mapperList.add(mapper);
@@ -1381,7 +1365,7 @@ public class SQLModelUtils {
         for (Map.Entry entry : entrySet) {
             List<String> nameList = WsStringUtils.split((String) entry.getKey(), '.');
             nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
-            FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
+            FieldColumnRelationMapper mapper = translateNameUtils.getLocalMapper(nameList.get(0));
             FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
 
             columnNameListList.add(nameList);
@@ -1441,96 +1425,10 @@ public class SQLModelUtils {
     }
 
 
-    /**
-     * 创建table nick name
-     *
-     * @param strs
-     * @return
-     */
-    private String createTableNickName(String... strs) {
-        return "`" + WsStringUtils.jointListString(strs, "`.`") + "`";
-    }
 
-    /**
-     * 创建table column name
-     *
-     * @param tableNickName
-     * @param columnName
-     * @return
-     */
-    private String createColumnName(String tableNickName, String columnName) {
-        return guardKeyword(tableNickName) + '.' + guardKeyword(columnName);
-    }
 
-    /**
-     * 创建table column nickName
-     *
-     * @param tableNickName
-     * @param fieldName
-     * @return
-     */
-    private String createColumnNickName(String tableNickName, String fieldName) {
-        return tableNickName + '.' + fieldName;
-    }
 
-    /**
-     * 获取简称
-     *
-     * @param keyword
-     * @return
-     */
-    /*private String getAbbreviation(String keyword) {
-        String value = abbreviationMap.get(keyword);
-        if (value == null) {
-            value = particularMap.get(keyword);
-            if (value == null) {
-                value = createAbbreviation(keyword);
-                abbreviationMap.put(keyword, value);
-                particularMap.put(value, keyword);
-                return value;
-            } else {
-                return value;
-            }
-        } else {
-            return value;
-        }
-    }*/
 
-    /**
-     * 设置简称
-     *
-     * @param keyword
-     * @return
-     */
-    /*private String setAbbreviation(String keyword, String value) {
-        abbreviationMap.put(keyword, value);
-        particularMap.put(value, keyword);
-        return value;
-    }*/
-
-    /**
-     * 创建简称
-     *
-     * @param keyword
-     * @return
-     */
-    /*private String createAbbreviation(String keyword) {
-        if (keyword.length() < 2) {
-            return keyword + '_' + abbreviationNum.getAndAdd(1);
-        } else {
-            return keyword.substring(0, 1) + '_' + abbreviationNum.getAndAdd(1);
-        }
-    }*/
-
-    /**
-     * 获取详细名称
-     *
-     * @param value
-     * @return
-     */
-    /*private String getParticular(String value) {
-        return particularMap.get(value);
-    }*/
 
     /**
      * 转换sql语句中表名为简写
@@ -1579,7 +1477,6 @@ public class SQLModelUtils {
 
     /**
      * 把简写转换成详细
-     *
      * @param searchSql
      * @return
      */
@@ -1609,7 +1506,6 @@ public class SQLModelUtils {
             }
         }
         return stringBuilder.toString();
-
     }
 
     /**
@@ -1644,7 +1540,6 @@ public class SQLModelUtils {
      * @return
      */
     private ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String prefix) {
-        ColumnBaseEntity columnBaseEntity = new ColumnBaseEntity();
         String prefixString = null;
         String fieldName;
         FieldColumnRelationMapper mapper;
@@ -1653,7 +1548,7 @@ public class SQLModelUtils {
         List<String> fieldNameList = WsStringUtils.split(originalFieldName, '.');
         int size = fieldNameList.size();
         if (size == 1) {
-            mapper = localMapperMap.get(prefix);
+            mapper = translateNameUtils.getLocalMapper(prefix);
             fieldName = fieldNameList.get(0);
             fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
             prefixString = mapper.getNickName();
@@ -1683,21 +1578,17 @@ public class SQLModelUtils {
 
             }
             prefixString = sb.toString();
-            mapper = localMapperMap.get(prefixString);
+            mapper = translateNameUtils.getLocalMapper(prefixString);
             if (mapper == null) {
                 throw new RuntimeException(prefixString + "不存在");
             }
             fieldName = fieldNameList.get(size - 1);
             fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
         }
-        columnBaseEntity.setTableName(mapper.getTableName());
-        columnBaseEntity.setTableNickName(prefixString);
-        columnBaseEntity.setColumnName(fieldColumnRelation.getColumnName());
-        columnBaseEntity.setAlias(translateNameUtils.getAbbreviation(columnBaseEntity.getTableNickName()));
-        columnBaseEntity.setFieldName(fieldColumnRelation.getFieldName());
-        columnBaseEntity.setFieldColumnRelation(fieldColumnRelation);
-        return columnBaseEntity;
+        return new ColumnBaseEntity(fieldColumnRelation,mapper.getTableName(),prefixString,translateNameUtils.getAbbreviation(prefixString));
     }
 
-
+    public TranslateNameUtils getTranslateNameUtils() {
+        return translateNameUtils;
+    }
 }

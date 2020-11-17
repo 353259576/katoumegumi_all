@@ -25,6 +25,11 @@ public class TranslateNameUtils {
      */
     private final AtomicInteger abbreviationNum = new AtomicInteger();
 
+    /**
+     * 本地对象与表的对应关系
+     */
+    private final Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
+
 
     /**
      * 创建简称
@@ -75,12 +80,32 @@ public class TranslateNameUtils {
     /**
      * 设置简称
      * @param keyword
-     * @return
      */
-    public String setAbbreviation(String keyword, String value) {
+    public void setAbbreviation(String keyword, String value) {
         abbreviationMap.put(keyword, value);
         particularMap.put(value, keyword);
-        return value;
+    }
+
+    /**
+     * 获取本地缓存的mapper
+     * @param locationName
+     * @return
+     */
+    public FieldColumnRelationMapper getLocalMapper(String locationName){
+        return localMapperMap.get(locationName);
+    }
+
+    /**
+     * 添加本地缓存的mapper
+     * @param locationName
+     * @param mapper
+     */
+    public void addLocalMapper(String locationName,FieldColumnRelationMapper mapper){
+        localMapperMap.put(locationName,mapper);
+    }
+
+    public int locationMapperSize(){
+        return localMapperMap.size();
     }
 
 }

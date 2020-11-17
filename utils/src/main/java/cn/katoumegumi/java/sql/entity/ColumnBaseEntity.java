@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.sql.entity;
 
+import cn.katoumegumi.java.common.SqlTableToBeanUtils;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
+import cn.katoumegumi.java.sql.SQLModelUtils;
 
 import java.lang.reflect.Field;
 
@@ -10,80 +12,87 @@ import java.lang.reflect.Field;
  */
 public class ColumnBaseEntity {
 
-    private Field field;
+    private final String tableName;
 
-    private String tableName;
+    private final String tableNickName;
 
-    private String tableNickName;
+    private final String alias;
 
-    private String alias;
+    private final FieldColumnRelation fieldColumnRelation;
 
-    private String columnName;
 
-    private String fieldName;
+    public ColumnBaseEntity(FieldColumnRelation relation,String tableName,String tableNickName,String alias){
+        this.fieldColumnRelation = relation;
+        this.tableName = tableName;
+        this.tableNickName = tableNickName;
+        this.alias = alias;
+    }
 
-    private FieldColumnRelation fieldColumnRelation;
+    public boolean isId(){
+        return fieldColumnRelation.isId();
+    }
 
     public Field getField() {
-        return field;
+        return fieldColumnRelation.getField();
     }
 
-    public ColumnBaseEntity setField(Field field) {
-        this.field = field;
-        return this;
-    }
 
     public String getTableName() {
         return tableName;
     }
 
-    public ColumnBaseEntity setTableName(String tableName) {
-        this.tableName = tableName;
-        return this;
-    }
 
     public String getTableNickName() {
         return tableNickName;
     }
 
-    public ColumnBaseEntity setTableNickName(String tableNickName) {
-        this.tableNickName = tableNickName;
-        return this;
-    }
 
     public String getAlias() {
         return alias;
     }
 
-    public ColumnBaseEntity setAlias(String alias) {
-        this.alias = alias;
-        return this;
-    }
 
     public String getColumnName() {
-        return columnName;
+        return fieldColumnRelation.getColumnName();
     }
 
-    public ColumnBaseEntity setColumnName(String columnName) {
-        this.columnName = columnName;
-        return this;
-    }
 
     public String getFieldName() {
-        return fieldName;
+        return fieldColumnRelation.getFieldName();
     }
 
-    public ColumnBaseEntity setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-        return this;
-    }
 
     public FieldColumnRelation getFieldColumnRelation() {
         return fieldColumnRelation;
     }
 
-    public ColumnBaseEntity setFieldColumnRelation(FieldColumnRelation fieldColumnRelation) {
-        this.fieldColumnRelation = fieldColumnRelation;
-        return this;
+    /**
+     * 获取显示的column的值
+     * @return
+     */
+    public String getColumnValue(){
+        return createColumnName(getAlias(),getColumnName()) + " " + createColumnNickName(getAlias(),getFieldName());
     }
+
+
+    /**
+     * 创建table column name
+     * @param tableNickName
+     * @param columnName
+     * @return
+     */
+    private static String createColumnName(String tableNickName, String columnName) {
+        return SQLModelUtils.guardKeyword(tableNickName) + '.' + SQLModelUtils.guardKeyword(columnName);
+    }
+
+    /**
+     * 创建table column name
+     * @param tableNickName
+     * @param columnName
+     * @return
+     */
+    private static String createColumnNickName(String tableNickName, String columnName) {
+        return SQLModelUtils.guardKeyword(tableNickName + '.' + columnName);
+    }
+
 }

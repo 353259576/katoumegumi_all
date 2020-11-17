@@ -133,7 +133,18 @@ public class IndexController implements IndexService {
     @Override
     @GetMapping("index")
     public String index() throws Exception {
-        List<User> list = jdbcUtils.getListT(MySearchList.create(User.class).eq(User::getId,6001));
+        WsDateUtils.getExecutionTime.accept(()->{
+            List<User> list = jdbcUtils.getListT(MySearchList.create(User.class));
+        });
+        return "你好啊";
+    }
+
+
+    @GetMapping("index2")
+    public String index2() throws Exception {
+        WsDateUtils.getExecutionTime.accept(()->{
+            List<User> list = userMapper.selectUserList();
+        });
         return "你好啊";
     }
 

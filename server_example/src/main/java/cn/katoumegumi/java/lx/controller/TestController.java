@@ -63,6 +63,8 @@ public class TestController {
                 ).eq("ud",UserDetails::getSex,"1").sort(User::getName,"desc");
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+        sqlModelUtils = new SQLModelUtils(mySearchList,sqlModelUtils.getTranslateNameUtils());
+        selectSqlEntity = sqlModelUtils.select();
         System.out.println(selectSqlEntity.getSelectSql());
         System.out.println(selectSqlEntity.getCountSql());
         sqlModelUtils = new SQLModelUtils(SQLModelUtils.ObjectToMySearchList(user));
