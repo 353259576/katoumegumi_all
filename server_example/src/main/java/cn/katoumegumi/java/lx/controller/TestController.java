@@ -29,7 +29,7 @@ public class TestController {
 
 
 
-        /*User user = new User();
+        User user = new User();
         user.setId(1L);
         user.setName("你好世界");
         user.setPassword("世界你好");
@@ -69,12 +69,12 @@ public class TestController {
         System.out.println(sqlModelUtils.update(user,true).getUpdateSql());
         sqlModelUtils = new SQLModelUtils(MySearchList.create(User.class).eq(User::getId,1));
         System.out.println(sqlModelUtils.delete().getDeleteSql());
-        System.out.println();*/
+        System.out.println();
 
 
         //lx(new int[]{3,8,12,5,24,3,1,9,27,36,43,11,6,2,7,15,25,56});
         //lx(new int[]{55,47,36,27,18,9,4,1,3,2,6});
-        String url = "jdbc:mysql://rm-bp13t5e43e9312u79co.mysql.rds.aliyuncs.com:3306/apes_cloud_test?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai";
+        /*String url = "jdbc:mysql://rm-bp13t5e43e9312u79co.mysql.rds.aliyuncs.com:3306/apes_cloud_test?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai";
         String userName = "yd_test";
         String password = "123456";
         String className = Driver.class.getName();
@@ -87,7 +87,7 @@ public class TestController {
                 System.out.printf("@Column(name=\"%s\")\n",column.getColumnName());
                 System.out.printf("private %s %s;%n",column.getColumnClass().getSimpleName(),column.getBeanFieldName());
             });
-        }
+        }*/
 
 
     }

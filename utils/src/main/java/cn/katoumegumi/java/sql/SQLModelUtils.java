@@ -13,7 +13,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author ws
@@ -36,47 +35,50 @@ public class SQLModelUtils {
 
 
     /**
+     * 已经使用过的表关联关系
+     */
+    private final Set<TableRelation> usedTableRelation = new HashSet<>();
+
+    /**
      * 记录where所需要的值
      */
     private final List<Object> baseWhereValueList = new ArrayList<>();
+
+    /**
+     * 简写数据
+     */
+    //private final Map<String, String> abbreviationMap = new HashMap<>();
+
+    /**
+     * 详细数据
+     */
+    //private final Map<String, String> particularMap = new HashMap<>();
+
+    /**
+     * 缩写防重复
+     */
+    //private final AtomicInteger abbreviationNum = new AtomicInteger();
+
+    /**
+     * 表面和列名转换
+      */
+    private final TranslateNameUtils translateNameUtils = new TranslateNameUtils();
+
+    /**
+     * 本地对象与表的对应关系
+     */
+    private final Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
+
+
     /**
      * 表查询条件
      */
     private final MySearchList mySearchList;
 
     /**
-     * 已经使用过的表关联关系
-     */
-    private final Set<TableRelation> usedTableRelation = new HashSet<>();
-
-
-    /**
-     * 简写数据
-     */
-    private final Map<String, String> abbreviationMap = new HashMap<>();
-
-    /**
-     * 详细数据
-     */
-    private final Map<String, String> particularMap = new HashMap<>();
-
-    /**
-     * 缩写防重复
-     */
-    private final AtomicInteger abbreviationNum = new AtomicInteger();
-    /**
-     * 本地对象与表的对应关系
-     */
-    private final Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
-
-    /**
      * 主表的class类型
      */
-    private Class<?> mainClass;
-    /**
-     * 基本查询语句
-     */
-    //private String searchSql;
+    private final Class<?> mainClass;
 
     /**
      * 缓存的sqlEntity
@@ -88,9 +90,9 @@ public class SQLModelUtils {
         this.mySearchList = mySearchList;
         mainClass = mySearchList.getMainClass();
         if (WsStringUtils.isEmpty(mySearchList.getAlias())) {
-            getAbbreviation(mainClass.getSimpleName());
+            translateNameUtils.getAbbreviation(mainClass.getSimpleName());
         } else {
-            setAbbreviation(mainClass.getSimpleName(), mySearchList.getAlias());
+            translateNameUtils.setAbbreviation(mainClass.getSimpleName(), mySearchList.getAlias());
         }
         String prefix = mainClass.getSimpleName();
         String tableName;
@@ -116,7 +118,7 @@ public class SQLModelUtils {
                 joinTableName = getNoPrefixTableName(joinTableName);
                 relation.setJoinTableNickName(joinTableName);
                 joinTableName = prefix + '.' + joinTableName;
-                setAbbreviation(joinTableName, relation.getAlias());
+                translateNameUtils.setAbbreviation(joinTableName, relation.getAlias());
             }
             tableName = null;
             joinTableName = null;
@@ -225,7 +227,7 @@ public class SQLModelUtils {
         StringBuilder selectSql;// = new StringBuilder();
         FieldColumnRelationMapper fieldColumnRelationMapper;
         if (cacheSqlEntity == null) {
-            mainClass = mySearchList.getMainClass();
+            //mainClass = mySearchList.getMainClass();
             SqlEntity sqlEntity = modelToSqlSelect(mySearchList.getMainClass());
             List<String> joinTableList = sqlEntity.getTableNameList();
             //selectSql.append(modelToSqlSelect(mySearchList.getMainClass()));
@@ -672,13 +674,14 @@ public class SQLModelUtils {
      * @return
      */
     private String createOneSelectColumn(String nickName, String columnName, String fieldName) {
-        String sNickName = getAbbreviation(nickName);
+        String sNickName = translateNameUtils.getAbbreviation(nickName);
         //String columnNickName = getAbbreviation(createColumnNickName(nickName,fieldName));
 
         String sColumnNickName = sNickName + '.' + fieldName;
         String columnNickName = nickName + '.' + fieldName;
-        abbreviationMap.put(columnNickName, sColumnNickName);
-        particularMap.put(sColumnNickName, columnNickName);
+        translateNameUtils.setAbbreviation(columnNickName,sColumnNickName);
+        //abbreviationMap.put(columnNickName, sColumnNickName);
+        //particularMap.put(sColumnNickName, columnNickName);
 
         return createColumnName(sNickName, columnName) + " " + guardKeyword(sNickName + '.' + fieldName);
     }
@@ -696,8 +699,8 @@ public class SQLModelUtils {
      */
     private String createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn, String joinType) {
 
-        String sJoinTableNickName = getAbbreviation(joinTableNickName);
-        String sTableNickName = getAbbreviation(tableNickName);
+        String sJoinTableNickName = translateNameUtils.getAbbreviation(joinTableNickName);
+        String sTableNickName = translateNameUtils.getAbbreviation(tableNickName);
         return ' ' + joinType
                 + guardKeyword(joinTableName) +
                 ' ' +
@@ -736,7 +739,7 @@ public class SQLModelUtils {
         localMapperMap.put(tableNickName, fieldColumnRelationMapper);
         List<String> list = sqlEntity.getColumnNameList();
         List<String> joinString = sqlEntity.getTableNameList();
-        joinString.add(" from " + guardKeyword(tableName) + ' ' + guardKeyword(getAbbreviation(fieldColumnRelationMapper.getNickName())));
+        joinString.add(" from " + guardKeyword(tableName) + ' ' + guardKeyword(translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName())));
         selectJoin(tableNickName, list, joinString, fieldColumnRelationMapper);
         return sqlEntity;
     }
@@ -1169,7 +1172,7 @@ public class SQLModelUtils {
         List<String> setList = createUpdateSetSql(mySearchList, fieldColumnRelationMapper.getNickName());
         String updateSql = "UPDATE `"
                 + fieldColumnRelationMapper.getTableName()
-                + "` `" + getAbbreviation(fieldColumnRelationMapper.getNickName())
+                + "` `" + translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName())
                 + "` SET "
                 + WsStringUtils.jointListString(setList, ",") + " where " + searchSql;
         List valueList = new ArrayList();
@@ -1213,23 +1216,23 @@ public class SQLModelUtils {
             String columnName = fieldColumnRelation.getColumnName();
             switch (mySearch.getOperator()) {
                 case SET:
-                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = ? ";
+                    str = guardKeyword(translateNameUtils.getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = ? ";
                     setStrList.add(str);
                     break;
                 case ADD:
-                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = IFNULL(" + guardKeyword(getAbbreviation(prefix)) + "." + guardKeyword(columnName) + ",0) + ? ";
+                    str = guardKeyword(translateNameUtils.getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = IFNULL(" + guardKeyword(translateNameUtils.getAbbreviation(prefix)) + "." + guardKeyword(columnName) + ",0) + ? ";
                     setStrList.add(str);
                     break;
                 case SUBTRACT:
-                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = IFNULL(" + guardKeyword(getAbbreviation(prefix)) + "." + guardKeyword(columnName) + ",0) - ? ";
+                    str = guardKeyword(translateNameUtils.getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = IFNULL(" + guardKeyword(translateNameUtils.getAbbreviation(prefix)) + "." + guardKeyword(columnName) + ",0) - ? ";
                     setStrList.add(str);
                     break;
                 case MULTIPLY:
-                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = IFNULL(" + guardKeyword(getAbbreviation(prefix)) + "." + guardKeyword(columnName) + ",0) * ? ";
+                    str = guardKeyword(translateNameUtils.getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = IFNULL(" + guardKeyword(translateNameUtils.getAbbreviation(prefix)) + "." + guardKeyword(columnName) + ",0) * ? ";
                     setStrList.add(str);
                     break;
                 case DIVIDE:
-                    str = guardKeyword(getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = IFNULL(" + guardKeyword(getAbbreviation(prefix)) + "." + guardKeyword(columnName) + ",0) / ? ";
+                    str = guardKeyword(translateNameUtils.getAbbreviation(prefix)) + '.' + guardKeyword(columnName) + " = IFNULL(" + guardKeyword(translateNameUtils.getAbbreviation(prefix)) + "." + guardKeyword(columnName) + ",0) / ? ";
                     setStrList.add(str);
                     break;
                 default:
@@ -1252,7 +1255,7 @@ public class SQLModelUtils {
         }
         //searchSql = searchSql.substring(index);
         FieldColumnRelationMapper mapper = analysisClassRelation(mainClass);
-        String deleteSql = "DELETE " + getAbbreviation(mapper.getNickName()) + " FROM " + guardKeyword(mapper.getTableName()) + " " + guardKeyword(getAbbreviation(mapper.getNickName())) + " " + searchSql;
+        String deleteSql = "DELETE " + translateNameUtils.getAbbreviation(mapper.getNickName()) + " FROM " + guardKeyword(mapper.getTableName()) + " " + guardKeyword(translateNameUtils.getAbbreviation(mapper.getNickName())) + " " + searchSql;
         DeleteSqlEntity deleteSqlEntity = new DeleteSqlEntity();
         deleteSqlEntity.setDeleteSql(deleteSql);
         deleteSqlEntity.setValueList(baseWhereValueList);
@@ -1285,7 +1288,7 @@ public class SQLModelUtils {
             for (int i = 0; i < length; i++) {
                 columnName = resultSetMetaData.getColumnLabel(i + 1);
                 List<String> nameList = WsStringUtils.split(columnName, '.');
-                nameList.set(0, getParticular(nameList.get(0)));
+                nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
                 FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
                 FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
                 columnNameListList.add(nameList);
@@ -1377,7 +1380,7 @@ public class SQLModelUtils {
 
         for (Map.Entry entry : entrySet) {
             List<String> nameList = WsStringUtils.split((String) entry.getKey(), '.');
-            nameList.set(0, getParticular(nameList.get(0)));
+            nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
             FieldColumnRelationMapper mapper = localMapperMap.get(nameList.get(0));
             FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
 
@@ -1476,7 +1479,7 @@ public class SQLModelUtils {
      * @param keyword
      * @return
      */
-    private String getAbbreviation(String keyword) {
+    /*private String getAbbreviation(String keyword) {
         String value = abbreviationMap.get(keyword);
         if (value == null) {
             value = particularMap.get(keyword);
@@ -1491,7 +1494,7 @@ public class SQLModelUtils {
         } else {
             return value;
         }
-    }
+    }*/
 
     /**
      * 设置简称
@@ -1499,11 +1502,11 @@ public class SQLModelUtils {
      * @param keyword
      * @return
      */
-    private String setAbbreviation(String keyword, String value) {
+    /*private String setAbbreviation(String keyword, String value) {
         abbreviationMap.put(keyword, value);
         particularMap.put(value, keyword);
         return value;
-    }
+    }*/
 
     /**
      * 创建简称
@@ -1511,13 +1514,13 @@ public class SQLModelUtils {
      * @param keyword
      * @return
      */
-    private String createAbbreviation(String keyword) {
+    /*private String createAbbreviation(String keyword) {
         if (keyword.length() < 2) {
             return keyword + '_' + abbreviationNum.getAndAdd(1);
         } else {
             return keyword.substring(0, 1) + '_' + abbreviationNum.getAndAdd(1);
         }
-    }
+    }*/
 
     /**
      * 获取详细名称
@@ -1525,9 +1528,9 @@ public class SQLModelUtils {
      * @param value
      * @return
      */
-    private String getParticular(String value) {
+    /*private String getParticular(String value) {
         return particularMap.get(value);
-    }
+    }*/
 
     /**
      * 转换sql语句中表名为简写
@@ -1546,12 +1549,12 @@ public class SQLModelUtils {
             c = value;
             if (isReplace) {
                 if (c == '}') {
-                    replaceStr = getParticular(replaceSb.toString());
+                    replaceStr = translateNameUtils.getParticular(replaceSb.toString());
                     if (replaceStr == null) {
                         if (replaceSb.toString().startsWith(prefix)) {
-                            stringBuilder.append(getAbbreviation(replaceSb.toString()));
+                            stringBuilder.append(translateNameUtils.getAbbreviation(replaceSb.toString()));
                         } else {
-                            stringBuilder.append(getAbbreviation(prefix + "." + replaceSb.toString()));
+                            stringBuilder.append(translateNameUtils.getAbbreviation(prefix + "." + replaceSb.toString()));
                         }
                     } else {
                         stringBuilder.append(replaceSb.toString());
@@ -1590,7 +1593,7 @@ public class SQLModelUtils {
             c = value;
             if (isReplace) {
                 if (c == '}') {
-                    stringBuilder.append(getNoPrefixTableName(getParticular(replaceSb.toString())));
+                    stringBuilder.append(getNoPrefixTableName(translateNameUtils.getParticular(replaceSb.toString())));
 
                     isReplace = false;
                 } else {
@@ -1660,7 +1663,7 @@ public class SQLModelUtils {
             for (int i = 0; i < size - 1; i++) {
                 sb.append(".");
                 key = fieldNameList.get(i);
-                key = getParticular(key);
+                key = translateNameUtils.getParticular(key);
                 if (key == null) {
                     key = fieldNameList.get(i);
                 } else {
@@ -1690,7 +1693,7 @@ public class SQLModelUtils {
         columnBaseEntity.setTableName(mapper.getTableName());
         columnBaseEntity.setTableNickName(prefixString);
         columnBaseEntity.setColumnName(fieldColumnRelation.getColumnName());
-        columnBaseEntity.setAlias(getAbbreviation(columnBaseEntity.getTableNickName()));
+        columnBaseEntity.setAlias(translateNameUtils.getAbbreviation(columnBaseEntity.getTableNickName()));
         columnBaseEntity.setFieldName(fieldColumnRelation.getFieldName());
         columnBaseEntity.setFieldColumnRelation(fieldColumnRelation);
         return columnBaseEntity;
