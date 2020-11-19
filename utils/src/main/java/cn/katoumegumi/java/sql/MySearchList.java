@@ -17,7 +17,6 @@ public class MySearchList {
     private final List<MySearch> orderSearches = new ArrayList<>();
     private final List<MySearchList> ands = new ArrayList<>();
     private final List<MySearchList> ors = new ArrayList<>();
-    //private final Map<Class, String> tableAndNickNameMap = new HashMap<>();
     private final List<TableRelation> joins = new ArrayList<>();
     private List<MySearch> mySearches = new ArrayList<>();
     private Class<?> mainClass;

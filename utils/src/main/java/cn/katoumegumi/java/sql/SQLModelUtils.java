@@ -96,10 +96,9 @@ public class SQLModelUtils {
                 }
             } else {
                 tableName = null;
-
             }
             relation.setTableNickName(tableName);
-            if (WsStringUtils.isNotBlank(relation.getAlias())) {
+            if (WsStringUtils.isNotBlank(relation.getJoinTableNickName())) {
                 joinTableName = translateToTableName(relation.getJoinTableNickName());
                 joinTableName = getNoPrefixTableName(joinTableName);
                 relation.setJoinTableNickName(joinTableName);
@@ -1481,7 +1480,7 @@ public class SQLModelUtils {
      * @return
      */
     private String translateToTableName(String searchSql) {
-        char[] cs = searchSql.toCharArray();
+        /*char[] cs = searchSql.toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
         StringBuilder replaceSb = new StringBuilder();
         char c;
@@ -1504,8 +1503,24 @@ public class SQLModelUtils {
                     stringBuilder.append(c);
                 }
             }
+        }*/
+        //return stringBuilder.toString();
+        //String str = stringBuilder.toString();
+        String[] strs = WsStringUtils.splitArray(searchSql,'.');
+        String ns;
+        String s;
+        for(int i = 0; i < strs.length; i++){
+            s = strs[i];
+            if(s.startsWith("{")){
+                s = s.substring(1,s.length() - 1);
+                strs[i] = s;
+            }
+            ns = translateNameUtils.getParticular(s);
+            if(ns != null){
+                strs[i] = ns;
+            }
         }
-        return stringBuilder.toString();
+        return WsStringUtils.jointListString(strs,".");
     }
 
     /**

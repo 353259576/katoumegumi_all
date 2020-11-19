@@ -4,6 +4,7 @@ import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserCC;
 import cn.katoumegumi.java.lx.model.UserDetails;
+import cn.katoumegumi.java.lx.model.UserDetailsRemake;
 import cn.katoumegumi.java.sql.*;
 
 import com.alibaba.fastjson.JSON;
@@ -51,27 +52,25 @@ public class TestController {
 
 
         Field field = WsFieldUtils.getFieldByName(user.getClass(),"userDetails");
-        System.out.println(field.getGenericType());
 
-        MySearchList mySearchList = MySearchList.create(User.class)
-                .setSqlLimit(sqlLimit -> sqlLimit.setOffset(0).setSize(10))
-                .innerJoin(UserDetails.class,t->t
-                        .setJoinTableNickName(User::getUserDetails)
-                        .setAlias("ud")
-                        .on(User::getId,UserDetails::getUserId)
-                        .condition(s->s.eq(User::getName,"你好"))
-                ).eq("ud",UserDetails::getSex,"1").sort(User::getName,"desc");
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
-        sqlModelUtils = new SQLModelUtils(mySearchList,sqlModelUtils.getTranslateNameUtils());
-        selectSqlEntity = sqlModelUtils.select();
-        System.out.println(selectSqlEntity.getSelectSql());
-        System.out.println(selectSqlEntity.getCountSql());
-        sqlModelUtils = new SQLModelUtils(SQLModelUtils.ObjectToMySearchList(user));
-        System.out.println(sqlModelUtils.update(user,true).getUpdateSql());
-        sqlModelUtils = new SQLModelUtils(MySearchList.create(User.class).eq(User::getId,1));
-        System.out.println(sqlModelUtils.delete().getDeleteSql());
-        System.out.println();
+        WsDateUtils.getExecutionTime.accept(()->{
+            for(int i = 0; i < 100000; i++) {
+                MySearchList mySearchList = MySearchList.create(User.class)
+                        .setAlias("u")
+                        .setSqlLimit(sqlLimit -> sqlLimit.setOffset(0).setSize(10))
+                        .innerJoin(UserDetails.class, t -> t
+                                .setJoinTableNickName(User::getUserDetails)
+                                .setAlias("ud")
+                                .on(User::getId, UserDetails::getUserId)
+                                .condition(s -> s.eq(User::getName, "你好"))
+                        )
+                        .innerJoin(UserDetailsRemake.class, t -> t.setTableNickName("{ud}").setJoinTableNickName("{ud}.userDetailsRemake").on(UserDetails::getId, UserDetailsRemake::getUserDetailsId))
+                        .eq("ud", UserDetails::getSex, "1").sort(User::getName, "desc");
+                SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+                sqlModelUtils.select();
+            }
+        });
+
 
 
         //lx(new int[]{3,8,12,5,24,3,1,9,27,36,43,11,6,2,7,15,25,56});
