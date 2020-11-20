@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.sql.entity;
 
-import cn.katoumegumi.java.sql.ResultMapIds;
 
 /**
  * 返回数据的单个数据

@@ -24,6 +24,9 @@ public class TableRelation {
 
     private String joinTableName;
 
+    /**
+     * 需要连接的表的名称（标名对应了实体的关系）
+     */
     private String joinTableNickName;
 
     private String joinTableColumn;

@@ -90,7 +90,7 @@ public class IndexController implements IndexService {
     public String insertUser(){
         List<User> users = new ArrayList<>();
         LocalDateTime date = LocalDateTime.now();
-        for(int i = 0; i < 1;i++){
+        for(int i = 0; i < 100;i++){
             User user = new User();
             user.setName("测试"+i);
             user.setName(WsStringUtils.createRandomStr());
@@ -99,12 +99,12 @@ public class IndexController implements IndexService {
         }
         jdbcUtils.insert(users);
 
-        /*Random random = new Random();
+        Random random = new Random();
 
         List<UserDetails> userDetails = new ArrayList<>();
         for(User user:users){
 
-            for(int i = 0; i < 100; i++){
+            for(int i = 0; i < 1000; i++){
                 UserDetails details = new UserDetails();
                 details.setUserId(user.getId());
                 details.setNickName(i+"测试名称");
@@ -124,7 +124,7 @@ public class IndexController implements IndexService {
                 remakeList.add(remake);
             }
             jdbcUtils.insert(remakeList);
-        }*/
+        }
 
         return "你好世界";
     }
@@ -135,6 +135,7 @@ public class IndexController implements IndexService {
     public String index() throws Exception {
         WsDateUtils.getExecutionTime.accept(()->{
             List<User> list = jdbcUtils.getListT(MySearchList.create(User.class));
+            System.out.println(list.size());
         });
         return "你好啊";
     }

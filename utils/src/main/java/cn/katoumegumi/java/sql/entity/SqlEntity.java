@@ -15,16 +15,23 @@ public class SqlEntity {
 
     private SqlType sqlType;
 
-    //private final List<String> columnNameList = new ArrayList<>();
-
+    /**
+     * 需要查询的列的信息
+     */
     private final List<ColumnBaseEntity> columnList = new ArrayList<>();
 
+    /**
+     * 查询的表的数据
+     */
     private final List<String> tableNameList = new ArrayList<>();
 
+    /**
+     * 查询条件数据
+     */
     private final List<String> conditionList = new ArrayList<>();
 
     /**
-     * 行
+     * 查询语句
      */
     private String columnStr;
 
@@ -52,10 +59,6 @@ public class SqlEntity {
         this.sqlType = sqlType;
         return this;
     }
-
-    /*public List<String> getColumnNameList() {
-        return columnNameList;
-    }*/
 
 
     public List<String> getTableNameList() {
