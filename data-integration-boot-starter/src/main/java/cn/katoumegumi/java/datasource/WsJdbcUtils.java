@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author ws
@@ -338,7 +337,7 @@ public class WsJdbcUtils {
 
     public <T> T getOne(Class<T> tClass, Object... objects) {
         FieldColumnRelationMapper mapper = FieldColumnRelationMapperFactory.analysisClassRelation(tClass);
-        List<FieldColumnRelation> ids = mapper.getIdSet();
+        List<FieldColumnRelation> ids = mapper.getIds();
         if (ids.size() != objects.length) {
             throw new RuntimeException("主键信息需要填写完整");
         }

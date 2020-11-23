@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -37,8 +39,9 @@ public class User implements Serializable {
     private LocalDateTime createDate;
 
     //@Transient
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name= "user_id")
+    //Fetch(FetchMode.JOIN)
     private List<UserDetails> userDetails;
 
     //private int[] ints = new int[]{1,2,3};

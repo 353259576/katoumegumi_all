@@ -19,7 +19,7 @@ public class FieldColumnRelationMapper {
     /**
      * id
      */
-    private final List<FieldColumnRelation> idSet = new ArrayList<>();
+    private final List<FieldColumnRelation> ids = new ArrayList<>();
 
     /**
      * 非Id
@@ -35,12 +35,12 @@ public class FieldColumnRelationMapper {
     /**
      * 位置
      */
-    private final Map<Object,Integer> locationMap = new HashMap<>();
+    private final Map<Object, Integer> locationMap = new HashMap<>();
 
     private Map<String, FieldColumnRelationMapper> map;
 
 
-    public FieldColumnRelationMapper(String nickName,String tableName,Class<?> clazz){
+    public FieldColumnRelationMapper(String nickName, String tableName, Class<?> clazz) {
         this.nickName = nickName;
         this.tableName = tableName;
         this.clazz = clazz;
@@ -48,7 +48,7 @@ public class FieldColumnRelationMapper {
 
 
     public FieldColumnRelation getFieldColumnRelationByColumn(String column) {
-        for (FieldColumnRelation fieldColumnRelation : idSet) {
+        for (FieldColumnRelation fieldColumnRelation : ids) {
             if (fieldColumnRelation.getColumnName().equals(column)) {
                 return fieldColumnRelation;
             }
@@ -89,54 +89,33 @@ public class FieldColumnRelationMapper {
     }
 
 
-
     public String getNickName() {
         return nickName;
     }
-
-    /*public void setNickName(String nickName) {
-        this.nickName = nickName;
-    }*/
 
     public String getTableName() {
         return tableName;
     }
 
-    /*public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }*/
 
     public Class<?> getClazz() {
         return clazz;
     }
 
-    /*public void setClazz(Class<?> clazz) {
-        this.clazz = clazz;
-    }*/
-
-    public List<FieldColumnRelation> getIdSet() {
-        return idSet;
+    public List<FieldColumnRelation> getIds() {
+        return ids;
     }
 
-    /*public void setIdSet(List<FieldColumnRelation> idSet) {
-        this.idSet = idSet;
-    }*/
 
     public List<FieldColumnRelation> getFieldColumnRelations() {
         return fieldColumnRelations;
     }
 
-   /* public void setFieldColumnRelations(List<FieldColumnRelation> fieldColumnRelations) {
-        this.fieldColumnRelations = fieldColumnRelations;
-    }*/
 
     public List<FieldJoinClass> getFieldJoinClasses() {
         return fieldJoinClasses;
     }
 
-    /*public void setFieldJoinClasses(List<FieldJoinClass> fieldJoinClasses) {
-        this.fieldJoinClasses = fieldJoinClasses;
-    }*/
 
     public Map<String, FieldColumnRelationMapper> getMap() {
         return map;
@@ -150,30 +129,28 @@ public class FieldColumnRelationMapper {
         return fieldColumnRelationMap;
     }
 
-    /*public void setFieldColumnRelationMap(Map<String, FieldColumnRelation> fieldColumnRelationMap) {
-        this.fieldColumnRelationMap = fieldColumnRelationMap;
-    }*/
 
-    public void markSignLocation(){
-        for(int i = 0; i < idSet.size(); i++){
-            locationMap.put(idSet.get(i),i);
+    public void markSignLocation() {
+        for (int i = 0; i < ids.size(); i++) {
+            locationMap.put(ids.get(i), i);
         }
-        for(int i = 0; i < fieldColumnRelations.size(); i++){
-            locationMap.put(fieldColumnRelations.get(i),i);
+        for (int i = 0; i < fieldColumnRelations.size(); i++) {
+            locationMap.put(fieldColumnRelations.get(i), i);
         }
-        if(WsListUtils.isNotEmpty(fieldJoinClasses)){
-            for(int i = 0; i < fieldJoinClasses.size(); i++){
-                locationMap.put(fieldJoinClasses.get(i),i);
+        if (WsListUtils.isNotEmpty(fieldJoinClasses)) {
+            for (int i = 0; i < fieldJoinClasses.size(); i++) {
+                locationMap.put(fieldJoinClasses.get(i), i);
             }
         }
+
     }
 
-    public Integer getLocation(Object o){
+    public Integer getLocation(Object o) {
         return locationMap.get(o);
     }
 
     @Override
     public String toString() {
-        return nickName+"_"+tableName;
+        return nickName + "_" + tableName;
     }
 }

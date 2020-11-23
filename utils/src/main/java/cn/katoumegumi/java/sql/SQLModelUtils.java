@@ -134,7 +134,7 @@ public class SQLModelUtils {
      */
     public static MySearchList ObjectToMySearchList(Object o) {
         FieldColumnRelationMapper mapper = analysisClassRelation(o.getClass());
-        List<FieldColumnRelation> ids = mapper.getIdSet();
+        List<FieldColumnRelation> ids = mapper.getIds();
         List<FieldColumnRelation> columns = mapper.getFieldColumnRelations();
         MySearchList mySearchList = MySearchList.create(o.getClass());
         if (WsListUtils.isNotEmpty(ids)) {
@@ -728,7 +728,7 @@ public class SQLModelUtils {
     private void selectJoin(String tableNickName, List<ColumnBaseEntity> selectString, List<String> joinString, FieldColumnRelationMapper fieldColumnRelationMapper) {
 
         ColumnBaseEntity entity = null;
-        for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationMapper.getIdSet()) {
+        for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationMapper.getIds()) {
             entity = new ColumnBaseEntity(fieldColumnRelation,fieldColumnRelationMapper.getTableName(),tableNickName,translateNameUtils.getAbbreviation(tableNickName));
             selectString.add(entity);
             //selectString.add(createOneSelectColumn(tableNickName, fieldColumnRelation.getColumnName(), fieldColumnRelation.getFieldName()));
@@ -913,7 +913,7 @@ public class SQLModelUtils {
         List<String> columnNameList = new ArrayList<>();
         List<String> placeholderList = new ArrayList<>();
 
-        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
+        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIds();
 
         for (FieldColumnRelation fieldColumnRelation : idList) {
             Field field = fieldColumnRelation.getField();
@@ -956,7 +956,7 @@ public class SQLModelUtils {
         String insertSql = "insert into " + fieldColumnRelationMapper.getTableName() + "(`" + WsStringUtils.jointListString(columnNameList, "`,`") + "`) value(" + WsStringUtils.jointListString(placeholderList, ",") + ")";
         entity.setInsertSql(insertSql);
         entity.setUsedField(validList);
-        entity.setIdList(fieldColumnRelationMapper.getIdSet());
+        entity.setIdList(fieldColumnRelationMapper.getIds());
         entity.setValueList(valueList);
         return entity;
     }
@@ -980,7 +980,7 @@ public class SQLModelUtils {
         List valueList = new ArrayList();
 
 
-        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
+        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIds();
         for (FieldColumnRelation fieldColumnRelation : idList) {
             Field field = fieldColumnRelation.getField();
             try {
@@ -1046,7 +1046,7 @@ public class SQLModelUtils {
         String insertSql = "insert into " + fieldColumnRelationMapper.getTableName() + "(`" + WsStringUtils.jointListString(columnNameList, "`,`") + "`) values" + WsStringUtils.jointListString(placeholderList, ",");
         insertSqlEntity.setInsertSql(insertSql);
         insertSqlEntity.setUsedField(validField);
-        insertSqlEntity.setIdList(fieldColumnRelationMapper.getIdSet());
+        insertSqlEntity.setIdList(fieldColumnRelationMapper.getIds());
         insertSqlEntity.setValueList(valueList);
         return insertSqlEntity;
     }
@@ -1061,7 +1061,7 @@ public class SQLModelUtils {
      */
     public <T> UpdateSqlEntity update(T t, boolean isAll) {
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(t.getClass());
-        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIdSet();
+        List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIds();
         List<FieldColumnRelation> columnList = fieldColumnRelationMapper.getFieldColumnRelations();
         List<String> columnStrList = new ArrayList<>();
         List<String> idStrList = new ArrayList<>();
@@ -1292,15 +1292,7 @@ public class SQLModelUtils {
                     FieldColumnRelationMapper mapper = mapperList.get(i);
                     FieldColumnRelation fieldColumnRelation = columnRelationList.get(i);
                     ReturnEntity returnEntity = returnEntityMap.computeIfAbsent(nameList.get(0), columnTypeName -> {
-                        ReturnEntity entity = new ReturnEntity();
-                        entity.setFieldColumnRelationMapper(mapper);
-                        Object[] idList = new Object[mapper.getIdSet().size()];
-                        Object[] columnList = new Object[mapper.getFieldColumnRelations().size()];
-                        ReturnEntity[] returnEntities = new ReturnEntity[mapper.getFieldJoinClasses().size()];
-                        entity.setIdValueList(idList);
-                        entity.setColumnValueList(columnList);
-                        entity.setJoinEntityList(returnEntities);
-                        return entity;
+                        return new ReturnEntity(mapper);
                     });
 
                     if (fieldColumnRelation.isId()) {
@@ -1321,7 +1313,7 @@ public class SQLModelUtils {
             if (returnEntityList.size() == 0) {
                 return new ArrayList<>(0);
             }
-            List<T> list = (List<T>) new ArrayList(returnEntityList.size());
+            List<T> list = new ArrayList<T>(returnEntityList.size());
             for (ReturnEntity returnEntity : returnEntityList) {
                 list.add((T) returnEntity.getValue());
             }
@@ -1387,15 +1379,7 @@ public class SQLModelUtils {
                 FieldColumnRelationMapper mapper = mapperList.get(i);
                 FieldColumnRelation fieldColumnRelation = columnRelationList.get(i);
                 ReturnEntity returnEntity = returnEntityMap.computeIfAbsent(nameList.get(0), columnTypeName -> {
-                    ReturnEntity entity = new ReturnEntity();
-                    entity.setFieldColumnRelationMapper(mapper);
-                    Object[] idList = new Object[mapper.getIdSet().size()];
-                    Object[] columnList = new Object[mapper.getFieldColumnRelations().size()];
-                    ReturnEntity[] returnEntities = new ReturnEntity[mapper.getFieldJoinClasses().size()];
-                    entity.setIdValueList(idList);
-                    entity.setColumnValueList(columnList);
-                    entity.setJoinEntityList(returnEntities);
-                    return entity;
+                    return new ReturnEntity(mapper);
                 });
 
                 if (fieldColumnRelation.isId()) {

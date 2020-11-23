@@ -30,7 +30,7 @@ public class TestController {
 
 
 
-        User user = new User();
+        /*User user = new User();
         user.setId(1L);
         user.setName("你好世界");
         user.setPassword("世界你好");
@@ -69,7 +69,7 @@ public class TestController {
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 sqlModelUtils.select();
             }
-        });
+        });*/
 
 
 
@@ -89,6 +89,14 @@ public class TestController {
                 System.out.printf("private %s %s;%n",column.getColumnClass().getSimpleName(),column.getBeanFieldName());
             });
         }*/
+
+
+        WsDateUtils.getExecutionTime.accept(()->{
+            for(int i = 0; i < 100000; i++){
+                WsBeanUtils.objectToT(100,String.class);
+            }
+        });
+
 
 
     }

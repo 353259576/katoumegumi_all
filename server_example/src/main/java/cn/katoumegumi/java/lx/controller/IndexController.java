@@ -6,6 +6,7 @@ import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.datasource.WsJdbcUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
+import cn.katoumegumi.java.hibernate.HibernateTransactional;
 import cn.katoumegumi.java.http.client.model.HttpRequestBody;
 import cn.katoumegumi.java.http.client.model.HttpResponseTask;
 import cn.katoumegumi.java.lx.jpa.UserJpaDao;
@@ -35,6 +36,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.SQLClient;
 import io.vertx.ext.sql.SQLConnection;
 import org.apache.dubbo.config.annotation.Service;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -130,17 +132,26 @@ public class IndexController implements IndexService {
     }
 
 
+    /**
+     * sqlUtils查询
+     * @return
+     * @throws Exception
+     */
     @Override
     @GetMapping("index")
     public String index() throws Exception {
         WsDateUtils.getExecutionTime.accept(()->{
-            List<User> list = jdbcUtils.getListT(MySearchList.create(User.class));
+            List<User> list = jdbcUtils.getListT(MySearchList.create(User.class).leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId)));
             System.out.println(list.size());
         });
         return "你好啊";
     }
 
-
+    /**
+     * mybatis查询
+     * @return
+     * @throws Exception
+     */
     @GetMapping("index2")
     public String index2() throws Exception {
         WsDateUtils.getExecutionTime.accept(()->{
@@ -149,5 +160,14 @@ public class IndexController implements IndexService {
         return "你好啊";
     }
 
+    @GetMapping("index3")
+    @HibernateTransactional(rollbackFor = RuntimeException.class)
+    public String index3(){
+        WsDateUtils.getExecutionTime.accept(()->{
+            List<User> list = hibernateDao.selectValueToList(MySearchList.create(User.class),User.class);
+            System.out.println(list.size());
+        });
+        return "你好啊";
+    }
 
 }

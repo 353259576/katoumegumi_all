@@ -1,10 +1,6 @@
 package cn.katoumegumi.java.sql.entity;
 
-import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 返回数据集合
@@ -24,22 +20,22 @@ public class ReturnEntity {
     /**
      * 对象关系数据
      */
-    private FieldColumnRelationMapper fieldColumnRelationMapper;
+    private final FieldColumnRelationMapper fieldColumnRelationMapper;
 
     /**
      * id的值
      */
-    private Object[] idValueList;
+    private final Object[] idValueList;
 
     /**
      * 其他值
      */
-    private Object[] columnValueList;
+    private final Object[] columnValueList;
 
     /**
      * 关联的对象
      */
-    private ReturnEntity[] joinEntityList;
+    private final ReturnEntity[] joinEntityList;
 
     /**
      * 父对象
@@ -47,38 +43,46 @@ public class ReturnEntity {
     private ReturnEntity parentReturnEntity;
 
 
+    public ReturnEntity(FieldColumnRelationMapper mapper){
+        fieldColumnRelationMapper = mapper;
+        idValueList = new Object[mapper.getIds().size()];
+        columnValueList = new Object[mapper.getFieldColumnRelations().size()];
+        joinEntityList = new ReturnEntity[mapper.getFieldJoinClasses().size()];
+    }
+
+
 
     public FieldColumnRelationMapper getFieldColumnRelationMapper() {
         return fieldColumnRelationMapper;
     }
 
-    public void setFieldColumnRelationMapper(FieldColumnRelationMapper fieldColumnRelationMapper) {
+    /*public void setFieldColumnRelationMapper(FieldColumnRelationMapper fieldColumnRelationMapper) {
         this.fieldColumnRelationMapper = fieldColumnRelationMapper;
-    }
+    }*/
 
     public Object[] getIdValueList() {
         return idValueList;
     }
 
-    public void setIdValueList(Object[] idValueList) {
+    /*public void setIdValueList(Object[] idValueList) {
         this.idValueList = idValueList;
-    }
+    }*/
 
     public Object[] getColumnValueList() {
         return columnValueList;
     }
 
-    public void setColumnValueList(Object[] columnValueList) {
+    /*public void setColumnValueList(Object[] columnValueList) {
         this.columnValueList = columnValueList;
-    }
+    }*/
 
     public ReturnEntity[] getJoinEntityList() {
         return joinEntityList;
     }
 
-    public void setJoinEntityList(ReturnEntity[] joinEntityList) {
+    /*public void setJoinEntityList(ReturnEntity[] joinEntityList) {
         this.joinEntityList = joinEntityList;
-    }
+    }*/
 
     public Object getValue() {
         return value;

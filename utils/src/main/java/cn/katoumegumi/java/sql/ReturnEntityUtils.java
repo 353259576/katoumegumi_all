@@ -30,8 +30,8 @@ public class ReturnEntityUtils {
     private static ReturnEntity getReturnEntity(Map<Class<?>, Map<ReturnEntityId, ReturnEntity>> idReturnEntityMap, ReturnEntity returnEntity) {
 
         FieldColumnRelationMapper fieldColumnRelationMapper = returnEntity.getFieldColumnRelationMapper();
-        if (WsListUtils.isNotEmpty(fieldColumnRelationMapper.getIdSet())) {
-            ReturnEntityId returnEntityId = new ReturnEntityId(fieldColumnRelationMapper.getIdSet(), returnEntity);
+        if (WsListUtils.isNotEmpty(fieldColumnRelationMapper.getIds())) {
+            ReturnEntityId returnEntityId = new ReturnEntityId(fieldColumnRelationMapper.getIds(), returnEntity);
             returnEntity.setReturnEntityId(returnEntityId);
             Map<ReturnEntityId, ReturnEntity> map = idReturnEntityMap.computeIfAbsent(fieldColumnRelationMapper.getClazz(), c -> new HashMap<>());
             return map.computeIfAbsent(returnEntityId, id -> {
@@ -54,7 +54,7 @@ public class ReturnEntityUtils {
     private static Object returnEntityToObject(ReturnEntity returnEntity) {
         FieldColumnRelationMapper mapper = returnEntity.getFieldColumnRelationMapper();
         Object o = WsBeanUtils.createObject(mapper.getClazz());
-        List<FieldColumnRelation> list = mapper.getIdSet();
+        List<FieldColumnRelation> list = mapper.getIds();
         Object[] values = null;
         boolean haveValue = false;
 
@@ -131,10 +131,9 @@ public class ReturnEntityUtils {
         FieldColumnRelationMapper mapper = returnEntity.getFieldColumnRelationMapper();
         if (WsListUtils.isNotEmpty(mapper.getFieldJoinClasses())) {
             List<FieldJoinClass> fieldJoinClassList = mapper.getFieldJoinClasses();
-            int length = fieldJoinClassList.size();
+            //int length = fieldJoinClassList.size();
             Object o = returnEntity.getValue();
-            for (int i = 0; i < length; ++i) {
-                FieldJoinClass fieldJoinClass = fieldJoinClassList.get(i);
+            for (FieldJoinClass fieldJoinClass : fieldJoinClassList) {
                 String nextTableName = tableName + "." + fieldJoinClass.getNickName();
                 ReturnEntity nextEntity = returnEntityMap.get(nextTableName);
                 if (nextEntity != null) {
@@ -173,7 +172,7 @@ public class ReturnEntityUtils {
                         }
 
                     }
-                    ReturnEntity r1 = packageReturnEntity(idReturnEntityMap, returnEntityMap, entity, nextTableName);
+                    packageReturnEntity(idReturnEntityMap, returnEntityMap, entity, nextTableName);
                 }
             }
         }

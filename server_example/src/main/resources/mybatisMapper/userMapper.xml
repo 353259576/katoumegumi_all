@@ -43,6 +43,7 @@
         from ws_user u
                  left join ws_user_details ud on ud.user_id = u.id
                  left join user_details_remake udr on udr.user_details_id = ud.id
+                limit 0,10
     </select>
 
     <!--<select id="selectUserList" resultMap="userBaseResultMap">

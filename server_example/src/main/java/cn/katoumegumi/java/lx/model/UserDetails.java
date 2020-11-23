@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.List;
@@ -33,6 +35,8 @@ public class UserDetails {
 
     @OneToMany
     @JoinColumn(name = "user_details_id")
+    //@Fetch(FetchMode.JOIN)
+    //@Transient
     private List<UserDetailsRemake> userDetailsRemake;
 
     //private List<UserDetailsRemake> userDetailsRemakeList;

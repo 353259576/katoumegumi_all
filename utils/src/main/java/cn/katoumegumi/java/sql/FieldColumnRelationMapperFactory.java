@@ -94,7 +94,7 @@ public class FieldColumnRelationMapperFactory {
                 FieldColumnRelation fieldColumnRelation = new FieldColumnRelation(isId, field.getName(), field, columnName, field.getType());
                 fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
                 if (isId) {
-                    fieldColumnRelationMapper.getIdSet().add(fieldColumnRelation);
+                    fieldColumnRelationMapper.getIds().add(fieldColumnRelation);
                 } else {
                     fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
                 }
@@ -136,11 +136,11 @@ public class FieldColumnRelationMapperFactory {
                     if (joinColumn != null) {
                         String name = joinColumn.name();
                         if (WsStringUtils.isBlank(name)) {
-                            name = fieldColumnRelationMapper.getIdSet().get(0).getColumnName();
+                            name = fieldColumnRelationMapper.getIds().get(0).getColumnName();
                         }
                         String referenced = joinColumn.referencedColumnName();
                         if (WsStringUtils.isBlank(referenced)) {
-                            referenced = mapper.getIdSet().get(0).getColumnName();
+                            referenced = mapper.getIds().get(0).getColumnName();
                         }
                         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
                         if (oneToMany == null) {
@@ -213,7 +213,7 @@ public class FieldColumnRelationMapperFactory {
                         columnName = id.value();
                     }
                     fieldColumnRelation = new FieldColumnRelation(true, field.getName(), field, columnName, field.getType());
-                    fieldColumnRelationMapper.getIdSet().add(fieldColumnRelation);
+                    fieldColumnRelationMapper.getIds().add(fieldColumnRelation);
                 }
                 fieldColumnRelationMapper.getFieldColumnRelationMap().put(field.getName(), fieldColumnRelation);
             } else {
