@@ -125,14 +125,11 @@ public class FieldColumnRelationMapperFactory {
 
                 FieldColumnRelationMapper mapper = analysisClassRelation(joinClass);
                 if (mapper != null) {
-                    FieldJoinClass fieldJoinClass = new FieldJoinClass();
+                    FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray,joinClass,field);
                     fieldJoinClass.setNickName(field.getName());
-                    fieldJoinClass.setJoinClass(joinClass);
                     fieldJoinClass.setJoinType(JoinType.LEFT);
                     JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
-                    fieldJoinClass.setArray(isArray);
                     field.setAccessible(true);
-                    fieldJoinClass.setField(field);
                     if (joinColumn != null) {
                         String name = joinColumn.name();
                         if (WsStringUtils.isBlank(name)) {
@@ -241,13 +238,9 @@ public class FieldColumnRelationMapperFactory {
                     isArray = true;
                 }
                 if (analysisClassRelation(joinClass) != null) {
-                    FieldJoinClass fieldJoinClass = new FieldJoinClass();
+                    FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray,joinClass,field);
                     fieldJoinClass.setNickName(field.getName());
                     fieldJoinClass.setJoinType(JoinType.LEFT);
-                    fieldJoinClass.setJoinClass(joinClass);
-                    fieldJoinClass.setArray(isArray);
-                    field.setAccessible(true);
-                    fieldJoinClass.setField(field);
                     fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
                 }
             }

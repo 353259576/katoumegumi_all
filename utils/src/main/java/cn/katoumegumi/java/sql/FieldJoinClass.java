@@ -7,46 +7,59 @@ import java.lang.reflect.Field;
  * @author ws
  */
 public class FieldJoinClass {
-    private boolean isArray;
+    private final boolean isArray;
+    private final Class<?> joinClass;
+    private final Field field;
+    /**
+     * 主表名称
+     */
     private String baseTableNickName;
+
+    /**
+     * 连接表的名称
+     */
     private String nickName;
-    private Class joinClass;
+
+    /**
+     * 连接类型
+     */
     private JoinType joinType;
+    /**
+     * 主表连接字段
+     */
     private String joinColumn;
+    /**
+     * 连接表字段
+     */
     private String anotherJoinColumn;
-    private Field field;
+
+    /**
+     * 附加查询条件
+     */
     private MySearchList conditionSearchList;
+
+
+    public FieldJoinClass(boolean isArray,Class<?> joinClass,Field field){
+        this.isArray = isArray;
+        this.joinClass = joinClass;
+        this.field = field;
+    }
+
 
     public String getBaseTableNickName() {
         return baseTableNickName;
-    }
-
-    public void setBaseTableNickName(String baseTableNickName) {
-        this.baseTableNickName = baseTableNickName;
     }
 
     public boolean isArray() {
         return isArray;
     }
 
-    public void setArray(boolean array) {
-        isArray = array;
-    }
-
     public String getNickName() {
         return nickName;
     }
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
-    }
-
-    public Class getJoinClass() {
+    public Class<?> getJoinClass() {
         return joinClass;
-    }
-
-    public void setJoinClass(Class joinClass) {
-        this.joinClass = joinClass;
     }
 
     public JoinType getJoinType() {
@@ -74,11 +87,16 @@ public class FieldJoinClass {
     }
 
     public Field getField() {
+        field.setAccessible(true);
         return field;
     }
 
-    public void setField(Field field) {
-        this.field = field;
+    public void setBaseTableNickName(String baseTableNickName) {
+        this.baseTableNickName = baseTableNickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     public MySearchList getConditionSearchList() {

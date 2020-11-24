@@ -2,6 +2,7 @@ package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 
 import javax.persistence.criteria.JoinType;
 import java.util.function.Consumer;
@@ -100,6 +101,15 @@ public class TableRelation {
 
     public TableRelation setJoinTableNickName(String joinTableNickName) {
         this.joinTableNickName = joinTableNickName;
+        return this;
+    }
+
+    public <T> TableRelation setJoinTableNickName(String parentTableNickName,SFunction<T,?> joinTableNickName) {
+        if(WsStringUtils.isBlank(parentTableNickName)){
+            this.joinTableNickName = WsFieldUtils.getFieldName(joinTableNickName);
+        }else {
+            this.joinTableNickName = parentTableNickName +'.' + WsFieldUtils.getFieldName(joinTableNickName);
+        }
         return this;
     }
 

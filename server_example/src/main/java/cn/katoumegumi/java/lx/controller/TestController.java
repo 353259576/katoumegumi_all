@@ -30,7 +30,7 @@ public class TestController {
 
 
 
-        /*User user = new User();
+        User user = new User();
         user.setId(1L);
         user.setName("你好世界");
         user.setPassword("世界你好");
@@ -53,8 +53,11 @@ public class TestController {
 
         Field field = WsFieldUtils.getFieldByName(user.getClass(),"userDetails");
 
+        //MySearchList searchList = MySearchList.create(User.class);
+        //new SQLModelUtils(searchList).select();
+
         WsDateUtils.getExecutionTime.accept(()->{
-            for(int i = 0; i < 100000; i++) {
+            for(int i = 0; i < 1; i++) {
                 MySearchList mySearchList = MySearchList.create(User.class)
                         .setAlias("u")
                         .setSqlLimit(sqlLimit -> sqlLimit.setOffset(0).setSize(10))
@@ -64,12 +67,15 @@ public class TestController {
                                 .on(User::getId, UserDetails::getUserId)
                                 .condition(s -> s.eq(User::getName, "你好"))
                         )
-                        .innerJoin(UserDetailsRemake.class, t -> t.setTableNickName("{ud}").setJoinTableNickName("{ud}.userDetailsRemake").on(UserDetails::getId, UserDetailsRemake::getUserDetailsId))
-                        .eq("ud", UserDetails::getSex, "1").sort(User::getName, "desc");
+                        .innerJoin(UserDetailsRemake.class, t -> t.setTableNickName("ud").setJoinTableNickName("ud",UserDetails::getUserDetailsRemake).on(UserDetails::getId, UserDetailsRemake::getUserDetailsId))
+                        .in("userDetails",UserDetails::getId,MySearchList.create(UserDetailsRemake.class).singleColumnName(UserDetailsRemake::getUserDetailsId).eqp("userDetailsId","User.userDetails.id"))
+                        .eq("userDetails", UserDetails::getSex, "1")
+                        .eq("userDetails.userDetailsRemake", UserDetailsRemake::getId, "1").sort(User::getName, "desc");
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-                sqlModelUtils.select();
+                SelectSqlEntity entity = sqlModelUtils.select();
+                System.out.println(entity.getSelectSql());
             }
-        });*/
+        });
 
 
 

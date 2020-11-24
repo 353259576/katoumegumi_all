@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -14,9 +15,15 @@ import java.util.function.Supplier;
  * @author ws
  */
 public class MySearchList {
+
+    private final List<String> columnNameList = new ArrayList<>();
+
     private final List<MySearch> orderSearches = new ArrayList<>();
+
     private final List<MySearchList> ands = new ArrayList<>();
+
     private final List<MySearchList> ors = new ArrayList<>();
+
     private final List<TableRelation> joins = new ArrayList<>();
     private List<MySearch> mySearches = new ArrayList<>();
     private Class<?> mainClass;
@@ -68,6 +75,7 @@ public class MySearchList {
         mySearches.add(new MySearch(fieldName, operator, value));
         return this;
     }
+
 
     public <T> MySearchList add(SupplierFunc<T> supplierFunc, SqlOperator operator, Object value) {
         return add(null,supplierFunc,operator,value);
@@ -623,6 +631,10 @@ public class MySearchList {
         return add(sql,SqlOperator.EXISTS,value);
     }
 
+    public MySearchList exists(MySearchList mySearchList){
+        return add("",SqlOperator.EXISTS,mySearchList);
+    }
+
     /**
      * not exists
      * @param sql
@@ -631,6 +643,10 @@ public class MySearchList {
      */
     public MySearchList notExists(String sql,Object value){
         return add(sql,SqlOperator.NOT_EXISTS,value);
+    }
+
+    public MySearchList notExists(MySearchList mySearchList){
+        return add("",SqlOperator.NOT_EXISTS,mySearchList);
     }
 
 
@@ -1059,6 +1075,10 @@ public class MySearchList {
                 break;
             case IN:
             case NIN:
+                if(!(WsBeanUtils.isArray(value.getClass())||value instanceof MySearchList)){
+                    throw new RuntimeException(fieldName+"的参数必须是数组类型，当前的类型是："+value.getClass());
+                }
+                break;
             case BETWEEN:
             case NOT_BETWEEN:
                 if(!WsBeanUtils.isArray(value.getClass())){
@@ -1312,6 +1332,43 @@ public class MySearchList {
     public MySearchList setAlias(String alias) {
         this.alias = alias;
         return this;
+    }
+
+    /**
+     * 设置查询的字段的名称
+     * @param columnName
+     * @return
+     */
+    public MySearchList singleColumnName(String columnName){
+        this.columnNameList.add(columnName);
+        return this;
+    }
+
+    public MySearchList singleColumnName(String tableName,String fieldName){
+        if(WsStringUtils.isBlank(tableName)){
+            this.singleColumnName(fieldName);
+        }else {
+            this.singleColumnName(tableName + '.'+fieldName);
+        }
+        return this;
+    }
+
+    public <T> MySearchList singleColumnName(String tableName,SFunction<T,?> fieldName){
+        if(WsStringUtils.isBlank(tableName)){
+            this.singleColumnName(WsFieldUtils.getFieldName(fieldName));
+        }else {
+            this.singleColumnName(tableName + '.'+WsFieldUtils.getFieldName(fieldName));
+        }
+        return this;
+    }
+
+    public <T> MySearchList singleColumnName(SFunction<T,?> fieldName){
+        this.singleColumnName(WsFieldUtils.getFieldName(fieldName));
+        return this;
+    }
+
+    public List<String> getColumnNameList() {
+        return columnNameList;
     }
 }
 

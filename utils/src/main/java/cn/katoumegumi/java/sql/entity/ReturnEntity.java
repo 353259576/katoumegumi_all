@@ -56,33 +56,17 @@ public class ReturnEntity {
         return fieldColumnRelationMapper;
     }
 
-    /*public void setFieldColumnRelationMapper(FieldColumnRelationMapper fieldColumnRelationMapper) {
-        this.fieldColumnRelationMapper = fieldColumnRelationMapper;
-    }*/
-
     public Object[] getIdValueList() {
         return idValueList;
     }
-
-    /*public void setIdValueList(Object[] idValueList) {
-        this.idValueList = idValueList;
-    }*/
 
     public Object[] getColumnValueList() {
         return columnValueList;
     }
 
-    /*public void setColumnValueList(Object[] columnValueList) {
-        this.columnValueList = columnValueList;
-    }*/
-
     public ReturnEntity[] getJoinEntityList() {
         return joinEntityList;
     }
-
-    /*public void setJoinEntityList(ReturnEntity[] joinEntityList) {
-        this.joinEntityList = joinEntityList;
-    }*/
 
     public Object getValue() {
         return value;

@@ -1,7 +1,8 @@
 package cn.katoumegumi.java.sql;
 
-import java.util.HashMap;
-import java.util.Map;
+import cn.katoumegumi.java.common.WsStringUtils;
+
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -9,6 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author ws
  */
 public class TranslateNameUtils {
+
+    private final List<String> mainClassNameList = new ArrayList<>();
 
     /**
      * 简写数据
@@ -108,4 +111,34 @@ public class TranslateNameUtils {
         return localMapperMap.size();
     }
 
+    public void addMainClassName(String mainClassName){
+        this.mainClassNameList.add(mainClassName+'.');
+    }
+
+    public boolean startsWithMainClassName(String mainClassName){
+        final String tableName = mainClassName + '.';
+        for(String prefix:mainClassNameList) {
+            if (tableName.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 去除表别名的主表名称
+     * @return
+     */
+    public String getNoPrefixTableName(final String tableName) {
+        if (WsStringUtils.isBlank(tableName)) {
+            return null;
+        }
+
+        for(String prefix:mainClassNameList) {
+            if (tableName.startsWith(prefix)) {
+                return tableName.substring(prefix.length());
+            }
+        }
+        return tableName;
+    }
 }
