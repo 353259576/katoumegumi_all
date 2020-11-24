@@ -1589,6 +1589,8 @@ public class SQLModelUtils {
             if(key == null){
                 if(!translateNameUtils.startsWithMainClassName(fieldNameList.get(0))){
                     key = prefix + '.' + fieldNameList.get(0);
+                }else {
+                    key = fieldNameList.get(0);
                 }
             }
             prefixString = key;
