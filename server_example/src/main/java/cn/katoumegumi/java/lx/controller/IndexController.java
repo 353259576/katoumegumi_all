@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -168,6 +169,24 @@ public class IndexController implements IndexService {
             System.out.println(list.size());
         });
         return "你好啊";
+    }
+
+    public void insert(List<User> userList){
+        List<User> insert = new ArrayList<>();
+        List<User> update = new ArrayList<>();
+        for(User user:userList){
+            if(user.getId() == null){
+                insert.add(user);
+            }else {
+                update.add(user);
+            }
+        }
+        if(!CollectionUtils.isEmpty(insert)){
+            jdbcUtils.insert(insert);
+        }
+        if(!CollectionUtils.isEmpty(update)){
+            jdbcUtils.updateBatchByT(update);
+        }
     }
 
 }

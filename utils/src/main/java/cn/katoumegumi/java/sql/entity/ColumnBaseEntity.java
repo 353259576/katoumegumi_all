@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.sql.entity;
 
-import cn.katoumegumi.java.common.SqlTableToBeanUtils;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 

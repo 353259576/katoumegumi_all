@@ -1,5 +1,8 @@
-package cn.katoumegumi.java.common;
+package cn.katoumegumi.java.utils;
 
+import cn.katoumegumi.java.common.WsStringUtils;
+
+import javax.persistence.Column;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -8,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * table转换为java bean
@@ -89,7 +93,7 @@ public class SqlTableToBeanUtils {
             while (resultSet.next()){
                 String name = resultSet.getString("TABLE_NAME");
                 String remark = resultSet.getString("TABLE_COMMENT");
-                Table table = new Table(name, remark);
+                Table table = new Table(name, remark,WsStringUtils.camelCase(name),selectTableColumns(name));
                 tableList.add(table);
             }
             resultSet.close();
@@ -201,13 +205,36 @@ public class SqlTableToBeanUtils {
     }
 
     public static class Table{
-        private String tableName;
+        private final String tableName;
 
-        private String tableRemark;
+        private final String tableRemark;
 
-        public Table(String tableName,String tableRemark){
+        private final String entityName;
+
+        private final String firstLowerEntityName;
+
+        private Column pkColumn;
+
+        private final List<Class<?>> classList;
+
+        private final List<Column> columnList;
+
+        public Table(String tableName,String tableRemark,String firstLowerEntityName,List<Column> columnList){
             this.tableName = tableName;
             this.tableRemark = tableRemark;
+            this.entityName = firstLowerEntityName.substring(0,1).toUpperCase()+firstLowerEntityName.substring(1);
+            this.firstLowerEntityName = firstLowerEntityName;
+            this.columnList = columnList;
+            this.classList = columnList.stream().map(Column::getColumnClass).distinct().collect(Collectors.toList());
+            for(Column column:columnList){
+                if(column.getColumnKey().equals("PRI")){
+                    pkColumn = column;
+                    break;
+                }
+            }
+            if(pkColumn == null){
+                pkColumn = columnList.get(0);
+            }
         }
 
         public String getTableName() {
@@ -216,6 +243,26 @@ public class SqlTableToBeanUtils {
 
         public String getTableRemark() {
             return tableRemark;
+        }
+
+        public List<Column> getColumnList() {
+            return columnList;
+        }
+
+        public String getEntityName() {
+            return entityName;
+        }
+
+        public String getFirstLowerEntityName() {
+            return firstLowerEntityName;
+        }
+
+        public Column getPkColumn() {
+            return pkColumn;
+        }
+
+        public List<Class<?>> getClassList() {
+            return classList;
         }
     }
 }
