@@ -14,8 +14,8 @@ public class HttpCloseHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(HttpCloseHandler.class);
     public static AtomicInteger atomicInteger = new AtomicInteger(0);
-    private HttpRequestBody httpRequestBody;
-    private String id;
+    private final HttpRequestBody httpRequestBody;
+    private final String id;
 
     public HttpCloseHandler(String id, HttpRequestBody httpRequestBody) {
         this.httpRequestBody = httpRequestBody;

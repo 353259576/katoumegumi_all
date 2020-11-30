@@ -1,21 +1,15 @@
 package cn.katoumegumi.java.lx.controller;
 
-import cn.katoumegumi.java.common.WsDateUtils;
+import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
-import cn.katoumegumi.java.http.client.model.HttpRequestBody;
-import cn.katoumegumi.java.http.client.model.HttpResponseBody;
-import cn.katoumegumi.java.http.client.model.HttpResponseTask;
 import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.model.User;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
-import cn.katoumegumi.java.lx.service.IndexService;
 import cn.katoumegumi.java.lx.service.UserService;
 import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.SQLModelUtils;
-import cn.katoumegumi.java.sql.UpdateSqlEntity;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -25,12 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.time.Year;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author ws
@@ -46,30 +35,6 @@ public class Index2Conftoller {
     @Autowired
     private UserService userService;
 
-    public static void main(String[] args) {
-
-        /*for(int i = 0; i < 100; i++){
-            HttpRequestBody httpRequestBody = HttpRequestBody.createHttpRequestBody();
-            httpRequestBody.setUrl("http://127.0.0.1:1920/index3")
-                    .setMethod("GET");
-            httpRequestBody.nettyBuild();
-
-        }*/
-
-        WsDateUtils.getExecutionTime.accept(()->{
-            boolean k = false;
-
-            for(int i = 0; i < 100000000; ++i){
-                //if(!k) {
-                    k = true;
-                //}
-            }
-        });
-
-
-
-
-    }
 
     @RequestMapping(value = "hibernateTest")
     @ResponseBody

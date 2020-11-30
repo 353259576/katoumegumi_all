@@ -275,7 +275,7 @@ public class WsJdbcUtils {
         return jdbcTemplate.query(sql, finalList.toArray(), new ResultSetExtractor<List<T>>() {
             @Override
             public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
-                List<T> list = sqlModelUtils.oneLoopMargeMap(rs);
+                List<T> list = sqlModelUtils.margeMap(rs);
                 return list;
             }
         });

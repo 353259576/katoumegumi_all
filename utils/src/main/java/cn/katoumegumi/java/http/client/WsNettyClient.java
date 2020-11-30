@@ -116,7 +116,7 @@ public class WsNettyClient {
         CountDownLatch countDownLatch = new CountDownLatch(10000);
         Semaphore semaphore = new Semaphore(200);
         ExecutorService executorService = Executors.newFixedThreadPool(1);
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 10000; i++) {
             try {
                 semaphore.acquire();
             } catch (InterruptedException e) {
@@ -128,7 +128,7 @@ public class WsNettyClient {
             String str = strs[k];
             //System.out.println(str);
             HttpRequestBody httpRequestBody = HttpRequestBody.createHttpRequestBody();
-            httpRequestBody.setUrl("https://www.ustc.edu.cn/")
+            httpRequestBody.setUrl(str)
                     .setMethod("GET")
                     .setGZIP(true)
                     .setUseChunked(true);
@@ -146,9 +146,9 @@ public class WsNettyClient {
                         //log.info(httpResponseBody.getResponseBodyToString());
                         if (httpResponseBody.getCode() == 200) {
                             System.out.println(httpResponseBody.getContentType());
-                            WsImageUtils.byteToFile(httpResponseBody.getReturnBytes(), httpRequestBody.getUri().getHost() + i1, "txt", "D:/网页/");
+                            WsImageUtils.byteToFile(httpResponseBody.getReturnBytes(), httpRequestBody.getUri().getHost() + i1, "txt", "D:/网页/1/");
                         } else {
-                            WsImageUtils.byteToFile(httpResponseBody.getErrorReturnBytes(), httpRequestBody.getUri().getHost() + i1, "txt", "D:/网页/");
+                            WsImageUtils.byteToFile(httpResponseBody.getErrorReturnBytes(), httpRequestBody.getUri().getHost() + i1, "txt", "D:/网页/1/");
                         }
 
                         successNum.getAndAdd(1);

@@ -36,8 +36,8 @@ public class LeetCodeTest {
         List<String> wordList = Arrays.asList("a","abc","b","cd");
         System.out.println(JSON.toJSONString(wordBreak(string,wordList)));*/
 
-        System.out.println(JSON.toJSONString(kClosest(new int[][]{{68,97},{34,-84},{60,100},{2,31},{-27,-38},{-73,-74},{-55,-39},{62,91},{62,92},{-57,-67}},5)));
-
+        //System.out.println(JSON.toJSONString(kClosest(new int[][]{{68,97},{34,-84},{60,100},{2,31},{-27,-38},{-73,-74},{-55,-39},{62,91},{62,92},{-57,-67}},5)));
+        System.out.println(JSON.toJSONString(reorganizeString("vvvlo")));
     }
 
     /**
@@ -1156,6 +1156,59 @@ public class LeetCodeTest {
             points[i] = ints;
         }
         return Arrays.copyOf(points,K);
+    }
+
+    /**
+     * 767. 重构字符串
+     * @param S
+     * @return
+     */
+    public static String reorganizeString(String S) {
+        int length = S.length();
+        if(length < 2){
+            return S;
+        }
+        int checkNum = (length + 1) / 2;
+        int num = 97;
+        int[] array = new int[26];
+        Arrays.fill(array,0);
+        char[] chars = S.toCharArray();
+        for(char c:chars){
+            array[c-num]++;
+            if(array[c-num] > checkNum){
+                return null;
+            }
+        }
+        PriorityQueue<Character> queue = new PriorityQueue<>(new Comparator<Character>() {
+            @Override
+            public int compare(Character o1, Character o2) {
+                return array[o2 - num] - array[o1 - num];
+            }
+        });
+        for(int i = 0; i < array.length; i++){
+            if(array[i] > 0){
+                queue.offer((char) (i+97));
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        while (queue.size() > 1){
+            char c1 = queue.poll();
+            char c2 = queue.poll();
+            sb.append(c1);
+            sb.append(c2);
+            array[c1 - 97]--;
+            array[c2 - 97]--;
+            if(array[c1 - 97] > 0){
+                queue.offer(c1);
+            }
+            if(array[c2 - 97] > 0){
+                queue.offer(c2);
+            }
+        }
+        if (queue.size() > 0){
+            sb.append(queue.poll());
+        }
+        return sb.toString();
     }
 
 }

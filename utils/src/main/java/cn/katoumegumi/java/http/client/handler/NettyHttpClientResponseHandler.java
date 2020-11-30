@@ -25,7 +25,7 @@ public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter
     public static AtomicInteger atomicInteger = new AtomicInteger(0);
     private volatile HttpRequestBody httpRequestBody;
     private volatile String id;
-    private volatile boolean sendHttp;
+    private final boolean sendHttp;
 
 
     public NettyHttpClientResponseHandler(HttpRequestBody httpRequestBody, String id, boolean sendHttp) {

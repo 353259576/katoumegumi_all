@@ -1,14 +1,13 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -1274,6 +1273,22 @@ public class SQLModelUtils {
         return deleteSqlEntity;
     }
 
+    public <T> List<T> margeMap(ResultSet resultSet){
+        if(WsListUtils.isEmpty(mySearchList.getColumnNameList())){
+            return oneLoopMargeMap(resultSet);
+        }else {
+            List<Object> tList = new ArrayList<>();
+            ColumnBaseEntity columnBaseEntity = cacheSqlEntity.getColumnList().get(0);
+            try {
+                while (resultSet.next()){
+                    tList.add(WsBeanUtils.objectToT(resultSet.getObject(1),columnBaseEntity.getField().getType()));
+                }
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
+            return (List<T>) tList;
+        }
+    }
 
     public <T> List<T> oneLoopMargeMap(ResultSet resultSet) {
         try {

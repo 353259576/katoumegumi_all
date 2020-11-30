@@ -1,5 +1,8 @@
 package cn.katoumegumi.java.http.client.model;
 
+/**
+ * @author ws
+ */
 public class WsRequestProperty {
     private String key;
     private String value;

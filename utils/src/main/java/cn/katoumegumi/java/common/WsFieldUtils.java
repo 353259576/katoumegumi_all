@@ -326,20 +326,19 @@ public class WsFieldUtils {
      * @param field
      * @return
      */
-    public static boolean setValue(Object o,Object value,Field field){
-        if(value == null){
+    public static boolean setValue(Object o,Object value,Field field) {
+        if (value == null) {
             return true;
         }
         try {
             field.setAccessible(true);
-            field.set(o,value);
+            field.set(o, value);
             return true;
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             return false;
         }
     }
-
 
 }
 

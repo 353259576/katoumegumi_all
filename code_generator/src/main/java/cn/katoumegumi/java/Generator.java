@@ -57,6 +57,7 @@ public class Generator {
             generator.createService(table);
             generator.createServiceImpl(table);
             generator.createController(table);
+            generator.createMybatisMapper(table);
         }
 
     }
@@ -64,23 +65,28 @@ public class Generator {
 
     public void createEntity(SqlTableToBeanUtils.Table table){
         Template template = freeMarkerUtils.getTemplate("Entity.ftl");
-        create("entity",table.getEntityName(),template,table);
+        create("entity",table.getEntityName()+".java",template,table);
     }
 
 
     public void createService(SqlTableToBeanUtils.Table table){
         Template template = freeMarkerUtils.getTemplate("Service.ftl");
-        create("service",table.getEntityName()+"Service",template,table);
+        create("service",table.getEntityName()+"Service.java",template,table);
     }
 
     public void createServiceImpl(SqlTableToBeanUtils.Table table){
         Template template = freeMarkerUtils.getTemplate("ServiceImpl.ftl");
-        create("service/impl",table.getEntityName()+"ServiceImpl",template,table);
+        create("service/impl",table.getEntityName()+"ServiceImpl.java",template,table);
     }
 
     public void createController(SqlTableToBeanUtils.Table table){
         Template template = freeMarkerUtils.getTemplate("Controller.ftl");
-        create("controller",table.getEntityName()+"Controller",template,table);
+        create("controller",table.getEntityName()+"Controller.java",template,table);
+    }
+
+    public void createMybatisMapper(SqlTableToBeanUtils.Table table){
+        Template template = freeMarkerUtils.getTemplate("MybatisMapper.ftl");
+        create("mapper",table.getEntityName()+"Mapper.xml",template,table);
     }
 
 
@@ -90,7 +96,7 @@ public class Generator {
         map.put("table",table);
         try {
             try {
-                File file = WsFileUtils.createFile(exportPath+"/"+packageName.replaceAll("\\.","/") +"/"+path+"/"+fileName+ ".java");
+                File file = WsFileUtils.createFile(exportPath+"/"+packageName.replaceAll("\\.","/") +"/"+path+"/"+fileName);
                 FileWriter writer = new FileWriter(file);
                 template.process(map,writer);
                 writer.close();

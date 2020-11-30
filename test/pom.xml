@@ -18,6 +18,25 @@
             <artifactId>utils</artifactId>
             <version>1.0.5-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>${zxing.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>${zxing.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>zxing-parent</artifactId>
+            <version>${zxing.version}</version>
+            <type>pom</type>
+        </dependency>
     </dependencies>
 
 </project>

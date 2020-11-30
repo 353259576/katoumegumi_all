@@ -1,5 +1,6 @@
-package cn.katoumegumi.java.common;
+package cn.katoumegumi.java.experiment.common;
 
+import cn.katoumegumi.java.common.WsImageUtils;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
