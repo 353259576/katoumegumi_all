@@ -14,21 +14,6 @@ import java.util.stream.Stream;
 public class WsStringUtils {
     public static final byte SPACE = 32;
 
-    //private static final SecureRandom RANDOM = new SecureRandom();
-
-
-    public static void main(String[] args) {
-
-        WsDateUtils.getExecutionTime.accept(()->{
-            for(int i = 0; i < 10000000; i++) {
-                createRandomStr("CS", WsDateUtils.LONGTIMESTRINGCOMPACT, 22);
-                //createRandomStr();
-            }
-        });
-        //System.out.println();
-    }
-
-
     public static String jointListString(String[] strings, String sign) {
         return jointListString(Arrays.asList(strings), sign);
     }
@@ -532,16 +517,41 @@ public class WsStringUtils {
 
     /**
      * 判断是不是汉字
-     *
      * @param c 字符
      * @return
      */
-    public boolean isChinese(char c) {
+    public static boolean isChinese(char c) {
         if (c >= 19968 && c <= 40869) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public static boolean isChinese(String string) {
+        string = new String(string.getBytes(StandardCharsets.UTF_8));
+        for(char c:string.toCharArray()){
+            if(!isChinese(c)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 截取汉字
+     * @param str
+     * @return
+     */
+    public static String interceptedChinese(String str){
+        StringBuilder sb = new StringBuilder();
+        str = new String(str.getBytes(StandardCharsets.UTF_8));
+        for(char c:str.toCharArray()){
+            if (isChinese(c)){
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
 

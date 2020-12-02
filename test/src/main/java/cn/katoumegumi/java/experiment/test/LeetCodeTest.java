@@ -38,6 +38,12 @@ public class LeetCodeTest {
 
         //System.out.println(JSON.toJSONString(kClosest(new int[][]{{68,97},{34,-84},{60,100},{2,31},{-27,-38},{-73,-74},{-55,-39},{62,91},{62,92},{-57,-67}},5)));
         System.out.println(JSON.toJSONString(reorganizeString("vvvlo")));
+
+        System.out.println(JSON.toJSONString(searchRange(new int[]{2,2},2)));
+
+
+        HashMap hashMap = new HashMap();
+
     }
 
     /**
@@ -1176,15 +1182,10 @@ public class LeetCodeTest {
         for(char c:chars){
             array[c-num]++;
             if(array[c-num] > checkNum){
-                return null;
+                return "";
             }
         }
-        PriorityQueue<Character> queue = new PriorityQueue<>(new Comparator<Character>() {
-            @Override
-            public int compare(Character o1, Character o2) {
-                return array[o2 - num] - array[o1 - num];
-            }
-        });
+        PriorityQueue<Character> queue = new PriorityQueue<>((o1, o2) -> array[o2 - num] - array[o1 - num]);
         for(int i = 0; i < array.length; i++){
             if(array[i] > 0){
                 queue.offer((char) (i+97));
@@ -1210,5 +1211,63 @@ public class LeetCodeTest {
         }
         return sb.toString();
     }
+
+    /**
+     * 34. 在排序数组中查找元素的第一个和最后一个位置(二分法)
+     * @param nums
+     * @param target
+     * @return
+     */
+    public static int[] searchRange(int[] nums, int target) {
+        int[] returnValue = new int[]{-1,-1};
+        if(nums == null || nums.length == 0){
+            return returnValue;
+        }
+        if(nums[0] > target){
+            return returnValue;
+        }
+
+        int left = 0;
+        int right = nums.length - 1;
+        int mid = 0;
+        while (left <= right){
+            mid = (right + left)/2;
+            if(nums[mid] > target){
+                right = mid - 1;
+            }else if(nums[mid] < target){
+                left = mid + 1;
+            }else {
+                right = mid - 1;
+            }
+        }
+        if(left >= nums.length){
+            return returnValue;
+        }
+        if(nums[left] != target){
+            return returnValue;
+        }
+        returnValue[0] = left;
+
+        left = 0;
+        right = nums.length - 1;
+        mid = 0;
+
+        while (left <= right){
+            mid = (right + left)/2;
+            if(nums[mid] > target){
+                right = mid - 1;
+            }else if(nums[mid] < target){
+                left = mid + 1;
+            }else {
+                left = mid + 1;
+            }
+        }
+        returnValue[1] = right;
+        return returnValue;
+
+
+
+    }
+
 
 }
