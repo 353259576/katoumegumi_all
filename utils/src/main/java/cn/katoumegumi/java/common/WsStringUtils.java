@@ -110,6 +110,30 @@ public class WsStringUtils {
         return true;
     }
 
+    public static boolean isNumber(char c){
+        return c >= 48 && c <= 58;
+    }
+
+    /**
+     * 是否是大写字母
+     * @param c
+     * @return
+     */
+    public static boolean isMajuscule(char c){
+        return c >= 'A' && c <= 'Z';
+    }
+
+    /**
+     * 是否是小写字母
+     * @param c
+     * @return
+     */
+    public static boolean isMinuscule(char c){
+        return c >= 'a' && c <= 'z';
+    }
+
+
+
     /**
      * 判断字符串是否含有空格
      * @param str

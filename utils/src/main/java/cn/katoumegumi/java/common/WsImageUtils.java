@@ -2,62 +2,86 @@ package cn.katoumegumi.java.common;
 
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 public class WsImageUtils {
 
+    private final static JLabel J_LABEL = new JLabel();
 
-    public static void main(String[] args) {
-        try {
-            /*BufferedImage bufferedImage = ImageIO.read(new FileInputStream("D:\\新建文件夹\\image-1540526825337.jpg"));
-            BufferedImage bufferedImage1 = new BufferedImage(bufferedImage.getWidth(),bufferedImage.getHeight(),BufferedImage.TYPE_4BYTE_ABGR);
-            Graphics2D graphics2D = bufferedImage1.createGraphics();
-            graphics2D.drawImage(bufferedImage,0,0,null);
-            File file = new File("D:\\新建文件夹\\image-1540526825337-副本.jpg");
-            if(file == null){
-                file.createNewFile();
-            }
-            ImageIO.write(bufferedImage1,"png",file);*/
+    public static void main(String[] args) throws Exception{
 
-            //FileInputStream fileInputStream = new FileInputStream("D:\\新建文件夹\\19.jpg");
-            //byte[] bytes = changeImageSize(fileInputStream,10);
-            /*byte[] bytes = cropImage(fileInputStream,100,100,500,500);
-            FileOutputStream fileOutputStream = new FileOutputStream("D:\\新建文件夹\\image-1540526825337-副本.jpg");
-            FileChannel fileChannel = fileOutputStream.getChannel();
-            ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-            //byteBuffer.flip();
-            while (byteBuffer.hasRemaining()){
-                fileChannel.write(byteBuffer);
-            }*/
-            //inciseImage(fileInputStream,1,200,"19","D:\\新建文件夹\\19\\");
-
-            //byteToFile(changeImageSize(fileInputStream,2),"123","gif","D:\\新建文件夹\\");
-            /*File file = new File("D:\\新建文件夹\\123");
-            File newFile = new File("D:\\新建文件夹\\123.gif");
-            file.renameTo(newFile);*/
-            long startTime = System.currentTimeMillis();
-            BufferedImage bufferedImage = ImageIO.read(new FileInputStream("D:\\新建文件夹\\19.jpg"));
-            bufferedImage = createMosaic(bufferedImage, 0, 0, 1920, 1080, 100);
-            byte bytes[] = bufferedImageToByteArray(bufferedImage, "png");
-            byteToFile(bytes, "newImageFile", "jpg", "D:\\新建文件夹\\");
-            long endTime = System.currentTimeMillis();
-            System.out.println(endTime - startTime);
-        } catch (Exception e) {
-            e.printStackTrace();
+        File file = new File("D:\\网页\\图修改\\");
+        File[] fs = file.listFiles();
+        int i = 0;
+        for(File f:fs){
+            BufferedImage bufferedImage = ImageIO.read(f);
+            ImageIO.write(bufferedImage,"png",WsFileUtils.createFile("D:\\网页\\图修改\\"+(i++)+"-1.png"));
         }
+
+
+        /*File file = WsFileUtils.createFile("D:\\网页\\-1.jpg");
+        try {
+            BufferedImage bufferedImage = ImageIO.read(file);
+            BufferedImage newBufferedImage = copyBufferedImage(bufferedImage,BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics2D = newBufferedImage.createGraphics();
+            System.out.println("图片宽度"+newBufferedImage.getWidth());
+            System.out.println("图片长度"+newBufferedImage.getHeight());
+            //Font font = new Font("微软雅黑",Font.PLAIN,96);
+            //Font font1 = new Font("宋体",Font.PLAIN,120);
+            Color color = getColor("#7FFF00");
+            Stream.iterate(0,i->i+1).limit(100).forEach(j->{
+                Font font = null;
+                try {
+                    font = Font.createFont(Font.TRUETYPE_FONT, WsFileUtils.createFile("D:\\网页\\SourceHanSansCN-Normal.ttf"));
+                } catch (FontFormatException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                font = font.deriveFont(Font.PLAIN,96);
+                System.out.println(font.getSize());
+                String context = "u易语言突然人fgsd豆腐干豆腐干地方合同已经同意就过分";
+                long startTime = System.currentTimeMillis();
+                FontMetrics fontMetrics = J_LABEL.getFontMetrics(font);
+                fontMetrics = J_LABEL.getFontMetrics(font);
+                List<LineText> list = splitContext(context,fontMetrics,50,0,bufferedImage.getWidth()-100,bufferedImage.getHeight(),3);
+                long endTime = System.currentTimeMillis();
+                System.out.println("拆解成行：" + (endTime - startTime));
+                startTime = System.currentTimeMillis();
+                for(int i = 0; i < list.size(); i++) {
+                    LineText lineText = list.get(i);
+                    writeFontBufferedImage(newBufferedImage, lineText.getText(), lineText.getPointX(), lineText.getPointY(), font, color);
+                    BufferedImage image = enlargementBufferedImage(bufferedImage,0.2,BufferedImage.TYPE_3BYTE_BGR);
+                    mergeBufferedImage(newBufferedImage,image,200,500);
+
+                }
+                endTime = System.currentTimeMillis();
+                System.out.println(endTime - startTime);
+                try {
+                    ImageIO.write(newBufferedImage,"jpg",WsFileUtils.createFile("D:\\网页\\"+j+".jpg"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
     }
 
 
-  /*  public static BufferedImage createFontBuffImage(Integer width,Integer height){
-
-    }*/
 
 
     public static byte[] changeImageSize(InputStream inputStream, Integer size) {
@@ -159,7 +183,6 @@ public class WsImageUtils {
 
     public static void inciseImage(InputStream inputStream, Integer direction, Integer directionValue, String fileName, String path) {
         try {
-            List list = new ArrayList();
             BufferedImage bufferedImage = ImageIO.read(inputStream);
             int width = bufferedImage.getWidth();
             int height = bufferedImage.getHeight();
@@ -235,9 +258,9 @@ public class WsImageUtils {
      * @param enlargementTimes
      * @return
      */
-    public static BufferedImage enlargementBufferedImage(BufferedImage bufferedImage, Integer enlargementTimes, Integer bufferedImageType) {
-        Integer newWidth = bufferedImage.getWidth() * enlargementTimes;
-        Integer newHeight = bufferedImage.getHeight() * enlargementTimes;
+    public static BufferedImage enlargementBufferedImage(BufferedImage bufferedImage, double enlargementTimes, Integer bufferedImageType) {
+        int newWidth = (int) (bufferedImage.getWidth() * enlargementTimes);
+        int newHeight = (int) (bufferedImage.getHeight() * enlargementTimes);
         BufferedImage newBufferedImage = new BufferedImage(newWidth, newHeight, bufferedImageType);
         Graphics2D graphics2D = newBufferedImage.createGraphics();
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -292,11 +315,19 @@ public class WsImageUtils {
      */
     public static BufferedImage writeFontBufferedImage(BufferedImage bufferedImage, String str, Integer pointX, Integer pointY, Font font, Color color) {
         Graphics2D graphics2D = bufferedImage.createGraphics();
+        /*graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics2D.setColor(color);
+        graphics2D.setFont(font);
+        graphics2D.drawString(str, pointX, pointY);*/
+        writeFontBufferedImage(graphics2D,str,pointX,pointY,font,color);
+        return bufferedImage;
+    }
+
+    public static void writeFontBufferedImage(Graphics2D graphics2D, String str, Integer pointX, Integer pointY, Font font, Color color) {
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics2D.setColor(color);
         graphics2D.setFont(font);
         graphics2D.drawString(str, pointX, pointY);
-        return bufferedImage;
     }
 
 
@@ -408,7 +439,7 @@ public class WsImageUtils {
      */
     public static byte[] bufferedImageToByteArray(BufferedImage bufferedImage, String type) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte bytes[] = null;
+        byte[] bytes = null;
         try {
             ImageIO.write(bufferedImage, type, byteArrayOutputStream);
             bytes = byteArrayOutputStream.toByteArray();
@@ -427,5 +458,98 @@ public class WsImageUtils {
 
     }
 
+    /**
+     * 把字符串拆成行
+     * @param context
+     * @param fontMetrics
+     * @param width
+     * @param height
+     * @param type 1 右对齐 2 居中 3 左对齐
+     * @return
+     */
+    public static List<LineText> splitContext(String context,FontMetrics fontMetrics,int pointX,int pointY,int width,int height,Integer type){
+        context = new String(context.getBytes(StandardCharsets.UTF_8));
+        Font font = fontMetrics.getFont();
+        char[] chars = context.toCharArray();
+        List<LineText> returnLineList = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        int size = 0;
+        int nowHeight = font.getSize();
+        int charSize = 0;
+        for(char c:chars){
+            charSize = fontMetrics.charWidth(c);
+            size += charSize;
+            if(size >= width){
 
+                returnLineList.add(new LineText(pointX,width,pointY + nowHeight,sb.toString(),size - charSize,type));
+                sb = new StringBuilder();
+                sb.append(c);
+                nowHeight += font.getSize();
+                size = charSize;
+            }else {
+                sb.append(c);
+            }
+            if(nowHeight > height){
+                sb = new StringBuilder();
+                break;
+            }
+        }
+        if(sb.length() > 0){
+            returnLineList.add(new LineText(pointX,width,pointY + nowHeight,sb.toString(),size,type));
+        }
+        return returnLineList;
+
+    }
+
+    public static Color getColor(String value){
+        if(!value.startsWith("#")){
+            throw new RuntimeException("格式错误");
+        }
+        return new Color(Integer.parseInt(value.substring(1,3),16),Integer.parseInt(value.substring(3,5),16),Integer.parseInt(value.substring(5,7),16));
+    }
+
+    static class LineText{
+
+        private final Integer pointX;
+
+        private final Integer pointY;
+
+        private final String text;
+
+        private final Integer length;
+
+        public LineText(Integer pointX,Integer width,Integer height,String text,Integer length,Integer type){
+            this.text = text;
+            this.length = length;
+            this.pointY = height;
+            if(type.equals(1)){
+                this.pointX = pointX;
+            }else if(type.equals(2)){
+                this.pointX = (pointX+width - length)/2;
+            }else if(type.equals(3)){
+                this.pointX = pointX+width - length;
+            }else {
+                throw new RuntimeException("不支持的类型");
+            }
+        }
+
+        public String getText() {
+            return text;
+        }
+
+
+        public Integer getLength() {
+            return length;
+        }
+
+
+        public Integer getPointX() {
+            return pointX;
+        }
+
+        public Integer getPointY() {
+            return pointY;
+        }
+    }
 }
+
