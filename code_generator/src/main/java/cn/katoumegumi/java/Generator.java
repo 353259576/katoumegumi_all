@@ -1,23 +1,16 @@
 package cn.katoumegumi.java;
 
-import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsFileUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.HikariCPDataSourceFactory;
 import cn.katoumegumi.java.utils.FreeMarkerUtils;
 import cn.katoumegumi.java.utils.SqlTableToBeanUtils;
-import com.alibaba.fastjson.JSON;
-import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
 
 import javax.sql.DataSource;
-import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Driver;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +27,17 @@ public class Generator {
 
     private final String packageName;
 
+    private final String packagePath;
 
-    public Generator(String packageName,String exportPath){
+    private final String javaPath = "src/main/java";
+
+    private final String resourcePath = "src/main/resources";
+
+
+    public Generator(String packageName, String exportPath) {
         this.packageName = packageName;
         this.exportPath = exportPath;
+        this.packagePath = packageName.replaceAll("\\.", "/");
     }
 
     public static void main(String[] args) {
@@ -47,58 +47,109 @@ public class Generator {
         String driverClassName = "com.mysql.cj.jdbc.Driver";
         String dataBaseName = "wslx";
 
-        DataSource dataSource = HikariCPDataSourceFactory.getDataSource(url,userName,password,driverClassName);
+        DataSource dataSource = HikariCPDataSourceFactory.getDataSource(url, userName, password, driverClassName);
 
-        Generator generator = new Generator("com.ws.lx","D://网页");
-        SqlTableToBeanUtils sqlTableToBeanUtils = new SqlTableToBeanUtils(dataSource,dataBaseName);
-        List<SqlTableToBeanUtils.Table> tableList = sqlTableToBeanUtils.selectTables(null);
-        for(SqlTableToBeanUtils.Table table:tableList){
-            generator.createEntity(table);
-            generator.createService(table);
-            generator.createServiceImpl(table);
-            generator.createController(table);
-            generator.createMybatisMapper(table);
+        Generator generator = new Generator("cn.katoumegumi.java.lx", "D:\\project\\项目\\ws_all\\server_example");
+        SqlTableToBeanUtils sqlTableToBeanUtils = new SqlTableToBeanUtils(dataSource, dataBaseName, null);
+        List<SqlTableToBeanUtils.Table> tableList = sqlTableToBeanUtils.selectTables("ws_user");
+        for (SqlTableToBeanUtils.Table table : tableList) {
+            generator.createEntity(table, false, true, true);
+            generator.createService(table, 1);
+            generator.createServiceImpl(table, 1);
+            generator.createController(table, false,1);
+            generator.createMybatisMapper(table, true);
+            generator.createMybatisMapperJava(table, true);
         }
 
     }
 
-
-    public void createEntity(SqlTableToBeanUtils.Table table){
+    /**
+     * 实体类
+     *
+     * @param table
+     */
+    public void createEntity(SqlTableToBeanUtils.Table table, boolean enableSwagger, boolean enableMybatisPlus, boolean enableHibernate) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("enableSwagger", enableSwagger);
+        map.put("enableMybatisPlus", enableMybatisPlus);
+        map.put("enableHibernate", enableHibernate);
         Template template = freeMarkerUtils.getTemplate("Entity.ftl");
-        create("entity",table.getEntityName()+".java",template,table);
+        create(exportPath + "/" + javaPath + "/" + packagePath + "/entity", table.getEntityName() + ".java", template, table, map);
     }
 
-
-    public void createService(SqlTableToBeanUtils.Table table){
+    /**
+     * 服务接口
+     *
+     * @param table
+     * @param type  0 sqlUtils 1 mybatisPlus 2 mybatis
+     */
+    public void createService(SqlTableToBeanUtils.Table table, int type) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", type);
         Template template = freeMarkerUtils.getTemplate("Service.ftl");
-        create("service",table.getEntityName()+"Service.java",template,table);
+        create(exportPath + "/" + javaPath + "/" + packagePath + "/service", table.getEntityName() + "Service.java", template, table, map);
     }
 
-    public void createServiceImpl(SqlTableToBeanUtils.Table table){
+    /**
+     * 服务
+     *
+     * @param table
+     * @param type  0 sqlUtils 1 mybatisPlus 2 mybatis
+     */
+    public void createServiceImpl(SqlTableToBeanUtils.Table table, int type) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", type);
         Template template = freeMarkerUtils.getTemplate("ServiceImpl.ftl");
-        create("service/impl",table.getEntityName()+"ServiceImpl.java",template,table);
+        create(exportPath + "/" + javaPath + "/" + packagePath + "/service/impl", table.getEntityName() + "ServiceImpl.java", template, table, map);
     }
 
-    public void createController(SqlTableToBeanUtils.Table table){
+    /**
+     * 控制器
+     *
+     * @param table
+     */
+    public void createController(SqlTableToBeanUtils.Table table, boolean enableSwagger,int type) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("enableSwagger", enableSwagger);
+        map.put("type",1);
         Template template = freeMarkerUtils.getTemplate("Controller.ftl");
-        create("controller",table.getEntityName()+"Controller.java",template,table);
+        create(exportPath + "/" + javaPath + "/" + packagePath + "/controller", table.getEntityName() + "Controller.java", template, table, map);
     }
 
-    public void createMybatisMapper(SqlTableToBeanUtils.Table table){
+    /**
+     * mybatisMapper.xml
+     *
+     * @param table
+     */
+    public void createMybatisMapper(SqlTableToBeanUtils.Table table, boolean enableMybatisPlus) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("enableMybatisPlus", enableMybatisPlus);
         Template template = freeMarkerUtils.getTemplate("MybatisMapper.ftl");
-        create("mapper",table.getEntityName()+"Mapper.xml",template,table);
+        create(exportPath + "/" + resourcePath + "/mapper", table.getEntityName() + "Mapper.xml", template, table, map);
+    }
+
+    /**
+     * mybatisMapper.java
+     *
+     * @param table
+     */
+    public void createMybatisMapperJava(SqlTableToBeanUtils.Table table, boolean enableMybatisPlus) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("enableMybatisPlus", enableMybatisPlus);
+        Template template = freeMarkerUtils.getTemplate("MybatisMapperJava.ftl");
+        create(exportPath + "/" + javaPath + "/" + packagePath + "/mapper", table.getEntityName() + "Mapper.java", template, table, map);
     }
 
 
-    private void create(String path,String fileName,Template template, SqlTableToBeanUtils.Table table){
-        Map<String,Object> map = new HashMap<>();
-        map.put("packageName",packageName);
-        map.put("table",table);
+    private void create(String filePath, String fileName, Template template, SqlTableToBeanUtils.Table table, Map<String, Object> map) {
+        //Map<String,Object> map = new HashMap<>();
+        map.put("packageName", packageName);
+        map.put("table", table);
         try {
             try {
-                File file = WsFileUtils.createFile(exportPath+"/"+packageName.replaceAll("\\.","/") +"/"+path+"/"+fileName);
+                File file = WsFileUtils.createFile(filePath + "/" + fileName);
                 FileWriter writer = new FileWriter(file);
-                template.process(map,writer);
+                template.process(map, writer);
                 writer.close();
             } catch (IOException e) {
                 e.printStackTrace();

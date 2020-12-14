@@ -1270,4 +1270,36 @@ public class LeetCodeTest {
     }
 
 
+    /**
+     * 649. Dota2 参议院
+     * @param senate
+     * @return
+     */
+    public static String predictPartyVictory(String senate) {
+        int n = senate.length();
+        Queue<Integer> rq = new ArrayDeque<>(senate.length());
+        Queue<Integer> dq = new ArrayDeque<>(senate.length());
+        char c;
+        for(int i = 0; i < senate.length(); i++) {
+            c = senate.charAt(i);
+            if (c == 'R') {
+                rq.offer(i);
+            } else {
+                dq.offer(i);
+            }
+        }
+        int rIndex;
+        int dIndex;
+        while (!rq.isEmpty() && !dq.isEmpty()){
+            rIndex = rq.poll();
+            dIndex = dq.poll();
+            if(rIndex > dIndex){
+
+            }
+        }
+
+
+
+    }
+
 }

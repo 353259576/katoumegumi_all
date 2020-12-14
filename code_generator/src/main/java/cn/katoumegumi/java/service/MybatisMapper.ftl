@@ -1,7 +1,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="${packageName}.mapper.${table.entityName}Mapper">
 
-
     <resultMap id="${table.firstLowerEntityName}BaseResultMap" type="${packageName}.model.${table.entityName}">
         <id property="${table.pkColumn.beanFieldName}" column="${table.pkColumn.columnName}"/>
         <#list table.columnList as column>
@@ -18,6 +17,7 @@
         </#list>
     </sql>
 
+<#if enableMybatisPlus == false>
     <select id="select${table.entityName}List" resultMap="${table.firstLowerEntityName}BaseResultMap">
         <include refid="base${table.entityName}Sql"/>
         from ${table.tableName}
@@ -57,5 +57,5 @@
         where
         ${table.pkColumn.columnName} = #\{${table.pkColumn.beanFieldName}\}
     </update>
-
+</#if>
 </mapper>

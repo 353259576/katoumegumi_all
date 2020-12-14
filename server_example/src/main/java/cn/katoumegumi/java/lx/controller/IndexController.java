@@ -25,7 +25,9 @@ import cn.katoumegumi.java.sql.entity.SelectCallable;
 import cn.katoumegumi.java.utils.PageConvertUtils;
 import cn.katoumegumi.java.vertx.sql.utils.SqlUtils;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -171,22 +173,10 @@ public class IndexController implements IndexService {
         return "你好啊";
     }
 
-    public void insert(List<User> userList){
-        List<User> insert = new ArrayList<>();
-        List<User> update = new ArrayList<>();
-        for(User user:userList){
-            if(user.getId() == null){
-                insert.add(user);
-            }else {
-                update.add(user);
-            }
-        }
-        if(!CollectionUtils.isEmpty(insert)){
-            jdbcUtils.insert(insert);
-        }
-        if(!CollectionUtils.isEmpty(update)){
-            jdbcUtils.updateBatchByT(update);
-        }
+    public static void main(String[] args) {
+        LambdaQueryWrapper<User> queryWrapper = Wrappers.lambdaQuery(User.class).eq(User::getName,"你好");
+
+        System.out.println(queryWrapper.getSqlSelect());
     }
 
 }
