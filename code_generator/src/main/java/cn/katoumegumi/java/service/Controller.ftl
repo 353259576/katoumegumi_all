@@ -82,8 +82,6 @@ public class ${table.entityName}Controller {
         Wrapper<${table.entityName}> wrapper = Wrappers.lambdaUpdate(${table.entityName}.class);
         IPage<${table.entityName}> iPage = ${table.firstLowerEntityName}Service.selectPage(page,wrapper);
 </#if>
-
-
         return null;
     }
 

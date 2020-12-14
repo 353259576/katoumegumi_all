@@ -54,9 +54,9 @@ public class Generator {
         List<SqlTableToBeanUtils.Table> tableList = sqlTableToBeanUtils.selectTables("ws_user");
         for (SqlTableToBeanUtils.Table table : tableList) {
             generator.createEntity(table, false, true, true);
-            generator.createService(table, 1);
-            generator.createServiceImpl(table, 1);
-            generator.createController(table, false,1);
+            generator.createService(table, 0);
+            generator.createServiceImpl(table, 0);
+            generator.createController(table, false,0);
             generator.createMybatisMapper(table, true);
             generator.createMybatisMapperJava(table, true);
         }
@@ -111,7 +111,7 @@ public class Generator {
     public void createController(SqlTableToBeanUtils.Table table, boolean enableSwagger,int type) {
         Map<String, Object> map = new HashMap<>();
         map.put("enableSwagger", enableSwagger);
-        map.put("type",1);
+        map.put("type",type);
         Template template = freeMarkerUtils.getTemplate("Controller.ftl");
         create(exportPath + "/" + javaPath + "/" + packagePath + "/controller", table.getEntityName() + "Controller.java", template, table, map);
     }
