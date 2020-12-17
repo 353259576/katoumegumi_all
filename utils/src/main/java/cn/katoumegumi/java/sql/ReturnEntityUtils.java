@@ -23,7 +23,6 @@ public class ReturnEntityUtils {
      * 获取id对应的returnEntity
      *
      * @param idReturnEntityMap
-     * @param returnEntityMap
      * @param returnEntity
      * @return
      */
@@ -62,14 +61,15 @@ public class ReturnEntityUtils {
         values = returnEntity.getIdValueList();
         if(values != null) {
             int length = values.length;
+            Object value;
+            FieldColumnRelation fieldColumnRelation;
             for (int i = 0; i < length; ++i) {
-
-                Object value = values[i];
+                value = values[i];
                 if (value != null) {
 
                     haveValue = true;
 
-                    FieldColumnRelation fieldColumnRelation = list.get(i);
+                    fieldColumnRelation = list.get(i);
                     try {
                         if (value instanceof byte[]) {
                             value = new String((byte[]) value);
@@ -88,14 +88,15 @@ public class ReturnEntityUtils {
         values = returnEntity.getColumnValueList();
         if(values != null) {
             int length = values.length;
+            Object value;
+            FieldColumnRelation fieldColumnRelation;
             for (int i = 0; i < length; ++i) {
 
-                Object value = values[i];
+                value = values[i];
                 if (value != null) {
 
                     haveValue = true;
-
-                    FieldColumnRelation fieldColumnRelation = list.get(i);
+                    fieldColumnRelation = list.get(i);
                     try {
                         if (value instanceof byte[]) {
                             value = new String((byte[]) value);
@@ -133,25 +134,31 @@ public class ReturnEntityUtils {
             List<FieldJoinClass> fieldJoinClassList = mapper.getFieldJoinClasses();
             //int length = fieldJoinClassList.size();
             Object o = returnEntity.getValue();
+            String nextTableName;
+            ReturnEntity nextEntity;
+            ReturnEntity entity;
+            Field field;
+            Object value;
+            List list;
             for (FieldJoinClass fieldJoinClass : fieldJoinClassList) {
-                String nextTableName = tableName + "." + fieldJoinClass.getNickName();
-                ReturnEntity nextEntity = returnEntityMap.get(nextTableName);
+                nextTableName = tableName + "." + fieldJoinClass.getNickName();
+                nextEntity = returnEntityMap.get(nextTableName);
                 if (nextEntity != null) {
                     nextEntity.setParentReturnEntity(returnEntity);
-                    ReturnEntity entity = getReturnEntity(idReturnEntityMap, nextEntity);
+                    entity = getReturnEntity(idReturnEntityMap, nextEntity);
                     if (entity.getValue() == null) {
                         continue;
                     }
                     if (fieldJoinClass.isArray()) {
                         if (nextEntity == entity) {
-                            Field field = fieldJoinClass.getField();
+                            field = fieldJoinClass.getField();
                             try {
-                                Object value = field.get(o);
+                                value = field.get(o);
                                 if (value == null) {
-                                    List list = new ArrayList();
+                                    list = new ArrayList();
                                     list.add(entity.getValue());
                                     field.set(o, list);
-
+                                    list = null;
                                 } else {
                                     if (value instanceof Collection) {
                                         ((Collection) value).add(entity.getValue());
@@ -163,7 +170,7 @@ public class ReturnEntityUtils {
                         }
                     } else {
                         if (nextEntity == entity) {
-                            Field field = fieldJoinClass.getField();
+                            field = fieldJoinClass.getField();
                             try {
                                 field.set(o, entity.getValue());
                             } catch (IllegalAccessException e) {
