@@ -278,31 +278,23 @@ public class SQLModelUtils {
                         }
                     }
                     selectSql = new StringBuilder();
-                    //selectSql.append(createJoinSql(tableName, tableMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), joinType));
-
                     if (tableRelation.getConditionSearchList() != null) {
                         List<String> whereStrList = searchListWhereSqlProcessor(tableRelation.getConditionSearchList(), mainClass.getSimpleName());
                         if (WsListUtils.isNotEmpty(whereStrList)) {
                             selectSql.append(" AND ").append(WsStringUtils.jointListString(whereStrList, " AND "));
                         }
                     }
-                    //joinTableList.add(selectSql.toString());
-                    TableEntity tableEntity = createJoinSql(tableName, tableMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), tableRelation.getJoinType(), selectSql.toString());
-                    joinTableList.add(tableEntity);
+                    joinTableList.add(createJoinSql(tableName, tableMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), tableRelation.getJoinType(), selectSql.toString()));
 
                 } else {
                     selectSql = new StringBuilder();
-                    //selectSql.append(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), joinType));
-
                     if (tableRelation.getConditionSearchList() != null) {
                         List<String> whereStrList = searchListWhereSqlProcessor(tableRelation.getConditionSearchList(), mainClass.getSimpleName());
                         if (WsListUtils.isNotEmpty(whereStrList)) {
                             selectSql.append(" AND ").append(WsStringUtils.jointListString(whereStrList, " AND "));
                         }
                     }
-                    //joinTableList.add(selectSql.toString());
-                    TableEntity tableEntity = createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), tableRelation.getJoinType(), selectSql.toString());
-                    joinTableList.add(tableEntity);
+                    joinTableList.add(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), tableRelation.getJoinType(), selectSql.toString()));
 
                 }
             }
@@ -702,21 +694,7 @@ public class SQLModelUtils {
                 guardKeyword(sJoinTableNickName) +
                 '.' +
                 guardKeyword(joinColumn) + condition;
-        TableEntity tableEntity = new TableEntity(joinType, joinTableName, sJoinTableNickName, c);
-        return tableEntity;
-
-        /*return ' ' + joinType
-                + guardKeyword(joinTableName) +
-                ' ' +
-                guardKeyword(sJoinTableNickName) +
-                " on " +
-                guardKeyword(sTableNickName) +
-                '.' +
-                guardKeyword(tableColumn) +
-                " = " +
-                guardKeyword(sJoinTableNickName) +
-                '.' +
-                guardKeyword(joinColumn);*/
+        return new TableEntity(joinType, joinTableName, sJoinTableNickName, c);
     }
 
     //创建查询语句
@@ -741,9 +719,7 @@ public class SQLModelUtils {
         String tableName = fieldColumnRelationMapper.getTableName();
         String tableNickName = fieldColumnRelationMapper.getNickName();
         translateNameUtils.addLocalMapper(tableNickName, fieldColumnRelationMapper);
-        //final List<String> joinString = sqlEntity.getTableNameList();
         final List<TableEntity> joinString = sqlEntity.getTableNameList();
-        //joinString.add(" from " + guardKeyword(tableName) + ' ' + guardKeyword(translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName())));
         joinString.add(new TableEntity(TableJoinType.FROM, tableName, translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName()), null));
         List<ColumnBaseEntity> list = null;
         if (WsListUtils.isEmpty(mySearchList.getColumnNameList())) {
@@ -795,27 +771,14 @@ public class SQLModelUtils {
 
                     FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
                     translateNameUtils.addLocalMapper(lastTableNickName, mapper);
-                    /*String joinType;
-                    if (fieldJoinClass.getJoinType() != null) {
-                        joinType = fieldJoinClass.getJoinType().getValue();
-                    } else {
-                        joinType = TableJoinType.INNER_JOIN.getValue();
-                    }*/
-
-
-                    //StringBuilder joinStr = new StringBuilder(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn(), joinType));
                     StringBuilder joinStr = new StringBuilder();
-
-
                     if (fieldJoinClass.getConditionSearchList() != null) {
                         List<String> whereStrList = searchListWhereSqlProcessor(fieldJoinClass.getConditionSearchList(), mainClass.getSimpleName());
                         if (WsListUtils.isNotEmpty(whereStrList)) {
                             joinStr.append(" AND ").append(WsStringUtils.jointListString(whereStrList, " AND "));
                         }
                     }
-                    TableEntity tableEntity = createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn(), fieldJoinClass.getJoinType(), joinStr.toString());
-                    //joinString.add(joinStr.toString());
-                    joinString.add(tableEntity);
+                    joinString.add(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn(), fieldJoinClass.getJoinType(), joinStr.toString()));
                     selectJoin(lastTableNickName, selectString, joinString, mapper);
                 }
             }
