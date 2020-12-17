@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.sql;
+package cn.katoumegumi.java.sql.common;
 
 /**
  * @author 10480

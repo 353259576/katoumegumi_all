@@ -31,9 +31,7 @@ import ${cl.getName()};
 @Data
 public class ${table.entityName} implements Serializable {
 
-
     private static final long serialVersionUID = 1L;
-
 
     /**
     * ${table.pkColumn.columnRemark}
@@ -59,13 +57,12 @@ public class ${table.entityName} implements Serializable {
     </#if>
     private ${table.pkColumn.columnClass.getSimpleName()} ${table.pkColumn.beanFieldName};
 
-
 <#list table.columnList as column>
+    <#if column != table.pkColumn>
 
     /**
     * ${column.columnRemark}
     */
-    <#if column != table.pkColumn>
         <#if enableMybatisPlus == true>
     @Column(name = "${column.columnName}")
         </#if>
@@ -77,7 +74,5 @@ public class ${table.entityName} implements Serializable {
         </#if>
     private ${column.columnClass.getSimpleName()} ${column.beanFieldName};
     </#if>
-
-
 </#list>
 }

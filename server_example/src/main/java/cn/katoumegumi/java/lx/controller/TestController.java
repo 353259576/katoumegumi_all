@@ -57,7 +57,7 @@ public class TestController {
         //new SQLModelUtils(searchList).select();
 
         WsDateUtils.getExecutionTime.accept(()->{
-            for(int i = 0; i < 1; i++) {
+            for(int i = 0; i < 10000; i++) {
                 MySearchList mySearchList = MySearchList.create(User.class)
                         .setAlias("u")
                         .setSqlLimit(sqlLimit -> sqlLimit.setOffset(0).setSize(10))
@@ -73,7 +73,7 @@ public class TestController {
                         .eq("userDetails.userDetailsRemake", UserDetailsRemake::getId, "1").sort(User::getName, "desc");
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectSqlEntity entity = sqlModelUtils.select();
-                System.out.println(entity.getSelectSql());
+                //System.out.println(entity.getSelectSql());
             }
         });
 

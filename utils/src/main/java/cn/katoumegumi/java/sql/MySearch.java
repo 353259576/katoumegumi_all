@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.sql;
 
+import cn.katoumegumi.java.sql.common.SqlOperator;
+
 /**
  * 查询条件
  * @author ws

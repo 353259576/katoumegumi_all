@@ -508,6 +508,11 @@ public class WsImageUtils {
         return new Color(Integer.parseInt(value.substring(1,3),16),Integer.parseInt(value.substring(3,5),16),Integer.parseInt(value.substring(5,7),16));
     }
 
+
+    public static FontMetrics getFontMetrics(Font font){
+        return J_LABEL.getFontMetrics(font);
+    }
+
     static class LineText{
 
         private final Integer pointX;

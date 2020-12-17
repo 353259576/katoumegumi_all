@@ -1,11 +1,11 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.*;
-import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
+import cn.katoumegumi.java.sql.common.SqlOperator;
+import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
-import javax.persistence.criteria.JoinType;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -29,7 +29,7 @@ public class MySearchList {
     private Class<?> mainClass;
     private String alias;
 
-    private JoinType defaultJoinType = JoinType.INNER;
+    private TableJoinType defaultJoinType = TableJoinType.INNER_JOIN;
 
     private SqlLimit sqlLimit;
 
@@ -1157,7 +1157,7 @@ public class MySearchList {
      * @param <T>
      * @return
      */
-    public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn, JoinType joinType) {
+    public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn, TableJoinType joinType) {
         TableRelation tableRelation = new TableRelation();
         tableRelation.setJoinTableClass(joinTableClass);
         tableRelation.setTableNickName(tableNickName);
@@ -1170,7 +1170,7 @@ public class MySearchList {
     }
 
     public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.INNER);
+        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, TableJoinType.INNER_JOIN);
     }
 
     public <T> MySearchList join(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
@@ -1178,27 +1178,27 @@ public class MySearchList {
     }
 
     public <T> MySearchList leftJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.LEFT);
+        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn, TableJoinType.LEFT_JOIN);
     }
 
     public <T> MySearchList leftJoin(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.LEFT);
+        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, TableJoinType.LEFT_JOIN);
     }
 
     public <T> MySearchList innerJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.INNER);
+        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn, TableJoinType.INNER_JOIN);
     }
 
     public <T> MySearchList innerJoin(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.INNER);
+        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, TableJoinType.INNER_JOIN);
     }
 
     public <T> MySearchList rightJoin(Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.RIGHT);
+        return join(null, joinTableClass, joinTableNickName, tableColumn, joinColumn, TableJoinType.RIGHT_JOIN);
     }
 
     public <T> MySearchList rightJoin(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn) {
-        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, JoinType.RIGHT);
+        return join(tableNickName, joinTableClass, joinTableNickName, tableColumn, joinColumn, TableJoinType.RIGHT_JOIN);
     }
 
     public List<TableRelation> getJoins() {
@@ -1218,11 +1218,11 @@ public class MySearchList {
         return orderSearches;
     }
 
-    public JoinType getDefaultJoinType() {
+    public TableJoinType getDefaultJoinType() {
         return defaultJoinType;
     }
 
-    public MySearchList setDefaultJoinType(JoinType defaultJoinType) {
+    public MySearchList setDefaultJoinType(TableJoinType defaultJoinType) {
         this.defaultJoinType = defaultJoinType;
         return this;
     }
@@ -1234,7 +1234,7 @@ public class MySearchList {
      */
     public TableRelation innerJoin(Class<?> tClass){
         TableRelation tableRelation = new TableRelation(this);
-        tableRelation.setJoinType(JoinType.INNER);
+        tableRelation.setJoinType(TableJoinType.INNER_JOIN);
         tableRelation.setJoinTableClass(tClass);
         tableRelation.setJoinTableNickName(tClass.getSimpleName());
         return tableRelation;
@@ -1247,7 +1247,7 @@ public class MySearchList {
      */
     public TableRelation leftJoin(Class<?> tClass){
         TableRelation tableRelation = new TableRelation(this);
-        tableRelation.setJoinType(JoinType.LEFT);
+        tableRelation.setJoinType(TableJoinType.LEFT_JOIN);
         tableRelation.setJoinTableClass(tClass);
         tableRelation.setJoinTableNickName(tClass.getSimpleName());
         return tableRelation;
@@ -1260,7 +1260,7 @@ public class MySearchList {
      */
     public TableRelation rightJoin(Class<?> tClass){
         TableRelation tableRelation = new TableRelation(this);
-        tableRelation.setJoinType(JoinType.RIGHT);
+        tableRelation.setJoinType(TableJoinType.RIGHT_JOIN);
         tableRelation.setJoinTableClass(tClass);
         tableRelation.setJoinTableNickName(tClass.getSimpleName());
         return tableRelation;
@@ -1290,7 +1290,7 @@ public class MySearchList {
      */
     public MySearchList innerJoin(Class<?> tClass,Consumer<TableRelation> consumer){
         TableRelation tableRelation = join(tClass,consumer);
-        tableRelation.setJoinType(JoinType.INNER);
+        tableRelation.setJoinType(TableJoinType.INNER_JOIN);
         return this;
     }
 
@@ -1301,7 +1301,7 @@ public class MySearchList {
      */
     public MySearchList leftJoin(Class<?> tClass,Consumer<TableRelation> consumer){
         TableRelation tableRelation = join(tClass,consumer);
-        tableRelation.setJoinType(JoinType.LEFT);
+        tableRelation.setJoinType(TableJoinType.LEFT_JOIN);
         return this;
     }
 
@@ -1312,7 +1312,7 @@ public class MySearchList {
      */
     public MySearchList rightJoin(Class<?> tClass,Consumer<TableRelation> consumer){
         TableRelation tableRelation = join(tClass,consumer);
-        tableRelation.setJoinType(JoinType.RIGHT);
+        tableRelation.setJoinType(TableJoinType.RIGHT_JOIN);
         return this;
     }
 

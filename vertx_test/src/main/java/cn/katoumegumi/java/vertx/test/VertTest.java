@@ -1,14 +1,22 @@
 package cn.katoumegumi.java.vertx.test;
 
 
+import com.alibaba.fastjson.JSON;
+import io.vertx.core.*;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.web.client.HttpRequest;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
+
 public class VertTest {
 
 
     public static void main(String[] args) {
-        /*VertxOptions vertxOptions = new VertxOptions();
+        VertxOptions vertxOptions = new VertxOptions();
         vertxOptions.setWorkerPoolSize(50);
-        Vertx vertx = Vertx.vertx(vertxOptions);*/
-        /*WebClient webClient = WebClient.create(vertx);
+        Vertx vertx = Vertx.vertx(vertxOptions);
+        WebClient webClient = WebClient.create(vertx);
         HttpRequest<Buffer> httpRequest = webClient.get(443,"www.baidu.com","/");
         httpRequest.method(HttpMethod.GET);
         httpRequest.ssl(true);
@@ -29,7 +37,7 @@ public class VertTest {
                 }
             }
         });
-        webClient.close();*/
+        webClient.close();
 
         //HttpServerOptions httpServerOptions = new HttpServerOptions();
         /*HttpServer httpServer = vertx.createHttpServer();

@@ -172,8 +172,6 @@ public class WsVertxClient {
                 return HttpMethod.DELETE;
             case "HEAD":
                 return HttpMethod.HEAD;
-            case "OTHER":
-                return HttpMethod.OTHER;
             case "OPTIONS":
                 return HttpMethod.OPTIONS;
             case "PATCH":

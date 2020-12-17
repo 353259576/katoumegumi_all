@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.entity;
 
 import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.sql.common.SqlType;
+import cn.katoumegumi.java.sql.SQLModelUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
  */
 public class SqlEntity {
 
-    private SqlType sqlType;
-
     /**
      * 需要查询的列的信息
      */
@@ -23,7 +21,8 @@ public class SqlEntity {
     /**
      * 查询的表的数据
      */
-    private final List<String> tableNameList = new ArrayList<>();
+    //private final List<String> tableNameList = new ArrayList<>();
+    private final List<TableEntity> tableNameList = new ArrayList<>();
 
     /**
      * 查询条件数据
@@ -51,23 +50,18 @@ public class SqlEntity {
     private String subjoin;
 
 
-    public SqlType getSqlType() {
-        return sqlType;
-    }
-
-    public SqlEntity setSqlType(SqlType sqlType) {
-        this.sqlType = sqlType;
-        return this;
-    }
 
 
-    public List<String> getTableNameList() {
+/*    public List<String> getTableNameList() {
         return tableNameList;
-    }
+    }*/
 
 
     public List<String> getConditionList() {
         return conditionList;
+    }
+    public List<TableEntity> getTableNameList() {
+        return tableNameList;
     }
 
 
@@ -81,7 +75,17 @@ public class SqlEntity {
 
     public String getTableStr() {
         if(tableStr == null){
-            tableStr = String.join(" ",tableNameList);
+            StringBuilder sb = new StringBuilder();
+            for(TableEntity tableEntity:tableNameList){
+                sb.append(tableEntity.getTableJoinType().getValue()).append(SQLModelUtils.guardKeyword(tableEntity.getTableName()))
+                        .append(' ')
+                        .append(SQLModelUtils.guardKeyword(tableEntity.getAlias()));
+                if(tableEntity.getCondition() != null){
+                    sb.append(tableEntity.getCondition());
+                }
+            }
+            //tableStr = String.join(" ",tableNameList);
+            tableStr = sb.toString();
         }
         return tableStr;
     }

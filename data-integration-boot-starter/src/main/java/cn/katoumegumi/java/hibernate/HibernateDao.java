@@ -3,11 +3,10 @@ package cn.katoumegumi.java.hibernate;
 import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.SqlOperator;
+import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.*;
@@ -241,13 +240,13 @@ public class HibernateDao {
     public Conjunction myDetachedCriteriaCreate(MySearchList mySearchList, Class clazz, boolean isAnd, DetachedCriteria detachedCriteria, Map<String, DetachedCriteria> nameMap) {
         JoinType joinType;
         switch (mySearchList.getDefaultJoinType()) {
-            case INNER:
+            case INNER_JOIN:
                 joinType = JoinType.INNER_JOIN;
                 break;
-            case LEFT:
+            case LEFT_JOIN:
                 joinType = JoinType.LEFT_OUTER_JOIN;
                 break;
-            case RIGHT:
+            case RIGHT_JOIN:
                 joinType = JoinType.RIGHT_OUTER_JOIN;
                 break;
             default:

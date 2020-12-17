@@ -3,6 +3,7 @@ package cn.katoumegumi.java.sql;
 import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.common.TableJoinType;
 
 import javax.persistence.criteria.JoinType;
 import java.util.function.Consumer;
@@ -15,7 +16,7 @@ public class TableRelation {
 
     private MySearchList mySearchList;
 
-    private JoinType joinType;
+    private TableJoinType joinType;
 
     private Class<?> joinTableClass;
 
@@ -49,11 +50,11 @@ public class TableRelation {
         this.mySearchList = mySearchList;
     }
 
-    public JoinType getJoinType() {
+    public TableJoinType getJoinType() {
         return joinType;
     }
 
-    public TableRelation setJoinType(JoinType joinType) {
+    public TableRelation setJoinType(TableJoinType joinType) {
         this.joinType = joinType;
         return this;
     }

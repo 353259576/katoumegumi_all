@@ -5,7 +5,7 @@ import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.SqlOperator;
+import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.TableRelation;
 import org.springframework.data.jpa.domain.Specification;
 

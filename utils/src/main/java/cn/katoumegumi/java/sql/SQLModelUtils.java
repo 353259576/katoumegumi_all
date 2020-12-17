@@ -1,13 +1,16 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsListUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.common.SqlOperator;
+import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -45,10 +48,8 @@ public class SQLModelUtils {
 
     /**
      * 表面和列名转换
-      */
+     */
     private final TranslateNameUtils translateNameUtils;
-
-
 
 
     /**
@@ -66,11 +67,11 @@ public class SQLModelUtils {
      */
     private SqlEntity cacheSqlEntity;
 
-    public SQLModelUtils(MySearchList mySearchList){
-        this(mySearchList,new TranslateNameUtils());
+    public SQLModelUtils(MySearchList mySearchList) {
+        this(mySearchList, new TranslateNameUtils());
     }
 
-    public SQLModelUtils(MySearchList mySearchList,TranslateNameUtils translateNameUtils) {
+    public SQLModelUtils(MySearchList mySearchList, TranslateNameUtils translateNameUtils) {
         this.mySearchList = mySearchList;
         this.translateNameUtils = translateNameUtils;
         mainClass = mySearchList.getMainClass();
@@ -103,7 +104,7 @@ public class SQLModelUtils {
                 joinTableName = translateNameUtils.getNoPrefixTableName(joinTableName);
                 relation.setJoinTableNickName(joinTableName);
                 joinTableName = prefix + '.' + joinTableName;
-                if(WsStringUtils.isBlank(relation.getAlias())){
+                if (WsStringUtils.isBlank(relation.getAlias())) {
                     relation.setAlias(translateNameUtils.createAbbreviation(joinTableName));
                 }
                 translateNameUtils.setAbbreviation(joinTableName, relation.getAlias());
@@ -122,6 +123,7 @@ public class SQLModelUtils {
 
     /**
      * 预防数据库关键词
+     *
      * @param keyword
      * @return
      */
@@ -215,7 +217,8 @@ public class SQLModelUtils {
         FieldColumnRelationMapper fieldColumnRelationMapper;
         if (cacheSqlEntity == null) {
             SqlEntity sqlEntity = modelToSqlSelect(mySearchList.getMainClass());
-            List<String> joinTableList = sqlEntity.getTableNameList();
+            //List<String> joinTableList = sqlEntity.getTableNameList();
+            List<TableEntity> joinTableList = sqlEntity.getTableNameList();
             List<TableRelation> list = mySearchList.getJoins();
             fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
             String baseTableName = fieldColumnRelationMapper.getNickName();
@@ -250,25 +253,12 @@ public class SQLModelUtils {
                     }
                 }
 
-                String joinType;
+                /*String joinType;
                 if (tableRelation.getJoinType() != null) {
-                    switch (tableRelation.getJoinType()) {
-                        case LEFT:
-                            joinType = " LEFT JOIN ";
-                            break;
-                        case INNER:
-                            joinType = " INNER JOIN ";
-                            break;
-                        case RIGHT:
-                            joinType = " RIGHT JOIN ";
-                            break;
-                        default:
-                            joinType = " INNER JOIN ";
-                            break;
-                    }
+                    joinType = tableRelation.getJoinType().getValue();
                 } else {
-                    joinType = " INNER JOIN ";
-                }
+                    joinType = TableJoinType.INNER_JOIN.getValue();
+                }*/
                 if (WsStringUtils.isNotBlank(tableRelation.getTableNickName())) {
                     FieldColumnRelationMapper tableMapper = null;
                     if (tableRelation.getTableNickName().startsWith(baseTableName)) {
@@ -288,7 +278,7 @@ public class SQLModelUtils {
                         }
                     }
                     selectSql = new StringBuilder();
-                    selectSql.append(createJoinSql(tableName, tableMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), joinType));
+                    //selectSql.append(createJoinSql(tableName, tableMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), joinType));
 
                     if (tableRelation.getConditionSearchList() != null) {
                         List<String> whereStrList = searchListWhereSqlProcessor(tableRelation.getConditionSearchList(), mainClass.getSimpleName());
@@ -296,11 +286,13 @@ public class SQLModelUtils {
                             selectSql.append(" AND ").append(WsStringUtils.jointListString(whereStrList, " AND "));
                         }
                     }
-                    joinTableList.add(selectSql.toString());
+                    //joinTableList.add(selectSql.toString());
+                    TableEntity tableEntity = createJoinSql(tableName, tableMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), tableRelation.getJoinType(), selectSql.toString());
+                    joinTableList.add(tableEntity);
 
                 } else {
                     selectSql = new StringBuilder();
-                    selectSql.append(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), joinType));
+                    //selectSql.append(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), joinType));
 
                     if (tableRelation.getConditionSearchList() != null) {
                         List<String> whereStrList = searchListWhereSqlProcessor(tableRelation.getConditionSearchList(), mainClass.getSimpleName());
@@ -308,7 +300,9 @@ public class SQLModelUtils {
                             selectSql.append(" AND ").append(WsStringUtils.jointListString(whereStrList, " AND "));
                         }
                     }
-                    joinTableList.add(selectSql.toString());
+                    //joinTableList.add(selectSql.toString());
+                    TableEntity tableEntity = createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), tableRelation.getJoinType(), selectSql.toString());
+                    joinTableList.add(tableEntity);
 
                 }
             }
@@ -434,16 +428,16 @@ public class SQLModelUtils {
             case NIN:
                 tableColumn.append(" not");
             case IN:
-                if(mySearch.getValue() instanceof MySearchList){
-                    SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList)mySearch.getValue(),translateNameUtils);
+                if (mySearch.getValue() instanceof MySearchList) {
+                    SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) mySearch.getValue(), translateNameUtils);
                     SelectSqlEntity entity = sqlModelUtils.select();
                     tableColumn.append(" in(");
                     tableColumn.append(entity.getSelectSql());
                     tableColumn.append(")");
-                    if(WsListUtils.isNotEmpty(entity.getValueList())){
+                    if (WsListUtils.isNotEmpty(entity.getValueList())) {
                         baseWhereValueList.addAll(entity.getValueList());
                     }
-                }else {
+                } else {
                     if (WsFieldUtils.classCompare(mySearch.getValue().getClass(), Collection.class)) {
                         Collection<?> collection = (Collection<?>) mySearch.getValue();
                         Iterator<?> iterator = collection.iterator();
@@ -513,14 +507,14 @@ public class SQLModelUtils {
                 tableColumn.append(" not");
             case EXISTS:
                 tableColumn.append(" exists (");
-                if(mySearch.getValue() instanceof MySearchList){
-                    SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList)mySearch.getValue(),translateNameUtils);
+                if (mySearch.getValue() instanceof MySearchList) {
+                    SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) mySearch.getValue(), translateNameUtils);
                     SelectSqlEntity entity = sqlModelUtils.select();
                     tableColumn.append(entity.getSelectSql());
-                    if(WsListUtils.isNotEmpty(entity.getValueList())){
+                    if (WsListUtils.isNotEmpty(entity.getValueList())) {
                         baseWhereValueList.addAll(entity.getValueList());
                     }
-                }else {
+                } else {
                     tableColumn.append(translateTableNickName(prefix, mySearch.getFieldName()));
                     if (mySearch.getValue() != null) {
                         if (mySearch.getValue() instanceof Collection) {
@@ -535,8 +529,6 @@ public class SQLModelUtils {
                     }
                 }
                 tableColumn.append(") ");
-
-
 
 
                 //tableColumn.append(mySearch.getValue());
@@ -698,11 +690,22 @@ public class SQLModelUtils {
      * @param joinType          连接类型
      * @return
      */
-    private String createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn, String joinType) {
+    private TableEntity createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn, TableJoinType joinType, String condition) {
 
         String sJoinTableNickName = translateNameUtils.getAbbreviation(joinTableNickName);
         String sTableNickName = translateNameUtils.getAbbreviation(tableNickName);
-        return ' ' + joinType
+        String c = " on " +
+                guardKeyword(sTableNickName) +
+                '.' +
+                guardKeyword(tableColumn) +
+                " = " +
+                guardKeyword(sJoinTableNickName) +
+                '.' +
+                guardKeyword(joinColumn) + condition;
+        TableEntity tableEntity = new TableEntity(joinType, joinTableName, sJoinTableNickName, c);
+        return tableEntity;
+
+        /*return ' ' + joinType
                 + guardKeyword(joinTableName) +
                 ' ' +
                 guardKeyword(sJoinTableNickName) +
@@ -713,7 +716,7 @@ public class SQLModelUtils {
                 " = " +
                 guardKeyword(sJoinTableNickName) +
                 '.' +
-                guardKeyword(joinColumn);
+                guardKeyword(joinColumn);*/
     }
 
     //创建查询语句
@@ -738,17 +741,19 @@ public class SQLModelUtils {
         String tableName = fieldColumnRelationMapper.getTableName();
         String tableNickName = fieldColumnRelationMapper.getNickName();
         translateNameUtils.addLocalMapper(tableNickName, fieldColumnRelationMapper);
-        final List<String> joinString = sqlEntity.getTableNameList();
-        joinString.add(" from " + guardKeyword(tableName) + ' ' + guardKeyword(translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName())));
+        //final List<String> joinString = sqlEntity.getTableNameList();
+        final List<TableEntity> joinString = sqlEntity.getTableNameList();
+        //joinString.add(" from " + guardKeyword(tableName) + ' ' + guardKeyword(translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName())));
+        joinString.add(new TableEntity(TableJoinType.FROM, tableName, translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName()), null));
         List<ColumnBaseEntity> list = null;
-        if(WsListUtils.isEmpty(mySearchList.getColumnNameList())){
+        if (WsListUtils.isEmpty(mySearchList.getColumnNameList())) {
             list = sqlEntity.getColumnList();
         }
         selectJoin(tableNickName, list, joinString, fieldColumnRelationMapper);
-        if(list == null){
+        if (list == null) {
             list = sqlEntity.getColumnList();
-            for(String columnName:mySearchList.getColumnNameList()){
-                list.add(getColumnBaseEntity(columnName,tableNickName));
+            for (String columnName : mySearchList.getColumnNameList()) {
+                list.add(getColumnBaseEntity(columnName, tableNickName));
             }
         }
         return sqlEntity;
@@ -757,10 +762,10 @@ public class SQLModelUtils {
     /**
      * 拼接查询
      */
-    private void selectJoin(final String tableNickName,final List<ColumnBaseEntity> selectString,final List<String> joinString,final FieldColumnRelationMapper fieldColumnRelationMapper) {
+    private void selectJoin(final String tableNickName, final List<ColumnBaseEntity> selectString, final List<TableEntity> joinString, final FieldColumnRelationMapper fieldColumnRelationMapper) {
 
         ColumnBaseEntity entity = null;
-        if(selectString != null) {
+        if (selectString != null) {
             for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationMapper.getIds()) {
                 entity = new ColumnBaseEntity(fieldColumnRelation, fieldColumnRelationMapper.getTableName(), tableNickName, translateNameUtils.getAbbreviation(tableNickName));
                 selectString.add(entity);
@@ -790,28 +795,16 @@ public class SQLModelUtils {
 
                     FieldColumnRelationMapper mapper = analysisClassRelation(fieldJoinClass.getJoinClass());
                     translateNameUtils.addLocalMapper(lastTableNickName, mapper);
-                    String joinType;
+                    /*String joinType;
                     if (fieldJoinClass.getJoinType() != null) {
-                        switch (fieldJoinClass.getJoinType()) {
-                            case LEFT:
-                                joinType = "LEFT JOIN ";
-                                break;
-                            case INNER:
-                                joinType = "INNER JOIN ";
-                                break;
-                            case RIGHT:
-                                joinType = "RIGHT JOIN ";
-                                break;
-                            default:
-                                joinType = "INNER JOIN ";
-                                break;
-                        }
+                        joinType = fieldJoinClass.getJoinType().getValue();
                     } else {
-                        joinType = "INNER JOIN ";
-                    }
+                        joinType = TableJoinType.INNER_JOIN.getValue();
+                    }*/
 
 
-                    StringBuilder joinStr = new StringBuilder(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn(), joinType));
+                    //StringBuilder joinStr = new StringBuilder(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn(), joinType));
+                    StringBuilder joinStr = new StringBuilder();
 
 
                     if (fieldJoinClass.getConditionSearchList() != null) {
@@ -820,7 +813,9 @@ public class SQLModelUtils {
                             joinStr.append(" AND ").append(WsStringUtils.jointListString(whereStrList, " AND "));
                         }
                     }
-                    joinString.add(joinStr.toString());
+                    TableEntity tableEntity = createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn(), fieldJoinClass.getJoinType(), joinStr.toString());
+                    //joinString.add(joinStr.toString());
+                    joinString.add(tableEntity);
                     selectJoin(lastTableNickName, selectString, joinString, mapper);
                 }
             }
@@ -839,6 +834,7 @@ public class SQLModelUtils {
 
     /**
      * 完善FieldJoinClass
+     *
      * @param tableNickName
      * @param fieldJoinClass
      * @param tableRelationList
@@ -883,7 +879,7 @@ public class SQLModelUtils {
             }
 
             FieldJoinClass oldFieldJoinClass = fieldJoinClass;
-            fieldJoinClass = new FieldJoinClass(oldFieldJoinClass.isArray(),oldFieldJoinClass.getJoinClass(),oldFieldJoinClass.getField());
+            fieldJoinClass = new FieldJoinClass(oldFieldJoinClass.isArray(), oldFieldJoinClass.getJoinClass(), oldFieldJoinClass.getField());
             fieldJoinClass.setNickName(oldFieldJoinClass.getNickName());
 
 
@@ -1273,17 +1269,17 @@ public class SQLModelUtils {
         return deleteSqlEntity;
     }
 
-    public <T> List<T> margeMap(ResultSet resultSet){
-        if(WsListUtils.isEmpty(mySearchList.getColumnNameList())){
+    public <T> List<T> margeMap(ResultSet resultSet) {
+        if (WsListUtils.isEmpty(mySearchList.getColumnNameList())) {
             return oneLoopMargeMap(resultSet);
-        }else {
+        } else {
             List<Object> tList = new ArrayList<>();
             ColumnBaseEntity columnBaseEntity = cacheSqlEntity.getColumnList().get(0);
             try {
-                while (resultSet.next()){
-                    tList.add(WsBeanUtils.objectToT(resultSet.getObject(1),columnBaseEntity.getField().getType()));
+                while (resultSet.next()) {
+                    tList.add(WsBeanUtils.objectToT(resultSet.getObject(1), columnBaseEntity.getField().getType()));
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
             return (List<T>) tList;
@@ -1452,11 +1448,6 @@ public class SQLModelUtils {
     }
 
 
-
-
-
-
-
     /**
      * 转换sql语句中表名为简写
      *
@@ -1504,6 +1495,7 @@ public class SQLModelUtils {
 
     /**
      * 把简写转换成详细
+     *
      * @param searchSql
      * @return
      */
@@ -1534,21 +1526,21 @@ public class SQLModelUtils {
         }*/
         //return stringBuilder.toString();
         //String str = stringBuilder.toString();
-        String[] strs = WsStringUtils.splitArray(searchSql,'.');
+        String[] strs = WsStringUtils.splitArray(searchSql, '.');
         String ns;
         String s;
-        for(int i = 0; i < strs.length; i++){
+        for (int i = 0; i < strs.length; i++) {
             s = strs[i];
-            if(s.startsWith("{")){
-                s = s.substring(1,s.length() - 1);
+            if (s.startsWith("{")) {
+                s = s.substring(1, s.length() - 1);
                 strs[i] = s;
             }
             ns = translateNameUtils.getParticular(s);
-            if(ns != null){
+            if (ns != null) {
                 strs[i] = ns;
             }
         }
-        return WsStringUtils.jointListString(strs,".");
+        return WsStringUtils.jointListString(strs, ".");
     }
 
     /**
@@ -1598,13 +1590,13 @@ public class SQLModelUtils {
             /*mapper = translateNameUtils.getLocalMapper(prefix);
             fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
             prefixString = mapper.getNickName();*/
-        } else if(size == 2){
+        } else if (size == 2) {
             fieldName = fieldNameList.get(1);
             key = translateNameUtils.getParticular(fieldNameList.get(0));
-            if(key == null){
-                if(!translateNameUtils.startsWithMainClassName(fieldNameList.get(0))){
+            if (key == null) {
+                if (!translateNameUtils.startsWithMainClassName(fieldNameList.get(0))) {
                     key = prefix + '.' + fieldNameList.get(0);
-                }else {
+                } else {
                     key = fieldNameList.get(0);
                 }
             }
@@ -1619,10 +1611,10 @@ public class SQLModelUtils {
         } else {
             fieldName = fieldNameList.get(size - 1);
             fieldNameList.remove(size - 1);
-            if(translateNameUtils.startsWithMainClassName(fieldNameList.get(0))){
-                prefixString = String.join(".",fieldNameList);
-            }else {
-                prefixString = prefix+'.'+String.join(".",fieldNameList);
+            if (translateNameUtils.startsWithMainClassName(fieldNameList.get(0))) {
+                prefixString = String.join(".", fieldNameList);
+            } else {
+                prefixString = prefix + '.' + String.join(".", fieldNameList);
             }
 
         }
@@ -1631,7 +1623,7 @@ public class SQLModelUtils {
             throw new RuntimeException(prefixString + "不存在");
         }
         fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
-        return new ColumnBaseEntity(fieldColumnRelation,mapper.getTableName(),prefixString,translateNameUtils.getAbbreviation(prefixString));
+        return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), prefixString, translateNameUtils.getAbbreviation(prefixString));
     }
 
     public TranslateNameUtils getTranslateNameUtils() {

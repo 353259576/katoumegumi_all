@@ -3,6 +3,7 @@ package cn.katoumegumi.java.sql;
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.common.TableJoinType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -127,7 +128,7 @@ public class FieldColumnRelationMapperFactory {
                 if (mapper != null) {
                     FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray,joinClass,field);
                     fieldJoinClass.setNickName(field.getName());
-                    fieldJoinClass.setJoinType(JoinType.LEFT);
+                    fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
                     JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
                     field.setAccessible(true);
                     if (joinColumn != null) {
@@ -240,7 +241,7 @@ public class FieldColumnRelationMapperFactory {
                 if (analysisClassRelation(joinClass) != null) {
                     FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray,joinClass,field);
                     fieldJoinClass.setNickName(field.getName());
-                    fieldJoinClass.setJoinType(JoinType.LEFT);
+                    fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
                     fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
                 }
             }

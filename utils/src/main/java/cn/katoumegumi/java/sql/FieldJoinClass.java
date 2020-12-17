@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql;
 
-import javax.persistence.criteria.JoinType;
+import cn.katoumegumi.java.sql.common.TableJoinType;
+
 import java.lang.reflect.Field;
 
 /**
@@ -23,7 +24,7 @@ public class FieldJoinClass {
     /**
      * 连接类型
      */
-    private JoinType joinType;
+    private TableJoinType joinType;
     /**
      * 主表连接字段
      */
@@ -62,11 +63,11 @@ public class FieldJoinClass {
         return joinClass;
     }
 
-    public JoinType getJoinType() {
+    public TableJoinType getJoinType() {
         return joinType;
     }
 
-    public void setJoinType(JoinType joinType) {
+    public void setJoinType(TableJoinType joinType) {
         this.joinType = joinType;
     }
 

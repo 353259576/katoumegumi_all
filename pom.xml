@@ -12,9 +12,9 @@
         <module>data-integration-boot-starter</module>
         <module>utils</module>
         <module>code_generator</module>
-        <module>test</module>
+        <!--<module>test</module>
         <module>vertx_test</module>
-        <module>server_example</module>
+        <module>server_example</module>-->
     </modules>
 
     <licenses>
@@ -57,7 +57,7 @@
         <mail.version>1.6.2</mail.version>
         <!--<hadoop.version>3.2.0</hadoop.version>
         <kafka.version>2.3.0</kafka.version>-->
-        <vertx.version>3.9.0</vertx.version>
+        <vertx.version>4.0.0</vertx.version>
         <druid.version>1.1.21</druid.version>
         <mysql.version>8.0.19</mysql.version>
         <hibernate.version>5.4.13.Final</hibernate.version>
