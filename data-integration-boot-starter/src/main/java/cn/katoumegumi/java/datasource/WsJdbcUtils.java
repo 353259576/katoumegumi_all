@@ -308,7 +308,7 @@ public class WsJdbcUtils {
     }
 
     public <T> List<T> getListT(T t) {
-        MySearchList mySearchList = SQLModelUtils.ObjectToMySearchList(t);
+        MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);
         return getListT(mySearchList);
     }
 
@@ -331,7 +331,7 @@ public class WsJdbcUtils {
     }
 
     public <T> T getTOne(T t) {
-        MySearchList mySearchList = SQLModelUtils.ObjectToMySearchList(t);
+        MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);
         return getTOne(mySearchList);
     }
 
@@ -382,7 +382,7 @@ public class WsJdbcUtils {
     }
 
     public <T> IPage<T> getTPage(T t, Page page) {
-        MySearchList mySearchList = SQLModelUtils.ObjectToMySearchList(t);
+        MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);
         mySearchList.setPageVO(page);
         return getTPage(mySearchList);
     }

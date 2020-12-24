@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -140,5 +141,94 @@ public class TranslateNameUtils {
             }
         }
         return tableName;
+    }
+
+    /**
+     * 根据查询条件生成列基本信息
+     *
+     * @param originalFieldName
+     * @param prefix
+     * @return
+     */
+    public ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String prefix) {
+        String prefixString;
+        String fieldName;
+        List<String> fieldNameList = WsStringUtils.split(originalFieldName, '.');
+        int size = fieldNameList.size();
+        if (size == 1) {
+            fieldName = fieldNameList.get(0);
+            prefixString = prefix;
+        } else if (size == 2) {
+            fieldName = fieldNameList.get(1);
+            String key = getParticular(fieldNameList.get(0));
+            if (key == null) {
+                if (!startsWithMainClassName(fieldNameList.get(0))) {
+                    key = prefix + '.' + fieldNameList.get(0);
+                } else {
+                    key = fieldNameList.get(0);
+                }
+            }
+            prefixString = key;
+        } else {
+            fieldName = fieldNameList.get(size - 1);
+            fieldNameList.remove(size - 1);
+            if (startsWithMainClassName(fieldNameList.get(0))) {
+                prefixString = String.join(".", fieldNameList);
+            } else {
+                prefixString = prefix + '.' + String.join(".", fieldNameList);
+            }
+
+        }
+        FieldColumnRelationMapper mapper = getLocalMapper(prefixString);
+        if (mapper == null) {
+            throw new RuntimeException(prefixString + "不存在");
+        }
+        FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
+        return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), prefixString, getAbbreviation(prefixString));
+    }
+
+
+    /**
+     * 转换sql语句中表名为简写
+     *
+     * @param searchSql
+     * @return
+     */
+    public String translateTableNickName(String prefix, String searchSql) {
+        char[] cs = searchSql.toCharArray();
+        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder replaceSb = new StringBuilder();
+        char c;
+        boolean isReplace = false;
+        String replaceStr = null;
+        for (char value : cs) {
+            c = value;
+            if (isReplace) {
+                if (c == '}') {
+                    replaceStr = getParticular(replaceSb.toString());
+                    if (replaceStr == null) {
+                        if (replaceSb.toString().startsWith(prefix)) {
+                            stringBuilder.append(getAbbreviation(replaceSb.toString()));
+                        } else {
+                            stringBuilder.append(getAbbreviation(prefix + "." + replaceSb.toString()));
+                        }
+                    } else {
+                        stringBuilder.append(replaceSb.toString());
+                    }
+                    isReplace = false;
+                } else {
+                    replaceSb.append(c);
+                }
+            } else {
+                if (c == '{') {
+                    replaceSb = new StringBuilder();
+                    isReplace = true;
+                } else {
+                    stringBuilder.append(c);
+                }
+            }
+        }
+        return stringBuilder.toString();
+
     }
 }

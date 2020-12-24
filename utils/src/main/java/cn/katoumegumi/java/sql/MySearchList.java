@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -25,8 +26,11 @@ public class MySearchList {
     private final List<MySearchList> ors = new ArrayList<>();
 
     private final List<TableRelation> joins = new ArrayList<>();
+
     private List<MySearch> mySearches = new ArrayList<>();
+
     private Class<?> mainClass;
+
     private String alias;
 
     private TableJoinType defaultJoinType = TableJoinType.INNER_JOIN;

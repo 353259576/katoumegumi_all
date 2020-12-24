@@ -29,10 +29,10 @@ public class SqlUtils {
                 int mapSize = WsBeanUtils.objectToT((columnSize/0.75),int.class) + 1;
                 int j = 0;
                 Object o = null;
-                List<Map> mapList = new ArrayList<>(list.size());
+                List<Map<Object,Object>> mapList = new ArrayList<>(list.size());
                 for (JsonArray jsonArray : list) {
                     Iterator<?> iterator = jsonArray.iterator();
-                    Map map = new HashMap(mapSize);
+                    Map<Object,Object> map = new HashMap<>(mapSize);
                     while (iterator.hasNext()) {
                         o = iterator.next();
                         //if (o != null) {

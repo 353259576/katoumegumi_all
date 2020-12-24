@@ -11,10 +11,9 @@ import java.util.*;
 public class ReturnEntityUtils {
 
 
-
-    public static ReturnEntity getReturnEntity(Map<Class<?>, Map<ReturnEntityId, ReturnEntity>> idReturnEntityMap, Map<String, ReturnEntity> returnEntityMap, ReturnEntity returnEntity,String tableName){
-        ReturnEntity entity = getReturnEntity(idReturnEntityMap,returnEntity);
-        packageReturnEntity(idReturnEntityMap,returnEntityMap,entity,tableName);
+    public static ReturnEntity getReturnEntity(Map<Class<?>, Map<ReturnEntityId, ReturnEntity>> idReturnEntityMap, Map<String, ReturnEntity> returnEntityMap, ReturnEntity returnEntity, String tableName) {
+        ReturnEntity entity = getReturnEntity(idReturnEntityMap, returnEntity);
+        packageReturnEntity(idReturnEntityMap, returnEntityMap, entity, tableName);
         return entity;
     }
 
@@ -59,7 +58,7 @@ public class ReturnEntityUtils {
 
 
         values = returnEntity.getIdValueList();
-        if(values != null) {
+        if (values != null) {
             int length = values.length;
             Object value;
             FieldColumnRelation fieldColumnRelation;
@@ -83,10 +82,9 @@ public class ReturnEntityUtils {
         }
 
 
-
         list = mapper.getFieldColumnRelations();
         values = returnEntity.getColumnValueList();
-        if(values != null) {
+        if (values != null) {
             int length = values.length;
             Object value;
             FieldColumnRelation fieldColumnRelation;
@@ -116,7 +114,6 @@ public class ReturnEntityUtils {
         }
 
     }
-
 
 
     /**

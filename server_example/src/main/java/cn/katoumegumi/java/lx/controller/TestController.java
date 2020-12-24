@@ -8,6 +8,8 @@ import cn.katoumegumi.java.lx.model.UserDetailsRemake;
 import cn.katoumegumi.java.sql.*;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mysql.cj.jdbc.Driver;
 import io.vertx.core.json.Json;
@@ -29,6 +31,7 @@ public class TestController {
 
 
 
+        LambdaQueryWrapper lambdaQueryWrapper = Wrappers.lambdaQuery();
 
         User user = new User();
         user.setId(1L);
@@ -56,8 +59,8 @@ public class TestController {
         //MySearchList searchList = MySearchList.create(User.class);
         //new SQLModelUtils(searchList).select();
 
-        WsDateUtils.getExecutionTime.accept(()->{
-            for(int i = 0; i < 10000; i++) {
+        /*WsDateUtils.getExecutionTime.accept(()->{
+            for(int i = 0; i < 1; i++) {
                 MySearchList mySearchList = MySearchList.create(User.class)
                         .setAlias("u")
                         .setSqlLimit(sqlLimit -> sqlLimit.setOffset(0).setSize(10))
@@ -73,36 +76,27 @@ public class TestController {
                         .eq("userDetails.userDetailsRemake", UserDetailsRemake::getId, "1").sort(User::getName, "desc");
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectSqlEntity entity = sqlModelUtils.select();
-                //System.out.println(entity.getSelectSql());
+                System.out.println(entity.getSelectSql());
+                System.out.println(JSON.toJSONString(entity.getValueList()));
             }
-        });
-
-
-
-        //lx(new int[]{3,8,12,5,24,3,1,9,27,36,43,11,6,2,7,15,25,56});
-        //lx(new int[]{55,47,36,27,18,9,4,1,3,2,6});
-        /*String url = "jdbc:mysql://rm-bp13t5e43e9312u79co.mysql.rds.aliyuncs.com:3306/apes_cloud_test?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai";
-        String userName = "yd_test";
-        String password = "123456";
-        String className = Driver.class.getName();
-        DataSource dataSource = HikariCPDataSourceFactory.getDataSource(url,userName,password,className);
-        SqlTableToBeanUtils sqlTableToBeanUtils = new SqlTableToBeanUtils(dataSource,"apes_cloud_test");
-        List<SqlTableToBeanUtils.Table> tableList = sqlTableToBeanUtils.selectTables(null);
-        for (SqlTableToBeanUtils.Table table:tableList){
-            List<SqlTableToBeanUtils.Column> columnList = sqlTableToBeanUtils.selectTableColumns(table.getTableName());
-            columnList.forEach(column -> {
-                System.out.printf("@Column(name=\"%s\")\n",column.getColumnName());
-                System.out.printf("private %s %s;%n",column.getColumnClass().getSimpleName(),column.getBeanFieldName());
-            });
-        }*/
+        });*/
 
 
         WsDateUtils.getExecutionTime.accept(()->{
-            for(int i = 0; i < 100000; i++){
-                WsBeanUtils.objectToT(100,String.class);
-            }
-        });
 
+            MySearchList mySearchList = MySearchList.create(User.class);
+            mySearchList.set(User::getName,"你好")
+                    .add(User::getName,1)
+                    .subtract(User::getName,2)
+                    .multiply(User::getName,3)
+                    .divide(User::getName,4)
+                    .eq(User::getName,5);
+            SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+            UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
+            System.out.println(updateSqlEntity.getUpdateSql());
+            System.out.println(JSON.toJSONString(updateSqlEntity.getValueList()));
+
+        });
 
 
     }
