@@ -12,9 +12,9 @@
         <module>data-integration-boot-starter</module>
         <module>utils</module>
         <module>code_generator</module>
-        <module>test</module>
+        <!--<module>test</module>
         <module>vertx_test</module>
-        <module>server_example</module>
+        <module>server_example</module>-->
     </modules>
 
     <licenses>

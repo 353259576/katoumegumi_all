@@ -536,6 +536,14 @@ public enum SqlOperator {
 
     public interface ColumnConditionHandle{
 
+        /**
+         * 处理方法
+         * @param translateNameUtils
+         * @param mySearch
+         * @param prefix
+         * @param baseWhereValueList
+         * @return
+         */
         public String handle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList);
     }
 

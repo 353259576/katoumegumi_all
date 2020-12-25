@@ -3,7 +3,7 @@ package cn.katoumegumi.java.sql;
 import java.util.List;
 
 /***
- * @author 王松
+ * @author ws
  */
 public class UpdateSqlEntity {
 
@@ -13,7 +13,7 @@ public class UpdateSqlEntity {
 
     private List<FieldColumnRelation> idList;
 
-    private List valueList;
+    private List<Object> valueList;
 
 
     public String getUpdateSql() {
@@ -40,11 +40,11 @@ public class UpdateSqlEntity {
         this.idList = idList;
     }
 
-    public List getValueList() {
+    public List<Object> getValueList() {
         return valueList;
     }
 
-    public void setValueList(List valueList) {
+    public void setValueList(List<Object> valueList) {
         this.valueList = valueList;
     }
 }

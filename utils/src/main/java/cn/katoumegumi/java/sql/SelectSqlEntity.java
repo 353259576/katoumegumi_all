@@ -13,7 +13,7 @@ public class SelectSqlEntity {
 
     private String countSql;
 
-    private List valueList;
+    private List<Object> valueList;
 
     public String getSelectSql() {
         return selectSql;
@@ -31,11 +31,11 @@ public class SelectSqlEntity {
         this.countSql = countSql;
     }
 
-    public List getValueList() {
+    public List<Object> getValueList() {
         return valueList;
     }
 
-    public void setValueList(List valueList) {
+    public void setValueList(List<Object> valueList) {
         this.valueList = valueList;
     }
 
