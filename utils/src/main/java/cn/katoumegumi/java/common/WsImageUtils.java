@@ -56,7 +56,7 @@ public class WsImageUtils {
                 long startTime = System.currentTimeMillis();
                 FontMetrics fontMetrics = J_LABEL.getFontMetrics(font);
                 fontMetrics = J_LABEL.getFontMetrics(font);
-                List<LineText> list = splitContext(context,fontMetrics,150,0,bufferedImage.getWidth()-300,bufferedImage.getHeight(),96,20,2);
+                List<LineText> list = splitContext(context,fontMetrics,150,0,bufferedImage.getWidth()-300,bufferedImage.getHeight(),96,20,2,3);
                 long endTime = System.currentTimeMillis();
                 System.out.println("拆解成行：" + (endTime - startTime));
                 startTime = System.currentTimeMillis();
@@ -64,7 +64,7 @@ public class WsImageUtils {
                     LineText lineText = list.get(i);
                     List<CharText> charTextList = lineText.getCharTextList();
                     for(CharText charText:charTextList){
-                        writeFontBufferedImage(newBufferedImage,charText.getValue().toString(),lineText.getPointX() + charText.getPointX(),lineText.getPointY(),font,color);
+                        writeFontBufferedImage(newBufferedImage,charText.getValue().toString(),charText.getPointX(),lineText.getPointY(),font,color);
                     }
                     //writeFontBufferedImage(newBufferedImage, lineText.getText(), lineText.getPointX(), lineText.getPointY(), font, color);
                     //BufferedImage image = enlargementBufferedImage(bufferedImage,0.2,BufferedImage.TYPE_3BYTE_BGR);
@@ -473,10 +473,10 @@ public class WsImageUtils {
      * @param height 文本域高度
      * @param wordSpace 字间距
      * @param lineSpace 行间距
-     * @param type 1 右对齐 2 居中 3 左对齐
+     * @param horizontalType 1 右对齐 2 居中 3 左对齐
      * @return
      */
-    public static List<LineText> splitContext(String context,FontMetrics fontMetrics,int pointX,int pointY,int width,int height,int wordSpace,int lineSpace,Integer type){
+    public static List<LineText> splitContext(String context,FontMetrics fontMetrics,int pointX,int pointY,int width,int height,int wordSpace,int lineSpace,Integer horizontalType,Integer verticalType){
         context = new String(context.getBytes(StandardCharsets.UTF_8));
         Font font = fontMetrics.getFont();
         char[] chars = context.toCharArray();
@@ -493,7 +493,7 @@ public class WsImageUtils {
             charSize = fontMetrics.charWidth(c);
             currentLineWidth += charSize;
             if(currentLineWidth >= width){
-                returnLineList.add(new LineText(pointX,width,currentHeight,sb.toString(),currentLineWidth - charSize - wordSpace,charTextList,type));
+                returnLineList.add(new LineText(pointX,width,currentHeight,sb.toString(),currentLineWidth - charSize - wordSpace,charTextList,horizontalType));
                 currentHeight += font.getSize();
                 currentHeight += lineSpace;
                 currentLineWidth = charSize;
@@ -509,8 +509,22 @@ public class WsImageUtils {
             }
         }
         if(sb.length() > 0){
-            returnLineList.add(new LineText(pointX,width,currentHeight,sb.toString(),currentLineWidth - wordSpace,charTextList,type));
+            returnLineList.add(new LineText(pointX,width,currentHeight,sb.toString(),currentLineWidth - wordSpace,charTextList,horizontalType));
         }
+        if(verticalType.equals(2)){
+            Integer allHeight = returnLineList.size()* font.getSize() + lineSpace * returnLineList.size() - 1;
+            pointY = (height - allHeight)/2 + pointY;
+        }else if (verticalType.equals(3)){
+            Integer allHeight = returnLineList.size()* font.getSize() + lineSpace * returnLineList.size() - 1;
+            pointY = pointY + height - allHeight;
+        }
+        int finalPointY = pointY;
+        returnLineList.forEach(lineText -> {
+            lineText.setPointY(finalPointY + lineText.getPointY());
+            lineText.getCharTextList().forEach(charText -> {
+                charText.setPointY(lineText.getPointY());
+            });
+        });
         return returnLineList;
 
     }
@@ -529,20 +543,20 @@ public class WsImageUtils {
 
     static class LineText{
 
-        private final Integer pointX;
+        private Integer pointX;
 
-        private final Integer pointY;
+        private Integer pointY;
 
-        private final String text;
+        private String text;
 
-        private final Integer length;
+        private Integer length;
 
-        private final List<CharText> charTextList;
+        private List<CharText> charTextList;
 
-        public LineText(Integer pointX,Integer width,Integer height,String text,Integer length,List<CharText> charTextList,Integer type){
+        public LineText(Integer pointX,Integer width,Integer pointY,String text,Integer length,List<CharText> charTextList,Integer type){
             this.text = text;
             this.length = length;
-            this.pointY = height;
+            this.pointY = pointY;
             if(type.equals(1)){
                 this.pointX = pointX;
             }else if(type.equals(2)){
@@ -552,45 +566,60 @@ public class WsImageUtils {
             }else {
                 throw new RuntimeException("不支持的类型");
             }
+            charTextList.forEach(charText -> {
+                charText.setPointX(this.pointX + charText.getPointX());
+            });
             this.charTextList = charTextList;
         }
 
-        public String getText() {
-            return text;
-        }
-
-
-        public Integer getLength() {
-            return length;
-        }
-
-
         public Integer getPointX() {
             return pointX;
+        }
+
+        public void setPointX(Integer pointX) {
+            this.pointX = pointX;
         }
 
         public Integer getPointY() {
             return pointY;
         }
 
+        public void setPointY(Integer pointY) {
+            this.pointY = pointY;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public Integer getLength() {
+            return length;
+        }
+
+        public void setLength(Integer length) {
+            this.length = length;
+        }
+
         public List<CharText> getCharTextList() {
             return charTextList;
+        }
+
+        public void setCharTextList(List<CharText> charTextList) {
+            this.charTextList = charTextList;
         }
     }
 
     static class CharText{
 
-        /**
-         * 相对位置X
-         */
-        private final Integer pointX;
+        private Integer pointX;
 
-        /**
-         * 相对位置Y
-         */
-        private final Integer pointY;
+        private Integer pointY;
 
-        private final Character value;
+        private Character value;
 
         public CharText(Integer pointX,Integer pointY,Character value){
             this.pointX = pointX;
@@ -598,16 +627,29 @@ public class WsImageUtils {
             this.value = value;
         }
 
+
         public Integer getPointX() {
             return pointX;
+        }
+
+        public void setPointX(Integer pointX) {
+            this.pointX = pointX;
         }
 
         public Integer getPointY() {
             return pointY;
         }
 
+        public void setPointY(Integer pointY) {
+            this.pointY = pointY;
+        }
+
         public Character getValue() {
             return value;
+        }
+
+        public void setValue(Character value) {
+            this.value = value;
         }
     }
 }
