@@ -21,55 +21,60 @@ public class WsImageUtils {
 
     public static void main(String[] args) throws Exception{
 
-        File file = new File("D:\\网页\\图修改\\");
+        /*File file = new File("D:\\网页\\图修改\\");
         File[] fs = file.listFiles();
         int i = 0;
         for(File f:fs){
             BufferedImage bufferedImage = ImageIO.read(f);
             ImageIO.write(bufferedImage,"png",WsFileUtils.createFile("D:\\网页\\图修改\\"+(i++)+"-1.png"));
-        }
+        }*/
 
 
-        /*File file = WsFileUtils.createFile("D:\\网页\\-1.jpg");
+        File file = WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\1.jpg");
         try {
             BufferedImage bufferedImage = ImageIO.read(file);
             BufferedImage newBufferedImage = copyBufferedImage(bufferedImage,BufferedImage.TYPE_INT_RGB);
             Graphics2D graphics2D = newBufferedImage.createGraphics();
             System.out.println("图片宽度"+newBufferedImage.getWidth());
             System.out.println("图片长度"+newBufferedImage.getHeight());
-            //Font font = new Font("微软雅黑",Font.PLAIN,96);
+
             //Font font1 = new Font("宋体",Font.PLAIN,120);
-            Color color = getColor("#7FFF00");
-            Stream.iterate(0,i->i+1).limit(100).forEach(j->{
-                Font font = null;
+            Color color = getColor("#7FFA00");
+            Stream.iterate(2,i->i+1).limit(1).forEach(j->{
+                /*Font font = null;
                 try {
                     font = Font.createFont(Font.TRUETYPE_FONT, WsFileUtils.createFile("D:\\网页\\SourceHanSansCN-Normal.ttf"));
                 } catch (FontFormatException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
+                }*/
+                Font font = new Font("微软雅黑",Font.PLAIN,96);
                 font = font.deriveFont(Font.PLAIN,96);
                 System.out.println(font.getSize());
-                String context = "u易语言突然人fgsd豆腐干豆腐干地方合同已经同意就过分";
+                String context = "德玛西亚洛克萨斯艾欧尼亚恕瑞玛皮尔特沃夫祖安艾卡西亚";
                 long startTime = System.currentTimeMillis();
                 FontMetrics fontMetrics = J_LABEL.getFontMetrics(font);
                 fontMetrics = J_LABEL.getFontMetrics(font);
-                List<LineText> list = splitContext(context,fontMetrics,50,0,bufferedImage.getWidth()-100,bufferedImage.getHeight(),3);
+                List<LineText> list = splitContext(context,fontMetrics,150,0,bufferedImage.getWidth()-300,bufferedImage.getHeight(),96,20,2);
                 long endTime = System.currentTimeMillis();
                 System.out.println("拆解成行：" + (endTime - startTime));
                 startTime = System.currentTimeMillis();
                 for(int i = 0; i < list.size(); i++) {
                     LineText lineText = list.get(i);
-                    writeFontBufferedImage(newBufferedImage, lineText.getText(), lineText.getPointX(), lineText.getPointY(), font, color);
-                    BufferedImage image = enlargementBufferedImage(bufferedImage,0.2,BufferedImage.TYPE_3BYTE_BGR);
-                    mergeBufferedImage(newBufferedImage,image,200,500);
+                    List<CharText> charTextList = lineText.getCharTextList();
+                    for(CharText charText:charTextList){
+                        writeFontBufferedImage(newBufferedImage,charText.getValue().toString(),lineText.getPointX() + charText.getPointX(),lineText.getPointY(),font,color);
+                    }
+                    //writeFontBufferedImage(newBufferedImage, lineText.getText(), lineText.getPointX(), lineText.getPointY(), font, color);
+                    //BufferedImage image = enlargementBufferedImage(bufferedImage,0.2,BufferedImage.TYPE_3BYTE_BGR);
+                    //mergeBufferedImage(newBufferedImage,image,200,500);
 
                 }
                 endTime = System.currentTimeMillis();
                 System.out.println(endTime - startTime);
                 try {
-                    ImageIO.write(newBufferedImage,"jpg",WsFileUtils.createFile("D:\\网页\\"+j+".jpg"));
+                    ImageIO.write(newBufferedImage,"jpg",WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\"+j+".jpg"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -77,7 +82,7 @@ public class WsImageUtils {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }*/
+        }
 
     }
 
@@ -99,7 +104,7 @@ public class WsImageUtils {
                 newWidth = oldWidth / size;
                 newHeight = oldHeight / size;
             }
-            BufferedImage newBufferedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+            BufferedImage newBufferedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
             Graphics2D newGraphics2D = newBufferedImage.createGraphics();
             newGraphics2D.setBackground(Color.WHITE);
             newGraphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -193,12 +198,12 @@ public class WsImageUtils {
                 }
                 int i = 0;
                 for (i = 0; i < directionNum; i++) {
-                    byte bytes[] = cropImage(bufferedImage, 0, i * directionValue, width, directionValue);
+                    byte[] bytes = cropImage(bufferedImage, 0, i * directionValue, width, directionValue);
                     byteToFile(bytes, fileName + "-" + i, "jpg", path);
                 }
                 int directionSurplus = height % directionValue;
                 if (directionSurplus > 0) {
-                    byte bytes[] = cropImage(bufferedImage, 0, height - directionSurplus, width, directionSurplus);
+                    byte[] bytes = cropImage(bufferedImage, 0, height - directionSurplus, width, directionSurplus);
                     byteToFile(bytes, fileName + "-" + (i + 1), "jpg", path);
                 }
             } else if (direction == 2) {
@@ -208,12 +213,12 @@ public class WsImageUtils {
                 }
                 int i = 0;
                 for (; i < directionNum; i++) {
-                    byte bytes[] = cropImage(bufferedImage, i * directionValue, 0, directionValue, height);
+                    byte[] bytes = cropImage(bufferedImage, i * directionValue, 0, directionValue, height);
                     byteToFile(bytes, fileName + "-" + i, "jpg", path);
                 }
                 int directionSurplus = width % directionValue;
                 if (directionSurplus > 0) {
-                    byte bytes[] = cropImage(bufferedImage, height - directionSurplus, 0, directionSurplus, height);
+                    byte[]  bytes = cropImage(bufferedImage, height - directionSurplus, 0, directionSurplus, height);
                     byteToFile(bytes, fileName + "-" + (i + 1), "jpg", path);
                 }
             }
@@ -380,12 +385,12 @@ public class WsImageUtils {
 
 
     public static BufferedImage createMosaic(BufferedImage bufferedImage, Integer pointX, Integer pointY, Integer width, Integer height, Integer level) {
-        Integer bufferImageWidth = bufferedImage.getWidth();
-        Integer bufferImageHeight = bufferedImage.getHeight();
+        int bufferImageWidth = bufferedImage.getWidth();
+        int bufferImageHeight = bufferedImage.getHeight();
         Integer x = pointX;
         Integer y = pointY;
-        Integer chunkWidth = width / level;
-        Integer chunkHeight = height / level;
+        int chunkWidth = width / level;
+        int chunkHeight = height / level;
         chunkWidth = chunkWidth == 0 ? 1 : chunkWidth;
         chunkHeight = chunkHeight == 0 ? 1 : chunkHeight;
 
@@ -401,8 +406,8 @@ public class WsImageUtils {
                 y += chunkHeight;
                 Integer randomX = random.nextInt(chunkWidth);
                 Integer randomY = random.nextInt(chunkWidth);
-                Integer modificationX = 0;
-                Integer modificationY = 0;
+                int modificationX = 0;
+                int modificationY = 0;
                 if (x + randomX >= bufferImageWidth) {
                     modificationX = (x + randomX) - bufferImageWidth + 1;
                 }
@@ -460,42 +465,51 @@ public class WsImageUtils {
 
     /**
      * 把字符串拆成行
-     * @param context
+     * @param context 文本内容
      * @param fontMetrics
-     * @param width
-     * @param height
+     * @param pointX 开始点的x轴坐标
+     * @param pointY 开始点的y轴坐标
+     * @param width 文本域宽度
+     * @param height 文本域高度
+     * @param wordSpace 字间距
+     * @param lineSpace 行间距
      * @param type 1 右对齐 2 居中 3 左对齐
      * @return
      */
-    public static List<LineText> splitContext(String context,FontMetrics fontMetrics,int pointX,int pointY,int width,int height,Integer type){
+    public static List<LineText> splitContext(String context,FontMetrics fontMetrics,int pointX,int pointY,int width,int height,int wordSpace,int lineSpace,Integer type){
         context = new String(context.getBytes(StandardCharsets.UTF_8));
         Font font = fontMetrics.getFont();
         char[] chars = context.toCharArray();
         List<LineText> returnLineList = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
-        int size = 0;
-        int nowHeight = font.getSize();
+        //当前的行宽度
+        int currentLineWidth = 0;
+        //当前的高度
+        int currentHeight = font.getSize();
+        //字体宽度
         int charSize = 0;
+        List<CharText> charTextList = new ArrayList<>();
         for(char c:chars){
             charSize = fontMetrics.charWidth(c);
-            size += charSize;
-            if(size >= width){
-
-                returnLineList.add(new LineText(pointX,width,pointY + nowHeight,sb.toString(),size - charSize,type));
+            currentLineWidth += charSize;
+            if(currentLineWidth >= width){
+                returnLineList.add(new LineText(pointX,width,currentHeight,sb.toString(),currentLineWidth - charSize - wordSpace,charTextList,type));
+                currentHeight += font.getSize();
+                currentHeight += lineSpace;
+                currentLineWidth = charSize;
+                charTextList = new ArrayList<>();
                 sb = new StringBuilder();
-                sb.append(c);
-                nowHeight += font.getSize();
-                size = charSize;
-            }else {
-                sb.append(c);
             }
-            if(nowHeight > height){
+            charTextList.add(new CharText(currentLineWidth - charSize,currentHeight,c));
+            currentLineWidth += wordSpace;
+            sb.append(c);
+            if(currentHeight > height){
                 sb = new StringBuilder();
                 break;
             }
         }
         if(sb.length() > 0){
-            returnLineList.add(new LineText(pointX,width,pointY + nowHeight,sb.toString(),size,type));
+            returnLineList.add(new LineText(pointX,width,currentHeight,sb.toString(),currentLineWidth - wordSpace,charTextList,type));
         }
         return returnLineList;
 
@@ -523,19 +537,22 @@ public class WsImageUtils {
 
         private final Integer length;
 
-        public LineText(Integer pointX,Integer width,Integer height,String text,Integer length,Integer type){
+        private final List<CharText> charTextList;
+
+        public LineText(Integer pointX,Integer width,Integer height,String text,Integer length,List<CharText> charTextList,Integer type){
             this.text = text;
             this.length = length;
             this.pointY = height;
             if(type.equals(1)){
                 this.pointX = pointX;
             }else if(type.equals(2)){
-                this.pointX = (pointX+width - length)/2;
+                this.pointX = pointX+(width - length)/2;
             }else if(type.equals(3)){
-                this.pointX = pointX+width - length;
+                this.pointX = pointX + width - length;
             }else {
                 throw new RuntimeException("不支持的类型");
             }
+            this.charTextList = charTextList;
         }
 
         public String getText() {
@@ -554,6 +571,43 @@ public class WsImageUtils {
 
         public Integer getPointY() {
             return pointY;
+        }
+
+        public List<CharText> getCharTextList() {
+            return charTextList;
+        }
+    }
+
+    static class CharText{
+
+        /**
+         * 相对位置X
+         */
+        private final Integer pointX;
+
+        /**
+         * 相对位置Y
+         */
+        private final Integer pointY;
+
+        private final Character value;
+
+        public CharText(Integer pointX,Integer pointY,Character value){
+            this.pointX = pointX;
+            this.pointY = pointY;
+            this.value = value;
+        }
+
+        public Integer getPointX() {
+            return pointX;
+        }
+
+        public Integer getPointY() {
+            return pointY;
+        }
+
+        public Character getValue() {
+            return value;
         }
     }
 }
