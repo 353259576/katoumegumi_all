@@ -7,12 +7,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 public class WsImageUtils {
@@ -20,6 +22,8 @@ public class WsImageUtils {
     private final static JLabel J_LABEL = new JLabel();
 
     public static void main(String[] args) throws Exception{
+
+        System.out.println(Math.sin(Math.toRadians(45)));
 
         /*File file = new File("D:\\网页\\图修改\\");
         File[] fs = file.listFiles();
@@ -29,6 +33,7 @@ public class WsImageUtils {
             ImageIO.write(bufferedImage,"png",WsFileUtils.createFile("D:\\网页\\图修改\\"+(i++)+"-1.png"));
         }*/
 
+        System.out.println(Math.toRadians(Math.atan(1)));
 
         File file = WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\1.jpg");
         try {
@@ -40,7 +45,7 @@ public class WsImageUtils {
 
             //Font font1 = new Font("宋体",Font.PLAIN,120);
             Color color = getColor("#7FFA00");
-            Stream.iterate(2,i->i+1).limit(1).forEach(j->{
+            Stream.iterate(10,i->i+5).limit(72).forEach(j->{
                 /*Font font = null;
                 try {
                     font = Font.createFont(Font.TRUETYPE_FONT, WsFileUtils.createFile("D:\\网页\\SourceHanSansCN-Normal.ttf"));
@@ -74,7 +79,8 @@ public class WsImageUtils {
                 endTime = System.currentTimeMillis();
                 System.out.println(endTime - startTime);
                 try {
-                    ImageIO.write(newBufferedImage,"jpg",WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\"+j+".jpg"));
+                    BufferedImage image = rotateImage(newBufferedImage,j);
+                    ImageIO.write(image,"png",WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\"+j+".jpg"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -512,10 +518,10 @@ public class WsImageUtils {
             returnLineList.add(new LineText(pointX,width,currentHeight,sb.toString(),currentLineWidth - wordSpace,charTextList,horizontalType));
         }
         if(verticalType.equals(2)){
-            Integer allHeight = returnLineList.size()* font.getSize() + lineSpace * returnLineList.size() - 1;
+            int allHeight = returnLineList.size()* font.getSize() + lineSpace * returnLineList.size() - 1;
             pointY = (height - allHeight)/2 + pointY;
         }else if (verticalType.equals(3)){
-            Integer allHeight = returnLineList.size()* font.getSize() + lineSpace * returnLineList.size() - 1;
+            int allHeight = returnLineList.size()* font.getSize() + lineSpace * returnLineList.size() - 1;
             pointY = pointY + height - allHeight;
         }
         int finalPointY = pointY;
@@ -529,7 +535,40 @@ public class WsImageUtils {
 
     }
 
-    public static Color getColor(String value){
+    public static BufferedImage rotateImage(BufferedImage bufferedImage,double angle){
+        Rectangle rectangle = getRotateRectangle(bufferedImage.getWidth(),bufferedImage.getHeight(),angle);
+        BufferedImage image = new BufferedImage((int) rectangle.getWidth(),(int) rectangle.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics2D = image.createGraphics();
+        graphics2D.translate((rectangle.getWidth() - bufferedImage.getWidth()) / 2,(rectangle.getHeight() - bufferedImage.getHeight()) / 2);
+        graphics2D.rotate(Math.toRadians(angle), BigDecimal.valueOf(bufferedImage.getWidth()/2).doubleValue(),BigDecimal.valueOf(bufferedImage.getHeight()/2).doubleValue());
+        graphics2D.drawImage(bufferedImage,null,0,0);
+        return image;
+    }
+
+
+    public static Rectangle getRotateRectangle(double width,double height,double angle){
+        if (angle >= 90) {
+            if((int) angle / 90 % 2 == 1){
+                double temp = height;
+                height = width;
+                width = temp;
+            }
+            angle = angle % 90;
+        }
+        double j1Angle = Math.atan(height / width);
+        angle = Math.toRadians(angle);
+        double r = Math.sqrt(Math.pow(width,2)+Math.pow(height,2)) / 2;
+        double newWidth = Math.cos(j1Angle - angle) * r * 2;
+        double newHeight = Math.sin(j1Angle + angle) * r * 2;
+        newHeight = Math.abs(newHeight);
+        newWidth = Math.abs(newWidth);
+        return new Rectangle(0,0,(int) newWidth,(int) newHeight);
+    }
+
+
+
+
+        public static Color getColor(String value){
         if(!value.startsWith("#")){
             throw new RuntimeException("格式错误");
         }
