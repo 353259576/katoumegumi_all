@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 public class WsImageUtils {
@@ -38,14 +37,14 @@ public class WsImageUtils {
         File file = WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\1.jpg");
         try {
             BufferedImage bufferedImage = ImageIO.read(file);
-            BufferedImage newBufferedImage = copyBufferedImage(bufferedImage,BufferedImage.TYPE_INT_RGB);
+            BufferedImage newBufferedImage = copyBufferedImage(bufferedImage,BufferedImage.TYPE_INT_ARGB);
             Graphics2D graphics2D = newBufferedImage.createGraphics();
             System.out.println("图片宽度"+newBufferedImage.getWidth());
             System.out.println("图片长度"+newBufferedImage.getHeight());
 
             //Font font1 = new Font("宋体",Font.PLAIN,120);
             Color color = getColor("#7FFA00");
-            Stream.iterate(10,i->i+5).limit(72).forEach(j->{
+            Stream.iterate(10,i->i+5).limit(1).forEach(j->{
                 /*Font font = null;
                 try {
                     font = Font.createFont(Font.TRUETYPE_FONT, WsFileUtils.createFile("D:\\网页\\SourceHanSansCN-Normal.ttf"));
@@ -80,6 +79,7 @@ public class WsImageUtils {
                 System.out.println(endTime - startTime);
                 try {
                     BufferedImage image = rotateImage(newBufferedImage,j);
+                    image = setBufferedImageAlpha(image,100,BufferedImage.TYPE_INT_ARGB);
                     ImageIO.write(image,"png",WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\"+j+".jpg"));
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -261,10 +261,37 @@ public class WsImageUtils {
         return newBufferedImage;
     }
 
+    /**
+     * 设置透明度
+     * @param bufferedImage
+     * @param alpha
+     * @param bufferedImageType
+     * @return
+     */
+    public static BufferedImage setBufferedImageAlpha(BufferedImage bufferedImage,Integer alpha,Integer bufferedImageType){
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        BufferedImage newBufferedImage = new BufferedImage(width,height, bufferedImageType);
+        int argb;
+        int oa;
+        int a;
+        int rgb;
+        for(int y = 0; y < height; y++){
+            for(int x = 0; x < width; x++){
+                argb = bufferedImage.getRGB(x,y);
+                rgb = argb & 0x00FFFFFF;
+                oa = argb >>> 24;
+                a = oa == 0?0:alpha<<24;
+                argb = a^rgb;
+                newBufferedImage.setRGB(x,y,argb);
+            }
+        }
+        return newBufferedImage;
+    }
+
 
     /**
      * 放大缩小
-     *
      * @param bufferedImage
      * @param enlargementTimes
      * @return
@@ -389,7 +416,16 @@ public class WsImageUtils {
 
     }
 
-
+    /**
+     * 为图片打马赛克
+     * @param bufferedImage
+     * @param pointX
+     * @param pointY
+     * @param width
+     * @param height
+     * @param level
+     * @return
+     */
     public static BufferedImage createMosaic(BufferedImage bufferedImage, Integer pointX, Integer pointY, Integer width, Integer height, Integer level) {
         int bufferImageWidth = bufferedImage.getWidth();
         int bufferImageHeight = bufferedImage.getHeight();
@@ -535,9 +571,15 @@ public class WsImageUtils {
 
     }
 
+    /**
+     * 旋转图片
+     * @param bufferedImage
+     * @param angle
+     * @return
+     */
     public static BufferedImage rotateImage(BufferedImage bufferedImage,double angle){
         Rectangle rectangle = getRotateRectangle(bufferedImage.getWidth(),bufferedImage.getHeight(),angle);
-        BufferedImage image = new BufferedImage((int) rectangle.getWidth(),(int) rectangle.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage((int) rectangle.getWidth(),(int) rectangle.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D graphics2D = image.createGraphics();
         graphics2D.translate((rectangle.getWidth() - bufferedImage.getWidth()) / 2,(rectangle.getHeight() - bufferedImage.getHeight()) / 2);
         graphics2D.rotate(Math.toRadians(angle), BigDecimal.valueOf(bufferedImage.getWidth()/2).doubleValue(),BigDecimal.valueOf(bufferedImage.getHeight()/2).doubleValue());
@@ -566,9 +608,12 @@ public class WsImageUtils {
     }
 
 
-
-
-        public static Color getColor(String value){
+    /**
+     * 解析16进制颜色
+     * @param value
+     * @return
+     */
+    public static Color getColor(String value){
         if(!value.startsWith("#")){
             throw new RuntimeException("格式错误");
         }
