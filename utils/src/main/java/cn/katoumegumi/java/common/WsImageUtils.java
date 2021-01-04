@@ -41,25 +41,16 @@ public class WsImageUtils {
             Graphics2D graphics2D = newBufferedImage.createGraphics();
             System.out.println("图片宽度"+newBufferedImage.getWidth());
             System.out.println("图片长度"+newBufferedImage.getHeight());
-
-            //Font font1 = new Font("宋体",Font.PLAIN,120);
             Color color = getColor("#7FFA00");
             Stream.iterate(10,i->i+5).limit(1).forEach(j->{
-                /*Font font = null;
-                try {
-                    font = Font.createFont(Font.TRUETYPE_FONT, WsFileUtils.createFile("D:\\网页\\SourceHanSansCN-Normal.ttf"));
-                } catch (FontFormatException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
                 Font font = new Font("微软雅黑",Font.PLAIN,96);
                 font = font.deriveFont(Font.PLAIN,96);
                 System.out.println(font.getSize());
                 String context = "德玛西亚洛克萨斯艾欧尼亚恕瑞玛皮尔特沃夫祖安艾卡西亚";
-                long startTime = System.currentTimeMillis();
+
                 FontMetrics fontMetrics = J_LABEL.getFontMetrics(font);
                 fontMetrics = J_LABEL.getFontMetrics(font);
+                long startTime = System.currentTimeMillis();
                 List<LineText> list = splitContext(context,fontMetrics,150,0,bufferedImage.getWidth()-300,bufferedImage.getHeight(),96,20,2,3);
                 long endTime = System.currentTimeMillis();
                 System.out.println("拆解成行：" + (endTime - startTime));
@@ -70,16 +61,18 @@ public class WsImageUtils {
                     for(CharText charText:charTextList){
                         writeFontBufferedImage(newBufferedImage,charText.getValue().toString(),charText.getPointX(),lineText.getPointY(),font,color);
                     }
-                    //writeFontBufferedImage(newBufferedImage, lineText.getText(), lineText.getPointX(), lineText.getPointY(), font, color);
-                    //BufferedImage image = enlargementBufferedImage(bufferedImage,0.2,BufferedImage.TYPE_3BYTE_BGR);
-                    //mergeBufferedImage(newBufferedImage,image,200,500);
-
                 }
                 endTime = System.currentTimeMillis();
-                System.out.println(endTime - startTime);
+                System.out.println("书写文字耗费时间："+(endTime - startTime));
                 try {
+                    startTime = System.currentTimeMillis();
                     BufferedImage image = rotateImage(newBufferedImage,j);
-                    image = setBufferedImageAlpha(image,100,BufferedImage.TYPE_INT_ARGB);
+                    endTime = System.currentTimeMillis();
+                    System.out.println("旋转图片："+(endTime - startTime));
+                    startTime = System.currentTimeMillis();
+                    image = setBufferedImageAlpha(image,255,BufferedImage.TYPE_INT_ARGB);
+                    endTime = System.currentTimeMillis();
+                    System.out.println("设置透明度：" + (endTime - startTime));
                     ImageIO.write(image,"png",WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\"+j+".jpg"));
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -269,23 +262,30 @@ public class WsImageUtils {
      * @return
      */
     public static BufferedImage setBufferedImageAlpha(BufferedImage bufferedImage,Integer alpha,Integer bufferedImageType){
+        if(alpha < 0 || alpha > 255){
+            throw new RuntimeException("范围错误[0,255]");
+        }
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
         BufferedImage newBufferedImage = new BufferedImage(width,height, bufferedImageType);
-        int argb;
         int oa;
         int a;
         int rgb;
-        for(int y = 0; y < height; y++){
-            for(int x = 0; x < width; x++){
-                argb = bufferedImage.getRGB(x,y);
-                rgb = argb & 0x00FFFFFF;
-                oa = argb >>> 24;
-                a = oa == 0?0:alpha<<24;
-                argb = a^rgb;
-                newBufferedImage.setRGB(x,y,argb);
-            }
+        int[] rgbsArray = bufferedImage.getRGB(0,0,width,height,null,0,width);
+        long start = System.currentTimeMillis();
+        int length = rgbsArray.length;
+        for(int i = 0; i < length; ++i){
+            rgb = rgbsArray[i] & 0x00FFFFFF;
+            oa = rgbsArray[i] >>> 24;
+            a = oa == 0?0:alpha<<24;
+            rgbsArray[i] = a^rgb;
         }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+        WsDateUtils.getExecutionTime.accept(()->{
+            newBufferedImage.setRGB(0,0,width,height,rgbsArray,0,width);
+        });
+
         return newBufferedImage;
     }
 
@@ -581,6 +581,7 @@ public class WsImageUtils {
         Rectangle rectangle = getRotateRectangle(bufferedImage.getWidth(),bufferedImage.getHeight(),angle);
         BufferedImage image = new BufferedImage((int) rectangle.getWidth(),(int) rectangle.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D graphics2D = image.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics2D.translate((rectangle.getWidth() - bufferedImage.getWidth()) / 2,(rectangle.getHeight() - bufferedImage.getHeight()) / 2);
         graphics2D.rotate(Math.toRadians(angle), BigDecimal.valueOf(bufferedImage.getWidth()/2).doubleValue(),BigDecimal.valueOf(bufferedImage.getHeight()/2).doubleValue());
         graphics2D.drawImage(bufferedImage,null,0,0);
@@ -625,7 +626,7 @@ public class WsImageUtils {
         return J_LABEL.getFontMetrics(font);
     }
 
-    static class LineText{
+    public static class LineText{
 
         private Integer pointX;
 
@@ -697,7 +698,7 @@ public class WsImageUtils {
         }
     }
 
-    static class CharText{
+    public static class CharText{
 
         private Integer pointX;
 

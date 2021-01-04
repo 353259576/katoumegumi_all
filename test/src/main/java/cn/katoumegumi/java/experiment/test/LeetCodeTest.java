@@ -22,28 +22,8 @@ public class LeetCodeTest {
     public static int leftValue;
 
     public static void main(String[] args) {
-        //repeatedSubstringPattern("1434");
-        /*int i = totalNQueens(1);
-        System.out.println(i);*/
-        //boolean k = backspaceCompare("","");
-        //System.out.println(k);
-        //System.out.println(JSON.toJSONString(partitionLabels("ababcbacadefegdehijhklij")));
-        //System.out.println(uniqueOccurrences(new int[]{1,1}));
-        //String string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-        //List<String> wordList = Arrays.asList("a","aa","aaa","aaaa","aaaaa","aaaaaa","aaaaaaa","aaaaaaaa","aaaaaaaaa","aaaaaaaaaa");
-
-       /* String string = "abcd";
-        List<String> wordList = Arrays.asList("a","abc","b","cd");
-        System.out.println(JSON.toJSONString(wordBreak(string,wordList)));*/
-
-        //System.out.println(JSON.toJSONString(kClosest(new int[][]{{68,97},{34,-84},{60,100},{2,31},{-27,-38},{-73,-74},{-55,-39},{62,91},{62,92},{-57,-67}},5)));
-        System.out.println(JSON.toJSONString(reorganizeString("vvvlo")));
-
-        System.out.println(JSON.toJSONString(searchRange(new int[]{2,2},2)));
-
-
-        HashMap hashMap = new HashMap();
-
+        System.out.println(predictPartyVictory("RD"));
+        System.out.println(canPlaceFlowers(new int[]{1,0,0,0,0,1},2));
     }
 
     /**
@@ -1293,13 +1273,65 @@ public class LeetCodeTest {
         while (!rq.isEmpty() && !dq.isEmpty()){
             rIndex = rq.poll();
             dIndex = dq.poll();
-            if(rIndex > dIndex){
-
+            if(rIndex < dIndex){
+                rq.offer(rIndex + n);
+            }else {
+                dq.offer(dIndex + n);
             }
         }
 
 
-        return null;
+        return rq.isEmpty()?"Dire":"Radiant";
     }
+
+    /**
+     * 605. 种花问题
+     * @param flowerbed
+     * @param n
+     * @return
+     */
+    public static boolean canPlaceFlowers(int[] flowerbed, int n) {
+        if(n <= 0){
+            return true;
+        }
+        if(flowerbed.length == 0){
+            return false;
+        }
+        int prev = 0;
+        int current = flowerbed[0];
+        int next = 0;
+        for(int i = 1; i < flowerbed.length; i++){
+            prev = current;
+            current = flowerbed[i - 1];
+            next = flowerbed[i];
+            if(prev == 0 && current == 0 && next == 0){
+                n--;
+                flowerbed[i - 1] = 1;
+                current = 1;
+                if(n <= 0){
+                    return true;
+                }
+            }
+        }
+        prev = current;
+        current = next;
+        if(prev == 0 && current == 0){
+            n--;
+            if(n <= 0){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 239. 滑动窗口最大值
+     * @param nums
+     * @param k
+     * @return
+     */
+    /*public int[] maxSlidingWindow(int[] nums, int k) {
+
+    }*/
 
 }
