@@ -1330,8 +1330,8 @@ public class LeetCodeTest {
      * @param k
      * @return
      */
-    /*public int[] maxSlidingWindow(int[] nums, int k) {
-
-    }*/
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        return null;
+    }
 
 }
