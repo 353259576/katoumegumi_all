@@ -1374,5 +1374,12 @@ public class MySearchList {
     public List<String> getColumnNameList() {
         return columnNameList;
     }
+
+    public MySearchList condition(boolean condition,Consumer<MySearchList> consumer){
+        if(condition){
+            consumer.accept(this);
+        }
+        return this;
+    }
 }
 

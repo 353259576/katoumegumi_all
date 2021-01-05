@@ -91,6 +91,9 @@ public class TestController {
                         .gt(User::getName,1)
                         .lt(User::getName,1)
                         .lte(User::getName,1)
+                        .condition(false,m->{
+                            m.eq(User::getName,"你好世界");
+                        })
                         .eq("userDetails.userDetailsRemake", UserDetailsRemake::getId, "1").sort(User::getName, "desc");
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectSqlEntity entity = sqlModelUtils.select();
