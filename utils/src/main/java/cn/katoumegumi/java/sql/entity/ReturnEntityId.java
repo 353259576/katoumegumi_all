@@ -27,27 +27,6 @@ public class ReturnEntityId {
             System.arraycopy(parentEntity.getReturnEntityId().getIdSigns(),0,idSigns,0,parentEntity.getReturnEntityId().getIdSigns().length);
             System.arraycopy(valueList,0,idSigns,parentEntity.getReturnEntityId().getIdSigns().length,length);
         }
-
-
-        /*Object[] valueList = returnEntity.getIdValueList();
-        StringBuilder stringBuilder = new StringBuilder();
-        int length = idList.size();
-        for(int i = 0; i < length; i++){
-            stringBuilder.append(idList.get(i).hashCode());
-            stringBuilder.append(":");
-            if(valueList[i] != null){
-                stringBuilder.append(valueList[i]);
-            }else {
-                stringBuilder.append("`");
-            }
-            stringBuilder.append("_");
-        }
-        ReturnEntity entity = returnEntity.getParentReturnEntity();
-        if (entity != null){
-            stringBuilder.append(";");
-            stringBuilder.append(entity.getReturnEntityId().getIdSign());
-        }
-        idSign = stringBuilder.toString();*/
     }
 
     @Override
@@ -81,16 +60,7 @@ public class ReturnEntityId {
             }
         }
         return true;
-        //return ((ReturnEntityId) obj).getIdSign().equals(this.getIdSign());
     }
-
-    /*public String getIdSign() {
-        return idSign;
-    }
-
-    public void setIdSign(String idSign) {
-        this.idSign = idSign;
-    }*/
 
     public Object[] getIdSigns() {
         return idSigns;

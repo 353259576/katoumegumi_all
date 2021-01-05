@@ -59,7 +59,7 @@ public class TestController {
         //MySearchList searchList = MySearchList.create(User.class);
         //new SQLModelUtils(searchList).select();
 
-        /*WsDateUtils.getExecutionTime.accept(()->{
+        WsDateUtils.getExecutionTime.accept(()->{
             for(int i = 0; i < 1; i++) {
                 MySearchList mySearchList = MySearchList.create(User.class)
                         .setAlias("u")
@@ -73,13 +73,31 @@ public class TestController {
                         .innerJoin(UserDetailsRemake.class, t -> t.setTableNickName("ud").setJoinTableNickName("ud",UserDetails::getUserDetailsRemake).on(UserDetails::getId, UserDetailsRemake::getUserDetailsId))
                         .in("userDetails",UserDetails::getId,MySearchList.create(UserDetailsRemake.class).singleColumnName(UserDetailsRemake::getUserDetailsId).eqp("userDetailsId","User.userDetails.id"))
                         .eq("userDetails", UserDetails::getSex, "1")
+                        .ne("userDetails", UserDetails::getSex, "1")
+                        .isNull(User::getName)
+                        .isNotNull(User::getName)
+                        .in(User::getName,Arrays.asList("1","2"))
+                        .nIn(User::getName,Arrays.asList("1","2"))
+                        .exists("234234",Collections.singletonList("1"))
+                        .notExists("234234",Collections.singletonList("1"))
+                        .between(User::getName,"1","2")
+                        .notBetween(User::getName,"1","3")
+                        .eqp(User::getName,User::getName)
+                        .gtep(User::getName,User::getName)
+                        .gtp(User::getName,User::getName)
+                        .ltp(User::getName,User::getName)
+                        .ltep(User::getName,User::getName)
+                        .gte(User::getName,1)
+                        .gt(User::getName,1)
+                        .lt(User::getName,1)
+                        .lte(User::getName,1)
                         .eq("userDetails.userDetailsRemake", UserDetailsRemake::getId, "1").sort(User::getName, "desc");
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectSqlEntity entity = sqlModelUtils.select();
                 System.out.println(entity.getSelectSql());
                 System.out.println(JSON.toJSONString(entity.getValueList()));
             }
-        });*/
+        });
 
 
         WsDateUtils.getExecutionTime.accept(()->{
