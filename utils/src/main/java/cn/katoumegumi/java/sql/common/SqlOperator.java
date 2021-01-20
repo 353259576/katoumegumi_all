@@ -89,13 +89,13 @@ public enum SqlOperator {
      * not null
      */
     NOTNULL((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.nullConditionHandle(true,translateNameUtils,mySearch,prefix,baseWhereValueList);
+        return SQLModelUtils.nullConditionHandle(false,translateNameUtils,mySearch,prefix,baseWhereValueList);
     }),
     /**
      * is null
      */
     NULL((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.nullConditionHandle(false,translateNameUtils,mySearch,prefix,baseWhereValueList);
+        return SQLModelUtils.nullConditionHandle(true,translateNameUtils,mySearch,prefix,baseWhereValueList);
     }),
     /**
      * 不等于
