@@ -75,7 +75,7 @@ public class ${table.entityName}Controller {
     public IPage<${table.entityName}> selectPage(Page<?> page){
 <#if type == 0>
         MySearchList searchList = MySearchList.create(${table.entityName}.class);
-        searchList.setPageVO(page);
+        searchList.setSqlLimit(sqlLimit -> sqlLimit.setCurrent(page.getCurrent()).setSize(page.getSize()));
         IPage<${table.entityName}> iPage = ${table.firstLowerEntityName}Service.selectPage(searchList);
 </#if>
 <#if type == 1>
