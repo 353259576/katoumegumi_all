@@ -383,7 +383,7 @@ public class WsJdbcUtils {
 
     public <T> IPage<T> getTPage(T t, Page page) {
         MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);
-        mySearchList.setPageVO(page);
+        mySearchList.setSqlLimit(sqlLimit -> sqlLimit.setCurrent(page.getCurrent()).setSize(page.getSize()));
         return getTPage(mySearchList);
     }
 

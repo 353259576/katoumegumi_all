@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>test</artifactId>
+    <artifactId>test</artifactId><build><plugins><plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><configuration><source>8</source><target>8</target></configuration></plugin></plugins></build>
 
 
     <dependencies>
@@ -36,6 +36,14 @@
             <artifactId>zxing-parent</artifactId>
             <version>${zxing.version}</version>
             <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org</groupId>
+            <artifactId>opencv</artifactId>
+            <version>4.5.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}\src\main\resources\lib\opencv-451.jar</systemPath>
         </dependency>
     </dependencies>
 

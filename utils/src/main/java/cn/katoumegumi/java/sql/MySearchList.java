@@ -4,11 +4,9 @@ import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -137,17 +135,14 @@ public class MySearchList {
     }
 
 
-    public MySearchList setPageVO(Page pageVO) {
+    /*public MySearchList setPageVO(Page pageVO) {
         SqlLimit sqlLimit = new SqlLimit();
         sqlLimit.setCurrent(pageVO.getCurrent());
-        if(pageVO.getCurrent() < 1L){
-            pageVO.setCurrent(1L);
-        }
-        sqlLimit.setOffset((pageVO.getCurrent() - 1) * pageVO.getSize());
         sqlLimit.setSize(pageVO.getSize());
+        sqlLimit.build();
         this.sqlLimit = sqlLimit;
         return this;
-    }
+    }*/
 
     public SqlLimit getSqlLimit() {
         return sqlLimit;
@@ -156,6 +151,7 @@ public class MySearchList {
     public MySearchList setSqlLimit(Consumer<SqlLimit> sqlLimitConsumer) {
         SqlLimit sqlLimit = new SqlLimit();
         sqlLimitConsumer.accept(sqlLimit);
+        sqlLimit.build();
         this.sqlLimit = sqlLimit;
         return this;
     }

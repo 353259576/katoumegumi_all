@@ -60,7 +60,7 @@ public abstract class AbstractJpaService<K, P, D extends JpaDao<K, P>> implement
         if (sqlLimit == null) {
             sqlLimit = new SqlLimit();
         }
-        Pageable pageable = PageRequest.of(Long.valueOf(sqlLimit.getCurrent() - 1).intValue(), Long.valueOf(sqlLimit.getSize()).intValue());
+        Pageable pageable = PageRequest.of(Math.toIntExact(sqlLimit.getCurrent()), Long.valueOf(sqlLimit.getSize()).intValue());
         org.springframework.data.domain.Page<P> tPage = getEntityDao().findAll(specification, pageable);
         return convertPage(tPage);
     }

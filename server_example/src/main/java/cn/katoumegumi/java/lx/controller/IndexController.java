@@ -1,60 +1,32 @@
 package cn.katoumegumi.java.lx.controller;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.datasource.WsJdbcUtils;
-import cn.katoumegumi.java.datasource.annotation.DataBase;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.hibernate.HibernateTransactional;
-import cn.katoumegumi.java.http.client.model.HttpRequestBody;
-import cn.katoumegumi.java.http.client.model.HttpResponseTask;
 import cn.katoumegumi.java.lx.jpa.UserJpaDao;
 import cn.katoumegumi.java.lx.mapper.UserMapper;
 import cn.katoumegumi.java.lx.model.User;
-import cn.katoumegumi.java.lx.model.UserCC;
 import cn.katoumegumi.java.lx.model.UserDetails;
 import cn.katoumegumi.java.lx.model.UserDetailsRemake;
 import cn.katoumegumi.java.lx.service.IndexService;
 import cn.katoumegumi.java.lx.service.UserService;
 import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.PageConvertUtil;
-import cn.katoumegumi.java.sql.SQLModelUtils;
-import cn.katoumegumi.java.sql.SelectSqlEntity;
-import cn.katoumegumi.java.sql.entity.SelectCallable;
-import cn.katoumegumi.java.utils.PageConvertUtils;
-import cn.katoumegumi.java.vertx.sql.utils.SqlUtils;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.ext.sql.SQLClient;
-import io.vertx.ext.sql.SQLConnection;
 import org.apache.dubbo.config.annotation.Service;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Consumer;
 
 @Service(version = "1.0.0", protocol = {"dubbo", "rest"})
 @RestController

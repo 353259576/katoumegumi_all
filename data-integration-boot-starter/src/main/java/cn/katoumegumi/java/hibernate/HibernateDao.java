@@ -131,8 +131,8 @@ public class HibernateDao {
         if (sqlLimit == null) {
             sqlLimit = new SqlLimit();
         }
-        Integer firstResult = Integer.parseInt(Long.valueOf((sqlLimit.getCurrent() - 1) * sqlLimit.getSize()).toString());
-        List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria, firstResult, Integer.parseInt(Long.valueOf(sqlLimit.getSize()).toString()));
+        Integer firstResult = Math.toIntExact(sqlLimit.getOffset());
+        List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria, firstResult, Long.valueOf(sqlLimit.getSize()).intValue());
         Integer count = 0;
         if (list.size() == 0) {
             count = list.size();

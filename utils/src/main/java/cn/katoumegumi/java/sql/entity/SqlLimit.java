@@ -5,7 +5,7 @@ package cn.katoumegumi.java.sql.entity;
  */
 public class SqlLimit {
 
-    private long current = 1L;
+    private long current = -1L;
 
     private long offset = 0L;
 
@@ -30,12 +30,22 @@ public class SqlLimit {
         return this;
     }
 
-    public Long getCurrent() {
+    public long getCurrent() {
         return current;
     }
 
-    public SqlLimit setCurrent(Long current) {
+    public SqlLimit setCurrent(long current) {
         this.current = current;
         return this;
+    }
+
+    public void build(){
+        if (this.current > -1){
+            if (this.current != 0){
+                this.offset = (this.current - 1) * this.size;
+            }
+        }else {
+            this.current = this.offset/this.size + 1;
+        }
     }
 }
