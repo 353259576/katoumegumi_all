@@ -1,15 +1,7 @@
 package cn.katoumegumi.java.sql.common;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.*;
-import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
-import cn.katoumegumi.java.sql.entity.ColumnConditionEntity;
-
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * @author 10480
@@ -167,7 +159,12 @@ public enum SqlOperator {
     DIVIDE((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
         return SQLModelUtils.commonUpdateConditionHandle("/",translateNameUtils,mySearch,prefix,baseWhereValueList);
 
-    });
+    }),
+    /**
+     * 等式
+     */
+    EQUATION(null)
+    ;
 
 
 

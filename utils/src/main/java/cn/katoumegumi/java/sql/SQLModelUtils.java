@@ -340,6 +340,9 @@ public class SQLModelUtils {
      * @return
      */
     private String createWhereColumn(String prefix, MySearch mySearch) {
+        if(mySearch.getOperator().equals(SqlOperator.EQUATION)){
+            return sqlEquationHandel((SqlEquation) mySearch.getValue(),prefix);
+        }
         switch (mySearch.getOperator()) {
             case SET:
             case ADD:
@@ -1455,6 +1458,73 @@ public class SQLModelUtils {
                 " = IFNULL(" + SQLModelUtils.guardKeyword(translateNameUtils.getAbbreviation(prefix)) +
                 "." +
                 SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) + ",0) "+condition+" ? ";
+    }
+
+    public String sqlEquationHandel(SqlEquation sqlEquation,String prefix){
+        List<Integer> typeList = sqlEquation.getTypeList();
+        List<Object> valueList = sqlEquation.getValueList();
+        int length = typeList.size();
+        StringBuilder sb = new StringBuilder();
+        int type;
+        Object value;
+        for(int i = 0; i < length; ++i){
+            type = typeList.get(i);
+            value = valueList.get(i);
+            if(type == 1){
+                if(i > 0 && !typeList.get(i - 1).equals(2)){
+                    throw new RuntimeException("顺序错误,列前面必须为符号");
+                }
+                if(value instanceof SqlEquation){
+                    sb.append("(");
+                    sb.append(sqlEquationHandel((SqlEquation) value,prefix)).append(' ');
+                    sb.append(") ");
+                }else {
+                    ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity((String) value,prefix);
+                    sb.append(guardKeyword(columnBaseEntity.getTableNickName()))
+                            .append('.')
+                            .append(guardKeyword(columnBaseEntity.getColumnName())).append(' ');
+                }
+            }else if(type == 2){
+                if(i > 0 && typeList.get(i - 1).equals(2)){
+                    throw new RuntimeException("顺序错误,符号不允许相连");
+                }
+                //SqlEquation.Symbol symbol = (SqlEquation.Symbol) value;
+                //sb.append(symbol.getSymbol()).append(' ');
+                sb.append(value);
+            }else if(type == 3){
+                if(i > 0 && !typeList.get(i - 1).equals(2)){
+                    throw new RuntimeException("顺序错误,值前面必须为符号");
+                }
+                if(WsBeanUtils.isArray(value.getClass())){
+                    List<String> symbols = new ArrayList<>();
+                    if(WsFieldUtils.classCompare(value.getClass(),Collection.class)){
+                        Collection<?> collection = (Collection<?>) value;
+                        for (Object o : collection) {
+                            symbols.add("?");
+                            baseWhereValueList.add(o);
+                        }
+                        sb.append("(")
+                                .append(WsStringUtils.jointListString(symbols,","))
+                                .append(") ");
+                    }else {
+                        Object[] values = (Object[]) value;
+                        for (Object o:values){
+                            symbols.add("?");
+                            baseWhereValueList.add(o);
+                        }
+                    }
+                    sb.append("(")
+                            .append(WsStringUtils.jointListString(symbols,","))
+                            .append(") ");
+
+                }else {
+                    sb.append("? ");
+                    baseWhereValueList.add(value);
+                }
+            }
+
+        }
+        return sb.toString();
     }
 
 }

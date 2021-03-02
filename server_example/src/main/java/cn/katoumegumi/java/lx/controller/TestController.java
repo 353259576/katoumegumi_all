@@ -94,7 +94,9 @@ public class TestController {
                         .condition(false,m->{
                             m.eq(User::getName,"你好世界");
                         })
-                        .eq("userDetails.userDetailsRemake", UserDetailsRemake::getId, "1").sort(User::getName, "desc");
+                        .eq("userDetails.userDetailsRemake", UserDetailsRemake::getId, "1").sort(User::getName, "desc")
+                        .sqlEquation(sqlEquation -> sqlEquation.column(User::getName).add().value(11).subtract().column(User::getPassword).equal().value(20))
+                        ;
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectSqlEntity entity = sqlModelUtils.select();
                 System.out.println(entity.getSelectSql());

@@ -3,6 +3,7 @@ package cn.katoumegumi.java.sql;
 import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.TableJoinType;
+import cn.katoumegumi.java.sql.entity.SqlEquation;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 
 import java.util.*;
@@ -1375,6 +1376,14 @@ public class MySearchList {
         if(condition){
             consumer.accept(this);
         }
+        return this;
+    }
+
+
+    public MySearchList sqlEquation(Consumer<SqlEquation> consumer){
+        SqlEquation sqlEquation = new SqlEquation();
+        consumer.accept(sqlEquation);
+        mySearches.add(new MySearch(null,SqlOperator.EQUATION,sqlEquation));
         return this;
     }
 }

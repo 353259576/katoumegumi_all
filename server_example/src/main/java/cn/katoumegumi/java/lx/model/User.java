@@ -39,10 +39,13 @@ public class User implements Serializable {
     private LocalDateTime createDate;
 
     //@Transient
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name= "user_id")
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "userId")
+    //@JoinColumn(name= "user_id")
     //Fetch(FetchMode.JOIN)
     private List<UserDetails> userDetails;
+
+    @Column(name = "user_id")
+    private Long userId;
 
     //private int[] ints = new int[]{1,2,3};
 
