@@ -1,7 +1,6 @@
 package cn.katoumegumi.java.sql.entity;
 
 import cn.katoumegumi.java.common.SFunction;
-import cn.katoumegumi.java.common.SupplierFunc;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 
@@ -86,6 +85,37 @@ public class SqlEquation {
         return symbol(Symbol.DIVIDE.getSymbol());
     }
 
+    public SqlEquation gt(){
+        return symbol(Symbol.GT.getSymbol());
+    }
+    public SqlEquation gte(){
+        return symbol(Symbol.GTE.getSymbol());
+    }
+
+    public SqlEquation lt(){
+        return symbol(Symbol.LT.getSymbol());
+    }
+
+    public SqlEquation lte(){
+        return symbol(Symbol.LTE.getSymbol());
+    }
+
+    public SqlEquation and(){
+        return symbol(Symbol.AND.getSymbol());
+    }
+
+    public SqlEquation or(){
+        return symbol(Symbol.OR.getSymbol());
+    }
+
+    public SqlEquation xor(){
+        return symbol(Symbol.XOR.getSymbol());
+    }
+
+    public SqlEquation not(){
+        return symbol(Symbol.NOT.getSymbol());
+    }
+
     public enum Symbol {
         /**
          * 符号
@@ -94,7 +124,16 @@ public class SqlEquation {
         SUBTRACT(" - "),
         MULTIPLY(" * "),
         DIVIDE(" / "),
-        EQUAL(" = ");
+        EQUAL(" = "),
+        GT(" > "),
+        GTE(" >= "),
+        LT(" < "),
+        LTE(" <= "),
+        AND(" > "),
+        OR(" > "),
+        XOR(" ^ "),
+        NOT(" ~ ")
+        ;
 
         private final String symbol;
 

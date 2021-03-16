@@ -1480,7 +1480,7 @@ public class SQLModelUtils {
                     sb.append(") ");
                 }else {
                     ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity((String) value,prefix);
-                    sb.append(guardKeyword(columnBaseEntity.getTableNickName()))
+                    sb.append(guardKeyword(translateNameUtils.getAbbreviation(columnBaseEntity.getTableNickName())))
                             .append('.')
                             .append(guardKeyword(columnBaseEntity.getColumnName())).append(' ');
                 }
