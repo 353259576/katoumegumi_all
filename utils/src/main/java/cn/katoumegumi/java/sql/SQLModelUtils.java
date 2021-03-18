@@ -1521,6 +1521,14 @@ public class SQLModelUtils {
                     sb.append("? ");
                     baseWhereValueList.add(value);
                 }
+            }else if(type == 4){
+                MySearchList searchList = (MySearchList) value;
+                SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList,translateNameUtils);
+                SelectSqlEntity entity = sqlModelUtils.select();
+                sb.append('(')
+                        .append(entity.getSelectSql())
+                        .append(')');
+                baseWhereValueList.addAll(entity.getValueList());
             }
 
         }

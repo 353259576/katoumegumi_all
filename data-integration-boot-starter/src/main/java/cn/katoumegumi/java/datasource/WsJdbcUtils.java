@@ -8,6 +8,7 @@ import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -37,6 +38,9 @@ public class WsJdbcUtils {
 
 
     public <T> int insert(T t) {
+        if(t == null){
+            return 0;
+        }
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSql(t);
@@ -86,6 +90,9 @@ public class WsJdbcUtils {
     }
 
     public <T> int insert(List<T> tList) {
+        if(WsListUtils.isEmpty(tList)){
+            return 0;
+        }
         MySearchList mySearchList = MySearchList.create(tList.get(0).getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSqlBatch(tList);
@@ -185,6 +192,9 @@ public class WsJdbcUtils {
         return update(t,false);
     }
     public <T> int update(T t,boolean isAll) {
+        if(t == null){
+            return 0;
+        }
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t,isAll);
@@ -193,6 +203,9 @@ public class WsJdbcUtils {
     }
 
     public int update(MySearchList mySearchList) {
+        if(mySearchList == null){
+            return 0;
+        }
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
         log.debug(updateSqlEntity.getUpdateSql());
@@ -200,7 +213,9 @@ public class WsJdbcUtils {
     }
 
     public void updateBatch(List<MySearchList> mySearchLists) {
-
+        if(WsListUtils.isEmpty(mySearchLists)){
+            return;
+        }
         Map<String,List<Object[]>> map = new HashMap<>();
         for(MySearchList mySearchList:mySearchLists){
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
@@ -221,10 +236,12 @@ public class WsJdbcUtils {
     }
 
     public <T> void updateBatchByT(List<T> tList,boolean isAll) {
-
+        if(WsListUtils.isEmpty(tList)){
+            return;
+        }
         Map<String,List<Object[]>> map = new HashMap<>();
-        List<String> sqlList = new ArrayList<>(tList.size());
-        List<Object[]> list = new ArrayList<>();
+        //List<String> sqlList = new ArrayList<>(tList.size());
+        //List<Object[]> list = new ArrayList<>();
         for(T t:tList){
             MySearchList mySearchList = MySearchList.create(t.getClass());
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);

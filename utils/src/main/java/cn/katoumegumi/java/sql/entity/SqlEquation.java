@@ -3,6 +3,7 @@ package cn.katoumegumi.java.sql.entity;
 import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.MySearchList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,11 @@ public class SqlEquation {
         return this;
     }
 
+    public <T> SqlEquation sql(MySearchList mySearchList){
+        typeList.add(4);
+        valueList.add(mySearchList);
+        return this;
+    }
 
     public SqlEquation value(Object o){
         typeList.add(3);
