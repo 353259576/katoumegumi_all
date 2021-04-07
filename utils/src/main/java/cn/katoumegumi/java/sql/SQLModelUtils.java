@@ -75,7 +75,7 @@ public class SQLModelUtils {
         this.mySearchList = mySearchList;
         this.translateNameUtils = translateNameUtils;
         mainClass = mySearchList.getMainClass();
-        if (WsStringUtils.isEmpty(mySearchList.getAlias())) {
+        if (WsStringUtils.isBlank(mySearchList.getAlias())) {
             translateNameUtils.getAbbreviation(mainClass.getSimpleName());
         } else {
             translateNameUtils.setAbbreviation(mainClass.getSimpleName(), mySearchList.getAlias());

@@ -87,6 +87,35 @@ public class SqlEquation {
     public SqlEquation equal(){
         return symbol(Symbol.EQUAL.getSymbol());
     }
+
+    public SqlEquation notEqual(){
+        return symbol(Symbol.NOT_EQUAL.getSymbol());
+    }
+
+    public SqlEquation in(){
+        return symbol(Symbol.IN.getSymbol());
+    }
+
+    public SqlEquation notIn(){
+        return symbol(Symbol.NOT_IN.getSymbol());
+    }
+
+    public SqlEquation isNull(){
+        return symbol(Symbol.NULL.getSymbol());
+    }
+
+    public SqlEquation isNotNull(){
+        return symbol(Symbol.NOT_NULL.getSymbol());
+    }
+
+    public SqlEquation exists(){
+        return symbol(Symbol.EXISTS.getSymbol());
+    }
+
+    public SqlEquation notExists(){
+        return symbol(Symbol.NOT_EXISTS.getSymbol());
+    }
+
     public SqlEquation divide(){
         return symbol(Symbol.DIVIDE.getSymbol());
     }
@@ -131,12 +160,19 @@ public class SqlEquation {
         MULTIPLY(" * "),
         DIVIDE(" / "),
         EQUAL(" = "),
+        NOT_EQUAL(" != "),
+        NULL(" is NULL "),
+        NOT_NULL(" is not NULL "),
+        IN(" in "),
+        NOT_IN(" not in "),
+        EXISTS(" exists "),
+        NOT_EXISTS(" not exists "),
         GT(" > "),
         GTE(" >= "),
         LT(" < "),
         LTE(" <= "),
-        AND(" > "),
-        OR(" > "),
+        AND(" & "),
+        OR(" | "),
         XOR(" ^ "),
         NOT(" ~ ")
         ;
