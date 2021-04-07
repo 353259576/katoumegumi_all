@@ -190,7 +190,6 @@ public class TranslateNameUtils {
 
     /**
      * 转换sql语句中表名为简写
-     *
      * @param searchSql
      * @return
      */
