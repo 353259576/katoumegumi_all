@@ -4,6 +4,7 @@ import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.common.SqlCommon;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.entity.*;
@@ -208,8 +209,7 @@ public class SQLModelUtils {
         baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), columnBaseEntity.getFieldColumnRelation().getFieldClass()));
         return SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()) +
                 "." +
-                SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) +
-                " " + condition + " ?";
+                SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) + condition + SqlCommon.PLACEHOLDER;
     }
 
     /**
@@ -237,7 +237,7 @@ public class SQLModelUtils {
         return SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()) +
                 "." +
                 SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) +
-                " like concat('%',?,'%')";
+                SqlCommon.LIKE + "concat('%',"+SqlCommon.PLACEHOLDER+",'%')";
     }
 
     /**
@@ -277,9 +277,13 @@ public class SQLModelUtils {
     public static String existsConditionHandle(boolean condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
         StringBuilder tableColumn = new StringBuilder();
         if (!condition) {
-            tableColumn.append(" not");
+            //tableColumn.append(" not");
+            tableColumn.append(SqlCommon.NOT_EXISTS);
+        } else {
+            tableColumn.append(SqlCommon.EXISTS);
         }
-        tableColumn.append(" exists (");
+        tableColumn.append(SqlCommon.LEFT_BRACKETS);
+        //tableColumn.append(" exists (");
         if (mySearch.getValue() instanceof MySearchList) {
             SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) mySearch.getValue(), translateNameUtils);
             SelectSqlEntity entity = sqlModelUtils.select();
@@ -301,7 +305,8 @@ public class SQLModelUtils {
                 }
             }
         }
-        tableColumn.append(") ");
+        //tableColumn.append(") ");
+        tableColumn.append(SqlCommon.RIGHT_BRACKETS);
         return tableColumn.toString();
     }
 
@@ -322,11 +327,14 @@ public class SQLModelUtils {
         tableColumn.append(".");
         tableColumn.append(SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()));
         if (!condition) {
-            tableColumn.append(" not");
+            //tableColumn.append(" not");
+            tableColumn.append(SqlCommon.NOT_BETWEEN);
+        } else {
+            tableColumn.append(SqlCommon.BETWEEN);
         }
         if (WsBeanUtils.isArray(mySearch.getValue().getClass())) {
 
-            tableColumn.append(" between ");
+            //tableColumn.append(" between ");
             if (mySearch.getValue().getClass().isArray()) {
                 Object[] objects = (Object[]) mySearch.getValue();
                 if (objects.length != 2) {
@@ -334,11 +342,13 @@ public class SQLModelUtils {
                     throw new RuntimeException(columnBaseEntity.getFieldName() + "between只能允许有两个值");
                 }
                 tableColumn
-                        .append(WsBeanUtils.objectToT(objects[0], columnBaseEntity.getField().getType()))
-                        .append(" AND ")
-                        .append(WsBeanUtils.objectToT(objects[1], columnBaseEntity.getField().getType()));
-                baseWhereValueList.add(objects[0]);
-                baseWhereValueList.add(objects[1]);
+                        .append(SqlCommon.PLACEHOLDER)
+                        .append(SqlCommon.SPACE)
+                        .append(SqlCommon.SQL_AND)
+                        .append(SqlCommon.SPACE)
+                        .append(SqlCommon.PLACEHOLDER);
+                baseWhereValueList.add(WsBeanUtils.objectToT(objects[0], columnBaseEntity.getField().getType()));
+                baseWhereValueList.add(WsBeanUtils.objectToT(objects[1], columnBaseEntity.getField().getType()));
             } else {
                 Collection<?> collection = (Collection<?>) mySearch.getValue();
                 if (collection.size() != 2) {
@@ -346,10 +356,13 @@ public class SQLModelUtils {
                 }
                 Iterator<?> iterator = collection.iterator();
                 tableColumn
-                        .append(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType()))
-                        .append(" AND ")
-                        .append(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType()));
-                baseWhereValueList.addAll(collection);
+                        .append(SqlCommon.PLACEHOLDER)
+                        .append(SqlCommon.SPACE)
+                        .append(SqlCommon.SQL_AND)
+                        .append(SqlCommon.SPACE)
+                        .append(SqlCommon.PLACEHOLDER);
+                baseWhereValueList.add(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType()));
+                baseWhereValueList.add(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType()));
             }
         }
         return tableColumn.toString();
@@ -372,14 +385,19 @@ public class SQLModelUtils {
         tableColumn.append(".");
         tableColumn.append(SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()));
         if (!condition) {
-            tableColumn.append(" not");
+            //tableColumn.append(" not");
+            tableColumn.append(SqlCommon.NOT_IN);
+        } else {
+            tableColumn.append(SqlCommon.IN);
         }
         if (mySearch.getValue() instanceof MySearchList) {
             SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) mySearch.getValue(), translateNameUtils);
             SelectSqlEntity entity = sqlModelUtils.select();
-            tableColumn.append(" in(");
+            //tableColumn.append(" in(");
+            tableColumn.append(SqlCommon.LEFT_BRACKETS);
             tableColumn.append(entity.getSelectSql());
-            tableColumn.append(")");
+            //tableColumn.append(")");
+            tableColumn.append(SqlCommon.RIGHT_BRACKETS);
             if (WsListUtils.isNotEmpty(entity.getValueList())) {
                 baseWhereValueList.addAll(entity.getValueList());
             }
@@ -390,25 +408,25 @@ public class SQLModelUtils {
                 List<String> symbols = new ArrayList<>();
                 while (iterator.hasNext()) {
                     Object o = iterator.next();
-                    symbols.add("?");
+                    symbols.add(SqlCommon.PLACEHOLDER);
                     baseWhereValueList.add(WsBeanUtils.objectToT(o, columnBaseEntity.getFieldColumnRelation().getFieldClass()));
                 }
-                tableColumn.append(" in");
-                tableColumn.append('(');
-                tableColumn.append(WsStringUtils.jointListString(symbols, ","));
-                tableColumn.append(')');
+                //tableColumn.append(" in");
+                tableColumn.append(SqlCommon.LEFT_BRACKETS);
+                tableColumn.append(WsStringUtils.jointListString(symbols, SqlCommon.COMMA));
+                tableColumn.append(SqlCommon.RIGHT_BRACKETS);
 
             } else if (mySearch.getValue().getClass().isArray()) {
                 Object[] os = (Object[]) mySearch.getValue();
                 List<String> symbols = new ArrayList<>();
                 for (Object o : os) {
-                    symbols.add("?");
+                    symbols.add(SqlCommon.PLACEHOLDER);
                     baseWhereValueList.add(WsBeanUtils.objectToT(o, columnBaseEntity.getFieldColumnRelation().getFieldClass()));
                 }
-                tableColumn.append(" in");
-                tableColumn.append('(');
-                tableColumn.append(WsStringUtils.jointListString(symbols, ","));
-                tableColumn.append(')');
+                //tableColumn.append(" in");
+                tableColumn.append(SqlCommon.LEFT_BRACKETS);
+                tableColumn.append(WsStringUtils.jointListString(symbols, SqlCommon.COMMA));
+                tableColumn.append(SqlCommon.RIGHT_BRACKETS);
             } else {
                 throw new RuntimeException(columnBaseEntity.getFieldName() + "参数非数组类型");
             }
@@ -448,11 +466,11 @@ public class SQLModelUtils {
         return condition ? SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()) +
                 "." +
                 SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) +
-                " is null" :
+                SqlCommon.NULL :
                 SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()) +
                         "." +
                         SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) +
-                        " is not null";
+                        SqlCommon.NOT_NULL;
     }
 
     /**
@@ -466,7 +484,7 @@ public class SQLModelUtils {
      */
     public static String sortConditionHandle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
         StringBuilder tableColumn = new StringBuilder();
-        if (mySearch.getFieldName().endsWith(")")) {
+        if (mySearch.getFieldName().endsWith(String.valueOf(SqlCommon.RIGHT_BRACKETS))) {
             tableColumn.append(mySearch.getFieldName());
         } else {
             ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), prefix);
@@ -474,7 +492,7 @@ public class SQLModelUtils {
             tableColumn.append(".");
             tableColumn.append(SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()));
         }
-        tableColumn.append(' ');
+        tableColumn.append(SqlCommon.SPACE);
         tableColumn.append(mySearch.getValue());
         return tableColumn.toString();
     }
@@ -495,7 +513,7 @@ public class SQLModelUtils {
         return SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()) +
                 "." +
                 SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) +
-                " " + condition + " " +
+                condition +
                 SQLModelUtils.guardKeyword(conditionColumn.getAlias()) +
                 '.' +
                 SQLModelUtils.guardKeyword(conditionColumn.getColumnName());
@@ -519,7 +537,7 @@ public class SQLModelUtils {
                 SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) +
                 " = IFNULL(" + SQLModelUtils.guardKeyword(translateNameUtils.getAbbreviation(prefix)) +
                 "." +
-                SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) + ",0) " + condition + " ? ";
+                SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) + ",0)" + condition + SqlCommon.PLACEHOLDER;
     }
 
     /**
@@ -606,7 +624,7 @@ public class SQLModelUtils {
                     if (tableRelation.getConditionSearchList() != null) {
                         List<String> whereStrList = searchListWhereSqlProcessor(tableRelation.getConditionSearchList(), mainClass.getSimpleName());
                         if (WsListUtils.isNotEmpty(whereStrList)) {
-                            selectSql.append(" AND ").append(WsStringUtils.jointListString(whereStrList, " AND "));
+                            selectSql.append(SqlCommon.SQL_AND).append(WsStringUtils.jointListString(whereStrList, SqlCommon.SQL_AND));
                         }
                     }
                     joinTableList.add(createJoinSql(tableName, tableMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), tableRelation.getJoinType(), selectSql.toString()));
@@ -616,7 +634,7 @@ public class SQLModelUtils {
                     if (tableRelation.getConditionSearchList() != null) {
                         List<String> whereStrList = searchListWhereSqlProcessor(tableRelation.getConditionSearchList(), mainClass.getSimpleName());
                         if (WsListUtils.isNotEmpty(whereStrList)) {
-                            selectSql.append(" AND ").append(WsStringUtils.jointListString(whereStrList, " AND "));
+                            selectSql.append(SqlCommon.SQL_AND).append(WsStringUtils.jointListString(whereStrList, SqlCommon.SQL_AND));
                         }
                     }
                     joinTableList.add(createJoinSql(tableNickName, baseMapper.getFieldColumnRelationByField(tableRelation.getTableColumn()).getColumnName(), mapper.getTableName(), joinTableNickName, mapper.getFieldColumnRelationByField(tableRelation.getJoinTableColumn()).getColumnName(), tableRelation.getJoinType(), selectSql.toString()));
@@ -635,7 +653,7 @@ public class SQLModelUtils {
             }
             selectSql = new StringBuilder();
             if (list1.size() > 0) {
-                selectSql.append(" order by ")
+                selectSql.append(SqlCommon.ORDER_BY)
                         .append(WsStringUtils.jointListString(list1, ","));
             }
             if (mySearchList.getSqlLimit() != null) {
@@ -647,14 +665,14 @@ public class SQLModelUtils {
             cacheSqlEntity = sqlEntity;
 
         }
-        return "select " + cacheSqlEntity.getColumnStr() + " " + cacheSqlEntity.getTableStr() + " " + cacheSqlEntity.getCondition() + cacheSqlEntity.getSubjoin();
+        return SqlCommon.SELECT + cacheSqlEntity.getColumnStr() + SqlCommon.SPACE + cacheSqlEntity.getTableStr() + SqlCommon.SPACE + cacheSqlEntity.getCondition() + cacheSqlEntity.getSubjoin();
     }
 
     private String searchListBaseCountSQLProcessor() {
         if (cacheSqlEntity == null) {
             searchListBaseSQLProcessor();
         }
-        return "select count(*) " + cacheSqlEntity.getTableStr() + " " + cacheSqlEntity.getCondition();
+        return SqlCommon.SELECT + "count(*) " + cacheSqlEntity.getTableStr() + SqlCommon.SPACE + cacheSqlEntity.getCondition();
     }
 
     private String mysqlPaging(SqlLimit limit, String selectSql) {
@@ -705,17 +723,17 @@ public class SQLModelUtils {
                 int andStringsSize = andStrings.size();
                 if (andStringsSize != 0) {
                     if (andStringsSize == 1) {
-                        andStrList.add(WsStringUtils.jointListString(andStrings, " and "));
+                        andStrList.add(WsStringUtils.jointListString(andStrings, SqlCommon.SQL_AND));
                     } else {
-                        andStrList.add("(" + WsStringUtils.jointListString(andStrings, " and ") + ")");
+                        andStrList.add(SqlCommon.LEFT_BRACKETS + WsStringUtils.jointListString(andStrings, SqlCommon.SQL_AND) + SqlCommon.RIGHT_BRACKETS);
                     }
                 }
             }
             if (WsListUtils.isNotEmpty(andStrList)) {
                 if (andStrList.size() == 1) {
-                    stringList.add(WsStringUtils.jointListString(andStrList, " and "));
+                    stringList.add(WsStringUtils.jointListString(andStrList, SqlCommon.SQL_AND));
                 } else {
-                    stringList.add("(" + WsStringUtils.jointListString(andStrList, " and ") + ")");
+                    stringList.add(SqlCommon.LEFT_BRACKETS + WsStringUtils.jointListString(andStrList, SqlCommon.SQL_AND) + SqlCommon.RIGHT_BRACKETS);
                 }
 
             }
@@ -728,18 +746,18 @@ public class SQLModelUtils {
                 int orStringsSize = orStrings.size();
                 if (orStringsSize != 0) {
                     if (orStringsSize == 1) {
-                        orStrList.add(WsStringUtils.jointListString(orStrings, " and "));
+                        orStrList.add(WsStringUtils.jointListString(orStrings, SqlCommon.SQL_AND));
                     } else {
-                        orStrList.add("(" + WsStringUtils.jointListString(orStrings, " and ") + ")");
+                        orStrList.add(SqlCommon.LEFT_BRACKETS + WsStringUtils.jointListString(orStrings, SqlCommon.SQL_AND) + SqlCommon.RIGHT_BRACKETS);
                     }
                 }
 
             }
             if (WsListUtils.isNotEmpty(orStrList)) {
                 if (orStrList.size() == 1) {
-                    stringList.add(WsStringUtils.jointListString(orStrList, " or "));
+                    stringList.add(WsStringUtils.jointListString(orStrList, SqlCommon.SQL_OR));
                 } else {
-                    stringList.add("(" + WsStringUtils.jointListString(orStrList, " or ") + ")");
+                    stringList.add(SqlCommon.LEFT_BRACKETS + WsStringUtils.jointListString(orStrList, SqlCommon.SQL_OR) + SqlCommon.RIGHT_BRACKETS);
                 }
 
             }
@@ -762,11 +780,11 @@ public class SQLModelUtils {
 
         String sJoinTableNickName = translateNameUtils.getAbbreviation(joinTableNickName);
         String sTableNickName = translateNameUtils.getAbbreviation(tableNickName);
-        String c = " on " +
+        String c = SqlCommon.ON +
                 guardKeyword(sTableNickName) +
                 '.' +
                 guardKeyword(tableColumn) +
-                " = " +
+                SqlCommon.EQ +
                 guardKeyword(sJoinTableNickName) +
                 '.' +
                 guardKeyword(joinColumn) + condition;
@@ -851,7 +869,7 @@ public class SQLModelUtils {
                     if (fieldJoinClass.getConditionSearchList() != null) {
                         List<String> whereStrList = searchListWhereSqlProcessor(fieldJoinClass.getConditionSearchList(), mainClass.getSimpleName());
                         if (WsListUtils.isNotEmpty(whereStrList)) {
-                            joinStr.append(" AND ").append(WsStringUtils.jointListString(whereStrList, " AND "));
+                            joinStr.append(SqlCommon.SQL_AND).append(WsStringUtils.jointListString(whereStrList, SqlCommon.SQL_AND));
                         }
                     }
                     joinString.add(createJoinSql(tableNickName, fieldJoinClass.getJoinColumn(), mapper.getTableName(), lastTableNickName, fieldJoinClass.getAnotherJoinColumn(), fieldJoinClass.getJoinType(), joinStr.toString()));
@@ -982,8 +1000,8 @@ public class SQLModelUtils {
             try {
                 Object o = field.get(t);
                 if (o != null) {
-                    columnNameList.add(fieldColumnRelation.getColumnName());
-                    placeholderList.add("?");
+                    columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
+                    placeholderList.add(SqlCommon.PLACEHOLDER);
                     validList.add(fieldColumnRelation);
                     valueList.add(o);
                 }
@@ -1008,14 +1026,14 @@ public class SQLModelUtils {
 
             }
             if (o != null) {
-                columnNameList.add(fieldColumnRelation.getColumnName());
-                placeholderList.add("?");
+                columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
+                placeholderList.add(SqlCommon.PLACEHOLDER);
                 validList.add(fieldColumnRelation);
                 valueList.add(o);
             }
         }
 
-        String insertSql = "insert into " + fieldColumnRelationMapper.getTableName() + "(`" + WsStringUtils.jointListString(columnNameList, "`,`") + "`) value(" + WsStringUtils.jointListString(placeholderList, ",") + ")";
+        String insertSql = SqlCommon.INSERT_INTO + guardKeyword(fieldColumnRelationMapper.getTableName()) + SqlCommon.LEFT_BRACKETS+WsStringUtils.jointListString(columnNameList, SqlCommon.COMMA)+SqlCommon.RIGHT_BRACKETS + SqlCommon.VALUE + SqlCommon.LEFT_BRACKETS + WsStringUtils.jointListString(placeholderList, SqlCommon.COMMA) + SqlCommon.RIGHT_BRACKETS;
         entity.setInsertSql(insertSql);
         entity.setUsedField(validList);
         entity.setIdList(fieldColumnRelationMapper.getIds());
@@ -1049,8 +1067,8 @@ public class SQLModelUtils {
                 Object o = field.get(tList.get(0));
                 if (o != null) {
                     validField.add(fieldColumnRelation);
-                    columnNameList.add(fieldColumnRelation.getColumnName());
-                    placeholderList.add("?");
+                    columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
+                    placeholderList.add(SqlCommon.PLACEHOLDER);
                     valueList.add(o);
                 }
             } catch (IllegalAccessException e) {
@@ -1076,12 +1094,12 @@ public class SQLModelUtils {
             }
             if (o != null) {
                 validField.add(fieldColumnRelation);
-                columnNameList.add(fieldColumnRelation.getColumnName());
-                placeholderList.add("?");
+                columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
+                placeholderList.add(SqlCommon.PLACEHOLDER);
                 valueList.add(o);
             }
         }
-        String placeholderSql = "(" + WsStringUtils.jointListString(placeholderList, ",") + ")";
+        String placeholderSql = SqlCommon.LEFT_BRACKETS + WsStringUtils.jointListString(placeholderList, SqlCommon.COMMA) + SqlCommon.RIGHT_BRACKETS;
         placeholderList = new ArrayList<>();
         placeholderList.add(placeholderSql);
         int size = tList.size();
@@ -1105,7 +1123,7 @@ public class SQLModelUtils {
             placeholderList.add(placeholderSql);
         }
         InsertSqlEntity insertSqlEntity = new InsertSqlEntity();
-        String insertSql = "insert into " + fieldColumnRelationMapper.getTableName() + "(`" + WsStringUtils.jointListString(columnNameList, "`,`") + "`) values" + WsStringUtils.jointListString(placeholderList, ",");
+        String insertSql = SqlCommon.INSERT_INTO + guardKeyword(fieldColumnRelationMapper.getTableName()) + SqlCommon.LEFT_BRACKETS +WsStringUtils.jointListString(columnNameList, SqlCommon.COMMA) + SqlCommon.RIGHT_BRACKETS + SqlCommon.VALUE + WsStringUtils.jointListString(placeholderList, ",");
         insertSqlEntity.setInsertSql(insertSql);
         insertSqlEntity.setUsedField(validField);
         insertSqlEntity.setIdList(fieldColumnRelationMapper.getIds());
@@ -1145,7 +1163,7 @@ public class SQLModelUtils {
                 }
             }
             if (isAll || o != null) {
-                String str = guardKeyword(fieldColumnRelation.getColumnName()) + " = ? ";
+                String str = guardKeyword(fieldColumnRelation.getColumnName()) + SqlCommon.EQ + SqlCommon.PLACEHOLDER;
                 columnStrList.add(str);
                 valueList.add(o);
                 validColumnList.add(fieldColumnRelation);
@@ -1155,7 +1173,7 @@ public class SQLModelUtils {
             try {
                 Object o = fieldColumnRelation.getField().get(t);
                 if (o != null) {
-                    String str = guardKeyword(fieldColumnRelation.getColumnName()) + " = ? ";
+                    String str = guardKeyword(fieldColumnRelation.getColumnName()) + SqlCommon.EQ + SqlCommon.PLACEHOLDER;
                     idStrList.add(str);
                     valueList.add(o);
                     validIdList.add(fieldColumnRelation);
@@ -1167,7 +1185,7 @@ public class SQLModelUtils {
         if (idStrList.size() == 0) {
             throw new RuntimeException("id不能为空");
         }
-        String updateSql = "UPDATE " + fieldColumnRelationMapper.getTableName() + " SET " + WsStringUtils.jointListString(columnStrList, ",") + " where " + WsStringUtils.jointListString(idStrList, " and ");
+        String updateSql = SqlCommon.UPDATE + guardKeyword(fieldColumnRelationMapper.getTableName()) + SqlCommon.SET + WsStringUtils.jointListString(columnStrList, SqlCommon.COMMA) + SqlCommon.WHERE + WsStringUtils.jointListString(idStrList, SqlCommon.SQL_AND);
         UpdateSqlEntity updateSqlEntity = new UpdateSqlEntity();
         updateSqlEntity.setUpdateSql(updateSql);
         updateSqlEntity.setIdList(validIdList);
@@ -1213,13 +1231,13 @@ public class SQLModelUtils {
         if (WsListUtils.isEmpty(whereStringList)) {
             throw new RuntimeException("不允许全局修改");
         }
-        String searchSql = WsStringUtils.jointListString(whereStringList, " and ");
+        String searchSql = WsStringUtils.jointListString(whereStringList, SqlCommon.SQL_AND);
 
-        String updateSql = "UPDATE `"
-                + fieldColumnRelationMapper.getTableName()
-                + "` `" + translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName())
-                + "` SET "
-                + WsStringUtils.jointListString(setList, ",") + " where " + searchSql;
+        String updateSql = SqlCommon.UPDATE
+                + guardKeyword(fieldColumnRelationMapper.getTableName())
+                + SqlCommon.SPACE + guardKeyword(translateNameUtils.getAbbreviation(fieldColumnRelationMapper.getNickName()))
+                + SqlCommon.SET
+                + WsStringUtils.jointListString(setList, SqlCommon.COMMA) + SqlCommon.WHERE + searchSql;
         UpdateSqlEntity updateSqlEntity = new UpdateSqlEntity();
         updateSqlEntity.setUpdateSql(updateSql);
         updateSqlEntity.setValueList(baseWhereValueList);
@@ -1256,7 +1274,7 @@ public class SQLModelUtils {
         }
         //searchSql = searchSql.substring(index);
         FieldColumnRelationMapper mapper = analysisClassRelation(mainClass);
-        String deleteSql = "DELETE " + translateNameUtils.getAbbreviation(mapper.getNickName()) + " FROM " + guardKeyword(mapper.getTableName()) + " " + guardKeyword(translateNameUtils.getAbbreviation(mapper.getNickName())) + " " + searchSql;
+        String deleteSql = SqlCommon.DELETE + guardKeyword(translateNameUtils.getAbbreviation(mapper.getNickName())) + SqlCommon.FROM + guardKeyword(mapper.getTableName()) + SqlCommon.SPACE + guardKeyword(translateNameUtils.getAbbreviation(mapper.getNickName())) + SqlCommon.SPACE + searchSql;
         DeleteSqlEntity deleteSqlEntity = new DeleteSqlEntity();
         deleteSqlEntity.setDeleteSql(deleteSql);
         deleteSqlEntity.setValueList(baseWhereValueList);
@@ -1484,14 +1502,15 @@ public class SQLModelUtils {
                     throw new RuntimeException("顺序错误,列前面必须为符号");
                 }
                 if (value instanceof SqlEquation) {
-                    sb.append("(");
-                    sb.append(sqlEquationHandel((SqlEquation) value, prefix)).append(' ');
-                    sb.append(") ");
+                    sb.append(SqlCommon.LEFT_BRACKETS);
+                    sb.append(sqlEquationHandel((SqlEquation) value, prefix)).append(SqlCommon.SPACE);
+                    sb.append(SqlCommon.RIGHT_BRACKETS);
+                    sb.append(SqlCommon.SPACE);
                 } else {
                     ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity((String) value, prefix);
                     sb.append(guardKeyword(translateNameUtils.getAbbreviation(columnBaseEntity.getTableNickName())))
                             .append('.')
-                            .append(guardKeyword(columnBaseEntity.getColumnName())).append(' ');
+                            .append(guardKeyword(columnBaseEntity.getColumnName())).append(SqlCommon.SPACE);
                 }
             } else if (type == 2) {
                 if (i > 0 && typeList.get(i - 1).equals(2)) {
@@ -1509,34 +1528,34 @@ public class SQLModelUtils {
                     if (WsFieldUtils.classCompare(value.getClass(), Collection.class)) {
                         Collection<?> collection = (Collection<?>) value;
                         for (Object o : collection) {
-                            symbols.add("?");
+                            symbols.add(SqlCommon.PLACEHOLDER);
                             baseWhereValueList.add(o);
                         }
-                        sb.append("(")
-                                .append(WsStringUtils.jointListString(symbols, ","))
-                                .append(") ");
+                        sb.append(SqlCommon.LEFT_BRACKETS)
+                                .append(WsStringUtils.jointListString(symbols, SqlCommon.COMMA))
+                                .append(SqlCommon.RIGHT_BRACKETS).append(SqlCommon.SPACE);
                     } else {
                         Object[] values = (Object[]) value;
                         for (Object o : values) {
-                            symbols.add("?");
+                            symbols.add(SqlCommon.PLACEHOLDER);
                             baseWhereValueList.add(o);
                         }
                     }
-                    sb.append("(")
-                            .append(WsStringUtils.jointListString(symbols, ","))
-                            .append(") ");
+                    sb.append(SqlCommon.LEFT_BRACKETS)
+                            .append(WsStringUtils.jointListString(symbols, SqlCommon.COMMA))
+                            .append(SqlCommon.RIGHT_BRACKETS).append(SqlCommon.SPACE);
 
                 } else {
-                    sb.append("? ");
+                    sb.append(SqlCommon.PLACEHOLDER).append(SqlCommon.SPACE);
                     baseWhereValueList.add(value);
                 }
             } else if (type == 4) {
                 MySearchList searchList = (MySearchList) value;
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList, translateNameUtils);
                 SelectSqlEntity entity = sqlModelUtils.select();
-                sb.append('(')
+                sb.append(SqlCommon.LEFT_BRACKETS)
                         .append(entity.getSelectSql())
-                        .append(')');
+                        .append(SqlCommon.RIGHT_BRACKETS);
                 baseWhereValueList.addAll(entity.getValueList());
             }
 

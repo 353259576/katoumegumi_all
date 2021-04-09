@@ -4,6 +4,7 @@ import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.common.SqlCommon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,26 +156,26 @@ public class SqlEquation {
         /**
          * 符号
          */
-        ADD(" + "),
-        SUBTRACT(" - "),
-        MULTIPLY(" * "),
-        DIVIDE(" / "),
-        EQUAL(" = "),
-        NOT_EQUAL(" != "),
-        NULL(" is NULL "),
-        NOT_NULL(" is not NULL "),
-        IN(" in "),
-        NOT_IN(" not in "),
-        EXISTS(" exists "),
-        NOT_EXISTS(" not exists "),
-        GT(" > "),
-        GTE(" >= "),
-        LT(" < "),
-        LTE(" <= "),
-        AND(" & "),
-        OR(" | "),
-        XOR(" ^ "),
-        NOT(" ~ ")
+        ADD(SqlCommon.ADD),
+        SUBTRACT(SqlCommon.SUBTRACT),
+        MULTIPLY(SqlCommon.MULTIPLY),
+        DIVIDE(SqlCommon.DIVIDE),
+        EQUAL(SqlCommon.EQ),
+        NOT_EQUAL(SqlCommon.NEQ),
+        NULL(SqlCommon.NULL),
+        NOT_NULL(SqlCommon.NOT_NULL),
+        IN(SqlCommon.IN),
+        NOT_IN(SqlCommon.NOT_IN),
+        EXISTS(SqlCommon.EXISTS),
+        NOT_EXISTS(SqlCommon.NOT_EXISTS),
+        GT(SqlCommon.GT),
+        GTE(SqlCommon.GTE),
+        LT(SqlCommon.LT),
+        LTE(SqlCommon.LTE),
+        AND(SqlCommon.AND),
+        OR(SqlCommon.OR),
+        XOR(SqlCommon.XOR),
+        NOT(SqlCommon.NOT)
         ;
 
         private final String symbol;
