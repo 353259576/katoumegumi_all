@@ -11,6 +11,7 @@ public class WsListUtils {
 
     /**
      * 判断是不是为空
+     *
      * @param collection 集合
      * @return 布尔
      */
@@ -20,6 +21,7 @@ public class WsListUtils {
 
     /**
      * 判断是否为空
+     *
      * @param os 数组
      * @return 布尔
      */
@@ -29,6 +31,7 @@ public class WsListUtils {
 
     /**
      * 判断是否为空
+     *
      * @param map map
      * @return 布尔
      */
@@ -38,6 +41,7 @@ public class WsListUtils {
 
     /**
      * 判断是否不为空
+     *
      * @param collection 集合
      * @return 布尔
      */
@@ -47,6 +51,7 @@ public class WsListUtils {
 
     /**
      * 判断是否不为空
+     *
      * @param map 集合
      * @return 布尔
      */
@@ -56,8 +61,9 @@ public class WsListUtils {
 
     /**
      * 合并数组
-     * @param l1 参数
-     * @param l2 参数
+     *
+     * @param l1  参数
+     * @param l2  参数
      * @param <T> 泛型
      * @return 合并后数组
      */
@@ -80,8 +86,9 @@ public class WsListUtils {
 
     /**
      * 原生数组转化为list
+     *
      * @param array 数组
-     * @param <T> 泛型
+     * @param <T>   泛型
      * @return list
      */
     public static <T> List<T> arrayToList(T[] array) {
@@ -97,21 +104,22 @@ public class WsListUtils {
 
     /**
      * list转为map
-     * @param tList 数组
+     *
+     * @param tList    数组
      * @param function 方法
-     * @param <T> 对象
-     * @param <I> id
+     * @param <T>      对象
+     * @param <I>      id
      * @return 图
      */
-    public static  <T,I> Map<I,List<T>> listToMapList(List<T> tList, Function<T,I> function){
-        Map<I,List<T>> map = new HashMap<>();
-        if(isEmpty(tList)){
+    public static <T, I> Map<I, List<T>> listToMapList(List<T> tList, Function<T, I> function) {
+        Map<I, List<T>> map = new HashMap<>();
+        if (isEmpty(tList)) {
             return new HashMap<>();
         }
-        for(T t:tList){
+        for (T t : tList) {
             I i = function.apply(t);
-            List<T> list = map.computeIfAbsent(i,id->{
-               return new ArrayList<>();
+            List<T> list = map.computeIfAbsent(i, id -> {
+                return new ArrayList<>();
             });
             list.add(t);
         }
@@ -120,21 +128,22 @@ public class WsListUtils {
 
     /**
      * list转为map
-     * @param tList 数组
+     *
+     * @param tList    数组
      * @param function 方法
-     * @param <T> 对象
-     * @param <I> id
+     * @param <T>      对象
+     * @param <I>      id
      * @return 图
      */
-    public static  <T,I> Map<I,Set<T>> listToMapSet(List<T> tList, Function<T,I> function){
-        Map<I,Set<T>> map = new HashMap<>();
-        if(isEmpty(tList)){
+    public static <T, I> Map<I, Set<T>> listToMapSet(List<T> tList, Function<T, I> function) {
+        Map<I, Set<T>> map = new HashMap<>();
+        if (isEmpty(tList)) {
             return new HashMap<>();
         }
-        for(T t:tList){
+        for (T t : tList) {
             I i = function.apply(t);
-            Set<T> set = map.computeIfAbsent(i,id->{
-               return new HashSet<>();
+            Set<T> set = map.computeIfAbsent(i, id -> {
+                return new HashSet<>();
             });
             set.add(t);
         }
@@ -143,35 +152,37 @@ public class WsListUtils {
 
     /**
      * list转为map
-     * @param tList list
+     *
+     * @param tList    list
      * @param function 方法
-     * @param <T> 泛型
-     * @param <I> 泛型
+     * @param <T>      泛型
+     * @param <I>      泛型
      * @return map
      */
-    public static  <T,I> Map<I,T> listToMap(List<T> tList, Function<T,I> function){
-        Map<I,T> map = new HashMap<>();
-        if(isEmpty(tList)){
+    public static <T, I> Map<I, T> listToMap(List<T> tList, Function<T, I> function) {
+        Map<I, T> map = new HashMap<>();
+        if (isEmpty(tList)) {
             return new HashMap<>();
         }
-        for(T t:tList){
+        for (T t : tList) {
             I i = function.apply(t);
-            map.put(i,t);
+            map.put(i, t);
         }
         return map;
     }
 
     /**
      * 获取list的子list
-     * @param tList 父list
+     *
+     * @param tList    父list
      * @param function 方法
-     * @param <T> 父
-     * @param <I> 子
+     * @param <T>      父
+     * @param <I>      子
      * @return 子list
      */
-    public static <T,I> List<I> listToList(List<T> tList,Function<T,I> function){
+    public static <T, I> List<I> listToList(List<T> tList, Function<T, I> function) {
         List<I> iList = new ArrayList<>(tList.size());
-        for(T t:tList){
+        for (T t : tList) {
             iList.add(function.apply(t));
         }
         return iList;
@@ -179,15 +190,16 @@ public class WsListUtils {
 
     /**
      * 获取list的子Set
-     * @param tList 父list
+     *
+     * @param tList    父list
      * @param function 方法
-     * @param <T> 父
-     * @param <I> 子
+     * @param <T>      父
+     * @param <I>      子
      * @return 子Set
      */
-    public static <T,I> Set<I> listToSet(List<T> tList,Function<T,I> function){
+    public static <T, I> Set<I> listToSet(List<T> tList, Function<T, I> function) {
         Set<I> iSet = new HashSet<>(tList.size());
-        for(T t:tList){
+        for (T t : tList) {
             iSet.add(function.apply(t));
         }
         return iSet;
@@ -196,16 +208,17 @@ public class WsListUtils {
 
     /**
      * 原生数组转化为list
+     *
      * @param tList 数组
-     * @param <T> 泛型
+     * @param <T>   泛型
      * @return 数组
      */
     public static <T> T[] listToArray(List<T> tList) {
-        if(isEmpty(tList)){
+        if (isEmpty(tList)) {
             return null;
         }
         T[] ts = (T[]) new Object[tList.size()];
-        for(int i = 0; i < tList.size(); i++){
+        for (int i = 0; i < tList.size(); i++) {
             ts[i] = tList.get(i);
         }
         return ts;
@@ -213,6 +226,7 @@ public class WsListUtils {
 
     /**
      * 合并两个数组成一个新的数组
+     *
      * @param list1
      * @param list2
      * @param <T>

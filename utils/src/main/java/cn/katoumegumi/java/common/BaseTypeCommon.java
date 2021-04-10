@@ -12,52 +12,29 @@ import java.util.Set;
  */
 public class BaseTypeCommon {
 
-    private static final Set<Class<?>> CLASS_SET = new HashSet<>(18);
-
     public static final Class<?> BYTE_CLASS = byte.class;
-
     public static final Class<?> W_BYTE_CLASS = Byte.class;
-
     public static final Class<?> CHAR_CLASS = char.class;
-
     public static final Class<?> W_CHAR_CLASS = Character.class;
-
     public static final Class<?> BOOLEAN_CLASS = boolean.class;
-
     public static final Class<?> W_BOOLEAN_CLASS = Boolean.class;
-
     public static final Class<?> SHORT_CLASS = short.class;
-
     public static final Class<?> W_SHORT_CLASS = Short.class;
-
     public static final Class<?> INT_CALSS = int.class;
-
     public static final Class<?> W_INT_CLASS = Integer.class;
-
     public static final Class<?> FLOAT_CLASS = float.class;
-
     public static final Class<?> W_FLOAT_CLASS = Float.class;
-
     public static final Class<?> LONG_CLASS = long.class;
-
     public static final Class<?> W_LONG_CLASS = Long.class;
-
     public static final Class<?> DOUBLE_CLASS = double.class;
-
     public static final Class<?> W_DOUBLE_CLASS = Double.class;
-
     public static final Class<?> STRING_CLASS = String.class;
-
     public static final Class<?> DATE_CALSS = Date.class;
-
     public static final Class<?> SQL_DATA_CALSS = java.sql.Date.class;
-
     public static final Class<?> LOCAL_DATE_CLASS = LocalDate.class;
-
     public static final Class<?> LOCAL_DATE_TIME_CLASS = LocalDateTime.class;
-
     public static final Class<?> BIG_DECIMAL = BigDecimal.class;
-
+    private static final Set<Class<?>> CLASS_SET = new HashSet<>(18);
 
     static {
         CLASS_SET.add(BYTE_CLASS);
@@ -84,10 +61,11 @@ public class BaseTypeCommon {
         CLASS_SET.add(BIG_DECIMAL);
     }
 
-    public static boolean verify(Class<?> tClass){
+    public static boolean verify(Class<?> tClass) {
         return CLASS_SET.contains(tClass);
     }
-    public static boolean verify(Object o){
+
+    public static boolean verify(Object o) {
         return verify(o.getClass());
     }
 

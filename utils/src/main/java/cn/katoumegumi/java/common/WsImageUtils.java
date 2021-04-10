@@ -3,9 +3,7 @@ package cn.katoumegumi.java.common;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
@@ -21,7 +19,7 @@ public class WsImageUtils {
 
     private final static JLabel J_LABEL = new JLabel();
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
 
         System.out.println(Math.sin(Math.toRadians(45)));
 
@@ -38,43 +36,43 @@ public class WsImageUtils {
         File file = WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\1.jpg");
         try {
             BufferedImage bufferedImage = ImageIO.read(file);
-            BufferedImage newBufferedImage = copyBufferedImage(bufferedImage,BufferedImage.TYPE_INT_ARGB);
+            BufferedImage newBufferedImage = copyBufferedImage(bufferedImage, BufferedImage.TYPE_INT_ARGB);
             Graphics2D graphics2D = newBufferedImage.createGraphics();
-            System.out.println("图片宽度"+newBufferedImage.getWidth());
-            System.out.println("图片长度"+newBufferedImage.getHeight());
+            System.out.println("图片宽度" + newBufferedImage.getWidth());
+            System.out.println("图片长度" + newBufferedImage.getHeight());
             Color color = getColor("#7FFA00");
-            Stream.iterate(10,i->i+5).limit(1).forEach(j->{
-                Font font = new Font("微软雅黑",Font.PLAIN,96);
-                font = font.deriveFont(Font.PLAIN,96);
+            Stream.iterate(10, i -> i + 5).limit(1).forEach(j -> {
+                Font font = new Font("微软雅黑", Font.PLAIN, 96);
+                font = font.deriveFont(Font.PLAIN, 96);
                 System.out.println(font.getSize());
                 String context = "德玛西亚洛克萨斯艾欧尼亚恕瑞玛皮尔特沃夫祖安艾卡西亚";
 
                 FontMetrics fontMetrics = J_LABEL.getFontMetrics(font);
                 fontMetrics = J_LABEL.getFontMetrics(font);
                 long startTime = System.currentTimeMillis();
-                List<LineText> list = splitContext(context,fontMetrics,150,0,bufferedImage.getWidth()-300,bufferedImage.getHeight(),96,20,2,3);
+                List<LineText> list = splitContext(context, fontMetrics, 150, 0, bufferedImage.getWidth() - 300, bufferedImage.getHeight(), 96, 20, 2, 3);
                 long endTime = System.currentTimeMillis();
                 System.out.println("拆解成行：" + (endTime - startTime));
                 startTime = System.currentTimeMillis();
-                for(int i = 0; i < list.size(); i++) {
+                for (int i = 0; i < list.size(); i++) {
                     LineText lineText = list.get(i);
                     List<CharText> charTextList = lineText.getCharTextList();
-                    for(CharText charText:charTextList){
-                        writeFontBufferedImage(newBufferedImage,charText.getValue().toString(),charText.getPointX(),lineText.getPointY(),font,color);
+                    for (CharText charText : charTextList) {
+                        writeFontBufferedImage(newBufferedImage, charText.getValue().toString(), charText.getPointX(), lineText.getPointY(), font, color);
                     }
                 }
                 endTime = System.currentTimeMillis();
-                System.out.println("书写文字耗费时间："+(endTime - startTime));
+                System.out.println("书写文字耗费时间：" + (endTime - startTime));
                 try {
                     startTime = System.currentTimeMillis();
-                    BufferedImage image = rotateImage(newBufferedImage,j);
+                    BufferedImage image = rotateImage(newBufferedImage, j);
                     endTime = System.currentTimeMillis();
-                    System.out.println("旋转图片："+(endTime - startTime));
+                    System.out.println("旋转图片：" + (endTime - startTime));
                     startTime = System.currentTimeMillis();
-                    image = setBufferedImageAlpha(image,255,BufferedImage.TYPE_INT_ARGB);
+                    image = setBufferedImageAlpha(image, 255, BufferedImage.TYPE_INT_ARGB);
                     endTime = System.currentTimeMillis();
                     System.out.println("设置透明度：" + (endTime - startTime));
-                    ImageIO.write(image,"png",WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\"+j+".jpg"));
+                    ImageIO.write(image, "png", WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\" + j + ".jpg"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -85,8 +83,6 @@ public class WsImageUtils {
         }
 
     }
-
-
 
 
     public static byte[] changeImageSize(InputStream inputStream, Integer size) {
@@ -218,7 +214,7 @@ public class WsImageUtils {
                 }
                 int directionSurplus = width % directionValue;
                 if (directionSurplus > 0) {
-                    byte[]  bytes = cropImage(bufferedImage, height - directionSurplus, 0, directionSurplus, height);
+                    byte[] bytes = cropImage(bufferedImage, height - directionSurplus, 0, directionSurplus, height);
                     byteToFile(bytes, fileName + "-" + (i + 1), "jpg", path);
                 }
             }
@@ -257,34 +253,35 @@ public class WsImageUtils {
 
     /**
      * 设置透明度
+     *
      * @param bufferedImage
      * @param alpha
      * @param bufferedImageType
      * @return
      */
-    public static BufferedImage setBufferedImageAlpha(BufferedImage bufferedImage,Integer alpha,Integer bufferedImageType){
-        if(alpha < 0 || alpha > 255){
+    public static BufferedImage setBufferedImageAlpha(BufferedImage bufferedImage, Integer alpha, Integer bufferedImageType) {
+        if (alpha < 0 || alpha > 255) {
             throw new RuntimeException("范围错误[0,255]");
         }
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
-        BufferedImage newBufferedImage = new BufferedImage(width,height, bufferedImageType);
+        BufferedImage newBufferedImage = new BufferedImage(width, height, bufferedImageType);
         int oa;
         int a;
         int rgb;
-        int[] rgbsArray = bufferedImage.getRGB(0,0,width,height,null,0,width);
+        int[] rgbsArray = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
         long start = System.currentTimeMillis();
         int length = rgbsArray.length;
-        for(int i = 0; i < length; ++i){
+        for (int i = 0; i < length; ++i) {
             rgb = rgbsArray[i] & 0x00FFFFFF;
             oa = rgbsArray[i] >>> 24;
-            a = oa == 0?0:alpha<<24;
-            rgbsArray[i] = a^rgb;
+            a = oa == 0 ? 0 : alpha << 24;
+            rgbsArray[i] = a ^ rgb;
         }
         long end = System.currentTimeMillis();
         System.out.println(end - start);
-        WsDateUtils.getExecutionTime.accept(()->{
-            newBufferedImage.setRGB(0,0,width,height,rgbsArray,0,width);
+        WsDateUtils.getExecutionTime.accept(() -> {
+            newBufferedImage.setRGB(0, 0, width, height, rgbsArray, 0, width);
         });
 
         return newBufferedImage;
@@ -293,6 +290,7 @@ public class WsImageUtils {
 
     /**
      * 放大缩小
+     *
      * @param bufferedImage
      * @param enlargementTimes
      * @return
@@ -358,7 +356,7 @@ public class WsImageUtils {
         graphics2D.setColor(color);
         graphics2D.setFont(font);
         graphics2D.drawString(str, pointX, pointY);*/
-        writeFontBufferedImage(graphics2D,str,pointX,pointY,font,color);
+        writeFontBufferedImage(graphics2D, str, pointX, pointY, font, color);
         return bufferedImage;
     }
 
@@ -419,6 +417,7 @@ public class WsImageUtils {
 
     /**
      * 为图片打马赛克
+     *
      * @param bufferedImage
      * @param pointX
      * @param pointY
@@ -508,18 +507,19 @@ public class WsImageUtils {
 
     /**
      * 把字符串拆成行
-     * @param context 文本内容
+     *
+     * @param context        文本内容
      * @param fontMetrics
-     * @param pointX 开始点的x轴坐标
-     * @param pointY 开始点的y轴坐标
-     * @param width 文本域宽度
-     * @param height 文本域高度
-     * @param wordSpace 字间距
-     * @param lineSpace 行间距
+     * @param pointX         开始点的x轴坐标
+     * @param pointY         开始点的y轴坐标
+     * @param width          文本域宽度
+     * @param height         文本域高度
+     * @param wordSpace      字间距
+     * @param lineSpace      行间距
      * @param horizontalType 1 右对齐 2 居中 3 左对齐
      * @return
      */
-    public static List<LineText> splitContext(String context,FontMetrics fontMetrics,int pointX,int pointY,int width,int height,int wordSpace,int lineSpace,Integer horizontalType,Integer verticalType){
+    public static List<LineText> splitContext(String context, FontMetrics fontMetrics, int pointX, int pointY, int width, int height, int wordSpace, int lineSpace, Integer horizontalType, Integer verticalType) {
         context = new String(context.getBytes(StandardCharsets.UTF_8));
         Font font = fontMetrics.getFont();
         char[] chars = context.toCharArray();
@@ -532,33 +532,33 @@ public class WsImageUtils {
         //字体宽度
         int charSize = 0;
         List<CharText> charTextList = new ArrayList<>();
-        for(char c:chars){
+        for (char c : chars) {
             charSize = fontMetrics.charWidth(c);
             currentLineWidth += charSize;
-            if(currentLineWidth >= width){
-                returnLineList.add(new LineText(pointX,width,currentHeight,sb.toString(),currentLineWidth - charSize - wordSpace,charTextList,horizontalType));
+            if (currentLineWidth >= width) {
+                returnLineList.add(new LineText(pointX, width, currentHeight, sb.toString(), currentLineWidth - charSize - wordSpace, charTextList, horizontalType));
                 currentHeight += font.getSize();
                 currentHeight += lineSpace;
                 currentLineWidth = charSize;
                 charTextList = new ArrayList<>();
                 sb = new StringBuilder();
             }
-            charTextList.add(new CharText(currentLineWidth - charSize,currentHeight,c));
+            charTextList.add(new CharText(currentLineWidth - charSize, currentHeight, c));
             currentLineWidth += wordSpace;
             sb.append(c);
-            if(currentHeight > height){
+            if (currentHeight > height) {
                 sb = new StringBuilder();
                 break;
             }
         }
-        if(sb.length() > 0){
-            returnLineList.add(new LineText(pointX,width,currentHeight,sb.toString(),currentLineWidth - wordSpace,charTextList,horizontalType));
+        if (sb.length() > 0) {
+            returnLineList.add(new LineText(pointX, width, currentHeight, sb.toString(), currentLineWidth - wordSpace, charTextList, horizontalType));
         }
-        if(verticalType.equals(2)){
-            int allHeight = returnLineList.size()* font.getSize() + lineSpace * returnLineList.size() - 1;
-            pointY = (height - allHeight)/2 + pointY;
-        }else if (verticalType.equals(3)){
-            int allHeight = returnLineList.size()* font.getSize() + lineSpace * returnLineList.size() - 1;
+        if (verticalType.equals(2)) {
+            int allHeight = returnLineList.size() * font.getSize() + lineSpace * returnLineList.size() - 1;
+            pointY = (height - allHeight) / 2 + pointY;
+        } else if (verticalType.equals(3)) {
+            int allHeight = returnLineList.size() * font.getSize() + lineSpace * returnLineList.size() - 1;
             pointY = pointY + height - allHeight;
         }
         int finalPointY = pointY;
@@ -574,25 +574,26 @@ public class WsImageUtils {
 
     /**
      * 旋转图片
+     *
      * @param bufferedImage
      * @param angle
      * @return
      */
-    public static BufferedImage rotateImage(BufferedImage bufferedImage,double angle){
-        Rectangle rectangle = getRotateRectangle(bufferedImage.getWidth(),bufferedImage.getHeight(),angle);
-        BufferedImage image = new BufferedImage((int) rectangle.getWidth(),(int) rectangle.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+    public static BufferedImage rotateImage(BufferedImage bufferedImage, double angle) {
+        Rectangle rectangle = getRotateRectangle(bufferedImage.getWidth(), bufferedImage.getHeight(), angle);
+        BufferedImage image = new BufferedImage((int) rectangle.getWidth(), (int) rectangle.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D graphics2D = image.createGraphics();
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.translate((rectangle.getWidth() - bufferedImage.getWidth()) / 2,(rectangle.getHeight() - bufferedImage.getHeight()) / 2);
-        graphics2D.rotate(Math.toRadians(angle), BigDecimal.valueOf(bufferedImage.getWidth()/2).doubleValue(),BigDecimal.valueOf(bufferedImage.getHeight()/2).doubleValue());
-        graphics2D.drawImage(bufferedImage,null,0,0);
+        graphics2D.translate((rectangle.getWidth() - bufferedImage.getWidth()) / 2, (rectangle.getHeight() - bufferedImage.getHeight()) / 2);
+        graphics2D.rotate(Math.toRadians(angle), BigDecimal.valueOf(bufferedImage.getWidth() / 2).doubleValue(), BigDecimal.valueOf(bufferedImage.getHeight() / 2).doubleValue());
+        graphics2D.drawImage(bufferedImage, null, 0, 0);
         return image;
     }
 
 
-    public static Rectangle getRotateRectangle(double width,double height,double angle){
+    public static Rectangle getRotateRectangle(double width, double height, double angle) {
         if (angle >= 90) {
-            if((int) angle / 90 % 2 == 1){
+            if ((int) angle / 90 % 2 == 1) {
                 double temp = height;
                 height = width;
                 width = temp;
@@ -601,33 +602,34 @@ public class WsImageUtils {
         }
         double j1Angle = Math.atan(height / width);
         angle = Math.toRadians(angle);
-        double r = Math.sqrt(Math.pow(width,2)+Math.pow(height,2)) / 2;
+        double r = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)) / 2;
         double newWidth = Math.cos(j1Angle - angle) * r * 2;
         double newHeight = Math.sin(j1Angle + angle) * r * 2;
         newHeight = Math.abs(newHeight);
         newWidth = Math.abs(newWidth);
-        return new Rectangle(0,0,(int) newWidth,(int) newHeight);
+        return new Rectangle(0, 0, (int) newWidth, (int) newHeight);
     }
 
 
     /**
      * 解析16进制颜色
+     *
      * @param value
      * @return
      */
-    public static Color getColor(String value){
-        if(!value.startsWith("#")){
+    public static Color getColor(String value) {
+        if (!value.startsWith("#")) {
             throw new RuntimeException("格式错误");
         }
-        return new Color(Integer.parseInt(value.substring(1,3),16),Integer.parseInt(value.substring(3,5),16),Integer.parseInt(value.substring(5,7),16));
+        return new Color(Integer.parseInt(value.substring(1, 3), 16), Integer.parseInt(value.substring(3, 5), 16), Integer.parseInt(value.substring(5, 7), 16));
     }
 
 
-    public static FontMetrics getFontMetrics(Font font){
+    public static FontMetrics getFontMetrics(Font font) {
         return J_LABEL.getFontMetrics(font);
     }
 
-    public static class LineText{
+    public static class LineText {
 
         private Integer pointX;
 
@@ -639,17 +641,17 @@ public class WsImageUtils {
 
         private List<CharText> charTextList;
 
-        public LineText(Integer pointX,Integer width,Integer pointY,String text,Integer length,List<CharText> charTextList,Integer type){
+        public LineText(Integer pointX, Integer width, Integer pointY, String text, Integer length, List<CharText> charTextList, Integer type) {
             this.text = text;
             this.length = length;
             this.pointY = pointY;
-            if(type.equals(1)){
+            if (type.equals(1)) {
                 this.pointX = pointX;
-            }else if(type.equals(2)){
-                this.pointX = pointX+(width - length)/2;
-            }else if(type.equals(3)){
+            } else if (type.equals(2)) {
+                this.pointX = pointX + (width - length) / 2;
+            } else if (type.equals(3)) {
                 this.pointX = pointX + width - length;
-            }else {
+            } else {
                 throw new RuntimeException("不支持的类型");
             }
             charTextList.forEach(charText -> {
@@ -699,7 +701,7 @@ public class WsImageUtils {
         }
     }
 
-    public static class CharText{
+    public static class CharText {
 
         private Integer pointX;
 
@@ -707,7 +709,7 @@ public class WsImageUtils {
 
         private Character value;
 
-        public CharText(Integer pointX,Integer pointY,Character value){
+        public CharText(Integer pointX, Integer pointY, Character value) {
             this.pointX = pointX;
             this.pointY = pointY;
             this.value = value;

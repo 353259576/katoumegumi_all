@@ -1,8 +1,6 @@
 package cn.katoumegumi.java.common;
 
 import cn.katoumegumi.java.common.model.WsRun;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -15,7 +13,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class WsDateUtils {
-
 
 
     public static final String[] CN_MONTH_NAMES = new String[]{"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"};
@@ -33,12 +30,11 @@ public class WsDateUtils {
      * 获取一段程序的执行时间
      */
     public static final Consumer<WsRun> getExecutionTime = wsRun -> {
-      long start = System.currentTimeMillis();
-      wsRun.run();
-      long end = System.currentTimeMillis();
-        System.out.println("执行时间为："+(end - start));
+        long start = System.currentTimeMillis();
+        wsRun.run();
+        long end = System.currentTimeMillis();
+        System.out.println("执行时间为：" + (end - start));
     };
-
 
 
     public static String dateStringFormat(String date) {

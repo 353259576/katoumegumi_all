@@ -5,11 +5,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class WsStringUtils {
     public static final byte SPACE = 32;
@@ -25,11 +27,11 @@ public class WsStringUtils {
 
     }
 
-    public static String jointListString(List<String> strings, String sign){
-        return jointListString(strings,sign,0,strings.size());
+    public static String jointListString(List<String> strings, String sign) {
+        return jointListString(strings, sign, 0, strings.size());
     }
 
-    public static String jointListString(List<String> strings, String sign,int start,int end) {
+    public static String jointListString(List<String> strings, String sign, int start, int end) {
         if (strings == null) {
             return "";
         }
@@ -78,6 +80,7 @@ public class WsStringUtils {
 
     /**
      * 判断字符串是否都是数字
+     *
      * @param str
      * @return
      */
@@ -110,32 +113,34 @@ public class WsStringUtils {
         return true;
     }
 
-    public static boolean isNumber(char c){
+    public static boolean isNumber(char c) {
         return c >= 48 && c <= 58;
     }
 
     /**
      * 是否是大写字母
+     *
      * @param c
      * @return
      */
-    public static boolean isMajuscule(char c){
+    public static boolean isMajuscule(char c) {
         return c >= 'A' && c <= 'Z';
     }
 
     /**
      * 是否是小写字母
+     *
      * @param c
      * @return
      */
-    public static boolean isMinuscule(char c){
+    public static boolean isMinuscule(char c) {
         return c >= 'a' && c <= 'z';
     }
 
 
-
     /**
      * 判断字符串是否含有空格
+     *
      * @param str
      * @return
      */
@@ -164,6 +169,7 @@ public class WsStringUtils {
 
     /**
      * 去掉string里的空格
+     *
      * @param str
      * @return
      */
@@ -329,6 +335,7 @@ public class WsStringUtils {
 
     /**
      * 字符串脱敏
+     *
      * @param string
      * @return
      */
@@ -350,28 +357,29 @@ public class WsStringUtils {
 
     /**
      * 创建随机字符串
-     * @param startStr 开始字符串
+     *
+     * @param startStr      开始字符串
      * @param timeTemplates 日期格式
-     * @param size 总大小
+     * @param size          总大小
      * @return
      */
-    public static String createRandomStr(String startStr,String timeTemplates,Integer size){
+    public static String createRandomStr(String startStr, String timeTemplates, Integer size) {
         StringBuilder stringBuilder = new StringBuilder();
-        if(isNotBlank(startStr)){
+        if (isNotBlank(startStr)) {
             stringBuilder.append(startStr);
         }
-        if(isNotBlank(timeTemplates)){
-            stringBuilder.append(WsDateUtils.dateToString(new Date(),timeTemplates));
+        if (isNotBlank(timeTemplates)) {
+            stringBuilder.append(WsDateUtils.dateToString(new Date(), timeTemplates));
         }
         int length = stringBuilder.length() - size;
-        if(length > 0){
-            return stringBuilder.substring(0,size);
-        }else if(length  < 0){
+        if (length > 0) {
+            return stringBuilder.substring(0, size);
+        } else if (length < 0) {
             length = -length;
             stringBuilder.append(createRandomNum(length));
             return stringBuilder.toString();
 
-        }else {
+        } else {
             return stringBuilder.toString();
         }
 
@@ -380,10 +388,11 @@ public class WsStringUtils {
 
     /**
      * 随机数字字符串
+     *
      * @param size 长度
      * @return
      */
-    public static String createRandomNum(int size){
+    public static String createRandomNum(int size) {
         StringBuilder stringBuilder = new StringBuilder();
         ThreadLocalRandom random = ThreadLocalRandom.current();
         int length = size / 9;
@@ -404,19 +413,19 @@ public class WsStringUtils {
             stringBuilder.append(si);
             length--;
         }
-        if(endSize > 0){
-            double value = Math.pow(10,endSize);
+        if (endSize > 0) {
+            double value = Math.pow(10, endSize);
             i = random.nextInt((int) value);
             si = Integer.toString(i);
             sLength = si.length();
             replenishSize = endSize - sLength;
-            while (replenishSize > 0){
+            while (replenishSize > 0) {
                 stringBuilder.append(0);
                 replenishSize--;
             }
             stringBuilder.append(si);
         }
-        return  stringBuilder.toString();
+        return stringBuilder.toString();
 
 
     }
@@ -502,6 +511,7 @@ public class WsStringUtils {
 
     /**
      * 拆分字符串
+     *
      * @param str
      * @param c
      * @return
@@ -541,6 +551,7 @@ public class WsStringUtils {
 
     /**
      * 判断是不是汉字
+     *
      * @param c 字符
      * @return
      */
@@ -554,8 +565,8 @@ public class WsStringUtils {
 
     public static boolean isChinese(String string) {
         string = new String(string.getBytes(StandardCharsets.UTF_8));
-        for(char c:string.toCharArray()){
-            if(!isChinese(c)){
+        for (char c : string.toCharArray()) {
+            if (!isChinese(c)) {
                 return false;
             }
         }
@@ -564,14 +575,15 @@ public class WsStringUtils {
 
     /**
      * 截取汉字
+     *
      * @param str
      * @return
      */
-    public static String interceptedChinese(String str){
+    public static String interceptedChinese(String str) {
         StringBuilder sb = new StringBuilder();
         str = new String(str.getBytes(StandardCharsets.UTF_8));
-        for(char c:str.toCharArray()){
-            if (isChinese(c)){
+        for (char c : str.toCharArray()) {
+            if (isChinese(c)) {
                 sb.append(c);
             }
         }

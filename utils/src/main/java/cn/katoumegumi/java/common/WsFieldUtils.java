@@ -183,44 +183,43 @@ public class WsFieldUtils {
 
 
     public static <T> String getFieldName(SupplierFunc<T> supplierFunc) {
-            String n = supplierFunc.getClass().getName();
-            return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(()->{
-                try {
-                    Method method = supplierFunc.getClass().getDeclaredMethod("writeReplace");
-                    method.setAccessible(true);
-                    SerializedLambda serializedLambda = (SerializedLambda) method.invoke(supplierFunc);
-                    String name = serializedLambda.getImplMethodName();
-                    String value = methodToFieldName(name);
-                    FIELD_NAME_MAP.put(n,new WeakReference<>(value));
-                    return value;
-                } catch (ReflectiveOperationException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            });
-
+        String n = supplierFunc.getClass().getName();
+        return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(() -> {
+            try {
+                Method method = supplierFunc.getClass().getDeclaredMethod("writeReplace");
+                method.setAccessible(true);
+                SerializedLambda serializedLambda = (SerializedLambda) method.invoke(supplierFunc);
+                String name = serializedLambda.getImplMethodName();
+                String value = methodToFieldName(name);
+                FIELD_NAME_MAP.put(n, new WeakReference<>(value));
+                return value;
+            } catch (ReflectiveOperationException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
 
 
     }
 
-    public static <T> String getFieldName(SFunction<T,?> sFunction) {
+    public static <T> String getFieldName(SFunction<T, ?> sFunction) {
 
-            String n = sFunction.getClass().getName();
+        String n = sFunction.getClass().getName();
 
-            return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(()->{
-                try {Method method = sFunction.getClass().getDeclaredMethod("writeReplace");
-                    method.setAccessible(true);
-                    SerializedLambda serializedLambda = (SerializedLambda) method.invoke(sFunction);
-                    String name = serializedLambda.getImplMethodName();
-                    String value = methodToFieldName(name);
-                    FIELD_NAME_MAP.put(n,new WeakReference<>(value));
-                    return value;
-                } catch (ReflectiveOperationException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            });
-
+        return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(() -> {
+            try {
+                Method method = sFunction.getClass().getDeclaredMethod("writeReplace");
+                method.setAccessible(true);
+                SerializedLambda serializedLambda = (SerializedLambda) method.invoke(sFunction);
+                String name = serializedLambda.getImplMethodName();
+                String value = methodToFieldName(name);
+                FIELD_NAME_MAP.put(n, new WeakReference<>(value));
+                return value;
+            } catch (ReflectiveOperationException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
 
 
     }
@@ -277,14 +276,14 @@ public class WsFieldUtils {
         if (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class)) {
             String listClassName = field.getGenericType().getTypeName();
             int start = listClassName.indexOf("<") + 1;
-            if(start == 0){
+            if (start == 0) {
                 return null;
             }
             int end = listClassName.lastIndexOf(">");
-            if(end == -1){
+            if (end == -1) {
                 return null;
             }
-            String className = listClassName.substring(start,end);
+            String className = listClassName.substring(start, end);
             try {
                 return Class.forName(className);
             } catch (ClassNotFoundException e) {
@@ -305,11 +304,12 @@ public class WsFieldUtils {
 
     /**
      * 获得值
+     *
      * @param o
      * @param field
      * @return
      */
-    public static Object getValue(Object o,Field field){
+    public static Object getValue(Object o, Field field) {
         try {
             field.setAccessible(true);
             return field.get(o);
@@ -321,12 +321,13 @@ public class WsFieldUtils {
 
     /**
      * 设置值
+     *
      * @param o
      * @param value
      * @param field
      * @return
      */
-    public static boolean setValue(Object o,Object value,Field field) {
+    public static boolean setValue(Object o, Object value, Field field) {
         if (value == null) {
             return true;
         }

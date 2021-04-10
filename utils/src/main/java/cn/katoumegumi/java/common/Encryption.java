@@ -31,7 +31,6 @@ public class Encryption {
     private static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 
-
     //*****************************************************************************************************
     public static String desEncoder(String str, String password) {
         try {
