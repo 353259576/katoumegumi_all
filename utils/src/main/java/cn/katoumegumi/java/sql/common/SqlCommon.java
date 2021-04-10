@@ -24,7 +24,7 @@ public interface SqlCommon {
 
     String WHERE = " where ";
 
-    String FROM = " form ";
+    String FROM = " from ";
 
     String ORDER_BY = " order by ";
 

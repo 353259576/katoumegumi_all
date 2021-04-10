@@ -2,6 +2,7 @@ package cn.katoumegumi.java.sql.entity;
 
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.sql.SQLModelUtils;
+import cn.katoumegumi.java.sql.common.SqlCommon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,7 @@ public class SqlEntity {
 
     public String getColumnStr() {
         if(columnStr == null){
-            columnStr = columnList.stream().map(ColumnBaseEntity::getColumnValue).collect(Collectors.joining(","));
+            columnStr = columnList.stream().map(ColumnBaseEntity::getColumnValue).collect(Collectors.joining(SqlCommon.COMMA));
         }
         return columnStr;
     }
@@ -94,7 +95,7 @@ public class SqlEntity {
     public String getCondition() {
         if(condition == null){
             if(WsListUtils.isNotEmpty(conditionList)){
-                condition = "where " + String.join(" and ",conditionList);
+                condition = SqlCommon.WHERE + String.join(SqlCommon.SQL_AND,conditionList);
             }else {
                 condition = "";
             }
