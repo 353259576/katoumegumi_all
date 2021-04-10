@@ -5,7 +5,6 @@ import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 
-import javax.persistence.criteria.JoinType;
 import java.util.function.Consumer;
 
 /**
@@ -41,12 +40,11 @@ public class TableRelation {
     private String alias;
 
 
-
-    public TableRelation(){
+    public TableRelation() {
 
     }
 
-    public TableRelation(MySearchList mySearchList){
+    public TableRelation(MySearchList mySearchList) {
         this.mySearchList = mySearchList;
     }
 
@@ -105,17 +103,17 @@ public class TableRelation {
         return this;
     }
 
-    public <T> TableRelation setJoinTableNickName(String parentTableNickName,SFunction<T,?> joinTableNickName) {
-        if(WsStringUtils.isBlank(parentTableNickName)){
-            this.joinTableNickName = WsFieldUtils.getFieldName(joinTableNickName);
-        }else {
-            this.joinTableNickName = parentTableNickName +'.' + WsFieldUtils.getFieldName(joinTableNickName);
-        }
+    public <T> TableRelation setJoinTableNickName(SFunction<T, ?> joinTableNickName) {
+        this.joinTableNickName = WsFieldUtils.getFieldName(joinTableNickName);
         return this;
     }
 
-    public <T> TableRelation setJoinTableNickName(SFunction<T,?> joinTableNickName) {
-        this.joinTableNickName = WsFieldUtils.getFieldName(joinTableNickName);
+    public <T> TableRelation setJoinTableNickName(String parentTableNickName, SFunction<T, ?> joinTableNickName) {
+        if (WsStringUtils.isBlank(parentTableNickName)) {
+            this.joinTableNickName = WsFieldUtils.getFieldName(joinTableNickName);
+        } else {
+            this.joinTableNickName = parentTableNickName + '.' + WsFieldUtils.getFieldName(joinTableNickName);
+        }
         return this;
     }
 
@@ -128,14 +126,14 @@ public class TableRelation {
         return this;
     }
 
-    public TableRelation on(String tableColumn,String joinTableColumn){
+    public TableRelation on(String tableColumn, String joinTableColumn) {
         this.tableColumn = tableColumn;
         this.joinTableColumn = joinTableColumn;
         return this;
     }
 
 
-    public <T,R> TableRelation on(SFunction<T,?> tableColumn, SFunction<R,?> joinTableColumn){
+    public <T, R> TableRelation on(SFunction<T, ?> tableColumn, SFunction<R, ?> joinTableColumn) {
         this.tableColumn = WsFieldUtils.getFieldName(tableColumn);
         this.joinTableColumn = WsFieldUtils.getFieldName(joinTableColumn);
         return this;
@@ -171,9 +169,9 @@ public class TableRelation {
 
     public TableRelation condition(Consumer<MySearchList> searchList) {
         MySearchList mySearchList = null;
-        if(this.conditionSearchList == null) {
+        if (this.conditionSearchList == null) {
             mySearchList = MySearchList.newMySearchList();
-        }else {
+        } else {
             mySearchList = this.conditionSearchList;
         }
         searchList.accept(mySearchList);

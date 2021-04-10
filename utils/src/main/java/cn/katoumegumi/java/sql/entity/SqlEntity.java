@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 /**
  * sql语句
+ *
  * @author ws
  */
 public class SqlEntity {
@@ -61,13 +62,14 @@ public class SqlEntity {
     public List<String> getConditionList() {
         return conditionList;
     }
+
     public List<TableEntity> getTableNameList() {
         return tableNameList;
     }
 
 
     public String getColumnStr() {
-        if(columnStr == null){
+        if (columnStr == null) {
             columnStr = columnList.stream().map(ColumnBaseEntity::getColumnValue).collect(Collectors.joining(SqlCommon.COMMA));
         }
         return columnStr;
@@ -75,13 +77,13 @@ public class SqlEntity {
 
 
     public String getTableStr() {
-        if(tableStr == null){
+        if (tableStr == null) {
             StringBuilder sb = new StringBuilder();
-            for(TableEntity tableEntity:tableNameList){
+            for (TableEntity tableEntity : tableNameList) {
                 sb.append(tableEntity.getTableJoinType().getValue()).append(SQLModelUtils.guardKeyword(tableEntity.getTableName()))
                         .append(' ')
                         .append(SQLModelUtils.guardKeyword(tableEntity.getAlias()));
-                if(tableEntity.getCondition() != null){
+                if (tableEntity.getCondition() != null) {
                     sb.append(tableEntity.getCondition());
                 }
             }
@@ -93,10 +95,10 @@ public class SqlEntity {
 
 
     public String getCondition() {
-        if(condition == null){
-            if(WsListUtils.isNotEmpty(conditionList)){
-                condition = SqlCommon.WHERE + String.join(SqlCommon.SQL_AND,conditionList);
-            }else {
+        if (condition == null) {
+            if (WsListUtils.isNotEmpty(conditionList)) {
+                condition = SqlCommon.WHERE + String.join(SqlCommon.SQL_AND, conditionList);
+            } else {
                 condition = "";
             }
 
@@ -106,7 +108,7 @@ public class SqlEntity {
 
 
     public String getSubjoin() {
-        if(subjoin == null){
+        if (subjoin == null) {
             return "";
         }
         return subjoin;

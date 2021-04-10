@@ -9,7 +9,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import javax.persistence.*;
-import javax.persistence.criteria.JoinType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -69,7 +68,7 @@ public class FieldColumnRelationMapperFactory {
         } else {
             tableName = table.name();
         }
-        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(),tableName,clazz);
+        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz);
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields) {
@@ -126,7 +125,7 @@ public class FieldColumnRelationMapperFactory {
 
                 FieldColumnRelationMapper mapper = analysisClassRelation(joinClass);
                 if (mapper != null) {
-                    FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray,joinClass,field);
+                    FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
                     fieldJoinClass.setNickName(field.getName());
                     fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
                     JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
@@ -178,7 +177,7 @@ public class FieldColumnRelationMapperFactory {
                 tableName = table.value();
             }
         }
-        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(),tableName,clazz);
+        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz);
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
         for (Field field : fields) {
@@ -239,7 +238,7 @@ public class FieldColumnRelationMapperFactory {
                     isArray = true;
                 }
                 if (analysisClassRelation(joinClass) != null) {
-                    FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray,joinClass,field);
+                    FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
                     fieldJoinClass.setNickName(field.getName());
                     fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
                     fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);

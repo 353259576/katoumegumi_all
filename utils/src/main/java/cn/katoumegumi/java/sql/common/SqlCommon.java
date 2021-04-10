@@ -60,7 +60,7 @@ public interface SqlCommon {
 
     String SQL_AND = " and ";
 
-    String SQL_OR= " or ";
+    String SQL_OR = " or ";
 
     String AND = (" & ");
 

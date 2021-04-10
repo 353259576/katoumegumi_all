@@ -7,12 +7,13 @@ import javax.sql.DataSource;
 
 /**
  * 光数据源生成
+ *
  * @author ws
  */
 public class HikariCPDataSourceFactory {
 
 
-    public static DataSource getDataSource(String url,String username,String password,String driverClassName){
+    public static DataSource getDataSource(String url, String username, String password, String driverClassName) {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName(driverClassName);
         hikariConfig.setJdbcUrl(url);

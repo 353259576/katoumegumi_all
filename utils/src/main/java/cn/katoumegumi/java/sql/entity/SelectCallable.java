@@ -19,7 +19,7 @@ public class SelectCallable<T> implements Callable<List<T>> {
         return valueList;
     }
 
-    public void put(List<T> list){
+    public void put(List<T> list) {
         this.valueList = list;
         countDownLatch.countDown();
     }

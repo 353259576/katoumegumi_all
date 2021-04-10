@@ -4,6 +4,7 @@ import cn.katoumegumi.java.sql.common.TableJoinType;
 
 /**
  * 表
+ *
  * @author ws
  */
 public class TableEntity {
@@ -24,11 +25,11 @@ public class TableEntity {
     private final String alias;
 
     /**
-     *条件
+     * 条件
      */
     private final String condition;
 
-    public TableEntity(TableJoinType type,String tableName,String alias,String condition){
+    public TableEntity(TableJoinType type, String tableName, String alias, String condition) {
         this.tableJoinType = type;
         this.tableName = tableName;
         this.alias = alias;

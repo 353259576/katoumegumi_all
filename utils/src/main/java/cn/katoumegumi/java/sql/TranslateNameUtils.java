@@ -3,11 +3,15 @@ package cn.katoumegumi.java.sql;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 翻译表名和列名
+ *
  * @author ws
  */
 public class TranslateNameUtils {
@@ -51,6 +55,7 @@ public class TranslateNameUtils {
 
     /**
      * 获取详细名称
+     *
      * @param value 简称
      * @return
      */
@@ -61,6 +66,7 @@ public class TranslateNameUtils {
 
     /**
      * 获取简称
+     *
      * @param keyword
      * @return
      */
@@ -83,6 +89,7 @@ public class TranslateNameUtils {
 
     /**
      * 设置简称
+     *
      * @param keyword
      */
     public void setAbbreviation(String keyword, String value) {
@@ -92,33 +99,35 @@ public class TranslateNameUtils {
 
     /**
      * 获取本地缓存的mapper
+     *
      * @param locationName
      * @return
      */
-    public FieldColumnRelationMapper getLocalMapper(String locationName){
+    public FieldColumnRelationMapper getLocalMapper(String locationName) {
         return localMapperMap.get(locationName);
     }
 
     /**
      * 添加本地缓存的mapper
+     *
      * @param locationName
      * @param mapper
      */
-    public void addLocalMapper(String locationName,FieldColumnRelationMapper mapper){
-        localMapperMap.put(locationName,mapper);
+    public void addLocalMapper(String locationName, FieldColumnRelationMapper mapper) {
+        localMapperMap.put(locationName, mapper);
     }
 
-    public int locationMapperSize(){
+    public int locationMapperSize() {
         return localMapperMap.size();
     }
 
-    public void addMainClassName(String mainClassName){
-        this.mainClassNameList.add(mainClassName+'.');
+    public void addMainClassName(String mainClassName) {
+        this.mainClassNameList.add(mainClassName + '.');
     }
 
-    public boolean startsWithMainClassName(String mainClassName){
+    public boolean startsWithMainClassName(String mainClassName) {
         final String tableName = mainClassName + '.';
-        for(String prefix:mainClassNameList) {
+        for (String prefix : mainClassNameList) {
             if (tableName.startsWith(prefix)) {
                 return true;
             }
@@ -128,6 +137,7 @@ public class TranslateNameUtils {
 
     /**
      * 去除表别名的主表名称
+     *
      * @return
      */
     public String getNoPrefixTableName(final String tableName) {
@@ -135,7 +145,7 @@ public class TranslateNameUtils {
             return null;
         }
 
-        for(String prefix:mainClassNameList) {
+        for (String prefix : mainClassNameList) {
             if (tableName.startsWith(prefix)) {
                 return tableName.substring(prefix.length());
             }
@@ -190,6 +200,7 @@ public class TranslateNameUtils {
 
     /**
      * 转换sql语句中表名为简写
+     *
      * @param searchSql
      * @return
      */

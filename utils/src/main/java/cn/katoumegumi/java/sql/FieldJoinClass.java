@@ -40,7 +40,7 @@ public class FieldJoinClass {
     private MySearchList conditionSearchList;
 
 
-    public FieldJoinClass(boolean isArray,Class<?> joinClass,Field field){
+    public FieldJoinClass(boolean isArray, Class<?> joinClass, Field field) {
         this.isArray = isArray;
         this.joinClass = joinClass;
         this.field = field;
@@ -51,12 +51,20 @@ public class FieldJoinClass {
         return baseTableNickName;
     }
 
+    public void setBaseTableNickName(String baseTableNickName) {
+        this.baseTableNickName = baseTableNickName;
+    }
+
     public boolean isArray() {
         return isArray;
     }
 
     public String getNickName() {
         return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     public Class<?> getJoinClass() {
@@ -90,14 +98,6 @@ public class FieldJoinClass {
     public Field getField() {
         field.setAccessible(true);
         return field;
-    }
-
-    public void setBaseTableNickName(String baseTableNickName) {
-        this.baseTableNickName = baseTableNickName;
-    }
-
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
     }
 
     public MySearchList getConditionSearchList() {

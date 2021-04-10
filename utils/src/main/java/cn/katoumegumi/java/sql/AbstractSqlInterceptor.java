@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * sql拦截器
+ *
  * @author ws
  */
 public abstract class AbstractSqlInterceptor {

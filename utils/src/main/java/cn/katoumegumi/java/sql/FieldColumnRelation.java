@@ -16,7 +16,7 @@ public class FieldColumnRelation {
     private final Class<?> fieldClass;
 
 
-    public FieldColumnRelation(boolean id, String fieldName,Field field,String columnName,Class<?> fieldClass){
+    public FieldColumnRelation(boolean id, String fieldName, Field field, String columnName, Class<?> fieldClass) {
         this.id = id;
         this.fieldName = fieldName;
         this.field = field;

@@ -39,13 +39,13 @@ public class SqlLimit {
         return this;
     }
 
-    public void build(){
-        if (this.current > -1){
-            if (this.current != 0){
+    public void build() {
+        if (this.current > -1) {
+            if (this.current != 0) {
                 this.offset = (this.current - 1) * this.size;
             }
-        }else {
-            this.current = this.offset/this.size + 1;
+        } else {
+            this.current = this.offset / this.size + 1;
         }
     }
 }

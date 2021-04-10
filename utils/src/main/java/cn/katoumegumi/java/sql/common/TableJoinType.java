@@ -2,6 +2,7 @@ package cn.katoumegumi.java.sql.common;
 
 /**
  * 表管理类型
+ *
  * @author ws
  */
 public enum TableJoinType {
@@ -26,7 +27,7 @@ public enum TableJoinType {
 
     private final String value;
 
-    TableJoinType(String value){
+    TableJoinType(String value) {
         this.value = value;
     }
 
