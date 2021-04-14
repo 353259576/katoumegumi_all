@@ -6,9 +6,10 @@ import java.io.Serializable;
 
 /**
  * 基础参数实体
+ *
  * @author ws
  */
-public abstract class BaseEntity implements Serializable,Comparable<BaseEntity> {
+public abstract class BaseEntity implements Serializable, Comparable<BaseEntity> {
 
     protected String name;
 
@@ -29,10 +30,10 @@ public abstract class BaseEntity implements Serializable,Comparable<BaseEntity> 
 
     @Override
     public boolean equals(Object obj) {
-        if(name == null){
+        if (name == null) {
             return false;
         }
-        if(obj == null){
+        if (obj == null) {
             return false;
         }
         return name.equals(obj);

@@ -3,7 +3,6 @@ package cn.katoumegumi.java.http.client.model;
 import io.netty.channel.Channel;
 
 import java.util.Objects;
-import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 

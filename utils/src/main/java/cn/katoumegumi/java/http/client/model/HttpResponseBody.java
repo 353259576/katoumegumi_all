@@ -92,9 +92,9 @@ public class HttpResponseBody {
     }
 
     public String getResponseBodyToString() {
-        if(WsStringUtils.isNotBlank(charSet)){
+        if (WsStringUtils.isNotBlank(charSet)) {
             return getResponseBodyToString(charSet);
-        }else {
+        } else {
             return getResponseBodyToString("UTF-8");
         }
 

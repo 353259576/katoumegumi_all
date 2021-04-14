@@ -30,6 +30,8 @@ public interface SqlCommon {
 
     String LIKE = " like ";
 
+    String DISTINCT = " distinct ";
+
     String EQ = " = ";
 
     String NEQ = " != ";

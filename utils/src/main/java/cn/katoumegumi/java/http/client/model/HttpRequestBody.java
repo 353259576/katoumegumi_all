@@ -9,7 +9,7 @@ import cn.katoumegumi.java.http.model.BaseEntity;
 import cn.katoumegumi.java.http.model.FileEntity;
 import cn.katoumegumi.java.http.model.ValueEntity;
 import cn.katoumegumi.java.http.utils.HttpUtils;
-import com.alibaba.fastjson.JSON;
+import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,9 +27,8 @@ public class HttpRequestBody {
     //private volatile List<HttpRequestBodyEntry> httpRequestBodyEntries = new ArrayList<>();
 
     private final List<BaseEntity> bodyEntityList = new ArrayList<>();
-
-    private String stringHttpRequestBody = null;
     private final List<WsRequestProperty> requestProperty = new ArrayList<>();
+    private String stringHttpRequestBody = null;
     private String charset = "UTF-8";
     private String method = "GET";
     private boolean isHttps = false;
@@ -219,7 +218,7 @@ public class HttpRequestBody {
 
     public String getStringHttpRequestBody() {
         try {
-            return new String(getByteHttpRequestBody(),charset);
+            return new String(getByteHttpRequestBody(), charset);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -241,26 +240,33 @@ public class HttpRequestBody {
     public byte[] multipartFormData(HttpRequestBody httpRequestBody) throws RuntimeException {
         String boundary = HttpUtils.getFormDataBoundary();
         httpRequestBody.setRequestProperty("content-type", "multipart/form-data; boundary=" + boundary);
-        return HttpUtils.toFormData(bodyEntityList,boundary,charset);
+        return HttpUtils.toFormData(bodyEntityList, boundary, charset);
     }
 
 
     //生成默认数据格式
     public byte[] simpleFormData(HttpRequestBody httpRequestBody) {
-        return HttpUtils.toBaseForm(bodyEntityList,charset);
+        return HttpUtils.toBaseForm(bodyEntityList, charset);
     }
 
     //生成JSON数据格式
     public byte[] jsonFormData(HttpRequestBody httpRequestBody) {
         httpRequestBody.setRequestProperty("content-type", MediaType.APPLICATION_JSON_VALUE.getCoed());
-        Map<String,Object> map = new HashMap<>();
-        for(BaseEntity entity:bodyEntityList){
-            if(entity instanceof ValueEntity){
-                map.put(entity.getName(),((ValueEntity) entity).getValue());
+        Map<String, Object> map = new HashMap<>();
+        for (BaseEntity entity : bodyEntityList) {
+            if (entity instanceof ValueEntity) {
+                map.put(entity.getName(), ((ValueEntity) entity).getValue());
             }
         }
-        if(WsListUtils.isNotEmpty(map)){
-            byte[] bytes = JSON.toJSONBytes(map);
+        if (WsListUtils.isNotEmpty(map)) {
+
+            //byte[] bytes = JSON.toJSONBytes(map);
+            byte[] bytes = new byte[0];
+            try {
+                bytes = new Gson().toJson(map).getBytes(charset);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             return bytes;
         }
         return null;
@@ -400,8 +406,8 @@ public class HttpRequestBody {
         return this;
     }
 
-    public HttpRequestBody setUserAgent(String userAgent){
-        setRequestProperty("User-Agent",userAgent);
+    public HttpRequestBody setUserAgent(String userAgent) {
+        setRequestProperty("User-Agent", userAgent);
         return this;
     }
 
@@ -417,18 +423,16 @@ public class HttpRequestBody {
     }
 
     public int getPort() {
-        if(this.port == 0){
+        if (this.port == 0) {
             this.port = this.uri.getPort();
         }
-        if(this.port == 0){
-            if(this.isHttps) {
+        if (this.port == 0) {
+            if (this.isHttps) {
                 this.port = 80;
-            }else {
+            } else {
                 this.port = 443;
             }
         }
-
-
 
 
         return port;

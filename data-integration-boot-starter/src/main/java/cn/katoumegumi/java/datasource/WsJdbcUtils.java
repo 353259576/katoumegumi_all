@@ -8,7 +8,6 @@ import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -38,7 +37,7 @@ public class WsJdbcUtils {
 
 
     public <T> int insert(T t) {
-        if(t == null){
+        if (t == null) {
             return 0;
         }
         MySearchList mySearchList = MySearchList.create(t.getClass());
@@ -90,7 +89,7 @@ public class WsJdbcUtils {
     }
 
     public <T> int insert(List<T> tList) {
-        if(WsListUtils.isEmpty(tList)){
+        if (WsListUtils.isEmpty(tList)) {
             return 0;
         }
         MySearchList mySearchList = MySearchList.create(tList.get(0).getClass());
@@ -188,22 +187,23 @@ public class WsJdbcUtils {
         return preparedStatementCreator;
     }
 
-    public <T> int update(T t){
-        return update(t,false);
+    public <T> int update(T t) {
+        return update(t, false);
     }
-    public <T> int update(T t,boolean isAll) {
-        if(t == null){
+
+    public <T> int update(T t, boolean isAll) {
+        if (t == null) {
             return 0;
         }
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t,isAll);
+        UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t, isAll);
         log.debug(updateSqlEntity.getUpdateSql());
         return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), updateSqlEntity.getValueList().toArray());
     }
 
     public int update(MySearchList mySearchList) {
-        if(mySearchList == null){
+        if (mySearchList == null) {
             return 0;
         }
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
@@ -213,55 +213,55 @@ public class WsJdbcUtils {
     }
 
     public void updateBatch(List<MySearchList> mySearchLists) {
-        if(WsListUtils.isEmpty(mySearchLists)){
+        if (WsListUtils.isEmpty(mySearchLists)) {
             return;
         }
-        Map<String,List<Object[]>> map = new HashMap<>();
-        for(MySearchList mySearchList:mySearchLists){
+        Map<String, List<Object[]>> map = new HashMap<>();
+        for (MySearchList mySearchList : mySearchLists) {
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
             UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
-            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(),sql->{
+            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> {
                 return new ArrayList<>();
             });
             objectList.add(updateSqlEntity.getValueList().toArray());
         }
-        map.forEach((sql,listValue)->{
+        map.forEach((sql, listValue) -> {
             log.debug(sql);
-            jdbcTemplate.batchUpdate(sql,listValue);
+            jdbcTemplate.batchUpdate(sql, listValue);
         });
     }
 
-    public <T> void updateBatchByT(List<T> tList){
-        updateBatchByT(tList,false);
+    public <T> void updateBatchByT(List<T> tList) {
+        updateBatchByT(tList, false);
     }
 
-    public <T> void updateBatchByT(List<T> tList,boolean isAll) {
-        if(WsListUtils.isEmpty(tList)){
+    public <T> void updateBatchByT(List<T> tList, boolean isAll) {
+        if (WsListUtils.isEmpty(tList)) {
             return;
         }
-        Map<String,List<Object[]>> map = new HashMap<>();
+        Map<String, List<Object[]>> map = new HashMap<>();
         //List<String> sqlList = new ArrayList<>(tList.size());
         //List<Object[]> list = new ArrayList<>();
-        for(T t:tList){
+        for (T t : tList) {
             MySearchList mySearchList = MySearchList.create(t.getClass());
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-            UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t,isAll);
-            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(),sql->{
+            UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t, isAll);
+            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> {
                 return new ArrayList<>();
             });
             objectList.add(updateSqlEntity.getValueList().toArray());
         }
-        map.forEach((sql,listValue)->{
+        map.forEach((sql, listValue) -> {
             log.debug(sql);
-            jdbcTemplate.batchUpdate(sql,listValue);
+            jdbcTemplate.batchUpdate(sql, listValue);
         });
     }
 
-    public int delete(MySearchList mySearchList){
+    public int delete(MySearchList mySearchList) {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         DeleteSqlEntity deleteSqlEntity = sqlModelUtils.delete();
         log.debug(deleteSqlEntity.getDeleteSql());
-        return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(),deleteSqlEntity.getValueList().toArray());
+        return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(), deleteSqlEntity.getValueList().toArray());
     }
 
 
@@ -280,7 +280,7 @@ public class WsJdbcUtils {
 
         List finalList = selectSqlEntity.getValueList();
 
-        return handleJdbcReturnValue(sql,finalList,sqlModelUtils);
+        return handleJdbcReturnValue(sql, finalList, sqlModelUtils);
 
         //List list = handleJdbcReturnValue(sql, finalList);
 
@@ -288,7 +288,7 @@ public class WsJdbcUtils {
         //return sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
     }
 
-    private <T> List<T> handleJdbcReturnValue(String sql,List finalList,SQLModelUtils sqlModelUtils){
+    private <T> List<T> handleJdbcReturnValue(String sql, List finalList, SQLModelUtils sqlModelUtils) {
         return jdbcTemplate.query(sql, finalList.toArray(), new ResultSetExtractor<List<T>>() {
             @Override
             public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
@@ -311,7 +311,7 @@ public class WsJdbcUtils {
                 }
             }
             int length = nameList.size();
-            Map map = new HashMap((int) (length/0.75));
+            Map map = new HashMap((int) (length / 0.75));
             //List<ReturnColumnEntity> valueList = new ArrayList<>(nameListLength);
             for (int j = 0; j < length; ++j) {
                 //valueList.add(new ReturnColumnEntity(nameList.get(j),resultSet.getObject(j+1)));
@@ -384,7 +384,7 @@ public class WsJdbcUtils {
         List finalList = selectSqlEntity.getValueList();
         //List list = handleJdbcReturnValue(sql, finalList);
 
-        List<T> tList = handleJdbcReturnValue(sql,finalList,sqlModelUtils);//sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
+        List<T> tList = handleJdbcReturnValue(sql, finalList, sqlModelUtils);//sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
         Long count = jdbcTemplate.queryForObject(countSql, finalList.toArray(), Long.class);
         if (count == null) {
             count = 0L;

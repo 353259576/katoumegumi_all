@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NettyHttpClientResponseHandler extends ChannelInboundHandlerAdapter {
     private static final Logger log = LoggerFactory.getLogger(NettyHttpClientResponseHandler.class);
     public static AtomicInteger atomicInteger = new AtomicInteger(0);
+    private final boolean sendHttp;
     private volatile HttpRequestBody httpRequestBody;
     private volatile String id;
-    private final boolean sendHttp;
 
 
     public NettyHttpClientResponseHandler(HttpRequestBody httpRequestBody, String id, boolean sendHttp) {

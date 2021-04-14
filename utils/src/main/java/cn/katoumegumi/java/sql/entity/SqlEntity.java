@@ -70,7 +70,12 @@ public class SqlEntity {
 
     public String getColumnStr() {
         if (columnStr == null) {
-            columnStr = columnList.stream().map(ColumnBaseEntity::getColumnValue).collect(Collectors.joining(SqlCommon.COMMA));
+            if (columnList.size() == 1) {
+                columnStr = SqlCommon.DISTINCT + columnList.get(0).getColumnValue();
+            } else {
+                columnStr = columnList.stream().map(ColumnBaseEntity::getColumnValue).collect(Collectors.joining(SqlCommon.COMMA));
+            }
+
         }
         return columnStr;
     }

@@ -4,6 +4,7 @@ import cn.katoumegumi.java.common.WsStringUtils;
 
 /**
  * 通常的基本值
+ *
  * @author ws
  */
 public class ValueEntity extends BaseEntity {
@@ -11,12 +12,11 @@ public class ValueEntity extends BaseEntity {
     private Object value;
 
 
-
     public String getStringValue() {
         return WsStringUtils.anyToString(value);
     }
 
-    public Object getValue(){
+    public Object getValue() {
         return this.value;
     }
 

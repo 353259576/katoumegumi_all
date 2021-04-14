@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.common;
 
-import com.alibaba.fastjson.JSON;
 
 import java.io.*;
 import java.lang.reflect.Array;
@@ -18,31 +17,6 @@ import java.util.*;
  */
 @SuppressWarnings("unchecked")
 public class WsBeanUtils {
-
-    public static void main(String[] args) {
-        /*java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
-
-
-        WsDateUtils.getExecutionTime.accept(()->{
-            for (int i = 0; i < 10000000; i++){
-                objectToT("1", Long.class);
-            }
-        });
-
-        PageVO pageVO = copyBean(new PageVO(),PageVO.class);
-        System.out.println(JSON.toJSONString(pageVO));*/
-
-
-        int[] ints = new int[]{1, 2, 3};
-        Object object = convertToArray(ints, Double.class);
-        Double[] objects = (Double[]) object;
-        //List<Object> list = WsListUtils.arrayToList(objects);
-        System.out.println(JSON.toJSONString(objects));
-
-        List<Integer> list = new ArrayList<>();
-
-    }
-
 
     /**
      * 转换bean

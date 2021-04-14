@@ -87,10 +87,10 @@ public class WsNettyClientUtils {
 
         URI uri = httpRequestBody.getUri();
         String host = null;
-        if(uri.getPort() <= 0){
+        if (uri.getPort() <= 0) {
             host = uri.getHost();
-        }else {
-            host = uri.getHost()+":"+uri.getPort();
+        } else {
+            host = uri.getHost() + ":" + uri.getPort();
         }
         httpRequest.headers().set(HttpHeaderNames.HOST, host);
         httpRequest.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
@@ -130,13 +130,13 @@ public class WsNettyClientUtils {
     }
 
 
-    public static HttpMethod getHttpMethod(HttpRequestBody httpRequestBody){
+    public static HttpMethod getHttpMethod(HttpRequestBody httpRequestBody) {
         String httpMethod = httpRequestBody.getMethod();
-        if(StringUtil.isNullOrEmpty(httpMethod)) {
+        if (StringUtil.isNullOrEmpty(httpMethod)) {
             throw new RuntimeException("httpMethod为空");
         }
         HttpMethod method = HttpMethod.valueOf(httpMethod);
-        if(method == null){
+        if (method == null) {
             throw new RuntimeException("不支持的HttpMethod");
         }
         return method;

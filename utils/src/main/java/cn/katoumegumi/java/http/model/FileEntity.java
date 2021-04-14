@@ -13,9 +13,10 @@ import java.util.List;
 
 /**
  * 文件类型
+ *
  * @author ws
  */
-public class FileEntity extends BaseEntity{
+public class FileEntity extends BaseEntity {
 
     private String fileName;
 
@@ -28,11 +29,11 @@ public class FileEntity extends BaseEntity{
     }
 
     public FileEntity setFileName(String fileName) {
-        if(WsStringUtils.isNotBlank(fileName)){
-            List<String> strs = WsStringUtils.split(fileName,'.');
-            if(strs.size() == 1){
+        if (WsStringUtils.isNotBlank(fileName)) {
+            List<String> strs = WsStringUtils.split(fileName, '.');
+            if (strs.size() == 1) {
                 this.fileName = strs.get(0);
-            }else {
+            } else {
                 this.fileType = strs.get(1);
             }
         }
@@ -44,8 +45,11 @@ public class FileEntity extends BaseEntity{
         return fileType;
     }
 
+    public byte[] getValue() {
+        return fileData;
+    }
 
-    public FileEntity setValue(File file){
+    public FileEntity setValue(File file) {
         try {
             setFileName(file.getName());
             return setValue(new FileInputStream(file));
@@ -55,26 +59,26 @@ public class FileEntity extends BaseEntity{
         return this;
     }
 
-    public FileEntity setValue(InputStream inputStream){
+    public FileEntity setValue(InputStream inputStream) {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             WritableByteChannel writableByteChannel = Channels.newChannel(outputStream);
-            if(inputStream instanceof FileInputStream){
+            if (inputStream instanceof FileInputStream) {
                 FileInputStream fileInputStream = (FileInputStream) inputStream;
                 FileChannel fileChannel = fileInputStream.getChannel();
-                fileChannel.transferTo(0,fileChannel.size(),writableByteChannel);
+                fileChannel.transferTo(0, fileChannel.size(), writableByteChannel);
                 this.fileData = outputStream.toByteArray();
                 writableByteChannel.close();
                 outputStream.close();
                 fileChannel.close();
                 inputStream.close();
-            }else {
+            } else {
                 ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
                 ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
                 int i = -1;
-                while ((i = readableByteChannel.read(byteBuffer)) > 0){
+                while ((i = readableByteChannel.read(byteBuffer)) > 0) {
                     byteBuffer.flip();
-                    while (byteBuffer.hasRemaining()){
+                    while (byteBuffer.hasRemaining()) {
                         writableByteChannel.write(byteBuffer);
                     }
                     byteBuffer.clear();
@@ -84,14 +88,10 @@ public class FileEntity extends BaseEntity{
                 outputStream.close();
                 inputStream.close();
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return this;
 
-    }
-
-    public byte[] getValue() {
-        return fileData;
     }
 }

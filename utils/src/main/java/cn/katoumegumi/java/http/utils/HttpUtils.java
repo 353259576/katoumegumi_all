@@ -63,7 +63,6 @@ public class HttpUtils {
     private static final String SEMICOLON_CHARACTER = ";";
 
 
-
     public static void main(String[] args) {
         String boundary = getFormDataBoundary();
         String charset = "UTF-8";
@@ -71,15 +70,16 @@ public class HttpUtils {
         entityList.add(new ValueEntity().setValue("你好世界").setName("name"));
         entityList.add(new ValueEntity().setValue("你好世界1321984865456").setName("password"));
         entityList.add(new FileEntity().setValue(new File("D:\\10480\\Documents\\练习.postman_collection.json")).setName("file"));
-        String str = new String(toBaseForm(entityList,charset));
+        String str = new String(toBaseForm(entityList, charset));
         System.out.println(str);
     }
 
     /**
      * 获取formData分隔符
+     *
      * @return
      */
-    public static String getFormDataBoundary(){
+    public static String getFormDataBoundary() {
         Random random = new Random();
         StringBuilder stringBuilder = new StringBuilder(BOUNDARY_START);
         int j;
@@ -93,10 +93,11 @@ public class HttpUtils {
 
     /**
      * 转换为formData格式
+     *
      * @return
      */
-    public static byte[] toFormData(List<BaseEntity> entityList,String boundary,String charset){
-        if(WsListUtils.isEmpty(entityList)){
+    public static byte[] toFormData(List<BaseEntity> entityList, String boundary, String charset) {
+        if (WsListUtils.isEmpty(entityList)) {
             return null;
         }
         try {
@@ -104,7 +105,7 @@ public class HttpUtils {
             ValueEntity valueEntity;
             byte[] boundaryByteArray = boundary.getBytes(charset);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            for (BaseEntity entity:entityList){
+            for (BaseEntity entity : entityList) {
                 byteArrayOutputStream.write(BOUNDARY_TAG.getBytes(charset));
                 byteArrayOutputStream.write(boundaryByteArray);
                 byteArrayOutputStream.write(LF_CHARACTER.getBytes(charset));
@@ -114,14 +115,14 @@ public class HttpUtils {
                 byteArrayOutputStream.write(DOUBLE_QUOTATION_CHARACTER.getBytes(charset));
                 byteArrayOutputStream.write(entity.getName().getBytes(charset));
                 byteArrayOutputStream.write(DOUBLE_QUOTATION_CHARACTER.getBytes(charset));
-                if(entity instanceof ValueEntity){
+                if (entity instanceof ValueEntity) {
                     valueEntity = (ValueEntity) entity;
                     byteArrayOutputStream.write(LF_CHARACTER.getBytes(charset));
                     byteArrayOutputStream.write(LF_CHARACTER.getBytes(charset));
                     byteArrayOutputStream.write(valueEntity.getStringValue().getBytes(charset));
-                }else {
+                } else {
                     fileEntity = (FileEntity) entity;
-                    if(WsStringUtils.isNotBlank(fileEntity.getFileName())){
+                    if (WsStringUtils.isNotBlank(fileEntity.getFileName())) {
                         byteArrayOutputStream.write(SEMICOLON_CHARACTER.getBytes(charset));
                         byteArrayOutputStream.write(SPACE_CHARACTER.getBytes(charset));
                         byteArrayOutputStream.write(FORM_DATA_FILENAME_STR.getBytes(charset));
@@ -145,7 +146,7 @@ public class HttpUtils {
             byte[] bytes = byteArrayOutputStream.toByteArray();
             byteArrayOutputStream.close();
             return bytes;
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -154,22 +155,23 @@ public class HttpUtils {
 
     /**
      * 转换为x-www-form-urlencoded
+     *
      * @param entityList
      * @return
      */
-    public static byte[] toBaseForm(List<BaseEntity> entityList,String charset){
-        if(WsListUtils.isEmpty(entityList)){
+    public static byte[] toBaseForm(List<BaseEntity> entityList, String charset) {
+        if (WsListUtils.isEmpty(entityList)) {
             return null;
         }
         ValueEntity valueEntity = null;
         List<String> valueList = new ArrayList<>(entityList.size());
-        for(BaseEntity entity:entityList){
-            if(entity instanceof ValueEntity){
+        for (BaseEntity entity : entityList) {
+            if (entity instanceof ValueEntity) {
                 valueEntity = (ValueEntity) entity;
-                valueList.add(valueEntity.getName() +"=" + valueEntity.getStringValue());
+                valueList.add(valueEntity.getName() + "=" + valueEntity.getStringValue());
             }
         }
-        if(WsListUtils.isEmpty(valueList)){
+        if (WsListUtils.isEmpty(valueList)) {
             return null;
         }
         try {
@@ -180,9 +182,6 @@ public class HttpUtils {
         return null;
 
     }
-
-
-
 
 
 }
