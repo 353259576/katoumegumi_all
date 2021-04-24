@@ -8,34 +8,40 @@ import java.lang.reflect.Field;
  * @author ws
  */
 public class FieldJoinClass {
+
     private final boolean isArray;
+
     private final Class<?> joinClass;
+
     private final Field field;
+
     /**
-     * 主表名称
+     * 主表实体名称
      */
     private String baseTableNickName;
 
     /**
-     * 连接表的名称
+     * 关联表实体名称
      */
     private String nickName;
 
     /**
-     * 连接类型
+     * 关联类型
      */
     private TableJoinType joinType;
+
     /**
-     * 主表连接字段
+     * 主表表中字段名称
      */
     private String joinColumn;
+
     /**
-     * 连接表字段
+     * 关联表表中字段名称
      */
     private String anotherJoinColumn;
 
     /**
-     * 附加查询条件
+     * 附加条件
      */
     private MySearchList conditionSearchList;
 

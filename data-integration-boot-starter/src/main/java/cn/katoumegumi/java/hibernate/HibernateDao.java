@@ -1,30 +1,41 @@
 package cn.katoumegumi.java.hibernate;
 
 import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.model.WsRun;
 import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.MySearchList;
+import cn.katoumegumi.java.sql.TableRelation;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.TypeHelper;
+import org.hibernate.annotations.common.reflection.java.generics.TypeEnvironmentFactory;
+import org.hibernate.boot.model.JavaTypeDescriptor;
 import org.hibernate.criterion.*;
+import org.hibernate.persister.walking.internal.StandardAnyTypeDefinition;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
 import org.hibernate.sql.JoinType;
+import org.hibernate.type.*;
+import org.hibernate.type.descriptor.java.spi.JavaTypeDescriptorRegistry;
+import org.hibernate.type.descriptor.java.spi.RegistryHelper;
+import org.hibernate.type.spi.TypeConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @HibernateTransactional
 public class HibernateDao {
 
     public static final Logger log = LoggerFactory.getLogger(HibernateDao.class);
-
+    //private final static String MAIN_TABLE_SIGN = "_1_";
     //@Resource
     private HibernateTemplate hibernateTemplate;
 
@@ -126,7 +137,9 @@ public class HibernateDao {
      * @return
      */
     public <T> IPage<T> selectValueToPage(MySearchList mySearchList, Class<T> clazz) {
-        DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz, mySearchList);
+        //DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz, mySearchList);
+        mySearchList.setMainClass(clazz);
+        DetachedCriteria detachedCriteria = createDetachedCriteria(mySearchList);
         SqlLimit sqlLimit = mySearchList.getSqlLimit();
         if (sqlLimit == null) {
             sqlLimit = new SqlLimit();
@@ -158,8 +171,9 @@ public class HibernateDao {
      * @return
      */
     public <T> List<T> selectValueToList(MySearchList mySearchList, Class<T> clazz) {
-        DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz, mySearchList);
-
+        //DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz, mySearchList);
+        mySearchList.setMainClass(clazz);
+        DetachedCriteria detachedCriteria = createDetachedCriteria(mySearchList);
         List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria);
         return list;
     }
@@ -183,10 +197,7 @@ public class HibernateDao {
         return tList.get(0);
     }
 
-
     private <T> DetachedCriteria myDetachedCriteriaCreate(Class<T> clazz, MySearchList mySearchList) {
-
-
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(clazz);
         Map<String, DetachedCriteria> map = new HashMap<>();
         Conjunction conjunction = myDetachedCriteriaCreate(mySearchList, clazz, true, detachedCriteria, map);
@@ -253,13 +264,11 @@ public class HibernateDao {
                 joinType = JoinType.INNER_JOIN;
         }
         List<MySearch> mySearches = mySearchList.getAll();
-        //MySearch mySearch;
         String fieldName;
         List<Criterion> criterionList = new ArrayList<>();
 
 
         for (MySearch mySearch : mySearches) {
-            //mySearch = mySearches.get(i);
             fieldName = mySearch.getFieldName();
             Field field = null;
 
@@ -432,7 +441,6 @@ public class HibernateDao {
         return hibernateTemplate.findByExample(t);
     }
 
-
     public Object update(String hql, Map map) {
 		/*hibernateTemplate.execute(new HibernateCallback<T>() {
 			@Override
@@ -449,5 +457,356 @@ public class HibernateDao {
             return query.executeUpdate();
         });
     }
+
+
+
+    private DetachedCriteria createDetachedCriteria(MySearchList mySearchList) {
+        AtomicInteger atomicInteger = new AtomicInteger();
+        String rootAlias = WsStringUtils.isBlank(mySearchList.getAlias()) ? mySearchList.getMainClass().getSimpleName().substring(0, 1).toUpperCase() + "_" + atomicInteger.getAndAdd(1) : mySearchList.getAlias();
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(mySearchList.getMainClass(), rootAlias);
+        Map<String, DetachedCriteria> detachedCriteriaMap = new HashMap<>();
+        Map<String, Class<?>> classMap = new HashMap<>();
+        Map<String, String> nickAndRealNameMap = new HashMap<>();
+        Map<String, String> realAndNickNameMap = new HashMap<>();
+        nickAndRealNameMap.put(detachedCriteria.getAlias(), null);
+        //classMap.put(MAIN_TABLE_SIGN, mySearchList.getMainClass());
+        //detachedCriteriaMap.put(MAIN_TABLE_SIGN, detachedCriteria);
+
+        if (WsListUtils.isNotEmpty(mySearchList.getJoins())) {
+            List<WsRun> runList = new ArrayList<>();
+            for (TableRelation tableRelation : mySearchList.getJoins()) {
+                JoinType joinType;
+                switch (tableRelation.getJoinType()) {
+                    case INNER_JOIN:
+                        joinType = JoinType.INNER_JOIN;
+                        break;
+                    case LEFT_JOIN:
+                        joinType = JoinType.LEFT_OUTER_JOIN;
+                        break;
+                    case RIGHT_JOIN:
+                        joinType = JoinType.RIGHT_OUTER_JOIN;
+                        break;
+                    default:
+                        joinType = JoinType.INNER_JOIN;
+                }
+                String joinTableNickName = tableRelation.getJoinTableNickName();
+                String joinTableName = null;
+                List<String> stringList = WsStringUtils.split(joinTableNickName, '.');
+                if (stringList.size() == 1) {
+                    joinTableName = getRealName(stringList.get(0), nickAndRealNameMap);
+                } else {
+                    for (int i = 0; i < stringList.size(); i++) {
+                        stringList.set(i, getRealName(stringList.get(i), nickAndRealNameMap));
+                    }
+                    joinTableName = WsStringUtils.jointListString(stringList, ".");
+                }
+                DetachedCriteria root;
+                Class<?> rootClass;
+                String rootName = null;
+                String nodeName = stringList.get(stringList.size() - 1);
+                if (stringList.size() == 1) {
+                    root = detachedCriteria;
+                    rootClass = mySearchList.getMainClass();
+                } else {
+                    stringList.remove(stringList.size() - 1);
+                    rootName = WsStringUtils.jointListString(stringList, ".");
+                    root = detachedCriteriaMap.get(rootName);
+                    rootClass = classMap.get(rootName);
+                }
+                String nodeAlias = WsStringUtils.isBlank(tableRelation.getAlias()) ? tableRelation.getJoinTableNickName().substring(0, 1).toUpperCase() + "_" + atomicInteger.getAndAdd(1) : tableRelation.getAlias();
+                DetachedCriteria node = root.createCriteria(nodeName, nodeAlias, joinType);
+                realAndNickNameMap.put(joinTableName, nodeAlias);
+                nickAndRealNameMap.put(nodeAlias, joinTableName);
+                detachedCriteriaMap.put(joinTableName, node);
+                classMap.put(joinTableName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(rootClass, nodeName)));
+                if (tableRelation.getConditionSearchList() != null && tableRelation.getConditionSearchList().getAll().size() > 0) {
+
+                    runList.add(()->{
+                        List<Criterion> criterionList = createDetachedCriteria(tableRelation.getConditionSearchList(),detachedCriteria,mySearchList.getMainClass(), detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+                        if (WsListUtils.isNotEmpty(criterionList)) {
+                            for (Criterion criterion : criterionList) {
+                                node.add(criterion);
+                            }
+                        }
+                    });
+                }
+            }
+            if(WsListUtils.isNotEmpty(runList)){
+                for(WsRun run:runList){
+                    run.run();
+                }
+            }
+
+        }
+        List<Criterion> criterionList = createDetachedCriteria(mySearchList,detachedCriteria,mySearchList.getMainClass(), detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+        if (WsListUtils.isNotEmpty(criterionList)) {
+            for (Criterion criterion : criterionList) {
+                detachedCriteria.add(criterion);
+            }
+        }
+        return detachedCriteria;
+    }
+
+
+    private String getFieldName(String name,
+                                final DetachedCriteria root,
+                                final Class<?> rootClass,
+                                Map<String, DetachedCriteria> detachedCriteriaMap,
+                                Map<String, Class<?>> classMap,
+                                Map<String, String> nickAndRealNameMap,
+                                Map<String, String> realAndNickNameMap,
+                                AtomicInteger atomicInteger) {
+
+        String fieldName = null;
+        List<String> stringList = WsStringUtils.split(name, '.');
+        if (stringList.size() == 1) {
+            fieldName = name;
+            classMap.put(fieldName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(rootClass, fieldName)));
+        } else {
+            for (int i = 0; i < stringList.size() - 1; i++) {
+                stringList.set(i, getRealName(stringList.get(i), nickAndRealNameMap));
+            }
+            DetachedCriteria local = root;
+            Class<?> localClass = rootClass;
+            fieldName = WsStringUtils.jointListString(stringList, ".");
+            String shortFieldName = stringList.get(stringList.size() - 1);
+            stringList.remove(stringList.size() - 1);
+            List<String> strings = new ArrayList<>();
+            for (String str : stringList) {
+                strings.add(str);
+                String nodeName = WsStringUtils.jointListString(strings, ".");
+                if (!detachedCriteriaMap.containsKey(nodeName)) {
+                    localClass = WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(rootClass, str));
+                    String alias = rootClass.getSimpleName().substring(0, 1).toUpperCase() + "_" + atomicInteger.getAndAdd(1);
+                    local = local.createCriteria(str, alias);
+                    detachedCriteriaMap.put(nodeName, local);
+                    classMap.put(nodeName, rootClass);
+                    nickAndRealNameMap.put(alias, nodeName);
+                    realAndNickNameMap.put(nodeName, alias);
+
+                } else {
+                    local = detachedCriteriaMap.get(nodeName);
+                    localClass = classMap.get(nodeName);
+                }
+            }
+            classMap.put(fieldName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(localClass, shortFieldName)));
+            fieldName = getNickName(WsStringUtils.jointListString(stringList, "."), realAndNickNameMap) + '.' + shortFieldName;
+        }
+        return fieldName;
+    }
+
+    private List<Criterion> createDetachedCriteria(MySearchList mySearchList,
+                                                   final DetachedCriteria root,
+                                                   final Class<?> rootClass,
+                                                   Map<String, DetachedCriteria> detachedCriteriaMap,
+                                                   Map<String, Class<?>> classMap,
+                                                   Map<String, String> nickAndRealNameMap,
+                                                   Map<String, String> realAndNickNameMap,
+                                                   AtomicInteger atomicInteger) {
+        List<MySearch> searchList = mySearchList.getAll();
+        List<Criterion> criterionList = new ArrayList<>();
+        for (MySearch search : searchList) {
+            if (search.getOperator().equals(SqlOperator.SQL)) {
+                criterionList.add(Restrictions.sqlRestriction(search.getFieldName()));
+
+                /*if(search.getValue() == null){
+                }else {
+                    if(WsBeanUtils.isArray(search.getValue().getClass())){
+
+                    }else {
+                        criterionList.add(Restrictions.sqlRestriction(search.getFieldName(),search.getValue(), ));
+                    }
+                }*/
+
+                continue;
+            }
+
+            String fieldName = getFieldName(search.getFieldName(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+            Class<?> type = classMap.get(fieldName);
+
+            switch (search.getOperator()) {
+                case EQ:
+                    criterionList.add(Restrictions.eq(fieldName, WsBeanUtils.objectToT(search.getValue(), type)));
+                    break;
+                case NE:
+                    criterionList.add(Restrictions.ne(fieldName, WsBeanUtils.objectToT(search.getValue(), type)));
+                    break;
+                case GT:
+                    criterionList.add(Restrictions.gt(fieldName, WsBeanUtils.objectToT(search.getValue(), type)));
+                    break;
+                case GTE:
+                    criterionList.add(Restrictions.ge(fieldName, WsBeanUtils.objectToT(search.getValue(), type)));
+                    break;
+                case LT:
+                    criterionList.add(Restrictions.lt(fieldName, WsBeanUtils.objectToT(search.getValue(), type)));
+                    break;
+                case LTE:
+                    criterionList.add(Restrictions.le(fieldName, WsBeanUtils.objectToT(search.getValue(), type)));
+                    break;
+                case LIKE:
+                    MatchMode matchMode;
+                    boolean start;
+                    boolean end;
+                    String likeValue = WsStringUtils.anyToString(search.getValue());
+                    end = likeValue.startsWith("%");
+                    start = likeValue.endsWith("%");
+                    if (start == end) {
+                        matchMode = MatchMode.ANYWHERE;
+                    } else {
+                        if (start) {
+                            matchMode = MatchMode.START;
+                        } else {
+                            matchMode = MatchMode.END;
+                        }
+                    }
+                    criterionList.add(Restrictions.like(fieldName, likeValue, matchMode));
+                    break;
+                case NULL:
+                    criterionList.add(Restrictions.isNull(fieldName));
+                    break;
+                case NOTNULL:
+                    criterionList.add(Restrictions.isNotNull(fieldName));
+                    break;
+                case BETWEEN:
+                    if (WsBeanUtils.isArray(search.getValue().getClass())) {
+                        if (search.getValue().getClass().isArray()) {
+                            Object[] objects = (Object[]) search.getValue();
+                            criterionList.add(Restrictions.between(fieldName, WsBeanUtils.objectToT(objects[0], type), WsBeanUtils.objectToT(objects[1], type)));
+                        } else {
+                            Collection<?> collection = (Collection<?>) search.getValue();
+                            Iterator<?> iterator = collection.iterator();
+                            criterionList.add(Restrictions.between(fieldName, WsBeanUtils.objectToT(iterator.next(), type), WsBeanUtils.objectToT(iterator.next(), type)));
+                        }
+                    } else {
+                        throw new RuntimeException("数据格式错误，当前需要数组类型,当前：" + search.getValue().getClass());
+                    }
+                    break;
+                case IN:
+                    if (WsBeanUtils.isArray(search.getValue().getClass())) {
+                        if (search.getValue().getClass().isArray()) {
+                            Object[] objects = (Object[]) search.getValue();
+                            for(int i = 0; i < objects.length; i++) {
+                                objects[i] = WsBeanUtils.objectToT(objects[i], type);
+                            }
+                            criterionList.add(Restrictions.in(fieldName, objects));
+                        } else {
+                            Collection<?> collection = (Collection<?>) search.getValue();
+                            List<Object> list = new ArrayList<>(collection.size());
+                            for (Object o : collection) {
+                                list.add(WsBeanUtils.objectToT(o, type));
+                            }
+                            criterionList.add(Restrictions.in(fieldName, list));
+                        }
+                    } else if(search.getValue() instanceof MySearchList) {
+
+
+                    } else {
+                        throw new RuntimeException("数据格式错误，当前需要数组类型,当前：" + search.getValue().getClass());
+                    }
+                    break;
+                case NIN:
+                    if (WsBeanUtils.isArray(search.getValue().getClass())) {
+                        if (search.getValue().getClass().isArray()) {
+                            Object[] objects = (Object[]) search.getValue();
+                            for(int i = 0; i < objects.length; i++) {
+                                objects[i] = WsBeanUtils.objectToT(objects[i], type);
+                            }
+                            criterionList.add(Restrictions.not(Restrictions.in(fieldName, objects)));
+                        } else {
+                            Collection<?> collection = (Collection<?>) search.getValue();
+                            List<Object> list = new ArrayList<>(collection.size());
+                            for (Object o : collection) {
+                                list.add(WsBeanUtils.objectToT(o, type));
+                            }
+                            criterionList.add(Restrictions.not(Restrictions.in(fieldName, collection)));
+                        }
+                    } else {
+                        throw new RuntimeException("数据格式错误，当前需要数组类型,当前：" + search.getValue().getClass());
+                    }
+                    break;
+                case EQP:
+                    criterionList.add(Restrictions.eqProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    break;
+                case GTP:
+                    criterionList.add(Restrictions.gtProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    break;
+                case GTEP:
+                    criterionList.add(Restrictions.geProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    break;
+                case LTP:
+                    criterionList.add(Restrictions.ltProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    break;
+                case LTEP:
+                    criterionList.add(Restrictions.leProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    break;
+                case NEP:
+                    criterionList.add(Restrictions.neProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    break;
+                case SORT:
+                    String order = (String) search.getValue();
+                    if (order.equalsIgnoreCase("asc")) {
+                        root.addOrder(Order.asc(fieldName));
+                    } else {
+                        root.addOrder(Order.desc(fieldName));
+                    }
+
+                    break;
+                default:
+                    throw new RuntimeException("暂不支持");
+            }
+
+
+        }
+        List<MySearchList> andList = mySearchList.getAnds();
+        List<MySearchList> orList = mySearchList.getOrs();
+        if (WsListUtils.isNotEmpty(andList)) {
+            List<Criterion> andCriterionList = new ArrayList<>();
+            for (MySearchList and : andList) {
+                List<Criterion> list = createDetachedCriteria(and,root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+                if (WsListUtils.isNotEmpty(list)) {
+                    andCriterionList.addAll(list);
+                }
+
+            }
+            if (WsListUtils.isNotEmpty(andCriterionList)) {
+                criterionList.add(Restrictions.and(andCriterionList.toArray(new Criterion[0])));
+            }
+        }
+        if (WsListUtils.isNotEmpty(orList)) {
+            List<Criterion> orCriterionList = new ArrayList<>();
+            for (MySearchList or : orList) {
+                List<Criterion> list = createDetachedCriteria(or,root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+                if (WsListUtils.isNotEmpty(list)) {
+                    orCriterionList.addAll(list);
+                }
+
+            }
+            if (WsListUtils.isNotEmpty(orCriterionList)) {
+                criterionList.add(Restrictions.or(orCriterionList.toArray(new Criterion[0])));
+            }
+        }
+
+
+        return criterionList;
+    }
+
+
+    private String getRealName(String nickName, Map<String, String> nickAndRealNameMap) {
+        String realName = nickAndRealNameMap.get(nickName);
+        if (realName == null) {
+            realName = nickName;
+        }
+        return realName;
+    }
+
+    private String getNickName(String realName, Map<String, String> realAndNickNameMap) {
+        String nickName = realAndNickNameMap.get(realName);
+        if (nickName == null) {
+            nickName = realName;
+        }
+        return nickName;
+    }
+
+
 }
 

@@ -575,7 +575,6 @@ public class WsStringUtils {
 
     /**
      * 截取汉字
-     *
      * @param str
      * @return
      */
@@ -590,5 +589,49 @@ public class WsStringUtils {
         return sb.toString();
     }
 
+
+    /**
+     * 获取两个字符串相同的部分
+     * @param str1
+     * @param str2
+     * @return
+     */
+    public static String getIdentical(String str1,String str2){
+        char[] s1 = str1.toCharArray();
+        char[] s2 = str2.toCharArray();
+        int size = Math.min(s1.length,s2.length);
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int i = 0; i < size; i++){
+            if(s1[i] == s2[i]){
+                stringBuilder.append(s1[i]);
+            }else {
+                break;
+            }
+        }
+        return stringBuilder.length() == 0?null:stringBuilder.toString();
+    }
+
+    /**
+     * 获取不同的字符串
+     * @param part
+     * @param intact
+     * @return
+     */
+    public static String getDisparate(String part,String intact) {
+        char[] s1 = part.toCharArray();
+        char[] s2 = intact.toCharArray();
+        int size = Math.min(s1.length, s2.length);
+        int i = 0;
+        for (; i < size; i++) {
+            if (s1[i] != s2[i]) {
+                break;
+            }
+        }
+
+        if (i >= s2.length) {
+            return null;
+        }
+        return String.copyValueOf(s2, i, s2.length - i);
+    }
 
 }

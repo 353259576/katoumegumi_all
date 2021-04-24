@@ -8,34 +8,50 @@ import cn.katoumegumi.java.sql.common.TableJoinType;
 import java.util.function.Consumer;
 
 /**
+ * mySearchList多表关联关系
+ *
  * @author ws
  */
-
 public class TableRelation {
 
     private MySearchList mySearchList;
 
+    /**
+     * 关联类型
+     */
     private TableJoinType joinType;
 
+    /**
+     * 关联表实体类型
+     */
     private Class<?> joinTableClass;
 
+    /**
+     * 主表实体路径名称
+     */
     private String tableNickName;
-
+    /**
+     * 主表实体字段名称
+     */
     private String tableColumn;
 
-    private String joinTableName;
-
     /**
-     * 需要连接的表的名称（标名对应了实体的关系）
+     * 关联表实体路径
      */
     private String joinTableNickName;
 
+    /**
+     * 关联表实体字段名称
+     */
     private String joinTableColumn;
 
+    /**
+     * 关联关系额外附加条件
+     */
     private MySearchList conditionSearchList;
 
     /**
-     * 关联表别名
+     * 关联表实体路径名称别名
      */
     private String alias;
 
@@ -81,15 +97,6 @@ public class TableRelation {
 
     public TableRelation setTableColumn(String tableColumn) {
         this.tableColumn = tableColumn;
-        return this;
-    }
-
-    public String getJoinTableName() {
-        return joinTableName;
-    }
-
-    public TableRelation setJoinTableName(String joinTableName) {
-        this.joinTableName = joinTableName;
         return this;
     }
 
@@ -170,7 +177,7 @@ public class TableRelation {
     public TableRelation condition(Consumer<MySearchList> searchList) {
         MySearchList mySearchList = null;
         if (this.conditionSearchList == null) {
-            mySearchList = MySearchList.newMySearchList();
+            mySearchList = MySearchList.create();
         } else {
             mySearchList = this.conditionSearchList;
         }
