@@ -50,11 +50,13 @@ public class SqlTableToBeanUtils {
 
         String sql = "select COLUMN_NAME,COLUMN_COMMENT,COLUMN_TYPE,COLUMN_KEY from INFORMATION_SCHEMA.Columns WHERE TABLE_SCHEMA = ? AND TABLE_NAME=?";
         Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, dbName);
             preparedStatement.setString(2, tableName);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             List<Column> columnList = new ArrayList<>();
             while (resultSet.next()) {
                 String colName = resultSet.getString("COLUMN_NAME");
@@ -64,13 +66,25 @@ public class SqlTableToBeanUtils {
                 Column column = new Column(colName, colRemark, colType, colKey);
                 columnList.add(column);
             }
-            resultSet.close();
-            preparedStatement.close();
             return columnList;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             return null;
         } finally {
+            if(resultSet != null){
+                try {
+                    resultSet.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            if(preparedStatement != null){
+                try {
+                    preparedStatement.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
             try {
                 connection.close();
             } catch (SQLException throwables) {
@@ -88,13 +102,15 @@ public class SqlTableToBeanUtils {
             sql += " and TABLE_NAME = ?";
         }
         Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, dbName);
             if (WsStringUtils.isNotBlank(tableName)) {
                 preparedStatement.setString(2, tableName);
             }
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             List<Table> tableList = new ArrayList<>();
             while (resultSet.next()) {
                 String name = resultSet.getString("TABLE_NAME");
@@ -107,13 +123,25 @@ public class SqlTableToBeanUtils {
                 Table table = new Table(name, remark, entityName, selectTableColumns(name));
                 tableList.add(table);
             }
-            resultSet.close();
-            preparedStatement.close();
             return tableList;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             return null;
         } finally {
+            if(resultSet != null){
+                try {
+                    resultSet.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            if(preparedStatement != null){
+                try {
+                    preparedStatement.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
             try {
                 connection.close();
             } catch (SQLException throwables) {

@@ -22,6 +22,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
@@ -110,7 +111,7 @@ public class WsNettyClient {
                 log.info("channel：{},countDownLatch数量：{},当前链接：{}", entry.getKey(), entry.getValue().getCount(), WsChannelHttpRequestBodyBind.httpRequestBodyMap.get(entry.getKey()).getUrl());
             }*/
         }, 10, 20, TimeUnit.SECONDS);
-        Random random = new Random();
+        Random random = new SecureRandom();
         AtomicInteger successNum = new AtomicInteger(0);
         AtomicInteger errorNum = new AtomicInteger(0);
         CountDownLatch countDownLatch = new CountDownLatch(10000);

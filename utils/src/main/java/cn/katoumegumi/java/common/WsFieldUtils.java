@@ -17,7 +17,7 @@ public class WsFieldUtils {
     private static final Map<String, WeakReference<String>> FIELD_NAME_MAP = new ConcurrentHashMap<>();
 
     public static Field getFieldForObject(String name, Object object) {
-        Class clazz = object.getClass();
+        Class<?> clazz = object.getClass();
         return getFieldForClass(name, clazz);
     }
 
@@ -28,9 +28,6 @@ public class WsFieldUtils {
         for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
             try {
                 field = clazz.getDeclaredField(name);
-                if (field != null) {
-                    break;
-                }
             } catch (Exception e) {
                 //e.printStackTrace();
             }
@@ -65,11 +62,11 @@ public class WsFieldUtils {
         return value;
     }
 
-    public static Field[] getFieldAll(Class clazz) {
+    public static Field[] getFieldAll(Class<?> clazz) {
         Set<Field> fieldSet = new HashSet<>();
         Map<String, Field> fieldMap = new HashMap<>();
         try {
-            Field fields[];
+            Field[] fields;
             /*fields = clazz.getFields();
             for (int i = 0; i < fields.length; i++) {
                 fieldSet.put(fields[i].getName(),fields[i]);
@@ -83,7 +80,7 @@ public class WsFieldUtils {
             }
             for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
                 fields = clazz.getDeclaredFields();
-                if (!(fields == null || fields.length == 0)) {
+                if (!(fields.length == 0)) {
                     for (int i = 0; i < fields.length; i++) {
                         if (!Modifier.isStatic(fields[i].getModifiers())) {
                             if (!fieldMap.containsKey(fields[i].getName())) {
@@ -110,8 +107,8 @@ public class WsFieldUtils {
     }
 
 
-    public static Method[] getObjectMethodByName(String methodName, Class clazz) {
-        Method methods[] = null;
+    public static Method[] getObjectMethodByName(String methodName, Class<?> clazz) {
+        Method[] methods = null;
         Set<Method> methodSet = new HashSet<>();
         methods = clazz.getDeclaredMethods();
         for (int i = 0; i < methods.length; i++) {

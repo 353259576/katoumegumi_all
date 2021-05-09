@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -132,14 +133,16 @@ public class WsImageUtils {
      */
     public static byte[] cropImage(InputStream inputStream, int x, int y, int width, int height) {
         BufferedImage bufferedImage = null;
-        byte bytes[] = null;
+        byte[] bytes = null;
         try {
             bufferedImage = ImageIO.read(inputStream);
             bytes = cropImage(bufferedImage, x, y, width, height);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            bufferedImage.flush();
+            if(bufferedImage != null) {
+                bufferedImage.flush();
+            }
             try {
                 inputStream.close();
             } catch (Exception e) {
@@ -438,7 +441,7 @@ public class WsImageUtils {
 
         x -= chunkWidth;
         y -= chunkHeight;
-        Random random = new Random();
+        Random random = new SecureRandom();
         Graphics2D graphics2D = bufferedImage.createGraphics();
         /*Rectangle rectangle = new Rectangle();
         rectangle.setRect(pointX,pointY,chunkWidth,chunkHeight);*/

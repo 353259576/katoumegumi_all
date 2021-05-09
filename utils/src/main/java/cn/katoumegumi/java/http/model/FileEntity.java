@@ -60,20 +60,21 @@ public class FileEntity extends BaseEntity {
     }
 
     public FileEntity setValue(InputStream inputStream) {
+        ByteArrayOutputStream outputStream = null;
+        WritableByteChannel writableByteChannel = null;
+        ReadableByteChannel readableByteChannel = null;
         try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            WritableByteChannel writableByteChannel = Channels.newChannel(outputStream);
+            outputStream = new ByteArrayOutputStream();
+            writableByteChannel = Channels.newChannel(outputStream);
             if (inputStream instanceof FileInputStream) {
                 FileInputStream fileInputStream = (FileInputStream) inputStream;
-                FileChannel fileChannel = fileInputStream.getChannel();
+                //FileChannel fileChannel = fileInputStream.getChannel();
+                readableByteChannel = fileInputStream.getChannel();
+                FileChannel fileChannel = (FileChannel) readableByteChannel;
                 fileChannel.transferTo(0, fileChannel.size(), writableByteChannel);
                 this.fileData = outputStream.toByteArray();
-                writableByteChannel.close();
-                outputStream.close();
-                fileChannel.close();
-                inputStream.close();
             } else {
-                ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
+                readableByteChannel = Channels.newChannel(inputStream);
                 ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
                 int i = -1;
                 while ((i = readableByteChannel.read(byteBuffer)) > 0) {
@@ -83,13 +84,41 @@ public class FileEntity extends BaseEntity {
                     }
                     byteBuffer.clear();
                 }
-                writableByteChannel.close();
-                readableByteChannel.close();
-                outputStream.close();
-                inputStream.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+
+
+            if (writableByteChannel != null) {
+                try {
+                    writableByteChannel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (readableByteChannel != null) {
+                try {
+                    readableByteChannel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return this;
 

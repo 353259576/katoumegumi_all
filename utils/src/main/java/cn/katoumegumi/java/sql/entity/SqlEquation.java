@@ -17,7 +17,7 @@ import java.util.List;
 public class SqlEquation {
 
     /**
-     * 1 columnName 2 符号 3 值
+     * 1 columnName 2 符号 3 值 4 MySearchList
      */
     private final List<Integer> typeList = new ArrayList<>();
 
@@ -32,6 +32,12 @@ public class SqlEquation {
     public SqlEquation column(SqlEquation equation) {
         typeList.add(1);
         valueList.add(equation);
+        return this;
+    }
+
+    public SqlEquation column(SqlFunction function) {
+        typeList.add(1);
+        valueList.add(function);
         return this;
     }
 

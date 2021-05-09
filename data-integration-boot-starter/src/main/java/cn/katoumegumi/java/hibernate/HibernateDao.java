@@ -9,20 +9,14 @@ import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.TypeHelper;
-import org.hibernate.annotations.common.reflection.java.generics.TypeEnvironmentFactory;
-import org.hibernate.boot.model.JavaTypeDescriptor;
 import org.hibernate.criterion.*;
-import org.hibernate.persister.walking.internal.StandardAnyTypeDefinition;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
 import org.hibernate.sql.JoinType;
-import org.hibernate.type.*;
-import org.hibernate.type.descriptor.java.spi.JavaTypeDescriptorRegistry;
-import org.hibernate.type.descriptor.java.spi.RegistryHelper;
-import org.hibernate.type.spi.TypeConfiguration;
+import org.hibernate.type.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.orm.hibernate5.HibernateTemplate;
@@ -459,18 +453,28 @@ public class HibernateDao {
     }
 
 
-
     private DetachedCriteria createDetachedCriteria(MySearchList mySearchList) {
         AtomicInteger atomicInteger = new AtomicInteger();
-        String rootAlias = WsStringUtils.isBlank(mySearchList.getAlias()) ? mySearchList.getMainClass().getSimpleName().substring(0, 1).toUpperCase() + "_" + atomicInteger.getAndAdd(1) : mySearchList.getAlias();
-        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(mySearchList.getMainClass(), rootAlias);
         Map<String, DetachedCriteria> detachedCriteriaMap = new HashMap<>();
         Map<String, Class<?>> classMap = new HashMap<>();
         Map<String, String> nickAndRealNameMap = new HashMap<>();
         Map<String, String> realAndNickNameMap = new HashMap<>();
-        nickAndRealNameMap.put(detachedCriteria.getAlias(), null);
-        //classMap.put(MAIN_TABLE_SIGN, mySearchList.getMainClass());
-        //detachedCriteriaMap.put(MAIN_TABLE_SIGN, detachedCriteria);
+        return createDetachedCriteria(mySearchList, atomicInteger, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap);
+    }
+
+    private DetachedCriteria createDetachedCriteria(MySearchList mySearchList,
+                                                    AtomicInteger atomicInteger,
+                                                    Map<String, DetachedCriteria> detachedCriteriaMap,
+                                                    Map<String, Class<?>> classMap,
+                                                    Map<String, String> nickAndRealNameMap,
+                                                    Map<String, String> realAndNickNameMap) {
+        String rootAlias = WsStringUtils.isBlank(mySearchList.getAlias()) ? mySearchList.getMainClass().getSimpleName().substring(0, 1).toUpperCase() + "_" + atomicInteger.getAndAdd(1) : mySearchList.getAlias();
+        String defaultPrefix = mySearchList.getMainClass().getSimpleName();
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass(mySearchList.getMainClass(), rootAlias);
+        nickAndRealNameMap.put(rootAlias, defaultPrefix);
+        realAndNickNameMap.put(defaultPrefix, rootAlias);
+        detachedCriteriaMap.put(defaultPrefix, detachedCriteria);
+        classMap.put(defaultPrefix, mySearchList.getMainClass());
 
         if (WsListUtils.isNotEmpty(mySearchList.getJoins())) {
             List<WsRun> runList = new ArrayList<>();
@@ -492,13 +496,17 @@ public class HibernateDao {
                 String joinTableNickName = tableRelation.getJoinTableNickName();
                 String joinTableName = null;
                 List<String> stringList = WsStringUtils.split(joinTableNickName, '.');
-                if (stringList.size() == 1) {
-                    joinTableName = getRealName(stringList.get(0), nickAndRealNameMap);
-                } else {
-                    for (int i = 0; i < stringList.size(); i++) {
-                        stringList.set(i, getRealName(stringList.get(i), nickAndRealNameMap));
+                if (stringList.size() > 1) {
+                    String startName = stringList.get(0);
+                    String startNickName = getRealName(startName, nickAndRealNameMap);
+                    if (startName == startNickName) {
+                        stringList.set(0, defaultPrefix + '.' + startName);
+                    } else {
+                        stringList.set(0, startNickName);
                     }
                     joinTableName = WsStringUtils.jointListString(stringList, ".");
+                } else {
+                    joinTableName = defaultPrefix + '.' + joinTableNickName;
                 }
                 DetachedCriteria root;
                 Class<?> rootClass;
@@ -521,8 +529,8 @@ public class HibernateDao {
                 classMap.put(joinTableName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(rootClass, nodeName)));
                 if (tableRelation.getConditionSearchList() != null && tableRelation.getConditionSearchList().getAll().size() > 0) {
 
-                    runList.add(()->{
-                        List<Criterion> criterionList = createDetachedCriteria(tableRelation.getConditionSearchList(),detachedCriteria,mySearchList.getMainClass(), detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+                    runList.add(() -> {
+                        List<Criterion> criterionList = createDetachedCriteria(tableRelation.getConditionSearchList(), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
                         if (WsListUtils.isNotEmpty(criterionList)) {
                             for (Criterion criterion : criterionList) {
                                 node.add(criterion);
@@ -531,44 +539,50 @@ public class HibernateDao {
                     });
                 }
             }
-            if(WsListUtils.isNotEmpty(runList)){
-                for(WsRun run:runList){
+            if (WsListUtils.isNotEmpty(runList)) {
+                for (WsRun run : runList) {
                     run.run();
                 }
             }
 
         }
-        List<Criterion> criterionList = createDetachedCriteria(mySearchList,detachedCriteria,mySearchList.getMainClass(), detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+        List<Criterion> criterionList = createDetachedCriteria(mySearchList, defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
         if (WsListUtils.isNotEmpty(criterionList)) {
             for (Criterion criterion : criterionList) {
                 detachedCriteria.add(criterion);
             }
+        }
+        if (mySearchList.getColumnNameList().size() > 0) {
+            detachedCriteria.setProjection(Property.forName(getFieldName(mySearchList.getColumnNameList().get(0), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
         }
         return detachedCriteria;
     }
 
 
     private String getFieldName(String name,
-                                final DetachedCriteria root,
-                                final Class<?> rootClass,
+                                final String defaultPrefix,
                                 Map<String, DetachedCriteria> detachedCriteriaMap,
                                 Map<String, Class<?>> classMap,
                                 Map<String, String> nickAndRealNameMap,
                                 Map<String, String> realAndNickNameMap,
                                 AtomicInteger atomicInteger) {
-
         String fieldName = null;
+        DetachedCriteria local = detachedCriteriaMap.get(defaultPrefix);
+        Class<?> localClass = classMap.get(defaultPrefix);
         List<String> stringList = WsStringUtils.split(name, '.');
         if (stringList.size() == 1) {
             fieldName = name;
-            classMap.put(fieldName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(rootClass, fieldName)));
+            classMap.put(defaultPrefix + '.' + fieldName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(localClass, fieldName)));
         } else {
-            for (int i = 0; i < stringList.size() - 1; i++) {
-                stringList.set(i, getRealName(stringList.get(i), nickAndRealNameMap));
+            String startName = stringList.get(0);
+            String startRealName = getRealName(startName, nickAndRealNameMap);
+            if (startRealName == startName) {
+                stringList.set(0, defaultPrefix + '.' + startName);
+            } else {
+                stringList.set(0, startRealName);
             }
-            DetachedCriteria local = root;
-            Class<?> localClass = rootClass;
             fieldName = WsStringUtils.jointListString(stringList, ".");
+
             String shortFieldName = stringList.get(stringList.size() - 1);
             stringList.remove(stringList.size() - 1);
             List<String> strings = new ArrayList<>();
@@ -576,11 +590,11 @@ public class HibernateDao {
                 strings.add(str);
                 String nodeName = WsStringUtils.jointListString(strings, ".");
                 if (!detachedCriteriaMap.containsKey(nodeName)) {
-                    localClass = WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(rootClass, str));
-                    String alias = rootClass.getSimpleName().substring(0, 1).toUpperCase() + "_" + atomicInteger.getAndAdd(1);
+                    localClass = WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(localClass, str));
+                    String alias = localClass.getSimpleName().substring(0, 1).toUpperCase() + "_" + atomicInteger.getAndAdd(1);
                     local = local.createCriteria(str, alias);
                     detachedCriteriaMap.put(nodeName, local);
-                    classMap.put(nodeName, rootClass);
+                    classMap.put(nodeName, localClass);
                     nickAndRealNameMap.put(alias, nodeName);
                     realAndNickNameMap.put(nodeName, alias);
 
@@ -596,8 +610,7 @@ public class HibernateDao {
     }
 
     private List<Criterion> createDetachedCriteria(MySearchList mySearchList,
-                                                   final DetachedCriteria root,
-                                                   final Class<?> rootClass,
+                                                   final String defaultPrefix,
                                                    Map<String, DetachedCriteria> detachedCriteriaMap,
                                                    Map<String, Class<?>> classMap,
                                                    Map<String, String> nickAndRealNameMap,
@@ -608,20 +621,10 @@ public class HibernateDao {
         for (MySearch search : searchList) {
             if (search.getOperator().equals(SqlOperator.SQL)) {
                 criterionList.add(Restrictions.sqlRestriction(search.getFieldName()));
-
-                /*if(search.getValue() == null){
-                }else {
-                    if(WsBeanUtils.isArray(search.getValue().getClass())){
-
-                    }else {
-                        criterionList.add(Restrictions.sqlRestriction(search.getFieldName(),search.getValue(), ));
-                    }
-                }*/
-
                 continue;
             }
 
-            String fieldName = getFieldName(search.getFieldName(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+            String fieldName = getFieldName(search.getFieldName(), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
             Class<?> type = classMap.get(fieldName);
 
             switch (search.getOperator()) {
@@ -685,7 +688,7 @@ public class HibernateDao {
                     if (WsBeanUtils.isArray(search.getValue().getClass())) {
                         if (search.getValue().getClass().isArray()) {
                             Object[] objects = (Object[]) search.getValue();
-                            for(int i = 0; i < objects.length; i++) {
+                            for (int i = 0; i < objects.length; i++) {
                                 objects[i] = WsBeanUtils.objectToT(objects[i], type);
                             }
                             criterionList.add(Restrictions.in(fieldName, objects));
@@ -697,9 +700,10 @@ public class HibernateDao {
                             }
                             criterionList.add(Restrictions.in(fieldName, list));
                         }
-                    } else if(search.getValue() instanceof MySearchList) {
-
-
+                    } else if (search.getValue() instanceof MySearchList) {
+                        criterionList.add(Property
+                                .forName(fieldName)
+                                .in(createDetachedCriteria((MySearchList) search.getValue(), atomicInteger, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap)));
                     } else {
                         throw new RuntimeException("数据格式错误，当前需要数组类型,当前：" + search.getValue().getClass());
                     }
@@ -708,7 +712,7 @@ public class HibernateDao {
                     if (WsBeanUtils.isArray(search.getValue().getClass())) {
                         if (search.getValue().getClass().isArray()) {
                             Object[] objects = (Object[]) search.getValue();
-                            for(int i = 0; i < objects.length; i++) {
+                            for (int i = 0; i < objects.length; i++) {
                                 objects[i] = WsBeanUtils.objectToT(objects[i], type);
                             }
                             criterionList.add(Restrictions.not(Restrictions.in(fieldName, objects)));
@@ -720,36 +724,39 @@ public class HibernateDao {
                             }
                             criterionList.add(Restrictions.not(Restrictions.in(fieldName, collection)));
                         }
+                    } else if (search.getValue() instanceof MySearchList) {
+                        criterionList.add(Property
+                                .forName(fieldName)
+                                .notIn(createDetachedCriteria((MySearchList) search.getValue(), atomicInteger, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap)));
                     } else {
                         throw new RuntimeException("数据格式错误，当前需要数组类型,当前：" + search.getValue().getClass());
                     }
                     break;
                 case EQP:
-                    criterionList.add(Restrictions.eqProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    criterionList.add(Restrictions.eqProperty(fieldName, getFieldName((String) search.getValue(), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
                     break;
                 case GTP:
-                    criterionList.add(Restrictions.gtProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    criterionList.add(Restrictions.gtProperty(fieldName, getFieldName((String) search.getValue(), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
                     break;
                 case GTEP:
-                    criterionList.add(Restrictions.geProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    criterionList.add(Restrictions.geProperty(fieldName, getFieldName((String) search.getValue(), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
                     break;
                 case LTP:
-                    criterionList.add(Restrictions.ltProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    criterionList.add(Restrictions.ltProperty(fieldName, getFieldName((String) search.getValue(), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
                     break;
                 case LTEP:
-                    criterionList.add(Restrictions.leProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    criterionList.add(Restrictions.leProperty(fieldName, getFieldName((String) search.getValue(), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
                     break;
                 case NEP:
-                    criterionList.add(Restrictions.neProperty(fieldName, getFieldName((String) search.getValue(),root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
+                    criterionList.add(Restrictions.neProperty(fieldName, getFieldName((String) search.getValue(), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger)));
                     break;
                 case SORT:
                     String order = (String) search.getValue();
                     if (order.equalsIgnoreCase("asc")) {
-                        root.addOrder(Order.asc(fieldName));
+                        detachedCriteriaMap.get(defaultPrefix).addOrder(Order.asc(fieldName));
                     } else {
-                        root.addOrder(Order.desc(fieldName));
+                        detachedCriteriaMap.get(defaultPrefix).addOrder(Order.desc(fieldName));
                     }
-
                     break;
                 default:
                     throw new RuntimeException("暂不支持");
@@ -762,7 +769,7 @@ public class HibernateDao {
         if (WsListUtils.isNotEmpty(andList)) {
             List<Criterion> andCriterionList = new ArrayList<>();
             for (MySearchList and : andList) {
-                List<Criterion> list = createDetachedCriteria(and,root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+                List<Criterion> list = createDetachedCriteria(and, defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
                 if (WsListUtils.isNotEmpty(list)) {
                     andCriterionList.addAll(list);
                 }
@@ -775,7 +782,7 @@ public class HibernateDao {
         if (WsListUtils.isNotEmpty(orList)) {
             List<Criterion> orCriterionList = new ArrayList<>();
             for (MySearchList or : orList) {
-                List<Criterion> list = createDetachedCriteria(or,root,rootClass, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
+                List<Criterion> list = createDetachedCriteria(or, defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
                 if (WsListUtils.isNotEmpty(list)) {
                     orCriterionList.addAll(list);
                 }
@@ -806,6 +813,8 @@ public class HibernateDao {
         }
         return nickName;
     }
+
+
 
 
 }

@@ -1478,6 +1478,12 @@ public class SQLModelUtils {
         return translateNameUtils;
     }
 
+    /**
+     * sql语句动态生成
+     * @param sqlEquation
+     * @param prefix
+     * @return
+     */
     public String sqlEquationHandel(SqlEquation sqlEquation, String prefix) {
         List<Integer> typeList = sqlEquation.getTypeList();
         List<Object> valueList = sqlEquation.getValueList();
@@ -1497,6 +1503,12 @@ public class SQLModelUtils {
                     sb.append(sqlEquationHandel((SqlEquation) value, prefix)).append(SqlCommon.SPACE);
                     sb.append(SqlCommon.RIGHT_BRACKETS);
                     sb.append(SqlCommon.SPACE);
+                }else if(value instanceof SqlFunction) {
+                    SqlFunction sqlFunction = (SqlFunction) value;
+                    ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(sqlFunction.getSqlFunctionValue().get(0),prefix);
+                    sb.append(guardKeyword(translateNameUtils.getAbbreviation(sqlFunction.getFunctionValue(columnBaseEntity.getTableNickName()))))
+                            .append('.')
+                            .append(guardKeyword(columnBaseEntity.getColumnName())).append(SqlCommon.SPACE);
                 } else {
                     ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity((String) value, prefix);
                     sb.append(guardKeyword(translateNameUtils.getAbbreviation(columnBaseEntity.getTableNickName())))
