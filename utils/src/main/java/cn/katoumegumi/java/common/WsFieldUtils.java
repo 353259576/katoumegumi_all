@@ -12,6 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WsFieldUtils {
 
     private static final String METHOD_NAME_GET = "get";
+
+    private static final String METHOD_NAME_SET = "set";
+
     private static final String METHOD_NAME_IS = "is";
 
     private static final Map<String, WeakReference<String>> FIELD_NAME_MAP = new ConcurrentHashMap<>();
