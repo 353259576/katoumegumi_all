@@ -1,64 +1,68 @@
 package cn.katoumegumi.java.common;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
+ * 基本类型
  * @author ws
  */
 public class BaseTypeCommon {
 
-    public static final Class<?> BYTE_CLASS = byte.class;
-    public static final Class<?> W_BYTE_CLASS = Byte.class;
-    public static final Class<?> CHAR_CLASS = char.class;
-    public static final Class<?> W_CHAR_CLASS = Character.class;
-    public static final Class<?> BOOLEAN_CLASS = boolean.class;
-    public static final Class<?> W_BOOLEAN_CLASS = Boolean.class;
-    public static final Class<?> SHORT_CLASS = short.class;
-    public static final Class<?> W_SHORT_CLASS = Short.class;
-    public static final Class<?> INT_CALSS = int.class;
-    public static final Class<?> W_INT_CLASS = Integer.class;
-    public static final Class<?> FLOAT_CLASS = float.class;
-    public static final Class<?> W_FLOAT_CLASS = Float.class;
-    public static final Class<?> LONG_CLASS = long.class;
-    public static final Class<?> W_LONG_CLASS = Long.class;
-    public static final Class<?> DOUBLE_CLASS = double.class;
-    public static final Class<?> W_DOUBLE_CLASS = Double.class;
-    public static final Class<?> STRING_CLASS = String.class;
-    public static final Class<?> DATE_CALSS = Date.class;
-    public static final Class<?> SQL_DATA_CALSS = java.sql.Date.class;
-    public static final Class<?> LOCAL_DATE_CLASS = LocalDate.class;
-    public static final Class<?> LOCAL_DATE_TIME_CLASS = LocalDateTime.class;
-    public static final Class<?> BIG_DECIMAL = BigDecimal.class;
     private static final Set<Class<?>> CLASS_SET = new HashSet<>(18);
 
+    private static final Class<?>[] BASE_TYPE_ARRAY = new Class[]{
+            boolean.class,
+            char.class,
+            byte.class,
+            short.class,
+            int.class,
+            float.class,
+            long.class,
+            double.class
+    };
+
+    private static final Class<?>[] WRAPPER_BASE_TYPE_ARRAY = new Class[]{
+            Boolean.class,
+            Character.class,
+            Byte.class,
+            Short.class,
+            Integer.class,
+            Float.class,
+            Long.class,
+            Double.class
+    };
+
     static {
-        CLASS_SET.add(BYTE_CLASS);
-        CLASS_SET.add(W_BYTE_CLASS);
-        CLASS_SET.add(CHAR_CLASS);
-        CLASS_SET.add(W_CHAR_CLASS);
-        CLASS_SET.add(BOOLEAN_CLASS);
-        CLASS_SET.add(W_BOOLEAN_CLASS);
-        CLASS_SET.add(SHORT_CLASS);
-        CLASS_SET.add(W_SHORT_CLASS);
-        CLASS_SET.add(FLOAT_CLASS);
-        CLASS_SET.add(W_FLOAT_CLASS);
-        CLASS_SET.add(INT_CALSS);
-        CLASS_SET.add(W_INT_CLASS);
-        CLASS_SET.add(DOUBLE_CLASS);
-        CLASS_SET.add(W_DOUBLE_CLASS);
-        CLASS_SET.add(STRING_CLASS);
-        CLASS_SET.add(LONG_CLASS);
-        CLASS_SET.add(W_LONG_CLASS);
-        CLASS_SET.add(DATE_CALSS);
-        CLASS_SET.add(SQL_DATA_CALSS);
-        CLASS_SET.add(LOCAL_DATE_CLASS);
-        CLASS_SET.add(LOCAL_DATE_TIME_CLASS);
-        CLASS_SET.add(BIG_DECIMAL);
+        CLASS_SET.add(byte.class);
+        CLASS_SET.add(Byte.class);
+        CLASS_SET.add(char.class);
+        CLASS_SET.add(Character.class);
+        CLASS_SET.add(boolean.class);
+        CLASS_SET.add(Boolean.class);
+        CLASS_SET.add(short.class);
+        CLASS_SET.add(Short.class);
+        CLASS_SET.add(float.class);
+        CLASS_SET.add(Float.class);
+        CLASS_SET.add(int.class);
+        CLASS_SET.add(Integer.class);
+        CLASS_SET.add(double.class);
+        CLASS_SET.add(Double.class);
+        CLASS_SET.add(long.class);
+        CLASS_SET.add(Long.class);
+        CLASS_SET.add(String.class);
+        CLASS_SET.add(Date.class);
+        CLASS_SET.add(java.sql.Date.class);
+        CLASS_SET.add(LocalDate.class);
+        CLASS_SET.add(LocalDateTime.class);
+        CLASS_SET.add(BigDecimal.class);
+        CLASS_SET.add(BigInteger.class);
     }
 
     public static boolean verify(Class<?> tClass) {
@@ -67,6 +71,20 @@ public class BaseTypeCommon {
 
     public static boolean verify(Object o) {
         return verify(o.getClass());
+    }
+
+    /**
+     * 获取基本类型的包装类
+     * @param clazz
+     * @return
+     */
+    public static Class<?> getWrapperClass(Class<?> clazz){
+        for(int i = 0; i < 8; i++){
+            if(clazz.equals(BASE_TYPE_ARRAY[i])){
+                return WRAPPER_BASE_TYPE_ARRAY[i];
+            }
+        }
+        throw new NullPointerException("未发现"+clazz.getSimpleName()+"包装类");
     }
 
 

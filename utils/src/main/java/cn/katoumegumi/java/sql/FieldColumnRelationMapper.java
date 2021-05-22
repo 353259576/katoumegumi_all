@@ -2,10 +2,7 @@ package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsListUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author ws
@@ -152,5 +149,18 @@ public class FieldColumnRelationMapper {
     @Override
     public String toString() {
         return nickName + "_" + tableName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FieldColumnRelationMapper)) return false;
+        FieldColumnRelationMapper that = (FieldColumnRelationMapper) o;
+        return Objects.equals(nickName, that.nickName) && Objects.equals(tableName, that.tableName) && Objects.equals(clazz, that.clazz);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nickName, tableName, clazz);
     }
 }

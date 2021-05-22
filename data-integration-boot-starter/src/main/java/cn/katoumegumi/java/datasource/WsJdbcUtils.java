@@ -152,7 +152,7 @@ public class WsJdbcUtils {
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                 PreparedStatement statement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS);
                 Object o;
-                List valueList = insertSqlEntity.getValueList();
+                List<?> valueList = insertSqlEntity.getValueList();
                 for (int i = 0; i < valueList.size(); i++) {
                     o = valueList.get(i);
                     if (o == null) {
@@ -177,8 +177,9 @@ public class WsJdbcUtils {
                         statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
                     } else if (o instanceof LocalDate || o instanceof LocalDateTime) {
                         statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
-                    } else {
-                        throw new RuntimeException("不支持的数据类型:" + o.getClass());
+                    }else {
+                        statement.setObject(i+1,o);
+                        //throw new RuntimeException("不支持的数据类型:" + o.getClass());
                     }
                 }
                 return statement;

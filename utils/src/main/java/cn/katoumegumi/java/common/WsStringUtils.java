@@ -1,20 +1,22 @@
 package cn.katoumegumi.java.common;
 
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class WsStringUtils {
-    public static final byte SPACE = 32;
+    private static final byte SPACE = 32;
+
+    private static final String[] CN_NUMBER_NAME = new String[]{"零","壹","贰","叁","肆","伍","陆","柒","捌","玖"};
+
+    private static final String[] CN_DECIMALISM_NAME = new String[]{"","拾","佰","仟","万","拾","佰","仟","亿"};
 
     public static String jointListString(String[] strings, String sign) {
         return jointListString(Arrays.asList(strings), sign);
@@ -80,7 +82,6 @@ public class WsStringUtils {
 
     /**
      * 判断字符串是否都是数字
-     *
      * @param str
      * @return
      */
@@ -88,7 +89,7 @@ public class WsStringUtils {
         if (str == null) {
             return false;
         }
-        char chars[] = str.toCharArray();
+        char[] chars = str.toCharArray();
         if (str.length() == 0) {
             return false;
         }
@@ -119,7 +120,6 @@ public class WsStringUtils {
 
     /**
      * 是否是大写字母
-     *
      * @param c
      * @return
      */
@@ -129,7 +129,6 @@ public class WsStringUtils {
 
     /**
      * 是否是小写字母
-     *
      * @param c
      * @return
      */
@@ -140,7 +139,6 @@ public class WsStringUtils {
 
     /**
      * 判断字符串是否含有空格
-     *
      * @param str
      * @return
      */
@@ -177,39 +175,36 @@ public class WsStringUtils {
         if (str == null) {
             return str;
         }
-        byte bytes[] = str.getBytes();
+        byte[] bytes = str.getBytes();
         if (bytes.length == 0) {
-            return null;
+            return "";
         }
-        List list = new ArrayList();
-        for (int i = 0; i < bytes.length; i++) {
-            if (bytes[i] != SPACE) {
-                list.add(bytes[i]);
+        int newIndex = 0;
+        for (byte aByte : bytes) {
+            if (aByte != SPACE) {
+                bytes[newIndex++] = aByte;
             }
         }
-        bytes = new byte[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            bytes[i] = (byte) list.get(i);
-        }
-        if (bytes.length == 0) {
-            return null;
-        } else {
+        if(newIndex == 0){
+            return "";
+        }else if(newIndex == bytes.length){
             return new String(bytes);
         }
+        byte[] newBytes = Arrays.copyOfRange(bytes,0,newIndex);
+        return new String(newBytes);
     }
 
 
     /**
      * unicode转码
-     *
      * @param dataStr
      * @return
      */
     public static String decodeUnicode(String dataStr) {
 
-        StringBuffer buffer = new StringBuffer();
-        char unicodeChar[] = new char[]{'\\', 'u', 'U'};
-        char ch[] = dataStr.toCharArray();
+        StringBuilder buffer = new StringBuilder();
+        char[] unicodeChar = new char[]{'\\', 'u', 'U'};
+        char[] ch = dataStr.toCharArray();
         for (int i = 0; i < ch.length; i++) {
             if (ch[i] == unicodeChar[0]) {
                 if (i + 1 < ch.length) {
@@ -220,13 +215,13 @@ public class WsStringUtils {
                         i++;
                         if (ch[i] == unicodeChar[1] || ch[i] == unicodeChar[2]) {
                             //i++;
-                            String str = "";
+                            StringBuilder str = new StringBuilder();
                             for (int j = 0; j < 4; j++) {
                                 i++;
-                                str += ch[i];
+                                str.append(ch[i]);
                             }
                             // 16进制parse整形字符串。
-                            char letter = (char) Integer.parseInt(str, 16);
+                            char letter = (char) Integer.parseInt(str.toString(), 16);
                             buffer.append(letter);
                         }
                     }
@@ -240,7 +235,7 @@ public class WsStringUtils {
                 } else {
                     List<String> strings = new ArrayList<>();
                     String str = "";
-                    StringBuffer stringBuffer = new StringBuffer();
+                    StringBuilder stringBuffer = new StringBuilder();
                     for (int j = 0; j < 2; j++) {
                         i++;
                         //str += ch[i];
@@ -252,7 +247,7 @@ public class WsStringUtils {
                     i++;
                     while (i + 2 < ch.length && ch[i] == '%') {
                         //str = "";
-                        stringBuffer = new StringBuffer();
+                        stringBuffer = new StringBuilder();
                         for (int j = 0; j < 2; j++) {
                             i++;
                             //str += ch[i];
@@ -264,12 +259,12 @@ public class WsStringUtils {
                         i++;
                     }
                     i--;
-                    byte by[] = new byte[strings.size()];
+                    byte[] by = new byte[strings.size()];
                     for (int j = 0; j < strings.size(); j++) {
                         by[j] = (byte) Integer.parseInt(strings.get(j), 16);
                     }
                     try {
-                        buffer.append(new String(by, "utf-8"));
+                        buffer.append(new String(by, StandardCharsets.UTF_8));
                     } catch (Exception e) {
                         e.printStackTrace();
                         buffer.append(new String(by));
@@ -283,21 +278,21 @@ public class WsStringUtils {
         return buffer.toString();
     }
 
-
+    /**
+     * 对象转String
+     * @param object
+     * @return
+     */
     public static String anyToString(Object object) {
         if (object == null) {
             return null;
         }
-        if (object.getClass().isPrimitive()) {
-            return String.valueOf(object);
-        } else if (object instanceof Number) {
-            return object.toString();
-        } else if (object instanceof String) {
+        if(object.getClass().equals(String.class)){
             return (String) object;
-        } else if (object instanceof Character) {
+        }else if (object instanceof Number || object instanceof Character || object instanceof Boolean) {
             return object.toString();
-        } else if (object instanceof Boolean) {
-            return object.toString();
+        } else if (object.getClass().isPrimitive()) {
+            return String.valueOf(object);
         } else if (object instanceof Date) {
             Date date = (Date) object;
             return WsDateUtils.dateToString(date, WsDateUtils.LONGTIMESTRING);
@@ -306,32 +301,11 @@ public class WsStringUtils {
         } else if (object instanceof LocalDate) {
             return WsDateUtils.objectDateFormatString(object);
         } else {
-            return null;
+            return object.toString();
         }
     }
 
 
-    public static String dateToDate(String date) {
-        char chars[] = date.toCharArray();
-        List<String> strings = new ArrayList<>();
-        for (int i = 0; i < chars.length; i++) {
-            StringBuffer stringBuffer = new StringBuffer();
-            while (i < chars.length && chars[i] > 47 && chars[i] < 58) {
-                stringBuffer.append(chars[i]);
-                i++;
-            }
-            if (stringBuffer.length() > 0) {
-                strings.add(stringBuffer.toString());
-            }
-        }
-        if (strings.size() > 5) {
-            return strings.get(0) + "-" + strings.get(1) + "-" + strings.get(2) + " " + strings.get(3) + ":" + strings.get(4) + ":" + strings.get(5);
-        }
-        if (strings.size() > 2) {
-            return strings.get(0) + "-" + strings.get(1) + "-" + strings.get(2) + " 00:00:00";
-        }
-        return null;
-    }
 
     /**
      * 字符串脱敏
@@ -357,7 +331,6 @@ public class WsStringUtils {
 
     /**
      * 创建随机字符串
-     *
      * @param startStr      开始字符串
      * @param timeTemplates 日期格式
      * @param size          总大小
@@ -388,7 +361,6 @@ public class WsStringUtils {
 
     /**
      * 随机数字字符串
-     *
      * @param size 长度
      * @return
      */
@@ -432,13 +404,12 @@ public class WsStringUtils {
 
     /**
      * 驼峰法则
-     *
      * @param str
      * @return
      */
     public static String camel_case(String str) {
         char g = '_';
-        char chars[] = str.toCharArray();
+        char[] chars = str.toCharArray();
         StringBuilder stringBuffer = new StringBuilder();
         int length = str.length();
         char c = chars[0];
@@ -471,7 +442,7 @@ public class WsStringUtils {
         }
         char g = '_';
         str = str.toLowerCase();
-        char chars[] = str.toCharArray();
+        char[] chars = str.toCharArray();
         StringBuilder stringBuffer = new StringBuilder();
         int length = str.length();
         char c = chars[0];
@@ -494,7 +465,6 @@ public class WsStringUtils {
 
     /**
      * 首字母小写
-     *
      * @param str
      * @return
      */
@@ -541,7 +511,6 @@ public class WsStringUtils {
 
     /**
      * 判断是不是字母数字
-     *
      * @param c 字符
      * @return
      */
@@ -550,8 +519,7 @@ public class WsStringUtils {
     }
 
     /**
-     * 判断是不是汉字
-     *
+     * 判断字符是不是汉字
      * @param c 字符
      * @return
      */
@@ -563,6 +531,11 @@ public class WsStringUtils {
         }
     }
 
+    /**
+     * 判断字符串是不是都是汉字
+     * @param string
+     * @return
+     */
     public static boolean isChinese(String string) {
         string = new String(string.getBytes(StandardCharsets.UTF_8));
         for (char c : string.toCharArray()) {
@@ -574,7 +547,7 @@ public class WsStringUtils {
     }
 
     /**
-     * 截取汉字
+     * 获取字符串里所有的汉语字符
      * @param str
      * @return
      */
@@ -634,4 +607,76 @@ public class WsStringUtils {
         return String.copyValueOf(s2, i, s2.length - i);
     }
 
+    /**
+     * 数字转换成中文
+     * @param number 整形数字
+     * @return
+     */
+    public static String toCnNumber(BigDecimal number){
+
+        int signNum = number.signum();
+
+        if(signNum < 0){
+            number = number.abs();
+        }
+        long num = number.longValue();
+        char[] numChars = Long.valueOf(num).toString().toCharArray();
+        int cLength = numChars.length;
+        for(int i = 0; i < cLength/2; i++){
+            char c = numChars[i];
+            numChars[i] = numChars[cLength - i - 1];
+            numChars[cLength - i - 1] = c;
+        }
+        List<String> list = new ArrayList<>();
+        int decimalismIndex = 0;
+        int cnNumberNameIndex = 0;
+        //是否需要增加w 0 不需要 1 需要 2 已增加
+        int needAddW = 0;
+        //是否需要添加0
+        int needAddZ = 0;
+        for(int i = 0; i < cLength; i++){
+            cnNumberNameIndex = numChars[i] - 48;
+            //当数字为0时
+            if(cnNumberNameIndex == 0){
+                if( decimalismIndex == 8){
+                    //当亿单位是0时
+                    list.add(CN_DECIMALISM_NAME[decimalismIndex]);
+                    needAddW = 0;
+                }else if(decimalismIndex == 4){
+                    needAddZ = 0;
+                    needAddW = 1;
+                } else {
+                    if(decimalismIndex != 0 && needAddZ == 1) {
+                        list.add(CN_NUMBER_NAME[cnNumberNameIndex]);
+                        needAddZ = 0;
+                    }
+                }
+            }else {
+                if(needAddW == 1 && decimalismIndex != 8) {
+                    list.add(CN_DECIMALISM_NAME[4]);
+                    needAddW = 2;
+                }
+                String numCn = CN_NUMBER_NAME[cnNumberNameIndex];
+                String decimalismCn = CN_DECIMALISM_NAME[decimalismIndex];
+                list.add(numCn+decimalismCn);
+                needAddZ = 1;
+
+            }
+            ++decimalismIndex;
+            if(CN_DECIMALISM_NAME.length == decimalismIndex){
+                decimalismIndex = 1;
+                needAddZ = 0;
+                needAddW = 0;
+            }
+
+
+        }
+        Collections.reverse(list);
+        return list.stream().collect(Collectors.joining());
+    }
+
+    public static void main(String[] args) {
+        //System.out.println(toCnNumber(BigDecimal.valueOf(1022032030L)));
+        System.out.println(toCnNumber(BigDecimal.valueOf(1003056789)));
+    }
 }

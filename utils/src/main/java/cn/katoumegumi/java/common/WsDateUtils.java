@@ -26,6 +26,18 @@ public class WsDateUtils {
     public static final String SMALLTIMESTRING = "yyyy-MM-dd";
     public static final String CNSMALLTIMESTRING = "yyyy年MM月dd日";
 
+
+    private static final Long SECONDS = 1000L;
+
+    private static final Long MINUTES = 60L * SECONDS;
+
+    private static final Long HOUR = 60L * MINUTES;
+
+    private static final Long DAY = 24 * HOUR;
+
+    private static final Long WEEK = 7 * DAY;
+
+
     /**
      * 获取一段程序的执行时间
      */
@@ -138,7 +150,6 @@ public class WsDateUtils {
 
     /**
      * 获取中文星期
-     *
      * @param date 时间
      * @return 中文星期
      */
@@ -160,5 +171,88 @@ public class WsDateUtils {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return CN_MONTH_NAMES[calendar.get(Calendar.MONTH)];
+    }
+
+    /**
+     * 计算两个时间相差的天数
+     * @param before
+     * @param after
+     * @return
+     */
+    public static long getTimeDifferenceByDay(Date before,Date after){
+        return (after.getTime() - before.getTime()) / DAY;
+    }
+
+    /**
+     * 计算两个时间相差的秒数
+     * @param before
+     * @param after
+     * @return
+     */
+    public static long getTimeDifferenceBySeconds(Date before,Date after){
+        return (after.getTime() - before.getTime()) / SECONDS;
+    }
+
+    /**
+     * 计算两个时间相差的分钟数
+     * @param before
+     * @param after
+     * @return
+     */
+    public static long getTimeDifferenceByMinutes(Date before,Date after){
+        return (after.getTime() - before.getTime()) / MINUTES;
+    }
+
+    /**
+     * 计算两个时间相差的小时数
+     * @param before
+     * @param after
+     * @return
+     */
+    public static long getTimeDifferenceByHour(Date before,Date after){
+        return (after.getTime() - before.getTime()) / HOUR;
+    }
+
+    /**
+     * 计算两个时间相差的周数
+     * @param before
+     * @param after
+     * @return
+     */
+    public static long getTimeDifferenceByWeek(Date before,Date after){
+        return (after.getTime() - before.getTime()) / WEEK;
+    }
+
+    /**
+     * 计算两个时间相差的时间
+     * @param before
+     * @param after
+     * @param length 最大为4 最小为1 不足4 忽略前面的 4 - length
+     * @return 数组 周 天 时 分 秒
+     */
+    public static long[] getTimeDifferenceDetail(Date before,Date after,int length){
+        long[] longs = new long[length];
+        int index = 0;
+        long difference = after.getTime() - before.getTime();
+
+        switch (length){
+            case 5:
+                longs[index++] = difference/WEEK;
+                difference = difference % WEEK;
+            case 4:
+                longs[index++] = difference/DAY;
+                difference = difference % DAY;
+            case 3:
+                longs[index++] = difference / HOUR;
+                difference = difference % HOUR;
+            case 2:
+                longs[index++] = difference / MINUTES;
+                difference = difference % MINUTES;
+            case 1:
+                longs[index] =  difference / SECONDS;
+                break;
+            default: throw new IllegalArgumentException("length [1,5]");
+        }
+        return longs;
     }
 }
