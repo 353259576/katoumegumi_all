@@ -1,7 +1,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="${packageName}.mapper.${table.entityName}Mapper">
+<mapper namespace="${packageName}${baseJavaMapperName}.${table.entityName}Mapper">
 
-    <resultMap id="${table.firstLowerEntityName}BaseResultMap" type="${packageName}.model.${table.entityName}">
+    <resultMap id="${table.firstLowerEntityName}BaseResultMap" type="${packageName}${baseEntityName}.${table.entityName}">
         <id property="${table.pkColumn.beanFieldName}" column="${table.pkColumn.columnName}"/>
         <#list table.columnList as column>
             <#if column.columnKey != "PRI">
@@ -23,7 +23,7 @@
         from ${table.tableName}
     </select>
 
-    <insert id="insert${table.entityName}" parameterType="${packageName}.model.${table.entityName}">
+    <insert id="insert${table.entityName}" parameterType="${packageName}${baseEntityName}.${table.entityName}">
         insert into ${table.tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
         <#list table.columnList as column>
@@ -43,7 +43,7 @@
     </insert>
 
 
-    <update id="update${table.entityName}" parameterType="${packageName}.model.${table.entityName}">
+    <update id="update${table.entityName}" parameterType="${packageName}${baseEntityName}.${table.entityName}">
         UPDATE ${table.tableName} SET
         <trim suffixOverrides=",">
         <#list table.columnList as column>

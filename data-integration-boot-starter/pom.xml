@@ -95,7 +95,13 @@
 
         <dependency>
             <groupId>cn.katoumegumi.java</groupId>
-            <artifactId>utils</artifactId>
+            <artifactId>sql_utils</artifactId>
+            <version>${megumi.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.katoumegumi.java</groupId>
+            <artifactId>http_client</artifactId>
             <version>${megumi.version}</version>
         </dependency>
 
@@ -135,10 +141,10 @@
         </dependency>
 
         <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${lang3.vaersion}</version>
         </dependency>
-
 
     </dependencies>
 

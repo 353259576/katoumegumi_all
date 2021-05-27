@@ -1056,12 +1056,16 @@ public class SQLModelUtils {
             Field field = fieldColumnRelation.getField();
             try {
                 Object o = field.get(tList.get(0));
-                if (o != null) {
+                validField.add(fieldColumnRelation);
+                columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
+                placeholderList.add(SqlCommon.PLACEHOLDER);
+                valueList.add(o);
+                /*if (o != null) {
                     validField.add(fieldColumnRelation);
                     columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
                     placeholderList.add(SqlCommon.PLACEHOLDER);
                     valueList.add(o);
-                }
+                }*/
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -1083,12 +1087,16 @@ public class SQLModelUtils {
                 }
 
             }
-            if (o != null) {
+            validField.add(fieldColumnRelation);
+            columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
+            placeholderList.add(SqlCommon.PLACEHOLDER);
+            valueList.add(o);
+            /*if (o != null) {
                 validField.add(fieldColumnRelation);
                 columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
                 placeholderList.add(SqlCommon.PLACEHOLDER);
                 valueList.add(o);
-            }
+            }*/
         }
         String placeholderSql = SqlCommon.LEFT_BRACKETS + WsStringUtils.jointListString(placeholderList, SqlCommon.COMMA) + SqlCommon.RIGHT_BRACKETS;
         placeholderList = new ArrayList<>();

@@ -1,4 +1,4 @@
-package ${packageName}.entity;
+package ${packageName}${baseEntityName};
 
 <#if enableMybatisPlus == true>
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -26,7 +26,7 @@ import ${cl.getName()};
 @TableName(value = "${table.tableName}")
 </#if>
 <#if enableSwagger == true>
-@ApiModel(value = "${table.tableRemark}")
+@ApiModel(value = "${table.tableRemark}实体类")
 </#if>
 @Data
 public class ${table.entityName} implements Serializable {

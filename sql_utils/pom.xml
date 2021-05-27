@@ -8,9 +8,15 @@
         <version>1.0.5-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>utils</artifactId>
+    <artifactId>sql_utils</artifactId>
 
     <dependencies>
+
+        <dependency>
+            <groupId>cn.katoumegumi.java</groupId>
+            <artifactId>common_utils</artifactId>
+            <version>${megumi.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -24,35 +30,10 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${lang3.vaersion}</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-annotation</artifactId>
             <version>${mybatis.plus.version}</version>
         </dependency>
-
-
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>${netty-version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-core</artifactId>
-            <version>${reactor.version}</version>
-        </dependency>
-
-        <!--<dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>${fastjson.version}</version>
-        </dependency>-->
 
         <dependency>
             <groupId>com.google.code.gson</groupId>

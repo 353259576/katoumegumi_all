@@ -1,6 +1,7 @@
 package cn.katoumegumi.java;
 
 import cn.katoumegumi.java.common.WsFileUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.HikariCPDataSourceFactory;
 import cn.katoumegumi.java.utils.FreeMarkerUtils;
 import cn.katoumegumi.java.utils.SqlTableToBeanUtils;
@@ -22,99 +23,195 @@ import java.util.Map;
 public class Generator {
 
     private static final String TEMPLATE_PATH = "cn/katoumegumi/java/service";
+
     public static final FreeMarkerUtils freeMarkerUtils = new FreeMarkerUtils(TEMPLATE_PATH);
 
-    private final String exportPath;
+    /**
+     * 导出地址
+     */
+    private String exportPath;
 
-    private final String packageName;
+    /**
+     * 基础包名
+     */
+    private String packageName;
 
-    private final String packagePath;
 
-    private final String javaPath = "src/main/java";
+    private String packagePath;
 
-    private final String resourcePath = "src/main/resources";
+    /**
+     * java 代码文件夹
+     */
+    private String javaPath = "/src/main/java";
 
+    /**
+     * java 资源文件夹啊
+     */
+    private String resourcePath = "/src/main/resources";
+
+    /**
+     * 实体类的相对路径
+     */
+    private String entityPath = "/entity";
+
+    private String baseEntityName = ".entity";
+
+    /**
+     * 接口的相对路径
+     */
+    private String servicePath = "/service";
+
+
+    private String baseServiceName = ".service";
+
+    /**
+     * 结构实现的相对路径
+     */
+    private String serviceImplPath = "/service/impl";
+
+
+    private String baseServiceImplName = ".service.impl";
+
+    /**
+     * 控制器的相对路径
+     */
+    private String controllerPath = "/controller";
+
+    private String baseControllerName = ".controller";
+
+    /**
+     * mybatis mapper的相对路径
+     */
+    private String javaMapperPath = "/mapper";
+
+    private String baseJavaMapperName = ".mapper";
+
+    /**
+     * mybatis xml 的相对路径
+     */
+    private String xmlMapperPath = "/mapper";
+
+    /**
+     * 查询类的相对路径
+     */
+    private String searchVOPath = "/vo/search";
+
+    private String baseSearchVOName = ".vo.search";
+
+
+    private Boolean enableSwagger = true;
+
+    private Boolean enableMybatisPlus = true;
+
+    private Boolean enableHibernate = true;
+    /**
+     * 0 sqlUtils 1 mybatisPlus 2 mybatis
+     */
+    private Integer type = 0;
+
+    private Boolean enableSearchVO = true;
+
+    private Boolean enableMybatis = true;
+
+    private Boolean enableEntity = true;
+
+    private Boolean enableService = true;
+
+    private Boolean enableController = true;
 
     public Generator(String packageName, String exportPath) {
         this.packageName = packageName;
-        this.exportPath = exportPath;
-        this.packagePath = packageName.replaceAll("\\.", "/");
+        this.exportPath = defaultSettingPath(exportPath);
+        this.packagePath = "/" + packageName.replaceAll("\\.", "/");
     }
 
     public static void main(String[] args) {
-        String url = "jdbc:mysql://localhost:3306/wslx?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true";
+        String url = "jdbc:mysql://47.96.119.77:3306/zs_jym_ms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true";
         String userName = "root";
-        String password = "199645";
+        String password = "Qq123456789.";
         String driverClassName = "com.mysql.cj.jdbc.Driver";
-        String dataBaseName = "wslx";
+        String dataBaseName = "zs_jym_ms";
 
         DataSource dataSource = HikariCPDataSourceFactory.getDataSource(url, userName, password, driverClassName);
 
         Generator generator = new Generator("cn.katoumegumi.java.lx", "D:\\project\\项目\\ws_all\\server_example");
+        generator.setEntityPath("entity/model")
+                .setServicePath("service")
+                .setServiceImplPath("serviceImpl")
+                .setControllerPath("admin.controller");
         SqlTableToBeanUtils sqlTableToBeanUtils = new SqlTableToBeanUtils(dataSource, dataBaseName, null);
-        List<SqlTableToBeanUtils.Table> tableList = sqlTableToBeanUtils.selectTables("ws_user");
+        List<SqlTableToBeanUtils.Table> tableList = sqlTableToBeanUtils.selectTables("jym_store");
         for (SqlTableToBeanUtils.Table table : tableList) {
-            generator.createEntity(table, false, true, true);
-            generator.createService(table, 0);
-            generator.createServiceImpl(table, 0);
-            generator.createController(table, false,0);
-            generator.createMybatisMapper(table, true);
-            generator.createMybatisMapperJava(table, true);
+            generator.createEntity(table);
+            generator.createSearchVO(table);
+            generator.createService(table);
+            generator.createServiceImpl(table);
+            generator.createController(table);
+            generator.createMybatisMapper(table);
+            generator.createMybatisMapperJava(table);
         }
-
     }
+
+
 
     /**
      * 实体类
-     *
      * @param table
      */
-    public void createEntity(SqlTableToBeanUtils.Table table, boolean enableSwagger, boolean enableMybatisPlus, boolean enableHibernate) {
+    public void createEntity(SqlTableToBeanUtils.Table table) {
+        if(!enableEntity){
+            return;
+        }
         Map<String, Object> map = new HashMap<>();
-        map.put("enableSwagger", enableSwagger);
-        map.put("enableMybatisPlus", enableMybatisPlus);
-        map.put("enableHibernate", enableHibernate);
+        map.put("enableSwagger", this.enableSwagger);
+        map.put("enableMybatisPlus", this.enableMybatisPlus);
+        map.put("enableHibernate", this.enableHibernate);
         Template template = freeMarkerUtils.getTemplate("Entity.ftl");
-        create(exportPath + "/" + javaPath + "/" + packagePath + "/entity", table.getEntityName() + ".java", template, table, map);
+        create(exportPath + javaPath + packagePath , entityPath, table.getEntityName() + ".java", template, table, map);
     }
 
     /**
      * 服务接口
-     *
      * @param table
-     * @param type  0 sqlUtils 1 mybatisPlus 2 mybatis
      */
-    public void createService(SqlTableToBeanUtils.Table table, int type) {
+    public void createService(SqlTableToBeanUtils.Table table) {
+        if(!enableService){
+            return;
+        }
         Map<String, Object> map = new HashMap<>();
-        map.put("type", type);
+        map.put("type", this.type);
         Template template = freeMarkerUtils.getTemplate("Service.ftl");
-        create(exportPath + "/" + javaPath + "/" + packagePath + "/service", table.getEntityName() + "Service.java", template, table, map);
+        create(exportPath + javaPath + packagePath, servicePath, table.getEntityName() + "Service.java", template, table, map);
     }
 
     /**
      * 服务
-     *
      * @param table
-     * @param type  0 sqlUtils 1 mybatisPlus 2 mybatis
      */
-    public void createServiceImpl(SqlTableToBeanUtils.Table table, int type) {
+    public void createServiceImpl(SqlTableToBeanUtils.Table table) {
+        if(!enableService){
+            return;
+        }
         Map<String, Object> map = new HashMap<>();
-        map.put("type", type);
+        map.put("type", this.type);
         Template template = freeMarkerUtils.getTemplate("ServiceImpl.ftl");
-        create(exportPath + "/" + javaPath + "/" + packagePath + "/service/impl", table.getEntityName() + "ServiceImpl.java", template, table, map);
+        create(exportPath + javaPath + packagePath, serviceImplPath, table.getEntityName() + "ServiceImpl.java", template, table, map);
     }
 
     /**
      * 控制器
-     *
      * @param table
      */
-    public void createController(SqlTableToBeanUtils.Table table, boolean enableSwagger,int type) {
+    public void createController(SqlTableToBeanUtils.Table table) {
+        if(!enableController){
+            return;
+        }
         Map<String, Object> map = new HashMap<>();
-        map.put("enableSwagger", enableSwagger);
-        map.put("type",type);
+        map.put("enableSwagger", this.enableSwagger);
+        map.put("enableSearchVO",this.enableSearchVO);
+        map.put("type",this.type);
         Template template = freeMarkerUtils.getTemplate("Controller.ftl");
-        create(exportPath + "/" + javaPath + "/" + packagePath + "/controller", table.getEntityName() + "Controller.java", template, table, map);
+        create(exportPath  + javaPath + packagePath , controllerPath, table.getEntityName() + "Controller.java", template, table, map);
     }
 
     /**
@@ -122,11 +219,14 @@ public class Generator {
      *
      * @param table
      */
-    public void createMybatisMapper(SqlTableToBeanUtils.Table table, boolean enableMybatisPlus) {
+    public void createMybatisMapper(SqlTableToBeanUtils.Table table) {
+        if(!enableMybatisPlus && !enableMybatis){
+            return;
+        }
         Map<String, Object> map = new HashMap<>();
-        map.put("enableMybatisPlus", enableMybatisPlus);
+        map.put("enableMybatisPlus", this.enableMybatisPlus);
         Template template = freeMarkerUtils.getTemplate("MybatisMapper.ftl");
-        create(exportPath + "/" + resourcePath + "/mapper", table.getEntityName() + "Mapper.xml", template, table, map);
+        create(exportPath + resourcePath , xmlMapperPath, table.getEntityName() + "Mapper.xml", template, table, map);
     }
 
     /**
@@ -134,17 +234,36 @@ public class Generator {
      *
      * @param table
      */
-    public void createMybatisMapperJava(SqlTableToBeanUtils.Table table, boolean enableMybatisPlus) {
+    public void createMybatisMapperJava(SqlTableToBeanUtils.Table table) {
+        if(!(enableMybatis || enableMybatisPlus)){
+            return;
+        }
         Map<String, Object> map = new HashMap<>();
-        map.put("enableMybatisPlus", enableMybatisPlus);
+        map.put("enableMybatisPlus", this.enableMybatisPlus);
         Template template = freeMarkerUtils.getTemplate("MybatisMapperJava.ftl");
-        create(exportPath + "/" + javaPath + "/" + packagePath + "/mapper", table.getEntityName() + "Mapper.java", template, table, map);
+        create(exportPath + javaPath + packagePath , javaMapperPath, table.getEntityName() + "Mapper.java", template, table, map);
+    }
+
+    public void createSearchVO(SqlTableToBeanUtils.Table table) {
+        if(enableSearchVO) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("enableMybatisPlus", this.enableMybatisPlus);
+            map.put("enableSwagger", this.enableSwagger);
+            Template template = freeMarkerUtils.getTemplate("SearchVO.ftl");
+            create(exportPath + javaPath + packagePath, searchVOPath, table.getEntityName() + "Mapper.java", template, table, map);
+        }
     }
 
 
-    private void create(String filePath, String fileName, Template template, SqlTableToBeanUtils.Table table, Map<String, Object> map) {
-        //Map<String,Object> map = new HashMap<>();
+    private void create(String baseFilePath, String relativePackagePath,  String fileName, Template template, SqlTableToBeanUtils.Table table, Map<String, Object> map) {
+        String filePath = baseFilePath + relativePackagePath;
         map.put("packageName", packageName);
+        map.put("baseEntityName",baseEntityName);
+        map.put("baseJavaMapperName",baseJavaMapperName);
+        map.put("baseServiceImplName",baseServiceImplName);
+        map.put("baseServiceName",baseServiceName);
+        map.put("baseControllerName",baseControllerName);
+        map.put("baseSearchVOName",baseSearchVOName);
         map.put("table", table);
         try {
             try {
@@ -161,4 +280,156 @@ public class Generator {
     }
 
 
+
+    public Generator setExportPath(String exportPath) {
+        exportPath = defaultSettingPath(exportPath);
+        this.exportPath = exportPath;
+        return this;
+    }
+
+    public Generator setPackageName(String packageName) {
+        this.packageName = packageName;
+        this.packagePath = "/" + packageName.replaceAll("\\.", "/");
+        return this;
+    }
+
+    public Generator setJavaPath(String javaPath) {
+        defaultSettingPath(javaPath);
+        this.javaPath = javaPath;
+        return this;
+    }
+
+    public Generator setResourcePath(String resourcePath) {
+        defaultSettingPath(resourcePath);
+        this.resourcePath = resourcePath;
+        return this;
+    }
+
+    public Generator setEntityPath(String entityPath) {
+        entityPath = defaultSettingPath(entityPath);
+        this.baseEntityName = defaultSettingName(entityPath);
+        this.entityPath = entityPath;
+        return this;
+    }
+
+    public Generator setServicePath(String servicePath) {
+        servicePath = defaultSettingPath(servicePath);
+        this.baseServiceName = defaultSettingName(servicePath);
+        this.servicePath = servicePath;
+        return this;
+    }
+
+    public Generator setServiceImplPath(String serviceImplPath) {
+        serviceImplPath = defaultSettingPath(serviceImplPath);
+        this.baseServiceImplName = defaultSettingName(serviceImplPath);
+        this.serviceImplPath = serviceImplPath;
+        return this;
+    }
+
+    public Generator setControllerPath(String controllerPath) {
+        controllerPath = defaultSettingPath(controllerPath);
+        this.baseControllerName = defaultSettingName(controllerPath);
+        this.controllerPath = controllerPath;
+        return this;
+    }
+
+    public Generator setJavaMapperPath(String javaMapperPath) {
+        javaMapperPath = defaultSettingPath(javaMapperPath);
+        this.baseJavaMapperName = defaultSettingName(javaMapperPath);
+        this.javaMapperPath = javaMapperPath;
+        return this;
+    }
+
+
+    public Generator setXmlMapperPath(String xmlMapperPath) {
+        xmlMapperPath = defaultSettingPath(xmlMapperPath);
+        this.xmlMapperPath = xmlMapperPath;
+        return this;
+    }
+
+
+
+    public Generator setSearchVOPath(String searchVOPath) {
+        searchVOPath =defaultSettingPath(searchVOPath);
+        this.baseSearchVOName = defaultSettingName(searchVOPath);
+        this.searchVOPath = searchVOPath;
+        return this;
+    }
+
+
+    public Generator setEnableSwagger(Boolean enableSwagger) {
+        this.enableSwagger = enableSwagger;
+        return this;
+    }
+
+
+    public Generator setEnableMybatisPlus(Boolean enableMybatisPlus) {
+        this.enableMybatisPlus = enableMybatisPlus;
+        return this;
+    }
+
+
+    public Generator setEnableHibernate(Boolean enableHibernate) {
+        this.enableHibernate = enableHibernate;
+        return this;
+    }
+
+
+    public Generator setType(Integer type) {
+        this.type = type;
+        return this;
+    }
+
+
+
+    public Generator setEnableSearchVO(Boolean enableSearchVO) {
+        this.enableSearchVO = enableSearchVO;
+        return this;
+    }
+
+    public Generator setPackagePath(String packagePath) {
+        this.packagePath = packagePath;
+        return this;
+    }
+
+    public Generator setEnableMybatis(Boolean enableMybatis) {
+        this.enableMybatis = enableMybatis;
+        return this;
+    }
+
+    public Generator setEnableEntity(Boolean enableEntity) {
+        this.enableEntity = enableEntity;
+        return this;
+    }
+
+    public Generator setEnableService(Boolean enableService) {
+        this.enableService = enableService;
+        return this;
+    }
+
+    public Generator setEnableController(Boolean enableController) {
+        this.enableController = enableController;
+        return this;
+    }
+
+    private String defaultSettingPath(String str){
+        if(WsStringUtils.isBlank(str)){
+            return "";
+        }
+        str = str.replaceAll("\\\\","/");
+        if(!str.startsWith("/")){
+            str = "/" + str;
+        }
+        if(str.endsWith("/")){
+            str = str.substring(0,str.length());
+        }
+        return str;
+    }
+
+    private String defaultSettingName(String str){
+        if(WsStringUtils.isBlank(str)){
+            return "";
+        }
+        return str.replaceAll("/",".");
+    }
 }

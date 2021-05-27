@@ -1,4 +1,4 @@
-package ${packageName}.service.impl;
+package ${packageName}${baseServiceImplName};
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -6,18 +6,20 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.datasource.WsJdbcUtils;
 </#if>
+import cn.katoumegumi.java.common.WsListUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import ${packageName}.entity.${table.entityName};
-import ${packageName}.service.${table.entityName}Service;
+import ${packageName}${baseEntityName}.${table.entityName};
+import ${packageName}${baseServiceName}.${table.entityName}Service;
 import ${table.pkColumn.columnClass.getName()};
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 <#if type == 1>
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import ${packageName}.mapper.${table.entityName}Mapper;
+import ${packageName}${baseJavaMapperName}.${table.entityName}Mapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 </#if>
@@ -40,7 +42,7 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public Integer insert(${table.entityName} ${table.firstLowerEntityName}){
+    public Integer save(${table.entityName} ${table.firstLowerEntityName}){
 <#if type == 0>
         return jdbcUtils.insert(${table.firstLowerEntityName});
 </#if>
@@ -68,12 +70,10 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public void insertOrUpdateBatch(List<${table.entityName}> ${table.firstLowerEntityName}List){
-        List<${table.entityName}> insert = new ArrayList<>();
-        List<${table.entityName}> update = new ArrayList<>();
+    public void saveOrUpdateBatch(List<${table.entityName}> ${table.firstLowerEntityName}List){
         for(${table.entityName} ${table.firstLowerEntityName}:${table.firstLowerEntityName}List){
             if(${table.firstLowerEntityName}.getId() == null){
-                insert(${table.firstLowerEntityName});
+                save(${table.firstLowerEntityName});
             }else {
                 update(${table.firstLowerEntityName});
             }
@@ -84,13 +84,15 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     * 分页查询
     */
     @Override
-    public IPage<${table.entityName}> selectPage(<#if type == 0>MySearchList searchList</#if><#if type == 1>Page page,Wrapper<${table.entityName}> wrapper</#if>){
+    public IPage<${table.entityName}> queryPage(<#if type == 0>MySearchList searchList</#if><#if type == 1>Page page,Wrapper<${table.entityName}> wrapper</#if>){
 <#if type == 0>
         IPage<${table.entityName}> ${table.firstLowerEntityName}Page = jdbcUtils.getTPage(searchList);
+        wrapper${table.entityName}(${table.firstLowerEntityName}Page.getRecords());
         return ${table.firstLowerEntityName}Page;
 </#if>
 <#if type == 1>
         IPage<${table.entityName}> ${table.firstLowerEntityName}Page = ${table.firstLowerEntityName}Mapper.selectPage(page,wrapper);
+        wrapper${table.entityName}(${table.firstLowerEntityName}Page.getRecords());
         return ${table.firstLowerEntityName}Page;
 </#if>
     }
@@ -99,13 +101,15 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     * 列表查询
     */
     @Override
-    public List<${table.entityName}> selectList(<#if type == 0>MySearchList searchList</#if><#if type == 1>Wrapper<${table.entityName}> wrapper</#if>){
+    public List<${table.entityName}> queryList(<#if type == 0>MySearchList searchList</#if><#if type == 1>Wrapper<${table.entityName}> wrapper</#if>){
 <#if type == 0>
         List<${table.entityName}> ${table.firstLowerEntityName}List = jdbcUtils.getListT(searchList);
+        wrapper${table.entityName}(${table.firstLowerEntityName}List);
         return ${table.firstLowerEntityName}List;
 </#if>
 <#if type == 1>
         List<${table.entityName}> ${table.firstLowerEntityName}List = ${table.firstLowerEntityName}Mapper.selectList(wrapper);
+        wrapper${table.entityName}(${table.firstLowerEntityName}List);
         return ${table.firstLowerEntityName}List;
 </#if>
     }
@@ -114,13 +118,15 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     * 单条查询
     */
     @Override
-    public ${table.entityName} select(<#if type == 0>MySearchList searchList</#if><#if type == 1>Wrapper<${table.entityName}> wrapper</#if>){
+    public ${table.entityName} queryEntity(<#if type == 0>MySearchList searchList</#if><#if type == 1>Wrapper<${table.entityName}> wrapper</#if>){
 <#if type == 0>
         ${table.entityName} ${table.firstLowerEntityName} = jdbcUtils.getTOne(searchList);
+        wrapper${table.entityName}(Collections.singletonList(${table.firstLowerEntityName}));
         return ${table.firstLowerEntityName};
 </#if>
 <#if type == 1>
         ${table.entityName} ${table.firstLowerEntityName} = ${table.firstLowerEntityName}Mapper.selectOne(wrapper);
+        wrapper${table.entityName}(Collections.singletonList(${table.firstLowerEntityName}));
         return ${table.firstLowerEntityName};
 </#if>
     }
@@ -130,13 +136,22 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public Integer delete(${table.pkColumn.columnClass.getSimpleName()} ${table.pkColumn.beanFieldName}){
+    public Integer remove(${table.pkColumn.columnClass.getSimpleName()} ${table.pkColumn.beanFieldName}){
 <#if type == 0>
         return jdbcUtils.update(MySearchList.create(${table.entityName}.class).set("","").eq("${table.pkColumn.beanFieldName}",${table.pkColumn.beanFieldName}));
 </#if>
 <#if type == 1>
         ${table.entityName} ${table.firstLowerEntityName} = new ${table.entityName}();
 </#if>
+    }
+
+    /**
+    * 包装
+    */
+    private void wrapper${table.entityName}(List<${table.entityName}> ${table.firstLowerEntityName}List) {
+        if(WsListUtils.isEmpty(${table.firstLowerEntityName}List)) {
+            return;
+        }
     }
 
 }

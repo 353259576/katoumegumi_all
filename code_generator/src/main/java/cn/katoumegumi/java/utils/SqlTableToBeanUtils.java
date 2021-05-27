@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * table转换为java bean
+ * mysql table转换为java bean
  *
  * @author ws
  */
@@ -158,6 +158,7 @@ public class SqlTableToBeanUtils {
         static {
             classMap.put("varchar", String.class);
             classMap.put("int", Integer.class);
+            classMap.put("int unsigned", Integer.class);
             classMap.put("bigint", Long.class);
             classMap.put("float", Float.class);
             classMap.put("double", Double.class);
@@ -172,30 +173,30 @@ public class SqlTableToBeanUtils {
         /**
          * 字段名
          */
-        private String columnName;
+        private final String columnName;
         /**
          * 字段备注
          */
-        private String columnRemark;
+        private final String columnRemark;
         /**
          * 字段类型
          */
-        private String columnType;
+        private final String columnType;
         /**
          * 键类型
          */
-        private String columnKey;
+        private final String columnKey;
         /**
          * java bean field名称
          */
-        private String beanFieldName;
+        private final String beanFieldName;
         private Class<?> columnClass;
 
         public Column(String columnName, String columnRemark, String columnType, String columnKey) {
             this.columnName = columnName;
             this.columnRemark = columnRemark;
             this.columnKey = columnKey;
-            this.beanFieldName = WsStringUtils.camelCase(columnName.toLowerCase());
+            this.beanFieldName = WsStringUtils.camelCase(columnName);
             if (WsStringUtils.isNotBlank(columnType)) {
                 int index = columnType.indexOf("(");
                 if (index > 0) {

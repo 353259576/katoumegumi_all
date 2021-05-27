@@ -1,7 +1,5 @@
 package cn.katoumegumi.java.common;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -422,7 +420,6 @@ public class WsBeanUtils {
         return null;
     }
 
-    @NotNull
     private static <T> Object objectArrayToTArray(Class<T> tClass, Object[] objects) {
         if (tClass.isPrimitive()) {
             switch (tClass.getName()) {
@@ -486,7 +483,6 @@ public class WsBeanUtils {
         }
     }
 
-    @NotNull
     private static <T> Object booleanArrayToTArray(Class<T> tClass, boolean[] booleans) {
         T[] objects;
         if (tClass.isPrimitive()) {
@@ -551,7 +547,6 @@ public class WsBeanUtils {
         }
     }
 
-    @NotNull
     private static <T> Object charArrayToTArray(Class<T> tClass, char[] chars) {
         T[] objects;
         if (tClass.isPrimitive()) {
@@ -616,7 +611,6 @@ public class WsBeanUtils {
         }
     }
 
-    @NotNull
     private static <T> Object byteArrayToTArray(Class<T> tClass, byte[] bytes) {
         T[] objects;
         if (tClass.isPrimitive()) {
@@ -681,7 +675,6 @@ public class WsBeanUtils {
         }
     }
 
-    @NotNull
     private static <T> Object doubleArrayToTArray(Class<T> tClass, double[] doubles) {
         T[] objects;
         if (tClass.isPrimitive()) {
@@ -746,7 +739,6 @@ public class WsBeanUtils {
         }
     }
 
-    @NotNull
     private static <T> Object floatArrayToTArray(Class<T> tClass, float[] floats) {
         T[] objects;
         if (tClass.isPrimitive()) {
@@ -811,7 +803,6 @@ public class WsBeanUtils {
         }
     }
 
-    @NotNull
     private static <T> Object longArrayToTArray(Class<T> tClass, long[] longs) {
         T[] objects;
         if (tClass.isPrimitive()) {
@@ -876,7 +867,6 @@ public class WsBeanUtils {
         }
     }
 
-    @NotNull
     private static <T> Object shortArrayToTArray(Class<T> tClass, short[] shorts) {
         T[] objects;
         if (tClass.isPrimitive()) {
@@ -948,7 +938,6 @@ public class WsBeanUtils {
      * @param <T>
      * @return
      */
-    @NotNull
     private static <T> Object intArrayToTArray(Class<T> tClass, int[] ints) {
         T[] objects;
         if (tClass.isPrimitive()) {

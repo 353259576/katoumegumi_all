@@ -10,8 +10,10 @@
     <version>1.0.5-SNAPSHOT</version>
     <modules>
         <module>data-integration-boot-starter</module>
-        <module>utils</module>
+        <module>sql_utils</module>
         <module>code_generator</module>
+        <module>common_utils</module>
+        <module>http_client</module>
     </modules>
 
     <licenses>

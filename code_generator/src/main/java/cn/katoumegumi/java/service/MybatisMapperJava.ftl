@@ -1,7 +1,7 @@
 package ${packageName}.mapper;
 
 import java.util.List;
-import ${packageName}.entity.${table.entityName};
+import ${packageName}${baseEntityName}.${table.entityName};
 <#if enableMybatisPlus == true>
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 </#if>
