@@ -1,44 +1,76 @@
 package cn.katoumegumi.java.sql;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * sql拦截器
  *
  * @author ws
  */
-public abstract class AbstractSqlInterceptor {
+public interface AbstractSqlInterceptor {
 
-    private Map<Class, FieldColumnRelation> classFieldMap = new ConcurrentHashMap<>();
+    //private final Map<Class<?>, FieldColumnRelation> classFieldMap = new ConcurrentHashMap<>();
 
-    protected boolean isSelect() {
+    /**
+     * 是否在查询语句中起作用
+     *
+     * @return
+     */
+    default boolean isSelect() {
         return false;
     }
 
-    protected boolean isInsert() {
+    /**
+     * 是否在修改语句中起作用
+     *
+     * @return
+     */
+    default boolean isInsert() {
         return false;
     }
 
-    protected boolean isUpdate() {
+    /**
+     * 是否在修改语句中起作用
+     *
+     * @return
+     */
+    default boolean isUpdate() {
         return false;
     }
 
 
-    protected boolean
-    useCondition(FieldColumnRelationMapper fieldColumnRelationMapper) {
+    /**
+     * 使用条件
+     *
+     * @param fieldColumnRelationMapper
+     * @return
+     */
+    default boolean useCondition(FieldColumnRelationMapper fieldColumnRelationMapper) {
         return true;
     }
 
-    protected Object insertFill() {
+    /**
+     * 插入语句自动填充
+     *
+     * @return
+     */
+    default Object insertFill() {
         return null;
     }
 
-    protected Object updateFill() {
+    /**
+     * 修改语句自动填充
+     *
+     * @return
+     */
+    default Object updateFill() {
         return null;
     }
 
-    protected Object selectFill() {
+    /**
+     * 查询语句自动填充
+     *
+     * @return
+     */
+    default Object selectFill() {
         return null;
     }
 
@@ -47,16 +79,16 @@ public abstract class AbstractSqlInterceptor {
      *
      * @return
      */
-    protected abstract String fieldName();
+    public String fieldName();
 
 
-    protected void addClassFieldName(Class tClass, FieldColumnRelation fieldColumnRelation) {
+    /*protected void addClassFieldName(Class<?> tClass, FieldColumnRelation fieldColumnRelation) {
         classFieldMap.put(tClass, fieldColumnRelation);
     }
 
-    public FieldColumnRelation getFieldColumnRelation(Class tClass) {
+    public FieldColumnRelation getFieldColumnRelation(Class<?> tClass) {
         return classFieldMap.get(tClass);
-    }
+    }*/
 
 
 }

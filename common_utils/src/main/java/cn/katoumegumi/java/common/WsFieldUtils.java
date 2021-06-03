@@ -39,41 +39,12 @@ public class WsFieldUtils {
         return field;
     }
 
-    public static boolean setFieldValueForName(Field field, Object object, Object value) {
-        field.setAccessible(true);
-        try {
-            field.set(object, value);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            field.setAccessible(false);
-        }
-        return true;
-    }
-
-    public static Object getFieldValueForName(Field field, Object object) {
-        Object value = null;
-        field.setAccessible(true);
-        try {
-            value = field.get(object);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            field.setAccessible(false);
-        }
-        return value;
-    }
-
     public static Field[] getFieldAll(Class<?> clazz) {
         Set<Field> fieldSet = new HashSet<>();
         Map<String, Field> fieldMap = new HashMap<>();
         try {
             Field[] fields;
-            /*fields = clazz.getFields();
-            for (int i = 0; i < fields.length; i++) {
-                fieldSet.put(fields[i].getName(),fields[i]);
-            }*/
+
             fields = clazz.getDeclaredFields();
             for (int i = 0; i < fields.length; i++) {
                 if (!Modifier.isStatic(fields[i].getModifiers())) {
@@ -105,6 +76,9 @@ public class WsFieldUtils {
         if (fieldSet.isEmpty()) {
             return null;
         } else {
+            for(Field field:fieldSet){
+                makeAccessible(field);
+            }
             return fieldSet.toArray(new Field[0]);
         }
     }
@@ -131,7 +105,7 @@ public class WsFieldUtils {
 
     }
 
-    public static boolean classCompare(Class child, Class parent) {
+    public static boolean classCompare(Class<?> child, Class<?> parent) {
         if (parent == null || child == null) {
             return false;
         }
@@ -148,23 +122,23 @@ public class WsFieldUtils {
 
         if (parent.isInterface()) {
             if (child.isInterface()) {
-                Class[] cs = child.getInterfaces();
+                Class<?>[] cs = child.getInterfaces();
                 if (WsListUtils.isEmpty(cs)) {
                     return false;
                 }
-                for (Class clazz : cs) {
+                for (Class<?> clazz : cs) {
                     return classCompare(clazz, parent);
                 }
             } else {
-                Class parentClazz = child.getSuperclass();
+                Class<?> parentClazz = child.getSuperclass();
                 if (classCompare(parentClazz, parent)) {
                     return true;
                 } else {
-                    Class[] cs = child.getInterfaces();
+                    Class<?>[] cs = child.getInterfaces();
                     if (WsListUtils.isEmpty(cs)) {
                         return false;
                     }
-                    for (Class clazz : cs) {
+                    for (Class<?> clazz : cs) {
                         return classCompare(clazz, parent);
                     }
                 }
@@ -304,7 +278,6 @@ public class WsFieldUtils {
 
     /**
      * 获得值
-     *
      * @param o
      * @param field
      * @return
@@ -315,13 +288,22 @@ public class WsFieldUtils {
             return field.get(o);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
+            return getLastValue(o,field);
+        }
+    }
+
+    private static Object getLastValue(Object o, Field field) {
+        try {
+            makeAccessible(field);
+            return field.get(o);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
             return null;
         }
     }
 
     /**
      * 设置值
-     *
      * @param o
      * @param value
      * @param field
@@ -332,12 +314,34 @@ public class WsFieldUtils {
             return true;
         }
         try {
-            field.setAccessible(true);
+            //field.setAccessible(true);
+            field.set(o, value);
+            return true;
+        } catch (IllegalAccessException e) {
+            //e.printStackTrace();
+            return setLastValue(o,value,field);
+        }
+    }
+
+    private static boolean setLastValue(Object o, Object value, Field field) {
+        if (value == null) {
+            return true;
+        }
+        try {
+            makeAccessible(field);
             field.set(o, value);
             return true;
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public static void makeAccessible(Field field) {
+        if ((!Modifier.isPublic(field.getModifiers()) ||
+                !Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
+                Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
+            field.setAccessible(true);
         }
     }
 

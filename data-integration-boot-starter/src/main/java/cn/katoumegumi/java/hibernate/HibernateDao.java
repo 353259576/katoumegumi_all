@@ -32,10 +32,10 @@ public class HibernateDao {
     private HibernateTemplate hibernateTemplate;
 
     public static <T> T hibernateObjectConvertor(T object) {
-        Field fields[] = WsFieldUtils.getFieldAll(object.getClass());
+        Field[] fields = WsFieldUtils.getFieldAll(object.getClass());
         Object value = null;
         for (Field field : fields) {
-            value = WsFieldUtils.getFieldValueForName(field, object);
+            value = WsFieldUtils.getValue(object,field);
             if (value != null) {
                 if (value instanceof HibernateProxy) {
                     try {
@@ -44,7 +44,7 @@ public class HibernateDao {
                         value = null;
                         e.printStackTrace();
                     }
-                    WsFieldUtils.setFieldValueForName(field, object, value);
+                    WsFieldUtils.setValue(object,value,field);
                 }
             }
         }

@@ -250,7 +250,7 @@ public class Generator {
             map.put("enableMybatisPlus", this.enableMybatisPlus);
             map.put("enableSwagger", this.enableSwagger);
             Template template = freeMarkerUtils.getTemplate("SearchVO.ftl");
-            create(exportPath + javaPath + packagePath, searchVOPath, table.getEntityName() + "Mapper.java", template, table, map);
+            create(exportPath + javaPath + packagePath, searchVOPath, table.getEntityName() + "SearchVO.java", template, table, map);
         }
     }
 

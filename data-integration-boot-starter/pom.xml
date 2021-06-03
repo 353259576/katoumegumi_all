@@ -60,80 +60,43 @@
         </dependency>-->
 
 
-        <dependency>
+        <!--<dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.version}</version>
-        </dependency>
+        </dependency>-->
 
 
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <version>${druid.version}</version>
         </dependency>
-
-        <!--<dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>${hibernate.version}</version>
-        </dependency>-->
 
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>${hibernate.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-all</artifactId>
-            <version>${seata.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>cn.katoumegumi.java</groupId>
             <artifactId>sql_utils</artifactId>
-            <version>${megumi.version}</version>
         </dependency>
 
         <dependency>
             <groupId>cn.katoumegumi.java</groupId>
             <artifactId>http_client</artifactId>
-            <version>${megumi.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-extension</artifactId>
-            <version>${mybatis.plus.version}</version>
         </dependency>
-
-        <!--<dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-extension</artifactId>
-            <version>${mybatis.plus.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mybatis.scripting</groupId>
-            <artifactId>mybatis-thymeleaf</artifactId>
-            <version>${mybatis.thymeleaf.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mybatis.scripting</groupId>
-            <artifactId>mybatis-velocity</artifactId>
-            <version>${mybatis.velocity.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mybatis.scripting</groupId>
-            <artifactId>mybatis-freemarker</artifactId>
-            <version>${mybatis.freemarker.version}</version>
-        </dependency>-->
 
         <dependency>
             <groupId>io.lettuce</groupId>
@@ -143,7 +106,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>${lang3.vaersion}</version>
         </dependency>
 
     </dependencies>

@@ -1,7 +1,5 @@
 package cn.katoumegumi.java.http.model;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.Serializable;
 
 /**
@@ -30,17 +28,21 @@ public abstract class BaseEntity implements Serializable, Comparable<BaseEntity>
 
     @Override
     public boolean equals(Object obj) {
-        if (name == null) {
-            return false;
-        }
         if (obj == null) {
             return false;
         }
+        if(!(obj instanceof String)){
+            return false;
+        }
+        if (name == null) {
+            return false;
+        }
+
         return name.equals(obj);
     }
 
     @Override
-    public int compareTo(@NotNull BaseEntity o) {
+    public int compareTo(BaseEntity o) {
         return name.compareTo(o.getName());
     }
 }

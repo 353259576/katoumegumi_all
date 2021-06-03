@@ -13,18 +13,27 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 /**
  * 用于生成FieldColumnRelationMapper
+ *
+ * @author 星梦苍天
  */
 public class FieldColumnRelationMapperFactory {
 
     /**
      * 缓存实体对应的对象属性与列名的关联
      */
-    private static final Map<Class<?>, FieldColumnRelationMapper> mapperMap = new ConcurrentHashMap<>();
-
+    private static final Map<Class<?>, FieldColumnRelationMapper> MAPPER_MAP = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, CountDownLatch> CLASS_COUNT_DOWN_LATCH_MAP = new ConcurrentHashMap<>();
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(0, 16, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
+        Thread thread = new Thread(r);
+        thread.setDaemon(true);
+        thread.setName("sqlUtils mapper生成线程");
+        thread.setPriority(Thread.NORM_PRIORITY);
+        return thread;
+    });
     /**
      * 是否转换列名
      */
@@ -37,11 +46,46 @@ public class FieldColumnRelationMapperFactory {
      * @return
      */
     public static FieldColumnRelationMapper analysisClassRelation(Class<?> clazz) {
-        FieldColumnRelationMapper fieldColumnRelationMapper = mapperMap.get(clazz);
+        FieldColumnRelationMapper fieldColumnRelationMapper = MAPPER_MAP.get(clazz);
         if (fieldColumnRelationMapper != null) {
             return fieldColumnRelationMapper;
         }
-        Annotation annotation = clazz.getAnnotation(Entity.class);
+        CountDownLatch countDownLatch = CLASS_COUNT_DOWN_LATCH_MAP.computeIfAbsent(clazz, c -> {
+            CountDownLatch cdl = new CountDownLatch(1);
+            EXECUTOR_SERVICE.execute(() -> {
+                Annotation annotation = clazz.getAnnotation(Entity.class);
+                if (annotation == null) {
+                    annotation = clazz.getAnnotation(Table.class);
+                }
+                FieldColumnRelationMapper mapper = null;
+                if (annotation != null) {
+                    mapper = hibernateAnalysisClassRelation(clazz);
+                } else {
+                    mapper = mybatisPlusAnalysisClassRelation(clazz);
+                }
+                MAPPER_MAP.put(c, mapper);
+                CLASS_COUNT_DOWN_LATCH_MAP.remove(c);
+                cdl.countDown();
+            });
+
+            return cdl;
+        });
+        try {
+            boolean k = countDownLatch.await(1, TimeUnit.MINUTES);
+            if (k) {
+                fieldColumnRelationMapper = MAPPER_MAP.get(clazz);
+                if (fieldColumnRelationMapper == null) {
+                    throw new RuntimeException("解析失败");
+                }
+                return fieldColumnRelationMapper;
+            } else {
+                throw new RuntimeException("解析超时");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new RuntimeException("程序异常中断");
+        }
+        /*Annotation annotation = clazz.getAnnotation(Entity.class);
         if (annotation == null) {
             annotation = clazz.getAnnotation(Table.class);
         }
@@ -50,7 +94,7 @@ public class FieldColumnRelationMapperFactory {
         } else {
             fieldColumnRelationMapper = mybatisPlusAnalysisClassRelation(clazz);
         }
-        return fieldColumnRelationMapper;
+        return fieldColumnRelationMapper;*/
     }
 
     /**
@@ -124,37 +168,35 @@ public class FieldColumnRelationMapperFactory {
                 }
 
                 FieldColumnRelationMapper mapper = analysisClassRelation(joinClass);
-                if (mapper != null) {
-                    FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
-                    fieldJoinClass.setNickName(field.getName());
-                    fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
-                    JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
-                    field.setAccessible(true);
-                    if (joinColumn != null) {
-                        String name = joinColumn.name();
-                        if (WsStringUtils.isBlank(name)) {
-                            name = fieldColumnRelationMapper.getIds().get(0).getColumnName();
-                        }
-                        String referenced = joinColumn.referencedColumnName();
-                        if (WsStringUtils.isBlank(referenced)) {
-                            referenced = mapper.getIds().get(0).getColumnName();
-                        }
-                        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-                        if (oneToMany == null) {
-                            fieldJoinClass.setAnotherJoinColumn(referenced);
-                            fieldJoinClass.setJoinColumn(name);
-                        } else {
-                            fieldJoinClass.setAnotherJoinColumn(name);
-                            fieldJoinClass.setJoinColumn(referenced);
-                        }
-
+                FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
+                fieldJoinClass.setNickName(field.getName());
+                fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
+                JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+                field.setAccessible(true);
+                if (joinColumn != null) {
+                    String name = joinColumn.name();
+                    if (WsStringUtils.isBlank(name)) {
+                        name = fieldColumnRelationMapper.getIds().get(0).getColumnName();
                     }
-                    fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
+                    String referenced = joinColumn.referencedColumnName();
+                    if (WsStringUtils.isBlank(referenced)) {
+                        referenced = mapper.getIds().get(0).getColumnName();
+                    }
+                    OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+                    if (oneToMany == null) {
+                        fieldJoinClass.setAnotherJoinColumn(referenced);
+                        fieldJoinClass.setJoinColumn(name);
+                    } else {
+                        fieldJoinClass.setAnotherJoinColumn(name);
+                        fieldJoinClass.setJoinColumn(referenced);
+                    }
+
                 }
+                fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
             }
         }
         fieldColumnRelationMapper.markSignLocation();
-        mapperMap.put(clazz, fieldColumnRelationMapper);
+        MAPPER_MAP.put(clazz, fieldColumnRelationMapper);
         return fieldColumnRelationMapper;
     }
 
@@ -237,16 +279,15 @@ public class FieldColumnRelationMapperFactory {
                     }
                     isArray = true;
                 }
-                if (analysisClassRelation(joinClass) != null) {
-                    FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
-                    fieldJoinClass.setNickName(field.getName());
-                    fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
-                    fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
-                }
+                analysisClassRelation(joinClass);
+                FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
+                fieldJoinClass.setNickName(field.getName());
+                fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
+                fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
             }
         }
         fieldColumnRelationMapper.markSignLocation();
-        mapperMap.put(clazz, fieldColumnRelationMapper);
+        MAPPER_MAP.put(clazz, fieldColumnRelationMapper);
         return fieldColumnRelationMapper;
     }
 

@@ -19,9 +19,6 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class WsBeanUtils {
 
-    public static void main(String[] args) {
-    }
-
     /**
      * 转换bean
      * @param o
@@ -426,49 +423,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rInts[i] = (int) objectToT(objects[i], tClass);
+                        rInts[i] = (Integer) objectToT(objects[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rShorts[i] = (short) objectToT(objects[i], tClass);
+                        rShorts[i] = (Short) objectToT(objects[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rLongs[i] = (long) objectToT(objects[i], tClass);
+                        rLongs[i] = (Long) objectToT(objects[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rFloats[i] = (float) objectToT(objects[i], tClass);
+                        rFloats[i] = (Float) objectToT(objects[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rDoubles[i] = (double) objectToT(objects[i], tClass);
+                        rDoubles[i] = (Double) objectToT(objects[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rBytes[i] = (byte) objectToT(objects[i], tClass);
+                        rBytes[i] = (Byte) objectToT(objects[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rChars[i] = (char) objectToT(objects[i], tClass);
+                        rChars[i] = (Character) objectToT(objects[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rBooleans[i] = (boolean) objectToT(objects[i], tClass);
+                        rBooleans[i] = (Boolean) objectToT(objects[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -490,49 +487,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rInts[i] = (int) objectToT(booleans[i], tClass);
+                        rInts[i] = (Integer) objectToT(booleans[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rShorts[i] = (short) objectToT(booleans[i], tClass);
+                        rShorts[i] = (Short) objectToT(booleans[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rLongs[i] = (long) objectToT(booleans[i], tClass);
+                        rLongs[i] = (Long) objectToT(booleans[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rFloats[i] = (float) objectToT(booleans[i], tClass);
+                        rFloats[i] = (Float) objectToT(booleans[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rDoubles[i] = (double) objectToT(booleans[i], tClass);
+                        rDoubles[i] = (Double) objectToT(booleans[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rBytes[i] = (byte) objectToT(booleans[i], tClass);
+                        rBytes[i] = (Byte) objectToT(booleans[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rChars[i] = (char) objectToT(booleans[i], tClass);
+                        rChars[i] = (Character) objectToT(booleans[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rBooleans[i] = (boolean) objectToT(booleans[i], tClass);
+                        rBooleans[i] = (Boolean) objectToT(booleans[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -554,49 +551,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rInts[i] = (int) objectToT(chars[i], tClass);
+                        rInts[i] = (Integer) objectToT(chars[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rShorts[i] = (short) objectToT(chars[i], tClass);
+                        rShorts[i] = (Short) objectToT(chars[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rLongs[i] = (long) objectToT(chars[i], tClass);
+                        rLongs[i] = (Long) objectToT(chars[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rFloats[i] = (float) objectToT(chars[i], tClass);
+                        rFloats[i] = (Float) objectToT(chars[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rDoubles[i] = (double) objectToT(chars[i], tClass);
+                        rDoubles[i] = (Double) objectToT(chars[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rBytes[i] = (byte) objectToT(chars[i], tClass);
+                        rBytes[i] = (Byte) objectToT(chars[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rChars[i] = (char) objectToT(chars[i], tClass);
+                        rChars[i] = (Character) objectToT(chars[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rBooleans[i] = (boolean) objectToT(chars[i], tClass);
+                        rBooleans[i] = (Boolean) objectToT(chars[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -618,49 +615,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rInts[i] = (int) objectToT(bytes[i], tClass);
+                        rInts[i] = (Integer) objectToT(bytes[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rShorts[i] = (short) objectToT(bytes[i], tClass);
+                        rShorts[i] = (Short) objectToT(bytes[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rLongs[i] = (long) objectToT(bytes[i], tClass);
+                        rLongs[i] = (Long) objectToT(bytes[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rFloats[i] = (float) objectToT(bytes[i], tClass);
+                        rFloats[i] = (Float) objectToT(bytes[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rDoubles[i] = (double) objectToT(bytes[i], tClass);
+                        rDoubles[i] = (Double) objectToT(bytes[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rBytes[i] = (byte) objectToT(bytes[i], tClass);
+                        rBytes[i] = (Byte) objectToT(bytes[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rChars[i] = (char) objectToT(bytes[i], tClass);
+                        rChars[i] = (Character) objectToT(bytes[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rBooleans[i] = (boolean) objectToT(bytes[i], tClass);
+                        rBooleans[i] = (Boolean) objectToT(bytes[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -682,49 +679,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rInts[i] = (int) objectToT(doubles[i], tClass);
+                        rInts[i] = (Integer) objectToT(doubles[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rShorts[i] = (short) objectToT(doubles[i], tClass);
+                        rShorts[i] = (Short) objectToT(doubles[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rLongs[i] = (long) objectToT(doubles[i], tClass);
+                        rLongs[i] = (Long) objectToT(doubles[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rFloats[i] = (float) objectToT(doubles[i], tClass);
+                        rFloats[i] = (Float) objectToT(doubles[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rDoubles[i] = (double) objectToT(doubles[i], tClass);
+                        rDoubles[i] = (Double) objectToT(doubles[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rBytes[i] = (byte) objectToT(doubles[i], tClass);
+                        rBytes[i] = (Byte) objectToT(doubles[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rChars[i] = (char) objectToT(doubles[i], tClass);
+                        rChars[i] = (Character) objectToT(doubles[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rBooleans[i] = (boolean) objectToT(doubles[i], tClass);
+                        rBooleans[i] = (Boolean) objectToT(doubles[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -746,49 +743,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rInts[i] = (int) objectToT(floats[i], tClass);
+                        rInts[i] = (Integer) objectToT(floats[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rShorts[i] = (short) objectToT(floats[i], tClass);
+                        rShorts[i] = (Short) objectToT(floats[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rLongs[i] = (long) objectToT(floats[i], tClass);
+                        rLongs[i] = (Long) objectToT(floats[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rFloats[i] = (float) objectToT(floats[i], tClass);
+                        rFloats[i] = (Float) objectToT(floats[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rDoubles[i] = (double) objectToT(floats[i], tClass);
+                        rDoubles[i] = (Double) objectToT(floats[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rBytes[i] = (byte) objectToT(floats[i], tClass);
+                        rBytes[i] = (Byte) objectToT(floats[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rChars[i] = (char) objectToT(floats[i], tClass);
+                        rChars[i] = (Character) objectToT(floats[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rBooleans[i] = (boolean) objectToT(floats[i], tClass);
+                        rBooleans[i] = (Boolean) objectToT(floats[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -810,49 +807,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rInts[i] = (int) objectToT(longs[i], tClass);
+                        rInts[i] = (Integer) objectToT(longs[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rShorts[i] = (short) objectToT(longs[i], tClass);
+                        rShorts[i] = (Short) objectToT(longs[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rLongs[i] = (long) objectToT(longs[i], tClass);
+                        rLongs[i] = (Long) objectToT(longs[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rFloats[i] = (float) objectToT(longs[i], tClass);
+                        rFloats[i] = (Float) objectToT(longs[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rDoubles[i] = (double) objectToT(longs[i], tClass);
+                        rDoubles[i] = (Double) objectToT(longs[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rBytes[i] = (byte) objectToT(longs[i], tClass);
+                        rBytes[i] = (Byte) objectToT(longs[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rChars[i] = (char) objectToT(longs[i], tClass);
+                        rChars[i] = (Character) objectToT(longs[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rBooleans[i] = (boolean) objectToT(longs[i], tClass);
+                        rBooleans[i] = (Boolean) objectToT(longs[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -874,49 +871,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rInts[i] = (int) objectToT(shorts[i], tClass);
+                        rInts[i] = (Integer) objectToT(shorts[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rShorts[i] = (short) objectToT(shorts[i], tClass);
+                        rShorts[i] = (Short) objectToT(shorts[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rLongs[i] = (long) objectToT(shorts[i], tClass);
+                        rLongs[i] = (Long) objectToT(shorts[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rFloats[i] = (float) objectToT(shorts[i], tClass);
+                        rFloats[i] = (Float) objectToT(shorts[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rDoubles[i] = (double) objectToT(shorts[i], tClass);
+                        rDoubles[i] = (Double) objectToT(shorts[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rBytes[i] = (byte) objectToT(shorts[i], tClass);
+                        rBytes[i] = (Byte) objectToT(shorts[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rChars[i] = (char) objectToT(shorts[i], tClass);
+                        rChars[i] = (Character) objectToT(shorts[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rBooleans[i] = (boolean) objectToT(shorts[i], tClass);
+                        rBooleans[i] = (Boolean) objectToT(shorts[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -945,49 +942,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rInts[i] = (int) objectToT(ints[i], tClass);
+                        rInts[i] = (Integer) objectToT(ints[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rShorts[i] = (short) objectToT(ints[i], tClass);
+                        rShorts[i] = (Short) objectToT(ints[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rLongs[i] = (long) objectToT(ints[i], tClass);
+                        rLongs[i] = (Long) objectToT(ints[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rFloats[i] = (float) objectToT(ints[i], tClass);
+                        rFloats[i] = (Float) objectToT(ints[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rDoubles[i] = (double) objectToT(ints[i], tClass);
+                        rDoubles[i] = (Double) objectToT(ints[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rBytes[i] = (byte) objectToT(ints[i], tClass);
+                        rBytes[i] = (Byte) objectToT(ints[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rChars[i] = (char) objectToT(ints[i], tClass);
+                        rChars[i] = (Character) objectToT(ints[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rBooleans[i] = (boolean) objectToT(ints[i], tClass);
+                        rBooleans[i] = (Boolean) objectToT(ints[i], tClass);
                     }
                     return rBooleans;
                 default:

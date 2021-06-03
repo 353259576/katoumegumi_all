@@ -1488,6 +1488,7 @@ public class SQLModelUtils {
 
     /**
      * sql语句动态生成
+     *
      * @param sqlEquation
      * @param prefix
      * @return
@@ -1511,9 +1512,9 @@ public class SQLModelUtils {
                     sb.append(sqlEquationHandel((SqlEquation) value, prefix)).append(SqlCommon.SPACE);
                     sb.append(SqlCommon.RIGHT_BRACKETS);
                     sb.append(SqlCommon.SPACE);
-                }else if(value instanceof SqlFunction) {
+                } else if (value instanceof SqlFunction) {
                     SqlFunction sqlFunction = (SqlFunction) value;
-                    ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(sqlFunction.getSqlFunctionValue().get(0),prefix);
+                    ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(sqlFunction.getSqlFunctionValue().get(0), prefix);
                     sb.append(guardKeyword(translateNameUtils.getAbbreviation(sqlFunction.getFunctionValue(columnBaseEntity.getTableNickName()))))
                             .append('.')
                             .append(guardKeyword(columnBaseEntity.getColumnName())).append(SqlCommon.SPACE);

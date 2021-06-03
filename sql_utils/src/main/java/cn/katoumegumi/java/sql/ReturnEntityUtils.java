@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.sql.entity.ReturnEntity;
 import cn.katoumegumi.java.sql.entity.ReturnEntityId;
@@ -69,14 +70,11 @@ public class ReturnEntityUtils {
                     haveValue = true;
 
                     fieldColumnRelation = list.get(i);
-                    try {
-                        if (value instanceof byte[]) {
-                            value = new String((byte[]) value);
-                        }
-                        fieldColumnRelation.getField().set(o, WsBeanUtils.objectToT(value, fieldColumnRelation.getFieldClass()));
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                    if (value instanceof byte[]) {
+                        value = new String((byte[]) value);
                     }
+                    WsFieldUtils.setValue(o, WsBeanUtils.objectToT(value, fieldColumnRelation.getFieldClass()), fieldColumnRelation.getField());
+                    //fieldColumnRelation.getField().set(o, WsBeanUtils.objectToT(value, fieldColumnRelation.getFieldClass()));
                 }
             }
         }
@@ -136,7 +134,7 @@ public class ReturnEntityUtils {
             ReturnEntity entity;
             Field field;
             Object value;
-            List list;
+            List<Object> list;
             for (FieldJoinClass fieldJoinClass : fieldJoinClassList) {
                 nextTableName = tableName + "." + fieldJoinClass.getNickName();
                 nextEntity = returnEntityMap.get(nextTableName);
@@ -149,30 +147,22 @@ public class ReturnEntityUtils {
                     if (fieldJoinClass.isArray()) {
                         if (nextEntity == entity) {
                             field = fieldJoinClass.getField();
-                            try {
-                                value = field.get(o);
-                                if (value == null) {
-                                    list = new ArrayList();
-                                    list.add(entity.getValue());
-                                    field.set(o, list);
-                                    list = null;
-                                } else {
-                                    if (value instanceof Collection) {
-                                        ((Collection) value).add(entity.getValue());
-                                    }
+                            value = WsFieldUtils.getValue(o, field);
+                            if (value == null) {
+                                list = new ArrayList<>();
+                                list.add(entity.getValue());
+                                WsFieldUtils.setValue(o, list, field);
+                                list = null;
+                            } else {
+                                if (value instanceof Collection) {
+                                    ((Collection<Object>) value).add(entity.getValue());
                                 }
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
                             }
                         }
                     } else {
                         if (nextEntity == entity) {
                             field = fieldJoinClass.getField();
-                            try {
-                                field.set(o, entity.getValue());
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
+                            WsFieldUtils.setValue(o, entity.getValue(), field);
                         }
 
                     }

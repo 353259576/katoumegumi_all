@@ -80,10 +80,10 @@ public class HttpRequestBody {
         } else if (object instanceof String) {
             httpRequestBody.setStringHttpRequestBody((String) object);
         } else {
-            Field fields[] = WsFieldUtils.getFieldAll(object.getClass());
+            Field[] fields = WsFieldUtils.getFieldAll(object.getClass());
             String value = null;
             for (int i = 0; i < fields.length; i++) {
-                value = WsStringUtils.anyToString(WsFieldUtils.getFieldValueForName(fields[i], object));
+                value = WsStringUtils.anyToString(WsFieldUtils.getValue(object, fields[i]));
                 if (value != null) {
                     httpRequestBody.addHttpRequestBodyEntry(fields[i].getName(), value);
                 }

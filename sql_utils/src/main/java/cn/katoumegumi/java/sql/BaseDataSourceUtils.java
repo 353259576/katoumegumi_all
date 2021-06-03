@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
+
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.List;
@@ -10,7 +11,7 @@ public class BaseDataSourceUtils {
 
     private DataSource dataSource;
 
-    public BaseDataSourceUtils(DataSource dataSource){
+    public BaseDataSourceUtils(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -26,34 +27,34 @@ public class BaseDataSourceUtils {
             connection = dataSource.getConnection();
             preparedStatement = connection.prepareStatement(entity.getSelectSql());
             List<Object> objectList = entity.getValueList();
-            for(int i = 0; i < objectList.size(); i++){
+            for (int i = 0; i < objectList.size(); i++) {
                 Object o = objectList.get(i);
-                if(o instanceof Date){
-                    o = WsBeanUtils.objectToT(o,Date.class);
+                if (o instanceof Date) {
+                    o = WsBeanUtils.objectToT(o, Date.class);
                 }
-                preparedStatement.setObject(i+1,o);
+                preparedStatement.setObject(i + 1, o);
             }
             resultSet = preparedStatement.executeQuery();
 
             return (List<T>) sqlModelUtils.margeMap(resultSet);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        }finally {
-            if(resultSet != null){
+        } finally {
+            if (resultSet != null) {
                 try {
                     resultSet.close();
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
             }
-            if(preparedStatement != null){
+            if (preparedStatement != null) {
                 try {
                     preparedStatement.close();
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
             }
-            if(connection != null){
+            if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException throwables) {
@@ -63,7 +64,6 @@ public class BaseDataSourceUtils {
         }
         return null;
     }
-
 
 
 }

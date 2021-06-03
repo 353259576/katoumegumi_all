@@ -84,11 +84,11 @@ public class ${table.entityName}Controller {
 <#if type == 0>
         MySearchList searchList = getMySearchList(searchVO);
         searchList.setSqlLimit(sqlLimit -> sqlLimit.setCurrent(page.getCurrent()).setSize(page.getSize()));
-        IPage<${table.entityName}> iPage = ${table.firstLowerEntityName}Service.selectPage(searchList);
+        IPage<${table.entityName}> iPage = ${table.firstLowerEntityName}Service.queryPage(searchList);
 </#if>
 <#if type == 1>
         Wrapper<${table.entityName}> wrapper = getWrapper(searchVO);
-        IPage<${table.entityName}> iPage = ${table.firstLowerEntityName}Service.selectPage(page,wrapper);
+        IPage<${table.entityName}> iPage = ${table.firstLowerEntityName}Service.queryPage(page,wrapper);
 </#if>
         return null;
     }
@@ -103,11 +103,11 @@ public class ${table.entityName}Controller {
     public List<${table.entityName}> get${table.entityName}List(<#if enableSearchVO == true>${table.entityName}SearchVO searchVO</#if>){
 <#if type ==0>
         MySearchList searchList = getMySearchList(searchVO);
-        List<${table.entityName}> list = ${table.firstLowerEntityName}Service.selectList(searchList);
+        List<${table.entityName}> list = ${table.firstLowerEntityName}Service.queryList(searchList);
 </#if>
 <#if type == 1>
         Wrapper<${table.entityName}> wrapper = getWrapper(searchVO);
-        List<${table.entityName}> list = ${table.firstLowerEntityName}Service.selectList(wrapper);
+        List<${table.entityName}> list = ${table.firstLowerEntityName}Service.queryList(wrapper);
 </#if>
         return null;
     }

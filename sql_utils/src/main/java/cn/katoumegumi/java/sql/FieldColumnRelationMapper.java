@@ -34,7 +34,7 @@ public class FieldColumnRelationMapper {
      */
     private final Map<Object, Integer> locationMap = new HashMap<>();
 
-    private Map<String, FieldColumnRelationMapper> map;
+    //private Map<String, FieldColumnRelationMapper> map;
 
 
     public FieldColumnRelationMapper(String nickName, String tableName, Class<?> clazz) {
@@ -114,13 +114,13 @@ public class FieldColumnRelationMapper {
     }
 
 
-    public Map<String, FieldColumnRelationMapper> getMap() {
+    /*public Map<String, FieldColumnRelationMapper> getMap() {
         return map;
     }
 
     public void setMap(Map<String, FieldColumnRelationMapper> map) {
         this.map = map;
-    }
+    }*/
 
     public Map<String, FieldColumnRelation> getFieldColumnRelationMap() {
         return fieldColumnRelationMap;
@@ -153,8 +153,12 @@ public class FieldColumnRelationMapper {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FieldColumnRelationMapper)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof FieldColumnRelationMapper)) {
+            return false;
+        }
         FieldColumnRelationMapper that = (FieldColumnRelationMapper) o;
         return Objects.equals(nickName, that.nickName) && Objects.equals(tableName, that.tableName) && Objects.equals(clazz, that.clazz);
     }

@@ -15,20 +15,17 @@
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
-            <version>2.3.30</version>
         </dependency>
 
         <dependency>
             <groupId>cn.katoumegumi.java</groupId>
-            <artifactId>utils</artifactId>
-            <version>${megumi.version}</version>
+            <artifactId>sql_utils</artifactId>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.version}</version>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
 
