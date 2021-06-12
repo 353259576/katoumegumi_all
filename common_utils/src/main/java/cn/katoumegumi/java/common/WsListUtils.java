@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.common;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 
@@ -40,6 +41,32 @@ public class WsListUtils {
     }
 
     /**
+     * 判断数组是不是为空
+     * @param obj
+     * @return
+     */
+    public static boolean isEmpty(Object obj) {
+        if(obj == null){
+            return true;
+        }
+        if(obj instanceof Collection){
+            return ((Collection<?>) obj).size() == 0;
+        }else if(obj instanceof Map){
+            return ((Map<?,?>)obj).size() == 0;
+        }else {
+            if(obj.getClass().isArray()){
+                if(BaseTypeCommon.verifyArray(obj.getClass())){
+                    return Array.getLength(obj) == 0;
+                }else {
+                    return ((Object[])obj).length == 0;
+                }
+            }else {
+                return false;
+            }
+        }
+    }
+
+    /**
      * 判断是否不为空
      *
      * @param collection 集合
@@ -57,6 +84,10 @@ public class WsListUtils {
      */
     public static boolean isNotEmpty(Map map) {
         return !isEmpty(map);
+    }
+
+    public static boolean isNotEmpty(Object object) {
+        return !isEmpty(object);
     }
 
     /**

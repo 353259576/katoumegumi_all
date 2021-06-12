@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.common;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -16,6 +17,8 @@ import java.util.Set;
 public class BaseTypeCommon {
 
     private static final Set<Class<?>> CLASS_SET = new HashSet<>(18);
+
+    private static final Set<Class<?>> ARRAY_CLASS_SET = new HashSet<>(18);
 
     private static final Class<?>[] BASE_TYPE_ARRAY = new Class[]{
             boolean.class,
@@ -63,6 +66,16 @@ public class BaseTypeCommon {
         CLASS_SET.add(LocalDateTime.class);
         CLASS_SET.add(BigDecimal.class);
         CLASS_SET.add(BigInteger.class);
+
+
+        ARRAY_CLASS_SET.add(int[].class);
+        ARRAY_CLASS_SET.add(byte[].class);
+        ARRAY_CLASS_SET.add(char[].class);
+        ARRAY_CLASS_SET.add(short[].class);
+        ARRAY_CLASS_SET.add(long[].class);
+        ARRAY_CLASS_SET.add(float[].class);
+        ARRAY_CLASS_SET.add(double[].class);
+        ARRAY_CLASS_SET.add(boolean[].class);
     }
 
     public static boolean verify(Class<?> tClass) {
@@ -71,6 +84,10 @@ public class BaseTypeCommon {
 
     public static boolean verify(Object o) {
         return verify(o.getClass());
+    }
+
+    public static boolean verifyArray(Class<?> tClass){
+        return ARRAY_CLASS_SET.contains(tClass);
     }
 
     /**

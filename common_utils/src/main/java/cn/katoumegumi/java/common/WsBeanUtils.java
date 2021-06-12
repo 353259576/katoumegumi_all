@@ -154,7 +154,6 @@ public class WsBeanUtils {
 
     /**
      * 反序列化Object
-     *
      * @param bytes
      * @param <T>
      * @return
@@ -173,7 +172,40 @@ public class WsBeanUtils {
         }
     }
 
-    public static <T> T objectToT(Object object, Class<T> tClass) {
+    /**
+     * 常见数据格式相互转换
+     * @param object
+     * @param tClass
+     * @param <T>
+     * @return
+     */
+    public static <T> T objectToT(Object object, Class<T> tClass){
+        boolean isPrimitive = tClass.isPrimitive();
+        Object o = convertToT(object,tClass);
+        if(isPrimitive && o == null){
+            if(tClass == int.class){
+                o = 0;
+            }else if(tClass == long.class){
+                o = 0L;
+            }else if(tClass == double.class){
+                o = 0D;
+            }else if(tClass == float.class){
+                o = 0F;
+            }else if(tClass == boolean.class){
+                o = false;
+            }else if(tClass == byte.class){
+                o = 0;
+            }else if(tClass == short.class){
+                o = 0;
+            }else if(tClass == char.class){
+                o = 0;
+            }
+        }
+        return (T)o;
+    }
+
+
+    private static <T> T convertToT(Object object, Class<T> tClass) {
         try {
             if (tClass.isPrimitive()) {
                 tClass = (Class<T>) BaseTypeCommon.getWrapperClass(tClass);

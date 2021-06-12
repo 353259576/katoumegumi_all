@@ -9,8 +9,11 @@ import java.util.*;
  * 对象数据库列名关系集合
  */
 public class FieldColumnRelationMapper {
+
     private final String nickName;
+
     private final String tableName;
+
     private final Class<?> clazz;
 
     /**
@@ -34,13 +37,20 @@ public class FieldColumnRelationMapper {
      */
     private final Map<Object, Integer> locationMap = new HashMap<>();
 
-    //private Map<String, FieldColumnRelationMapper> map;
-
+    private final FieldColumnRelationMapper baseTemplateMapper;
 
     public FieldColumnRelationMapper(String nickName, String tableName, Class<?> clazz) {
         this.nickName = nickName;
         this.tableName = tableName;
         this.clazz = clazz;
+        this.baseTemplateMapper = null;
+    }
+
+    public FieldColumnRelationMapper(String nickName, String tableName, Class<?> clazz,FieldColumnRelationMapper mapper) {
+        this.nickName = nickName;
+        this.tableName = tableName;
+        this.clazz = clazz;
+        this.baseTemplateMapper = mapper;
     }
 
 
@@ -64,6 +74,10 @@ public class FieldColumnRelationMapper {
             throw new RuntimeException("未发现对象含有属性：" + fieldName);
         }
         return fieldColumnRelation;
+    }
+
+    public FieldColumnRelation containsFieldColumnRelationByFieldName(String fieldName) {
+        return fieldColumnRelationMap.get(fieldName);
     }
 
 
@@ -114,16 +128,12 @@ public class FieldColumnRelationMapper {
     }
 
 
-    /*public Map<String, FieldColumnRelationMapper> getMap() {
-        return map;
-    }
-
-    public void setMap(Map<String, FieldColumnRelationMapper> map) {
-        this.map = map;
+    /*public Map<String, FieldColumnRelation> getFieldColumnRelationMap() {
+        return fieldColumnRelationMap;
     }*/
 
-    public Map<String, FieldColumnRelation> getFieldColumnRelationMap() {
-        return fieldColumnRelationMap;
+    public FieldColumnRelation putFieldColumnRelationMap(String key,FieldColumnRelation fieldColumnRelation){
+        return this.fieldColumnRelationMap.put(key,fieldColumnRelation);
     }
 
 
@@ -166,5 +176,9 @@ public class FieldColumnRelationMapper {
     @Override
     public int hashCode() {
         return Objects.hash(nickName, tableName, clazz);
+    }
+
+    public FieldColumnRelationMapper getBaseTemplateMapper() {
+        return baseTemplateMapper;
     }
 }

@@ -137,13 +137,19 @@ public class MySearchList {
             case IN:
             case NIN:
                 if (!(WsBeanUtils.isArray(value.getClass()) || value instanceof MySearchList)) {
-                    throw new RuntimeException(fieldName + "的参数必须是数组类型，当前的类型是：" + value.getClass());
+                    throw new RuntimeException(fieldName + "类型不支持，当前的类型是：" + value.getClass());
+                }
+                if(WsListUtils.isEmpty(value)){
+                    throw new RuntimeException("数组为空");
                 }
                 break;
             case BETWEEN:
             case NOT_BETWEEN:
                 if (!WsBeanUtils.isArray(value.getClass())) {
                     throw new RuntimeException(fieldName + "的参数必须是数组类型，当前的类型是：" + value.getClass());
+                }
+                if(WsListUtils.isEmpty(value)){
+                    throw new RuntimeException("数组为空");
                 }
                 break;
             case NULL:

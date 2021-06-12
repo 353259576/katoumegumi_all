@@ -155,12 +155,12 @@ public class TranslateNameUtils {
 
     /**
      * 根据查询条件生成列基本信息
-     *
      * @param originalFieldName
      * @param prefix
+     * @param type 1 返回的列名 1 查询的列名
      * @return
      */
-    public ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String prefix) {
+    public ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String prefix,int type) {
         String prefixString;
         String fieldName;
         List<String> fieldNameList = WsStringUtils.split(originalFieldName, '.');
@@ -192,6 +192,9 @@ public class TranslateNameUtils {
         FieldColumnRelationMapper mapper = getLocalMapper(prefixString);
         if (mapper == null) {
             throw new RuntimeException(prefixString + "不存在");
+        }
+        if(type == 2){
+            mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();
         }
         FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
         return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), prefixString, getAbbreviation(prefixString));

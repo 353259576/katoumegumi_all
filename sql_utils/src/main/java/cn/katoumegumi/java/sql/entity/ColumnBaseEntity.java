@@ -7,7 +7,6 @@ import java.lang.reflect.Field;
 
 /**
  * 列基本信息
- *
  * @author ws
  */
 public class ColumnBaseEntity {

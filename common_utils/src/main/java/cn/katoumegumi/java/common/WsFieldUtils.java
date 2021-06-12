@@ -46,19 +46,19 @@ public class WsFieldUtils {
             Field[] fields;
 
             fields = clazz.getDeclaredFields();
-            for (int i = 0; i < fields.length; i++) {
-                if (!Modifier.isStatic(fields[i].getModifiers())) {
-                    fieldMap.put(fields[i].getName(), fields[i]);
+            for (Field value : fields) {
+                if (!Modifier.isStatic(value.getModifiers())) {
+                    fieldMap.put(value.getName(), value);
                 }
 
             }
             for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
                 fields = clazz.getDeclaredFields();
                 if (!(fields.length == 0)) {
-                    for (int i = 0; i < fields.length; i++) {
-                        if (!Modifier.isStatic(fields[i].getModifiers())) {
-                            if (!fieldMap.containsKey(fields[i].getName())) {
-                                fieldMap.put(fields[i].getName(), fields[i]);
+                    for (Field field : fields) {
+                        if (!Modifier.isStatic(field.getModifiers())) {
+                            if (!fieldMap.containsKey(field.getName())) {
+                                fieldMap.put(field.getName(), field);
                             }
                         }
 
