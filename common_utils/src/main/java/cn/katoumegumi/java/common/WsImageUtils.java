@@ -12,6 +12,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -21,68 +22,7 @@ public class WsImageUtils {
     private final static JLabel J_LABEL = new JLabel();
 
     public static void main(String[] args) throws Exception {
-
-        System.out.println(Math.sin(Math.toRadians(45)));
-
-        /*File file = new File("D:\\网页\\图修改\\");
-        File[] fs = file.listFiles();
-        int i = 0;
-        for(File f:fs){
-            BufferedImage bufferedImage = ImageIO.read(f);
-            ImageIO.write(bufferedImage,"png",WsFileUtils.createFile("D:\\网页\\图修改\\"+(i++)+"-1.png"));
-        }*/
-
-        System.out.println(Math.toRadians(Math.atan(1)));
-
-        File file = WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\1.jpg");
-        try {
-            BufferedImage bufferedImage = ImageIO.read(file);
-            BufferedImage newBufferedImage = copyBufferedImage(bufferedImage, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D graphics2D = newBufferedImage.createGraphics();
-            System.out.println("图片宽度" + newBufferedImage.getWidth());
-            System.out.println("图片长度" + newBufferedImage.getHeight());
-            Color color = getColor("#7FFA00");
-            Stream.iterate(10, i -> i + 5).limit(1).forEach(j -> {
-                Font font = new Font("微软雅黑", Font.PLAIN, 96);
-                font = font.deriveFont(Font.PLAIN, 96);
-                System.out.println(font.getSize());
-                String context = "德玛西亚洛克萨斯艾欧尼亚恕瑞玛皮尔特沃夫祖安艾卡西亚";
-
-                FontMetrics fontMetrics = J_LABEL.getFontMetrics(font);
-                fontMetrics = J_LABEL.getFontMetrics(font);
-                long startTime = System.currentTimeMillis();
-                List<LineText> list = splitContext(context, fontMetrics, 150, 0, bufferedImage.getWidth() - 300, bufferedImage.getHeight(), 96, 20, 2, 3);
-                long endTime = System.currentTimeMillis();
-                System.out.println("拆解成行：" + (endTime - startTime));
-                startTime = System.currentTimeMillis();
-                for (int i = 0; i < list.size(); i++) {
-                    LineText lineText = list.get(i);
-                    List<CharText> charTextList = lineText.getCharTextList();
-                    for (CharText charText : charTextList) {
-                        writeFontBufferedImage(newBufferedImage, charText.getValue().toString(), charText.getPointX(), lineText.getPointY(), font, color);
-                    }
-                }
-                endTime = System.currentTimeMillis();
-                System.out.println("书写文字耗费时间：" + (endTime - startTime));
-                try {
-                    startTime = System.currentTimeMillis();
-                    BufferedImage image = rotateImage(newBufferedImage, j);
-                    endTime = System.currentTimeMillis();
-                    System.out.println("旋转图片：" + (endTime - startTime));
-                    startTime = System.currentTimeMillis();
-                    image = setBufferedImageAlpha(image, 255, BufferedImage.TYPE_INT_ARGB);
-                    endTime = System.currentTimeMillis();
-                    System.out.println("设置透明度：" + (endTime - startTime));
-                    ImageIO.write(image, "png", WsFileUtils.createFile("C:\\Users\\星梦苍天\\Pictures\\" + j + ".jpg"));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        System.out.println(convertToBase64("png",new FileInputStream("D:\\test\\jetbrains.png")));
     }
 
 
@@ -612,6 +552,20 @@ public class WsImageUtils {
         newWidth = Math.abs(newWidth);
         return new Rectangle(0, 0, (int) newWidth, (int) newHeight);
     }
+
+    /**
+     * 转换为base64
+     * @param pictureFormat
+     * @param inputStream
+     * @return
+     */
+    public static String convertToBase64(String pictureFormat,InputStream inputStream){
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        WsStreamUtils.inputToOutput(inputStream,outputStream);
+        byte[] bytes = outputStream.toByteArray();
+        return "data:image/"+pictureFormat+";base64,"+new String(Base64.getEncoder().encode(bytes),StandardCharsets.UTF_8);
+    }
+
 
 
     /**
