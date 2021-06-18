@@ -228,8 +228,9 @@ public class WsFieldUtils {
 
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
+            throw new RuntimeException(e.getCause());
         }
-        return null;
+        //return null;
 
     }
 
