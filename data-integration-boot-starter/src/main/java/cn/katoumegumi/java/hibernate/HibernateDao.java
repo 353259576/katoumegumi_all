@@ -570,7 +570,7 @@ public class HibernateDao {
         List<String> stringList = WsStringUtils.split(name, '.');
         if (stringList.size() == 1) {
             fieldName = name;
-            classMap.put(defaultPrefix + '.' + fieldName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(localClass, fieldName)));
+            classMap.put(fieldName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(localClass, fieldName)));
         } else {
             String startName = stringList.get(0);
             String startRealName = getRealName(startName, nickAndRealNameMap);
@@ -782,7 +782,8 @@ public class HibernateDao {
             for (MySearchList or : orList) {
                 List<Criterion> list = createDetachedCriteria(or, defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
                 if (WsListUtils.isNotEmpty(list)) {
-                    orCriterionList.addAll(list);
+                    //orCriterionList.addAll(list);
+                    orCriterionList.add(Restrictions.and(list.toArray(new Criterion[0])));
                 }
 
             }
