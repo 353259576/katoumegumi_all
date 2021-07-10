@@ -7,14 +7,16 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class WsStreamUtils {
 
     //public static Logger log = LoggerFactory.getLogger(WsStreamUtils.class);
 
-    public static ByteBuffer InputStreamToByteBuffer(InputStream inputStream) {
+    public static ByteBuffer inputStreamToByteBuffer(InputStream inputStream) {
         if (inputStream instanceof FileInputStream) {
             FileInputStream fileInputStream = (FileInputStream) inputStream;
             FileChannel fileChannel = fileInputStream.getChannel();
@@ -26,16 +28,10 @@ public class WsStreamUtils {
                 ByteBuffer byteBuffer = ByteBuffer.allocateDirect((int) size);
                 fileChannel.read(byteBuffer);
                 byteBuffer.flip();
-                fileChannel.close();
                 return byteBuffer;
             } catch (IOException e) {
                 e.printStackTrace();
-                try {
-                    inputStream.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-
+                close(fileChannel,inputStream);
             }
 
         } else {
@@ -48,15 +44,10 @@ public class WsStreamUtils {
                 ByteBuffer byteBuffer = ByteBuffer.allocateDirect((int) size);
                 readableByteChannel.read(byteBuffer);
                 byteBuffer.flip();
-                readableByteChannel.close();
                 return byteBuffer;
             } catch (IOException e) {
                 e.printStackTrace();
-                try {
-                    inputStream.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
+                close(readableByteChannel,inputStream);
             }
 
         }
@@ -75,16 +66,7 @@ public class WsStreamUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                try {
-                    fileOutputChannel.close();
-                    fileInputChannel.close();
-                    outputStream.flush();
-                    outputStream.close();
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                close(fileOutputChannel,fileInputChannel,outputStream,inputStream);
             }
 
         } else {
@@ -100,27 +82,21 @@ public class WsStreamUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                try {
-                    writableByteChannel.close();
-                    readableByteChannel.close();
-                    outputStream.flush();
-                    outputStream.close();
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                close(writableByteChannel,readableByteChannel,outputStream,inputStream);
             }
         }
-
-
     }
 
 
+    /**
+     * zip压缩
+     * @param files
+     * @return
+     */
     public static byte[] encodeFileToZip(File... files) {
         try {
-            InputStream inputStreams[] = new InputStream[files.length];
-            String fileNames[] = new String[files.length];
+            InputStream[] inputStreams = new InputStream[files.length];
+            String[] fileNames = new String[files.length];
             for (int i = 0; i < files.length; i++) {
                 inputStreams[i] = new FileInputStream(files[i]);
                 fileNames[i] = files[i].getName();
@@ -133,8 +109,7 @@ public class WsStreamUtils {
 
     }
 
-
-    public static byte[] encodeFileToZip(InputStream inputStreams[], String fileNames[]) {
+    public static byte[] encodeFileToZip(InputStream[] inputStreams, String[] fileNames) {
         ZipOutputStream zipOutputStream = null;
         ByteArrayOutputStream byteArrayOutputStream = null;
         WritableByteChannel writableByteChannel = null;
@@ -168,45 +143,31 @@ public class WsStreamUtils {
             e.printStackTrace();
             return null;
         } finally {
-            try {
-                if (writableByteChannel != null) {
-                    writableByteChannel.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                if (zipOutputStream != null) {
-                    zipOutputStream.flush();
-                    zipOutputStream.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-
-            try {
-                if (byteArrayOutputStream != null) {
-                    byteArrayOutputStream.flush();
-                    byteArrayOutputStream.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                if (inputStreams != null) {
-                    for (int i = 0; i < inputStreams.length; i++) {
-                        inputStreams[i].close();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            close(writableByteChannel,zipOutputStream,byteArrayOutputStream);
+            close(inputStreams);
         }
-
     }
 
+
+
+
+    /**
+     * 关闭流
+     * @param closeables
+     */
+    public static void close(Closeable... closeables){
+        for(Closeable closeable:closeables){
+            if(closeable != null) {
+                try {
+                    if(closeable instanceof Flushable){
+                      ((Flushable) closeable).flush();
+                    }
+                    closeable.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
 }

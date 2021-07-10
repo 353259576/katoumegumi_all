@@ -30,7 +30,7 @@ public class FieldColumnRelationMapperFactory {
      */
     private static final Map<Class<?>, FieldColumnRelationMapper> MAPPER_MAP = new ConcurrentHashMap<>();
     private static final Map<Class<?>, CountDownLatch> CLASS_COUNT_DOWN_LATCH_MAP = new ConcurrentHashMap<>();
-    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(0, 16, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(0, 16,0L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
         Thread thread = new Thread(r);
         thread.setDaemon(true);
         thread.setName("sqlUtils mapper生成线程");

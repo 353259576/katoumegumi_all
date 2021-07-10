@@ -140,12 +140,12 @@ public class WsDateUtils {
 
     }
 
-    public static int chinaWeek(int westWeek) {
-        int chinaWeek = westWeek - 1;
-        if (chinaWeek == 0) {
-            chinaWeek = 7;
+    public static int getCnWeek(int westWeek) {
+        int cnWeek = westWeek - 1;
+        if (cnWeek == 0) {
+            cnWeek = 7;
         }
-        return chinaWeek;
+        return cnWeek;
     }
 
     /**
@@ -157,13 +157,12 @@ public class WsDateUtils {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int weekday = calendar.get(Calendar.DAY_OF_WEEK);
-        weekday = chinaWeek(weekday);
+        weekday = getCnWeek(weekday);
         return CN_WEEK_NAMES[weekday - 1];
     }
 
     /**
      * 获取中文月
-     *
      * @param date 时间
      * @return 中文月
      */

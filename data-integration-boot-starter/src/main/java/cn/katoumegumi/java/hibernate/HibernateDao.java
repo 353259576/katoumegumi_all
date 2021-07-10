@@ -9,17 +9,30 @@ import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.hibernate.FetchMode;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.boot.model.TypeContributions;
+import org.hibernate.boot.model.source.internal.hbm.HibernateTypeSourceImpl;
+import org.hibernate.boot.model.source.spi.HibernateTypeSource;
 import org.hibernate.criterion.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
 import org.hibernate.sql.JoinType;
+import org.hibernate.transform.ResultTransformer;
+import org.hibernate.type.*;
+import org.hibernate.type.spi.TypeConfiguration;
+import org.hibernate.type.spi.TypeConfigurationAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -132,6 +145,7 @@ public class HibernateDao {
         //DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz, mySearchList);
         mySearchList.setMainClass(clazz);
         DetachedCriteria detachedCriteria = createDetachedCriteria(mySearchList);
+        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         SqlLimit sqlLimit = mySearchList.getSqlLimit();
         if (sqlLimit == null) {
             sqlLimit = new SqlLimit();
@@ -166,6 +180,7 @@ public class HibernateDao {
         //DetachedCriteria detachedCriteria = myDetachedCriteriaCreate(clazz, mySearchList);
         mySearchList.setMainClass(clazz);
         DetachedCriteria detachedCriteria = createDetachedCriteria(mySearchList);
+        detachedCriteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria);
         return list;
     }
@@ -189,7 +204,7 @@ public class HibernateDao {
         return tList.get(0);
     }
 
-    private <T> DetachedCriteria myDetachedCriteriaCreate(Class<T> clazz, MySearchList mySearchList) {
+    /*private <T> DetachedCriteria myDetachedCriteriaCreate(Class<T> clazz, MySearchList mySearchList) {
         DetachedCriteria detachedCriteria = DetachedCriteria.forClass(clazz);
         Map<String, DetachedCriteria> map = new HashMap<>();
         Conjunction conjunction = myDetachedCriteriaCreate(mySearchList, clazz, true, detachedCriteria, map);
@@ -394,7 +409,7 @@ public class HibernateDao {
         }
 
         return Restrictions.and(criterionList.toArray(new Criterion[criterionList.size()]));
-    }
+    }*/
 
     public <T> T selectOneByHql(String hql, Map map) {
         List<T> list = hibernateTemplate.execute(session -> {
@@ -521,6 +536,7 @@ public class HibernateDao {
                 }
                 String nodeAlias = WsStringUtils.isBlank(tableRelation.getAlias()) ? tableRelation.getJoinTableNickName().substring(0, 1).toUpperCase() + "_" + atomicInteger.getAndAdd(1) : tableRelation.getAlias();
                 DetachedCriteria node = root.createCriteria(nodeName, nodeAlias, joinType);
+                root.setFetchMode(nodeName,FetchMode.DEFAULT);
                 realAndNickNameMap.put(joinTableName, nodeAlias);
                 nickAndRealNameMap.put(nodeAlias, joinTableName);
                 detachedCriteriaMap.put(joinTableName, node);
@@ -565,7 +581,8 @@ public class HibernateDao {
                                 Map<String, String> realAndNickNameMap,
                                 AtomicInteger atomicInteger) {
         String fieldName = null;
-        DetachedCriteria local = detachedCriteriaMap.get(defaultPrefix);
+        DetachedCriteria mainCriteria = detachedCriteriaMap.get(defaultPrefix);
+        DetachedCriteria local = mainCriteria;
         Class<?> localClass = classMap.get(defaultPrefix);
         List<String> stringList = WsStringUtils.split(name, '.');
         if (stringList.size() == 1) {
@@ -574,12 +591,14 @@ public class HibernateDao {
         } else {
             String startName = stringList.get(0);
             String startRealName = getRealName(startName, nickAndRealNameMap);
-            if (startRealName == startName) {
-                stringList.set(0, defaultPrefix + '.' + startName);
+            if (startRealName.equals(startName)) {
+                //stringList.set(0, defaultPrefix + '.' + startName);
+                stringList.add(defaultPrefix);
+                WsListUtils.moveListElement(stringList,1);
             } else {
                 stringList.set(0, startRealName);
             }
-            fieldName = WsStringUtils.jointListString(stringList, ".");
+            //fieldName = WsStringUtils.jointListString(stringList, ".");
 
             String shortFieldName = stringList.get(stringList.size() - 1);
             stringList.remove(stringList.size() - 1);
@@ -595,14 +614,13 @@ public class HibernateDao {
                     classMap.put(nodeName, localClass);
                     nickAndRealNameMap.put(alias, nodeName);
                     realAndNickNameMap.put(nodeName, alias);
-
                 } else {
                     local = detachedCriteriaMap.get(nodeName);
                     localClass = classMap.get(nodeName);
                 }
             }
-            classMap.put(fieldName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(localClass, shortFieldName)));
             fieldName = getNickName(WsStringUtils.jointListString(stringList, "."), realAndNickNameMap) + '.' + shortFieldName;
+            classMap.put(fieldName, WsFieldUtils.getClassTypeof(WsFieldUtils.getFieldByName(localClass, shortFieldName)));
         }
         return fieldName;
     }
@@ -614,17 +632,44 @@ public class HibernateDao {
                                                    Map<String, String> nickAndRealNameMap,
                                                    Map<String, String> realAndNickNameMap,
                                                    AtomicInteger atomicInteger) {
-        List<MySearch> searchList = mySearchList.getAll();
+        List<MySearch> searchList = new ArrayList<>();
+        if(WsListUtils.isNotEmpty(mySearchList.getAll())){
+            searchList.addAll(mySearchList.getAll());
+        }
+        if(WsListUtils.isNotEmpty(mySearchList.getOrderSearches())){
+            searchList.addAll(mySearchList.getOrderSearches());
+        }
         List<Criterion> criterionList = new ArrayList<>();
         for (MySearch search : searchList) {
             if (search.getOperator().equals(SqlOperator.SQL)) {
-                criterionList.add(Restrictions.sqlRestriction(search.getFieldName()));
+                if(search.getValue() == null){
+                    criterionList.add(Restrictions.sqlRestriction(search.getFieldName()));
+                }else {
+                    Object[] objects;
+                    if(search.getValue() instanceof Collection){
+                        Collection collection = (Collection)search.getValue();
+                        objects = collection.toArray();
+                    }else if(WsBeanUtils.isArray(search.getValue().getClass())){
+                        if(BaseTypeCommon.verifyArray(search.getValue().getClass())){
+                            throw new RuntimeException("请使用包装类");
+                        }else {
+                            objects = (Object[]) search.getValue();
+                        }
+                    }else {
+                        objects = new Object[]{search.getValue()};
+                    }
+                    Type[] types = new Type[objects.length];
+                    for(int i = 0; i < objects.length;i++){
+                        types[i] = HibernateDao.getType(objects[i].getClass());
+                    }
+                    criterionList.add(Restrictions.sqlRestriction(search.getFieldName(),objects,types));
+                }
+
                 continue;
             }
 
             String fieldName = getFieldName(search.getFieldName(), defaultPrefix, detachedCriteriaMap, classMap, nickAndRealNameMap, realAndNickNameMap, atomicInteger);
             Class<?> type = classMap.get(fieldName);
-
             switch (search.getOperator()) {
                 case EQ:
                     criterionList.add(Restrictions.eq(fieldName, WsBeanUtils.objectToT(search.getValue(), type)));
@@ -813,7 +858,44 @@ public class HibernateDao {
         return nickName;
     }
 
+    private static Type getType(Class<?> clazz){
+        if(clazz.isPrimitive()){
+            clazz = BaseTypeCommon.getWrapperClass(clazz);
+        }
+        if(clazz.equals(String.class)){
+            return StringType.INSTANCE;
+        } else if(clazz.equals(Integer.class)){
+            return IntegerType.INSTANCE;
+        }else if(clazz.equals(Long.class)){
+            return LongType.INSTANCE;
+        }else if(clazz.equals(Double.class)){
+            return DoubleType.INSTANCE;
+        }else if(clazz.equals(Float.class)){
+            return FloatType.INSTANCE;
+        }else if(clazz.equals(Byte.class)){
+            return ByteType.INSTANCE;
+        }else if(clazz.equals(Short.class)){
+            return ShortType.INSTANCE;
+        }else if(clazz.equals(Boolean.class)){
+            return BooleanType.INSTANCE;
+        }else if(clazz.equals(Character.class)){
+            return CharacterType.INSTANCE;
+        }else if(clazz.equals(Date.class)){
+            return DateType.INSTANCE;
+        }else if(clazz.equals(BigDecimal.class)){
+            return BigDecimalType.INSTANCE;
+        }else if(clazz.equals(BigInteger.class)){
+            return BigIntegerType.INSTANCE;
+        }else if(clazz.equals(LocalDate.class)){
+            return LocalDateType.INSTANCE;
+        }else if(clazz.equals(LocalDateTime.class)){
+            return LocalDateTimeType.INSTANCE;
+        }else {
+            throw new RuntimeException("不支持的class:"+clazz.toString());
+        }
 
+
+    }
 
 
 }

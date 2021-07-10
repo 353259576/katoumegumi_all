@@ -121,11 +121,17 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     public ${table.entityName} queryEntity(<#if type == 0>MySearchList searchList</#if><#if type == 1>Wrapper<${table.entityName}> wrapper</#if>){
 <#if type == 0>
         ${table.entityName} ${table.firstLowerEntityName} = jdbcUtils.getTOne(searchList);
+        if(${table.firstLowerEntityName} == null){
+            return null;
+        }
         wrapper${table.entityName}(Collections.singletonList(${table.firstLowerEntityName}));
         return ${table.firstLowerEntityName};
 </#if>
 <#if type == 1>
         ${table.entityName} ${table.firstLowerEntityName} = ${table.firstLowerEntityName}Mapper.selectOne(wrapper);
+        if(${table.firstLowerEntityName} == null){
+            return null;
+        }
         wrapper${table.entityName}(Collections.singletonList(${table.firstLowerEntityName}));
         return ${table.firstLowerEntityName};
 </#if>

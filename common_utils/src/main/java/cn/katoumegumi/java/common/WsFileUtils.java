@@ -5,14 +5,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 文件工具类
+ * @author 星梦苍天
+ */
 public class WsFileUtils {
     public static void main(String[] args) {
 
     }
 
-
+    /**
+     * 将文件路径的 \\ // 替换成 /
+     * @param oldFilePath
+     * @return
+     */
     public static String adjustFilePath(String oldFilePath) {
         oldFilePath = oldFilePath.replaceAll("\\\\", "/");
+        oldFilePath = oldFilePath.replaceAll("//","/");
         return oldFilePath;
     }
 
@@ -38,24 +47,13 @@ public class WsFileUtils {
         return WsListUtils.arrayToList(files);
     }
 
-
-    public static List<String> getListDirectory(String path) {
-
-        List<File> listFile = getListFile(path);
-        if (listFile == null || listFile.size() == 0) {
-            return null;
-        }
-        List<String> folders = new ArrayList<>();
-        for (File f1 : listFile) {
-            if (f1.isDirectory()) {
-                folders.add(f1.getName());
-            }
-        }
-        return folders;
-    }
-
-
+    /**
+     * 创建文件
+     * @param filePath 文件路径
+     * @return
+     */
     public static File createFile(String filePath) {
+        filePath = adjustFilePath(filePath);
         File file = new File(filePath);
         if (file.exists()) {
             file.setReadable(true);
@@ -63,13 +61,13 @@ public class WsFileUtils {
             file.setExecutable(true);
             return file;
         } else {
-            if (filePath.endsWith("/") || filePath.endsWith("\\")) {
+            if (filePath.endsWith("/")) {
                 file.mkdirs();
                 return file;
             } else {
-                int position1 = filePath.lastIndexOf('\\');
-                int position2 = filePath.lastIndexOf('/');
-                int position = Math.max(position1, position2);
+                //int position1 = filePath.lastIndexOf('\\');
+                int position = filePath.lastIndexOf('/');
+                //int position = Math.max(position1, position2);
                 String path = filePath.substring(0, position);
                 File fPath = new File(path);
                 fPath.mkdirs();

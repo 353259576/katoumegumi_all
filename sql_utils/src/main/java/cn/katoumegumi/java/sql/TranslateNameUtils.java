@@ -41,7 +41,6 @@ public class TranslateNameUtils {
 
     /**
      * 创建简称
-     *
      * @param keyword
      * @return
      */
@@ -55,7 +54,6 @@ public class TranslateNameUtils {
 
     /**
      * 获取详细名称
-     *
      * @param value 简称
      * @return
      */
@@ -66,7 +64,6 @@ public class TranslateNameUtils {
 
     /**
      * 获取简称
-     *
      * @param keyword
      * @return
      */
@@ -89,7 +86,6 @@ public class TranslateNameUtils {
 
     /**
      * 设置简称
-     *
      * @param keyword
      */
     public void setAbbreviation(String keyword, String value) {
@@ -99,7 +95,6 @@ public class TranslateNameUtils {
 
     /**
      * 获取本地缓存的mapper
-     *
      * @param locationName
      * @return
      */
@@ -109,7 +104,6 @@ public class TranslateNameUtils {
 
     /**
      * 添加本地缓存的mapper
-     *
      * @param locationName
      * @param mapper
      */
@@ -137,14 +131,12 @@ public class TranslateNameUtils {
 
     /**
      * 去除表别名的主表名称
-     *
      * @return
      */
     public String getNoPrefixTableName(final String tableName) {
         if (WsStringUtils.isBlank(tableName)) {
             return null;
         }
-
         for (String prefix : mainClassNameList) {
             if (tableName.startsWith(prefix)) {
                 return tableName.substring(prefix.length());
@@ -163,6 +155,7 @@ public class TranslateNameUtils {
     public ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String prefix,int type) {
         String prefixString;
         String fieldName;
+        originalFieldName = translateTableNickName(prefix,originalFieldName);
         List<String> fieldNameList = WsStringUtils.split(originalFieldName, '.');
         int size = fieldNameList.size();
         if (size == 1) {
@@ -203,7 +196,6 @@ public class TranslateNameUtils {
 
     /**
      * 转换sql语句中表名为简写
-     *
      * @param searchSql
      * @return
      */

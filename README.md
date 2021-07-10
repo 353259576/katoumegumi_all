@@ -1,10 +1,17 @@
-# ws_all
+# katoumegumi_all
  目录介绍
 =================
 
- 1. data-integration-boot-starter 一个spring的starter包，包含对于jpa和hibernate还有spring jdbc的配置
- 
-  基本使用
+ 1. data-integration-boot-starter 
+- 一个spring的starter包，包含对于jpa和hibernate还有spring jdbc的配置
+ 2. common_utils
+- 通用工具类
+ 3. code_generator
+- 快速生成spring mvc项目的基本代码 支持mybatis 和 mybatis plus代码生成
+4.sql_utils
+  - sql语句生成对返回的resultSet数据进行转化暂时只支持mysql
+  
+基本使用
  =================
  ### 引用项目
  ```
@@ -59,9 +66,12 @@
 
 ### hibernate需要使用事务使用@HibernateTransactional hibernate与jpa事务不兼容
 
-### jdbc hibernate jpa 使用
+### WsJdbcUtils 使用
 
-jdbc:
+WsJdbcUtils:
+*对spring jdbc进行封装，低侵入，无论你使用什么持久层框架都可以很简单的接入。使用MySearchList条件构造器可以支持多种查询方式，支持多表关联查询，根据主键的数据合并，同时支持在增删改查中增加插件，简化通用条件的重复编写。*
+
+
 1. 首选需要引用工具类，基于spring jdbc 的工具类。
 ```
     @Resource

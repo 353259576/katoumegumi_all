@@ -76,7 +76,7 @@ public class ${table.entityName}Controller {
     /**
     * 分页查询${table.tableRemark}
     */
-    @GetMapping(value = "get${table.entityName}Page")
+    @GetMapping(value = "getPage")
 <#if enableSwagger == true>
     @ApiOperation("分页查询${table.tableRemark}")
 </#if>
@@ -96,7 +96,7 @@ public class ${table.entityName}Controller {
     /**
     * 列表查询${table.tableRemark}
     */
-    @GetMapping(value = "get${table.entityName}List")
+    @GetMapping(value = "getList")
 <#if enableSwagger == true>
     @ApiOperation("列表查询${table.tableRemark}")
 </#if>

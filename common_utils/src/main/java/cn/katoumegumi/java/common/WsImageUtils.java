@@ -25,36 +25,45 @@ public class WsImageUtils {
         System.out.println(convertToBase64("png",new FileInputStream("D:\\test\\jetbrains.png")));
     }
 
-
-    public static byte[] changeImageSize(InputStream inputStream, Integer size) {
+    /**
+     * 读取图片
+     * @param inputStream
+     * @return
+     */
+    public static BufferedImage loadImage(InputStream inputStream){
         try {
-            BufferedImage oldBufferedImage = ImageIO.read(inputStream);
+            return ImageIO.read(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    /**
+     * 通过倍率改变图片大小
+     * @param oldBufferedImage 原图
+     * @param multiple 倍率
+     * @return
+     */
+    public static BufferedImage changeImageSize(BufferedImage oldBufferedImage, Integer multiple) {
+        try {
             int oldWidth = oldBufferedImage.getWidth();
             int oldHeight = oldBufferedImage.getHeight();
             int newWidth = 0;
             int newHeight = 0;
-            if (size >= 0) {
-                newWidth = oldWidth * size;
-                newHeight = oldHeight * size;
+            if (multiple >= 0) {
+                newWidth = oldWidth * multiple;
+                newHeight = oldHeight * multiple;
             } else {
-                size = -size;
-                newWidth = oldWidth / size;
-                newHeight = oldHeight / size;
+                multiple = -multiple;
+                newWidth = oldWidth / multiple;
+                newHeight = oldHeight / multiple;
             }
             BufferedImage newBufferedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
             Graphics2D newGraphics2D = newBufferedImage.createGraphics();
             newGraphics2D.setBackground(Color.WHITE);
             newGraphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             newGraphics2D.drawImage(oldBufferedImage, 0, 0, newWidth, newHeight, null);
-            oldBufferedImage.flush();
-            OutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write(newBufferedImage, "jpg", outputStream);
-            newBufferedImage.flush();
-            byte[] bytes = ((ByteArrayOutputStream) outputStream).toByteArray();
-            outputStream.flush();
-            outputStream.close();
-            return bytes;
-
+            return newBufferedImage;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -63,12 +72,11 @@ public class WsImageUtils {
 
     /**
      * 切割图片
-     *
      * @param inputStream
-     * @param x
-     * @param y
-     * @param width
-     * @param height
+     * @param x x轴坐标
+     * @param y y轴坐标
+     * @param width 宽度
+     * @param height 长度
      * @return
      */
     public static byte[] cropImage(InputStream inputStream, int x, int y, int width, int height) {
@@ -182,7 +190,6 @@ public class WsImageUtils {
 
     /**
      * 复制
-     *
      * @param bufferedImage
      * @param bufferedImageType
      * @return
@@ -196,7 +203,6 @@ public class WsImageUtils {
 
     /**
      * 设置透明度
-     *
      * @param bufferedImage
      * @param alpha
      * @param bufferedImageType
@@ -233,7 +239,6 @@ public class WsImageUtils {
 
     /**
      * 放大缩小
-     *
      * @param bufferedImage
      * @param enlargementTimes
      * @return
@@ -250,7 +255,6 @@ public class WsImageUtils {
 
     /**
      * 将图片改为固定尺寸
-     *
      * @param bufferedImage
      * @param bufferedImageType
      * @param width
@@ -268,11 +272,10 @@ public class WsImageUtils {
 
     /**
      * 合并两个图层
-     *
-     * @param backBufferedImage
-     * @param frontBufferedImage
-     * @param pointX
-     * @param pointY
+     * @param backBufferedImage 背景图片
+     * @param frontBufferedImage 位于背景图片上面的图片
+     * @param pointX 左上角x轴坐标
+     * @param pointY 左上角y轴坐标
      * @return
      */
     public static BufferedImage mergeBufferedImage(BufferedImage backBufferedImage, BufferedImage frontBufferedImage, Integer pointX, Integer pointY) {
@@ -284,7 +287,6 @@ public class WsImageUtils {
 
     /**
      * 在图层上写字
-     *
      * @param bufferedImage
      * @param str
      * @param pointX
@@ -313,7 +315,6 @@ public class WsImageUtils {
 
     /**
      * byte数组转成文件
-     *
      * @param bytes
      * @param fileName
      * @param fileType
@@ -360,7 +361,6 @@ public class WsImageUtils {
 
     /**
      * 为图片打马赛克
-     *
      * @param bufferedImage
      * @param pointX
      * @param pointY
@@ -399,20 +399,14 @@ public class WsImageUtils {
                 if (y + randomY >= bufferImageHeight) {
                     modificationY = (y + randomY) - bufferImageHeight + 1;
                 }
-
-                System.out.println("(" + (x + randomX - modificationX) + "," + (y + randomY - modificationY) + ")(" + x + "," + y + ")");
-
                 int rgb = bufferedImage.getRGB(x + randomX - modificationX, y + randomY - modificationY);
                 int a = rgb >>> 24;
                 int r = (rgb << 8) >>> 24;
                 int g = (rgb << 16) >>> 24;
                 int b = (rgb << 24) >>> 24;
-                //System.out.println("a:"+a+" r:"+r+" g:"+g+" b:"+b);
                 Color color = new Color(r, g, b);
                 graphics2D.setColor(color);
                 graphics2D.fillRect(x, y, chunkWidth, chunkHeight);
-
-
             }
             y = pointY - chunkHeight;
         }
@@ -422,7 +416,6 @@ public class WsImageUtils {
 
     /**
      * bufferedImage转成byte数组
-     *
      * @param bufferedImage
      * @param type
      * @return
@@ -450,7 +443,6 @@ public class WsImageUtils {
 
     /**
      * 把字符串拆成行
-     *
      * @param context        文本内容
      * @param fontMetrics
      * @param pointX         开始点的x轴坐标
@@ -517,9 +509,8 @@ public class WsImageUtils {
 
     /**
      * 旋转图片
-     *
-     * @param bufferedImage
-     * @param angle
+     * @param bufferedImage 需要旋转的图片
+     * @param angle 角度
      * @return
      */
     public static BufferedImage rotateImage(BufferedImage bufferedImage, double angle) {
@@ -534,6 +525,13 @@ public class WsImageUtils {
     }
 
 
+    /**
+     * 计算图片旋转后的最小矩形
+     * @param width 原有矩形的宽
+     * @param height 原有矩形的长
+     * @param angle 旋转角度
+     * @return
+     */
     public static Rectangle getRotateRectangle(double width, double height, double angle) {
         if (angle >= 90) {
             if ((int) angle / 90 % 2 == 1) {
@@ -555,8 +553,8 @@ public class WsImageUtils {
 
     /**
      * 转换为base64
-     * @param pictureFormat
-     * @param inputStream
+     * @param pictureFormat 图片格式
+     * @param inputStream 图片字节流
      * @return
      */
     public static String convertToBase64(String pictureFormat,InputStream inputStream){
@@ -570,7 +568,6 @@ public class WsImageUtils {
 
     /**
      * 解析16进制颜色
-     *
      * @param value
      * @return
      */
@@ -579,6 +576,16 @@ public class WsImageUtils {
             throw new RuntimeException("格式错误");
         }
         return new Color(Integer.parseInt(value.substring(1, 3), 16), Integer.parseInt(value.substring(3, 5), 16), Integer.parseInt(value.substring(5, 7), 16));
+    }
+
+    /**
+     * 批量清空bufferedImage
+     * @param bufferedImages
+     */
+    public void flushBufferedImage(BufferedImage... bufferedImages){
+        for(BufferedImage image:bufferedImages){
+            image.flush();
+        }
     }
 
 

@@ -167,7 +167,6 @@ public class WsStringUtils {
 
     /**
      * 去掉string里的空格
-     *
      * @param str
      * @return
      */
@@ -309,7 +308,6 @@ public class WsStringUtils {
 
     /**
      * 字符串脱敏
-     *
      * @param string
      * @return
      */
@@ -355,8 +353,6 @@ public class WsStringUtils {
         } else {
             return stringBuilder.toString();
         }
-
-
     }
 
     /**
@@ -432,7 +428,6 @@ public class WsStringUtils {
 
     /**
      * 驼峰法则
-     *
      * @param str
      * @return
      */
@@ -481,7 +476,6 @@ public class WsStringUtils {
 
     /**
      * 拆分字符串
-     *
      * @param str
      * @param c
      * @return
@@ -613,7 +607,6 @@ public class WsStringUtils {
      * @return
      */
     public static String toCnNumber(BigDecimal number){
-
         int signNum = number.signum();
 
         if(signNum < 0){
@@ -668,15 +661,9 @@ public class WsStringUtils {
                 needAddZ = 0;
                 needAddW = 0;
             }
-
-
         }
         Collections.reverse(list);
         return list.stream().collect(Collectors.joining());
     }
 
-    public static void main(String[] args) {
-        //System.out.println(toCnNumber(BigDecimal.valueOf(1022032030L)));
-        System.out.println(toCnNumber(BigDecimal.valueOf(1003056789)));
-    }
 }

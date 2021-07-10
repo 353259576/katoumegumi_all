@@ -8,6 +8,7 @@ import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -90,7 +91,6 @@ public class Encryption {
 
     /**
      * hmacsha1加密
-     *
      * @param str
      * @param key
      * @return
@@ -200,7 +200,7 @@ public class Encryption {
             PublicKey publicKey = getECPublicKey(publicKeyString);
             Signature signature = Signature.getInstance("SHA256withECDSA");
             signature.initVerify(publicKey);
-            signature.update(str.getBytes("UTF-8"));
+            signature.update(str.getBytes(StandardCharsets.UTF_8));
             boolean k = signature.verify(Base64.getDecoder().decode(sign));
             //boolean k = signature.verify(Base64Url.base64DecodeUrl(sign.getBytes("UTF-8")));
             return k;
@@ -214,15 +214,14 @@ public class Encryption {
 
     /**
      * md5加密
-     *
      * @param str
      * @return
      */
     public static String md5Encoder(String str) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            messageDigest.update(str.getBytes("UTF-8"));
-            byte bytes[] = messageDigest.digest();
+            messageDigest.update(str.getBytes(StandardCharsets.UTF_8));
+            byte[] bytes = messageDigest.digest();
             return byteHexToString(bytes);
         } catch (Exception e) {
             e.printStackTrace();
@@ -232,21 +231,13 @@ public class Encryption {
     }
 
 
-    private static String byteHexToString(byte bytes[]) {
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < bytes.length; i++) {
-            stringBuffer.append(HEX_DIGITS[(bytes[i] >> 4) & 0x0f]);
-            stringBuffer.append(HEX_DIGITS[bytes[i] & 0x0f]);
-        }
-        return stringBuffer.toString();
-    }
+
 
 
     //******************************************************************************************************
 
     /**
-     * 获取公钥私钥
-     *
+     * RSA加密获取公钥私钥
      * @param keySize
      * @return
      */
@@ -276,8 +267,7 @@ public class Encryption {
 
 
     /**
-     * 公钥翻译为公钥
-     *
+     * 公钥字符串转换为RSAPublicKey
      * @param publicKey
      * @return
      */
@@ -294,8 +284,7 @@ public class Encryption {
     }
 
     /**
-     * 私钥翻译为私钥
-     *
+     * 私钥字符串转换为RSAPrivateKey
      * @param privateKey
      * @return
      */
@@ -313,7 +302,6 @@ public class Encryption {
 
     /**
      * 公钥加密
-     *
      * @param data
      * @param rsaPublicKey
      * @return
@@ -331,7 +319,6 @@ public class Encryption {
 
     /**
      * 公钥解密
-     *
      * @param data
      * @param rsaPublicKey
      * @return
@@ -349,7 +336,6 @@ public class Encryption {
 
     /**
      * 私钥加密
-     *
      * @param data
      * @param rsaPrivateKey
      * @return
@@ -367,7 +353,6 @@ public class Encryption {
 
     /**
      * 私钥解密
-     *
      * @param data
      * @param rsaPrivateKey
      * @return
@@ -386,7 +371,6 @@ public class Encryption {
 
     /**
      * 开始加密解密
-     *
      * @param cipher
      * @param opmode
      * @param dataBytes
@@ -428,5 +412,19 @@ public class Encryption {
         return resultDatas;
     }
 
+
+    /**
+     * byte数组转字符串
+     * @param bytes
+     * @return
+     */
+    private static String byteHexToString(byte[] bytes) {
+        StringBuilder stringBuffer = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            stringBuffer.append(HEX_DIGITS[(bytes[i] >> 4) & 0x0f]);
+            stringBuffer.append(HEX_DIGITS[bytes[i] & 0x0f]);
+        }
+        return stringBuffer.toString();
+    }
 
 }
