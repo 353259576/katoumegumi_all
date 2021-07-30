@@ -91,6 +91,7 @@ public class Encryption {
 
     /**
      * hmacsha1加密
+     *
      * @param str
      * @param key
      * @return
@@ -214,6 +215,7 @@ public class Encryption {
 
     /**
      * md5加密
+     *
      * @param str
      * @return
      */
@@ -231,13 +233,11 @@ public class Encryption {
     }
 
 
-
-
-
     //******************************************************************************************************
 
     /**
      * RSA加密获取公钥私钥
+     *
      * @param keySize
      * @return
      */
@@ -268,6 +268,7 @@ public class Encryption {
 
     /**
      * 公钥字符串转换为RSAPublicKey
+     *
      * @param publicKey
      * @return
      */
@@ -285,6 +286,7 @@ public class Encryption {
 
     /**
      * 私钥字符串转换为RSAPrivateKey
+     *
      * @param privateKey
      * @return
      */
@@ -302,6 +304,7 @@ public class Encryption {
 
     /**
      * 公钥加密
+     *
      * @param data
      * @param rsaPublicKey
      * @return
@@ -319,6 +322,7 @@ public class Encryption {
 
     /**
      * 公钥解密
+     *
      * @param data
      * @param rsaPublicKey
      * @return
@@ -336,6 +340,7 @@ public class Encryption {
 
     /**
      * 私钥加密
+     *
      * @param data
      * @param rsaPrivateKey
      * @return
@@ -353,6 +358,7 @@ public class Encryption {
 
     /**
      * 私钥解密
+     *
      * @param data
      * @param rsaPrivateKey
      * @return
@@ -371,6 +377,7 @@ public class Encryption {
 
     /**
      * 开始加密解密
+     *
      * @param cipher
      * @param opmode
      * @param dataBytes
@@ -415,6 +422,7 @@ public class Encryption {
 
     /**
      * byte数组转字符串
+     *
      * @param bytes
      * @return
      */

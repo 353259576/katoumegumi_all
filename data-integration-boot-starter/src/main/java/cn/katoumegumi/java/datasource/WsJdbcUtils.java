@@ -6,6 +6,7 @@ import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
+import cn.katoumegumi.java.sql.entity.SqlWhereValue;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author ws
@@ -152,7 +154,7 @@ public class WsJdbcUtils {
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                 PreparedStatement statement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS);
                 Object o;
-                List<?> valueList = insertSqlEntity.getValueList();
+                List<?> valueList = WsListUtils.listToList(insertSqlEntity.getValueList(),SqlWhereValue::getValue);
                 for (int i = 0; i < valueList.size(); i++) {
                     o = valueList.get(i);
                     if (o == null) {
@@ -200,7 +202,8 @@ public class WsJdbcUtils {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t, isAll);
         log.debug(updateSqlEntity.getUpdateSql());
-        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), updateSqlEntity.getValueList().toArray());
+
+        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsListUtils.listToArray(updateSqlEntity.getValueList(),SqlWhereValue::getValue));
     }
 
     public int update(MySearchList mySearchList) {
@@ -210,7 +213,7 @@ public class WsJdbcUtils {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
         log.debug(updateSqlEntity.getUpdateSql());
-        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), updateSqlEntity.getValueList().toArray());
+        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsListUtils.listToArray(updateSqlEntity.getValueList(),SqlWhereValue::getValue));
     }
 
     public void updateBatch(List<MySearchList> mySearchLists) {
@@ -221,10 +224,8 @@ public class WsJdbcUtils {
         for (MySearchList mySearchList : mySearchLists) {
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
             UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
-            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> {
-                return new ArrayList<>();
-            });
-            objectList.add(updateSqlEntity.getValueList().toArray());
+            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new ArrayList<>());
+            objectList.add(WsListUtils.listToArray(updateSqlEntity.getValueList(),SqlWhereValue::getValue));
         }
         map.forEach((sql, listValue) -> {
             log.debug(sql);
@@ -250,7 +251,7 @@ public class WsJdbcUtils {
             List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> {
                 return new ArrayList<>();
             });
-            objectList.add(updateSqlEntity.getValueList().toArray());
+            objectList.add(WsListUtils.listToArray(updateSqlEntity.getValueList(),SqlWhereValue::getValue));
         }
         map.forEach((sql, listValue) -> {
             log.debug(sql);
@@ -262,7 +263,7 @@ public class WsJdbcUtils {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         DeleteSqlEntity deleteSqlEntity = sqlModelUtils.delete();
         log.debug(deleteSqlEntity.getDeleteSql());
-        return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(), deleteSqlEntity.getValueList().toArray());
+        return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(), WsListUtils.listToArray(deleteSqlEntity.getValueList(),SqlWhereValue::getValue));
     }
 
 
@@ -279,7 +280,7 @@ public class WsJdbcUtils {
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
 
-        List finalList = selectSqlEntity.getValueList();
+        List finalList = selectSqlEntity.getValueList().stream().map(SqlWhereValue::getValue).collect(Collectors.toList());
 
         return handleJdbcReturnValue(sql, finalList, sqlModelUtils);
 
@@ -382,7 +383,7 @@ public class WsJdbcUtils {
         log.debug(sql);
         String countSql = selectSqlEntity.getCountSql();
         log.info(countSql);
-        List finalList = selectSqlEntity.getValueList();
+        List finalList = selectSqlEntity.getValueList().stream().map(SqlWhereValue::getValue).collect(Collectors.toList());
         //List list = handleJdbcReturnValue(sql, finalList);
 
         List<T> tList = handleJdbcReturnValue(sql, finalList, sqlModelUtils);//sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));

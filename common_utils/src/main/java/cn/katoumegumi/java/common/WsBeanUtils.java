@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common;
 
+import cn.katoumegumi.java.common.convert.ConvertUtils;
+
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -21,6 +23,7 @@ public class WsBeanUtils {
 
     /**
      * 转换bean
+     *
      * @param o
      * @param tClass
      * @param <T>
@@ -154,6 +157,7 @@ public class WsBeanUtils {
 
     /**
      * 反序列化Object
+     *
      * @param bytes
      * @param <T>
      * @return
@@ -174,34 +178,36 @@ public class WsBeanUtils {
 
     /**
      * 常见数据格式相互转换
+     *
      * @param object
      * @param tClass
      * @param <T>
      * @return
      */
-    public static <T> T objectToT(Object object, Class<T> tClass){
+    public static <T> T objectToT(Object object, Class<T> tClass) {
         boolean isPrimitive = tClass.isPrimitive();
-        Object o = convertToT(object,tClass);
-        if(isPrimitive && o == null){
-            if(tClass == int.class){
+        //Object o = convertToT(object, tClass);
+        Object o = ConvertUtils.convert(object,tClass);
+        if (isPrimitive && o == null) {
+            if (tClass == int.class) {
                 o = 0;
-            }else if(tClass == long.class){
+            } else if (tClass == long.class) {
                 o = 0L;
-            }else if(tClass == double.class){
+            } else if (tClass == double.class) {
                 o = 0D;
-            }else if(tClass == float.class){
+            } else if (tClass == float.class) {
                 o = 0F;
-            }else if(tClass == boolean.class){
+            } else if (tClass == boolean.class) {
                 o = false;
-            }else if(tClass == byte.class){
+            } else if (tClass == byte.class) {
                 o = 0;
-            }else if(tClass == short.class){
+            } else if (tClass == short.class) {
                 o = 0;
-            }else if(tClass == char.class){
+            } else if (tClass == char.class) {
                 o = 0;
             }
         }
-        return (T)o;
+        return (T) o;
     }
 
 
@@ -388,6 +394,7 @@ public class WsBeanUtils {
 
     /**
      * 把数组或者list对象转换成数组
+     *
      * @param o      数组或者list
      * @param tClass 需要转换成的对象
      * @param <T>
@@ -961,6 +968,7 @@ public class WsBeanUtils {
 
     /**
      * int数组转换
+     *
      * @param tClass
      * @param ints
      * @param <T>
@@ -1033,33 +1041,34 @@ public class WsBeanUtils {
 
     /**
      * 对象转换成map
+     *
      * @param t
      * @param <T>
      * @return
      */
-    public static <T> Map<Object,Object> convertToMap(T t){
-        if(WsBeanUtils.isBaseType(t.getClass()) || WsBeanUtils.isArray(t.getClass())){
+    public static <T> Map<Object, Object> convertToMap(T t) {
+        if (WsBeanUtils.isBaseType(t.getClass()) || WsBeanUtils.isArray(t.getClass())) {
             throw new RuntimeException("不支持的格式");
         }
-        if(t instanceof Map){
+        if (t instanceof Map) {
             return (Map<Object, Object>) t;
         }
         Field[] fields = WsFieldUtils.getFieldAll(t.getClass());
 
-        Map<Object,Object> map = new HashMap<>();
-        for(Field field:fields){
-            Object value = WsFieldUtils.getValue(t,field);
-            if(value != null){
+        Map<Object, Object> map = new HashMap<>();
+        for (Field field : fields) {
+            Object value = WsFieldUtils.getValue(t, field);
+            if (value != null) {
                 String name = field.getName();
 
-                if(WsBeanUtils.isBaseType(value.getClass())){
-                    map.put(name,value);
-                }else if(value instanceof Map){
-                    map.put(name,value);
-                }else if (WsBeanUtils.isArray(value.getClass())){
-                    map.put(name,arrayToList(value));
-                }else {
-                    map.put(name,objectToMap(value));
+                if (WsBeanUtils.isBaseType(value.getClass())) {
+                    map.put(name, value);
+                } else if (value instanceof Map) {
+                    map.put(name, value);
+                } else if (WsBeanUtils.isArray(value.getClass())) {
+                    map.put(name, arrayToList(value));
+                } else {
+                    map.put(name, objectToMap(value));
                 }
             }
         }
@@ -1068,40 +1077,41 @@ public class WsBeanUtils {
 
     /**
      * 把数组里的对象转换成map
+     *
      * @param o
      * @return
      */
-    private static List arrayToList(Object o){
-        if(!WsBeanUtils.isArray(o.getClass())){
+    private static List arrayToList(Object o) {
+        if (!WsBeanUtils.isArray(o.getClass())) {
             throw new RuntimeException("非数组类型");
         }
-        if(o instanceof Collection){
-            Collection collection = (Collection)o;
+        if (o instanceof Collection) {
+            Collection collection = (Collection) o;
             List list = new ArrayList(collection.size());
-            for(Object value:collection){
-                if(WsBeanUtils.isBaseType(value.getClass())){
+            for (Object value : collection) {
+                if (WsBeanUtils.isBaseType(value.getClass())) {
                     list.add(value);
-                }else if(WsBeanUtils.isArray(value.getClass())){
+                } else if (WsBeanUtils.isArray(value.getClass())) {
                     list.add(arrayToList(value));
-                }else if(value instanceof Map){
+                } else if (value instanceof Map) {
                     list.add(o);
-                }else {
+                } else {
                     list.add(objectToMap(o));
                 }
             }
             return list;
 
-        }else {
+        } else {
             Object[] objects = (Object[]) o;
             List list = new ArrayList(objects.length);
-            for(Object value:objects){
-                if(WsBeanUtils.isBaseType(value.getClass())){
+            for (Object value : objects) {
+                if (WsBeanUtils.isBaseType(value.getClass())) {
                     list.add(value);
-                }else if(WsBeanUtils.isArray(value.getClass())){
+                } else if (WsBeanUtils.isArray(value.getClass())) {
                     list.add(arrayToList(value));
-                }else if(value instanceof Map){
+                } else if (value instanceof Map) {
                     list.add(o);
-                }else {
+                } else {
                     list.add(objectToMap(o));
                 }
             }
@@ -1112,30 +1122,31 @@ public class WsBeanUtils {
 
     /**
      * 对象转换成map
+     *
      * @param o
      * @return
      */
-    private static Map objectToMap(Object o){
-        if(WsBeanUtils.isBaseType(o.getClass()) || WsBeanUtils.isArray(o.getClass())){
+    private static Map objectToMap(Object o) {
+        if (WsBeanUtils.isBaseType(o.getClass()) || WsBeanUtils.isArray(o.getClass())) {
             throw new RuntimeException("格式错误");
         }
 
         Field[] fields = WsFieldUtils.getFieldAll(o.getClass());
 
-        Map<Object,Object> map = new HashMap<>();
+        Map<Object, Object> map = new HashMap<>();
         assert fields != null;
-        for(Field field:fields){
-            Object value = WsFieldUtils.getValue(o,field);
-            if(value != null){
+        for (Field field : fields) {
+            Object value = WsFieldUtils.getValue(o, field);
+            if (value != null) {
                 String name = field.getName();
-                if(WsBeanUtils.isBaseType(value.getClass())){
-                    map.put(name,value);
-                }else if(value instanceof Map){
-                    map.put(name,value);
-                }else if (WsBeanUtils.isArray(value.getClass())){
-                    map.put(name,arrayToList(value));
-                }else {
-                    map.put(name,objectToMap(value));
+                if (WsBeanUtils.isBaseType(value.getClass())) {
+                    map.put(name, value);
+                } else if (value instanceof Map) {
+                    map.put(name, value);
+                } else if (WsBeanUtils.isArray(value.getClass())) {
+                    map.put(name, arrayToList(value));
+                } else {
+                    map.put(name, objectToMap(value));
                 }
             }
         }

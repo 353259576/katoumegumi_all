@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 public class WsStringUtils {
     private static final byte SPACE = 32;
 
-    private static final String[] CN_NUMBER_NAME = new String[]{"零","壹","贰","叁","肆","伍","陆","柒","捌","玖"};
+    private static final String[] CN_NUMBER_NAME = new String[]{"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
 
-    private static final String[] CN_DECIMALISM_NAME = new String[]{"","拾","佰","仟","万","拾","佰","仟","亿"};
+    private static final String[] CN_DECIMALISM_NAME = new String[]{"", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿"};
 
     public static String jointListString(String[] strings, String sign) {
         return jointListString(Arrays.asList(strings), sign);
@@ -82,6 +82,7 @@ public class WsStringUtils {
 
     /**
      * 判断字符串是否都是数字
+     *
      * @param str
      * @return
      */
@@ -120,6 +121,7 @@ public class WsStringUtils {
 
     /**
      * 是否是大写字母
+     *
      * @param c
      * @return
      */
@@ -129,6 +131,7 @@ public class WsStringUtils {
 
     /**
      * 是否是小写字母
+     *
      * @param c
      * @return
      */
@@ -139,6 +142,7 @@ public class WsStringUtils {
 
     /**
      * 判断字符串是否含有空格
+     *
      * @param str
      * @return
      */
@@ -167,6 +171,7 @@ public class WsStringUtils {
 
     /**
      * 去掉string里的空格
+     *
      * @param str
      * @return
      */
@@ -184,18 +189,19 @@ public class WsStringUtils {
                 bytes[newIndex++] = aByte;
             }
         }
-        if(newIndex == 0){
+        if (newIndex == 0) {
             return "";
-        }else if(newIndex == bytes.length){
+        } else if (newIndex == bytes.length) {
             return new String(bytes);
         }
-        byte[] newBytes = Arrays.copyOfRange(bytes,0,newIndex);
+        byte[] newBytes = Arrays.copyOfRange(bytes, 0, newIndex);
         return new String(newBytes);
     }
 
 
     /**
      * unicode转码
+     *
      * @param dataStr
      * @return
      */
@@ -279,6 +285,7 @@ public class WsStringUtils {
 
     /**
      * 对象转String
+     *
      * @param object
      * @return
      */
@@ -286,9 +293,9 @@ public class WsStringUtils {
         if (object == null) {
             return null;
         }
-        if(object.getClass().equals(String.class)){
+        if (object.getClass().equals(String.class)) {
             return (String) object;
-        }else if (object instanceof Number || object instanceof Character || object instanceof Boolean) {
+        } else if (object instanceof Number || object instanceof Character || object instanceof Boolean) {
             return object.toString();
         } else if (object.getClass().isPrimitive()) {
             return String.valueOf(object);
@@ -305,9 +312,9 @@ public class WsStringUtils {
     }
 
 
-
     /**
      * 字符串脱敏
+     *
      * @param string
      * @return
      */
@@ -329,6 +336,7 @@ public class WsStringUtils {
 
     /**
      * 创建随机字符串
+     *
      * @param startStr      开始字符串
      * @param timeTemplates 日期格式
      * @param size          总大小
@@ -357,6 +365,7 @@ public class WsStringUtils {
 
     /**
      * 随机数字字符串
+     *
      * @param size 长度
      * @return
      */
@@ -400,6 +409,7 @@ public class WsStringUtils {
 
     /**
      * 驼峰法则
+     *
      * @param str
      * @return
      */
@@ -428,6 +438,7 @@ public class WsStringUtils {
 
     /**
      * 驼峰法则
+     *
      * @param str
      * @return
      */
@@ -460,6 +471,7 @@ public class WsStringUtils {
 
     /**
      * 首字母小写
+     *
      * @param str
      * @return
      */
@@ -476,6 +488,7 @@ public class WsStringUtils {
 
     /**
      * 拆分字符串
+     *
      * @param str
      * @param c
      * @return
@@ -505,6 +518,7 @@ public class WsStringUtils {
 
     /**
      * 判断是不是字母数字
+     *
      * @param c 字符
      * @return
      */
@@ -514,6 +528,7 @@ public class WsStringUtils {
 
     /**
      * 判断字符是不是汉字
+     *
      * @param c 字符
      * @return
      */
@@ -527,6 +542,7 @@ public class WsStringUtils {
 
     /**
      * 判断字符串是不是都是汉字
+     *
      * @param string
      * @return
      */
@@ -542,6 +558,7 @@ public class WsStringUtils {
 
     /**
      * 获取字符串里所有的汉语字符
+     *
      * @param str
      * @return
      */
@@ -559,32 +576,34 @@ public class WsStringUtils {
 
     /**
      * 获取两个字符串相同的部分
+     *
      * @param str1
      * @param str2
      * @return
      */
-    public static String getIdentical(String str1,String str2){
+    public static String getIdentical(String str1, String str2) {
         char[] s1 = str1.toCharArray();
         char[] s2 = str2.toCharArray();
-        int size = Math.min(s1.length,s2.length);
+        int size = Math.min(s1.length, s2.length);
         StringBuilder stringBuilder = new StringBuilder();
-        for(int i = 0; i < size; i++){
-            if(s1[i] == s2[i]){
+        for (int i = 0; i < size; i++) {
+            if (s1[i] == s2[i]) {
                 stringBuilder.append(s1[i]);
-            }else {
+            } else {
                 break;
             }
         }
-        return stringBuilder.length() == 0?null:stringBuilder.toString();
+        return stringBuilder.length() == 0 ? null : stringBuilder.toString();
     }
 
     /**
      * 获取不同的字符串
+     *
      * @param part
      * @param intact
      * @return
      */
-    public static String getDisparate(String part,String intact) {
+    public static String getDisparate(String part, String intact) {
         char[] s1 = part.toCharArray();
         char[] s2 = intact.toCharArray();
         int size = Math.min(s1.length, s2.length);
@@ -603,19 +622,20 @@ public class WsStringUtils {
 
     /**
      * 数字转换成中文
+     *
      * @param number 整形数字
      * @return
      */
-    public static String toCnNumber(BigDecimal number){
+    public static String toCnNumber(BigDecimal number) {
         int signNum = number.signum();
 
-        if(signNum < 0){
+        if (signNum < 0) {
             number = number.abs();
         }
         long num = number.longValue();
         char[] numChars = Long.valueOf(num).toString().toCharArray();
         int cLength = numChars.length;
-        for(int i = 0; i < cLength/2; i++){
+        for (int i = 0; i < cLength / 2; i++) {
             char c = numChars[i];
             numChars[i] = numChars[cLength - i - 1];
             numChars[cLength - i - 1] = c;
@@ -627,36 +647,36 @@ public class WsStringUtils {
         int needAddW = 0;
         //是否需要添加0
         int needAddZ = 0;
-        for(int i = 0; i < cLength; i++){
+        for (int i = 0; i < cLength; i++) {
             cnNumberNameIndex = numChars[i] - 48;
             //当数字为0时
-            if(cnNumberNameIndex == 0){
-                if( decimalismIndex == 8){
+            if (cnNumberNameIndex == 0) {
+                if (decimalismIndex == 8) {
                     //当亿单位是0时
                     list.add(CN_DECIMALISM_NAME[decimalismIndex]);
                     needAddW = 0;
-                }else if(decimalismIndex == 4){
+                } else if (decimalismIndex == 4) {
                     needAddZ = 0;
                     needAddW = 1;
                 } else {
-                    if(decimalismIndex != 0 && needAddZ == 1) {
+                    if (decimalismIndex != 0 && needAddZ == 1) {
                         list.add(CN_NUMBER_NAME[cnNumberNameIndex]);
                         needAddZ = 0;
                     }
                 }
-            }else {
-                if(needAddW == 1 && decimalismIndex != 8) {
+            } else {
+                if (needAddW == 1 && decimalismIndex != 8) {
                     list.add(CN_DECIMALISM_NAME[4]);
                     needAddW = 2;
                 }
                 String numCn = CN_NUMBER_NAME[cnNumberNameIndex];
                 String decimalismCn = CN_DECIMALISM_NAME[decimalismIndex];
-                list.add(numCn+decimalismCn);
+                list.add(numCn + decimalismCn);
                 needAddZ = 1;
 
             }
             ++decimalismIndex;
-            if(CN_DECIMALISM_NAME.length == decimalismIndex){
+            if (CN_DECIMALISM_NAME.length == decimalismIndex) {
                 decimalismIndex = 1;
                 needAddZ = 0;
                 needAddW = 0;

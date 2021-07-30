@@ -2,11 +2,11 @@ package cn.katoumegumi.java.common;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 文件工具类
+ *
  * @author 星梦苍天
  */
 public class WsFileUtils {
@@ -16,12 +16,13 @@ public class WsFileUtils {
 
     /**
      * 将文件路径的 \\ // 替换成 /
+     *
      * @param oldFilePath
      * @return
      */
     public static String adjustFilePath(String oldFilePath) {
         oldFilePath = oldFilePath.replaceAll("\\\\", "/");
-        oldFilePath = oldFilePath.replaceAll("//","/");
+        oldFilePath = oldFilePath.replaceAll("//", "/");
         return oldFilePath;
     }
 
@@ -49,6 +50,7 @@ public class WsFileUtils {
 
     /**
      * 创建文件
+     *
      * @param filePath 文件路径
      * @return
      */

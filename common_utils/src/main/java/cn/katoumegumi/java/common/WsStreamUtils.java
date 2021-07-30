@@ -7,9 +7,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class WsStreamUtils {
@@ -31,7 +29,7 @@ public class WsStreamUtils {
                 return byteBuffer;
             } catch (IOException e) {
                 e.printStackTrace();
-                close(fileChannel,inputStream);
+                close(fileChannel, inputStream);
             }
 
         } else {
@@ -47,7 +45,7 @@ public class WsStreamUtils {
                 return byteBuffer;
             } catch (IOException e) {
                 e.printStackTrace();
-                close(readableByteChannel,inputStream);
+                close(readableByteChannel, inputStream);
             }
 
         }
@@ -66,7 +64,7 @@ public class WsStreamUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                close(fileOutputChannel,fileInputChannel,outputStream,inputStream);
+                close(fileOutputChannel, fileInputChannel, outputStream, inputStream);
             }
 
         } else {
@@ -82,7 +80,7 @@ public class WsStreamUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                close(writableByteChannel,readableByteChannel,outputStream,inputStream);
+                close(writableByteChannel, readableByteChannel, outputStream, inputStream);
             }
         }
     }
@@ -90,6 +88,7 @@ public class WsStreamUtils {
 
     /**
      * zip压缩
+     *
      * @param files
      * @return
      */
@@ -143,27 +142,26 @@ public class WsStreamUtils {
             e.printStackTrace();
             return null;
         } finally {
-            close(writableByteChannel,zipOutputStream,byteArrayOutputStream);
+            close(writableByteChannel, zipOutputStream, byteArrayOutputStream);
             close(inputStreams);
         }
     }
 
 
-
-
     /**
      * 关闭流
-     * @param closeables
+     *
+     * @param closeableArray
      */
-    public static void close(Closeable... closeables){
-        for(Closeable closeable:closeables){
-            if(closeable != null) {
+    public static void close(AutoCloseable... closeableArray) {
+        for (AutoCloseable closeable : closeableArray) {
+            if (closeable != null) {
                 try {
-                    if(closeable instanceof Flushable){
-                      ((Flushable) closeable).flush();
+                    if (closeable instanceof Flushable) {
+                        ((Flushable) closeable).flush();
                     }
                     closeable.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

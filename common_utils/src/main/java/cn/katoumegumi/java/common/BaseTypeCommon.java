@@ -1,17 +1,16 @@
 package cn.katoumegumi.java.common;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
  * 基本类型
+ *
  * @author ws
  */
 public class BaseTypeCommon {
@@ -86,22 +85,23 @@ public class BaseTypeCommon {
         return verify(o.getClass());
     }
 
-    public static boolean verifyArray(Class<?> tClass){
+    public static boolean verifyArray(Class<?> tClass) {
         return ARRAY_CLASS_SET.contains(tClass);
     }
 
     /**
      * 获取基本类型的包装类
+     *
      * @param clazz
      * @return
      */
-    public static Class<?> getWrapperClass(Class<?> clazz){
-        for(int i = 0; i < 8; i++){
-            if(clazz.equals(BASE_TYPE_ARRAY[i])){
+    public static Class<?> getWrapperClass(Class<?> clazz) {
+        for (int i = 0; i < 8; i++) {
+            if (clazz.equals(BASE_TYPE_ARRAY[i])) {
                 return WRAPPER_BASE_TYPE_ARRAY[i];
             }
         }
-        throw new NullPointerException("未发现"+clazz.getSimpleName()+"包装类");
+        throw new NullPointerException("未发现" + clazz.getSimpleName() + "包装类");
     }
 
 

@@ -1,11 +1,17 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsListUtils;
+import cn.katoumegumi.java.common.WsStreamUtils;
+import cn.katoumegumi.java.sql.entity.SqlWhereValue;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.List;
 
+/**
+ * @author 星梦苍天
+ */
 public class BaseDataSourceUtils {
 
 
@@ -26,7 +32,7 @@ public class BaseDataSourceUtils {
         try {
             connection = dataSource.getConnection();
             preparedStatement = connection.prepareStatement(entity.getSelectSql());
-            List<Object> objectList = entity.getValueList();
+            List<Object> objectList = WsListUtils.listToList(entity.getValueList(), SqlWhereValue::getValue);
             for (int i = 0; i < objectList.size(); i++) {
                 Object o = objectList.get(i);
                 if (o instanceof Date) {
@@ -40,27 +46,7 @@ public class BaseDataSourceUtils {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            WsStreamUtils.close(resultSet,preparedStatement,connection);
         }
         return null;
     }

@@ -42,25 +42,26 @@ public class WsListUtils {
 
     /**
      * 判断数组是不是为空
+     *
      * @param obj
      * @return
      */
     public static boolean isEmpty(Object obj) {
-        if(obj == null){
+        if (obj == null) {
             return true;
         }
-        if(obj instanceof Collection){
+        if (obj instanceof Collection) {
             return ((Collection<?>) obj).size() == 0;
-        }else if(obj instanceof Map){
-            return ((Map<?,?>)obj).size() == 0;
-        }else {
-            if(obj.getClass().isArray()){
-                if(BaseTypeCommon.verifyArray(obj.getClass())){
+        } else if (obj instanceof Map) {
+            return ((Map<?, ?>) obj).size() == 0;
+        } else {
+            if (obj.getClass().isArray()) {
+                if (BaseTypeCommon.verifyArray(obj.getClass())) {
                     return Array.getLength(obj) == 0;
-                }else {
-                    return ((Object[])obj).length == 0;
+                } else {
+                    return ((Object[]) obj).length == 0;
                 }
-            }else {
+            } else {
                 return false;
             }
         }
@@ -68,6 +69,7 @@ public class WsListUtils {
 
     /**
      * 判断是否不为空
+     *
      * @param collection 集合
      * @return 布尔
      */
@@ -77,6 +79,7 @@ public class WsListUtils {
 
     /**
      * 判断是否不为空
+     *
      * @param map 集合
      * @return 布尔
      */
@@ -90,6 +93,7 @@ public class WsListUtils {
 
     /**
      * 合并数组
+     *
      * @param l1  参数
      * @param l2  参数
      * @param <T> 泛型
@@ -114,6 +118,7 @@ public class WsListUtils {
 
     /**
      * 原生数组转化为list
+     *
      * @param array 数组
      * @param <T>   泛型
      * @return list
@@ -131,6 +136,7 @@ public class WsListUtils {
 
     /**
      * list转为map
+     *
      * @param tList    数组
      * @param function 方法
      * @param <T>      对象
@@ -154,6 +160,7 @@ public class WsListUtils {
 
     /**
      * list转为map
+     *
      * @param tList    数组
      * @param function 方法
      * @param <T>      对象
@@ -177,6 +184,7 @@ public class WsListUtils {
 
     /**
      * list转为map
+     *
      * @param tList    list
      * @param function 方法
      * @param <T>      泛型
@@ -197,6 +205,7 @@ public class WsListUtils {
 
     /**
      * 获取list的子list
+     *
      * @param tList    父list
      * @param function 方法
      * @param <T>      父
@@ -211,8 +220,21 @@ public class WsListUtils {
         return iList;
     }
 
+    public static <T, I> I[] listToArray(List<T> tList, Function<T, I> function) {
+        int length = tList.size();
+        Object[] objects = new Object[length];
+
+        for (int i = 0; i < length; ++i){
+            objects[i] = function.apply(tList.get(i));
+        }
+
+
+        return (I[])objects;
+    }
+
     /**
      * 获取list的子Set
+     *
      * @param tList    父list
      * @param function 方法
      * @param <T>      父
@@ -230,6 +252,7 @@ public class WsListUtils {
 
     /**
      * 原生数组转化为list
+     *
      * @param tList 数组
      * @param <T>   泛型
      * @return 数组
@@ -238,15 +261,12 @@ public class WsListUtils {
         if (isEmpty(tList)) {
             return null;
         }
-        T[] ts = (T[]) new Object[tList.size()];
-        for (int i = 0; i < tList.size(); i++) {
-            ts[i] = tList.get(i);
-        }
-        return ts;
+        return (T[]) tList.toArray();
     }
 
     /**
      * 合并两个数组成一个新的数组
+     *
      * @param list1
      * @param list2
      * @param <T>
@@ -276,31 +296,32 @@ public class WsListUtils {
 
     /**
      * 移动数组元素（如果超过数组长度移动到数组头部）
+     *
      * @param list 原始数组
      * @param move 移动格数
      * @param <T>
      * @return
      */
-    public static <T> List<T> moveListElement(List<T> list,int move){
+    public static <T> List<T> moveListElement(List<T> list, int move) {
         int arrayLength = list.size();
-        if(arrayLength < 2){
+        if (arrayLength < 2) {
             return list;
         }
         move = move % arrayLength;
-        if(move == 0){
+        if (move == 0) {
             return list;
         }
 
         boolean right = move > 0;
 
-        if((right?move:Math.abs(move)) > arrayLength / 2){
+        if ((right ? move : Math.abs(move)) > arrayLength / 2) {
             right = !right;
-            move = move>0?arrayLength - move:arrayLength + move;
-        }else {
+            move = move > 0 ? arrayLength - move : arrayLength + move;
+        } else {
             move = Math.abs(move);
         }
         Object[] objects = new Object[move];
-        if(right) {
+        if (right) {
             for (int i = 0; i < move; i++) {
                 objects[move - 1 - i] = list.get(arrayLength - 1 - i);
             }
@@ -310,14 +331,14 @@ public class WsListUtils {
             for (int i = 0; i < move; i++) {
                 list.set(i, (T) objects[i]);
             }
-        }else {
-            for(int i = 0; i < move; i++){
+        } else {
+            for (int i = 0; i < move; i++) {
                 objects[i] = list.get(i);
             }
-            for(int i = move; i < arrayLength; i++){
-                list.set(i - move,list.get(i));
+            for (int i = move; i < arrayLength; i++) {
+                list.set(i - move, list.get(i));
             }
-            for(int i = 0; i < move; i++){
+            for (int i = 0; i < move; i++) {
                 list.set(arrayLength - move + i, (T) objects[i]);
             }
         }

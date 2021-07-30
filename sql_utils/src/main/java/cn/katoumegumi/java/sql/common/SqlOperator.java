@@ -3,6 +3,7 @@ package cn.katoumegumi.java.sql.common;
 import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.TranslateNameUtils;
+import cn.katoumegumi.java.sql.entity.SqlWhereValue;
 
 import java.util.List;
 
@@ -192,7 +193,7 @@ public enum SqlOperator {
          * @param baseWhereValueList
          * @return
          */
-        public String handle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList);
+        public String handle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList);
     }
 
 }

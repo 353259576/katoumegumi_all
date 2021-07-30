@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author ws
@@ -45,7 +46,7 @@ public class SQLModelUtils {
     /**
      * 记录where所需要的值
      */
-    private final List<Object> baseWhereValueList = new ArrayList<>();
+    private final List<SqlWhereValue> baseWhereValueList = new ArrayList<>();
 
     /**
      * 表面和列名转换
@@ -201,9 +202,9 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      */
-    public static String commonConditionHandle(String condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
+    public static String commonConditionHandle(String condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
         ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), prefix,2);
-        baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), columnBaseEntity.getFieldColumnRelation().getFieldClass()));
+        baseWhereValueList.add(new SqlWhereValue(WsBeanUtils.objectToT(mySearch.getValue(), columnBaseEntity.getFieldColumnRelation().getFieldClass())));
         return SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()) +
                 "." +
                 SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) + condition + SqlCommon.PLACEHOLDER;
@@ -217,7 +218,7 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      */
-    public static String likeConditionHandle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
+    public static String likeConditionHandle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
         ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), prefix,2);
         String fuzzyWord = WsBeanUtils.objectToT(mySearch.getValue(), String.class);
         assert fuzzyWord != null;
@@ -229,7 +230,7 @@ public class SQLModelUtils {
         if (fuzzyWord.charAt(fuzzyWord.length() - 1) == '%') {
             end = end - 1;
         }
-        baseWhereValueList.add(fuzzyWord.substring(start, end));
+        baseWhereValueList.add(new SqlWhereValue(fuzzyWord.substring(start, end)));
         return SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()) +
                 "." +
                 SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) +
@@ -244,18 +245,8 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      */
-    public static String sqlConditionHandle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
-        if (mySearch.getValue() != null) {
-            if (mySearch.getValue() instanceof Collection) {
-                Collection<?> collection = (Collection<?>) mySearch.getValue();
-                baseWhereValueList.addAll(collection);
-            } else if (mySearch.getValue().getClass().isArray()) {
-                Object[] os = (Object[]) mySearch.getValue();
-                baseWhereValueList.addAll(Arrays.asList(os));
-            } else {
-                baseWhereValueList.add(mySearch.getValue());
-            }
-        }
+    public static String sqlConditionHandle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
+        setSqlWhereValue(mySearch,baseWhereValueList);
         return translateNameUtils.translateTableNickName(prefix, mySearch.getFieldName());
     }
 
@@ -268,7 +259,7 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      */
-    public static String existsConditionHandle(boolean condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
+    public static String existsConditionHandle(boolean condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
         StringBuilder tableColumn = new StringBuilder();
         if (!condition) {
             tableColumn.append(SqlCommon.NOT_EXISTS);
@@ -285,17 +276,7 @@ public class SQLModelUtils {
             }
         } else {
             tableColumn.append(translateNameUtils.translateTableNickName(prefix, mySearch.getFieldName()));
-            if (mySearch.getValue() != null) {
-                if (mySearch.getValue() instanceof Collection) {
-                    Collection<?> collection = (Collection<?>) mySearch.getValue();
-                    baseWhereValueList.addAll(collection);
-                } else if (mySearch.getValue().getClass().isArray()) {
-                    Object[] os = (Object[]) mySearch.getValue();
-                    baseWhereValueList.addAll(Arrays.asList(os));
-                } else {
-                    baseWhereValueList.add(mySearch.getValue());
-                }
-            }
+            setSqlWhereValue(mySearch,baseWhereValueList);
         }
         tableColumn.append(SqlCommon.RIGHT_BRACKETS);
         return tableColumn.toString();
@@ -310,7 +291,7 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      */
-    public static String betweenConditionHandle(boolean condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
+    public static String betweenConditionHandle(boolean condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
         ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), prefix,2);
         StringBuilder tableColumn = new StringBuilder();
         tableColumn.append(SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()));
@@ -335,8 +316,8 @@ public class SQLModelUtils {
                         .append(SqlCommon.SQL_AND)
                         .append(SqlCommon.SPACE)
                         .append(SqlCommon.PLACEHOLDER);
-                baseWhereValueList.add(WsBeanUtils.objectToT(objects[0], columnBaseEntity.getField().getType()));
-                baseWhereValueList.add(WsBeanUtils.objectToT(objects[1], columnBaseEntity.getField().getType()));
+                baseWhereValueList.add(new SqlWhereValue(WsBeanUtils.objectToT(objects[0], columnBaseEntity.getField().getType())));
+                baseWhereValueList.add(new SqlWhereValue(WsBeanUtils.objectToT(objects[1], columnBaseEntity.getField().getType())));
             } else {
                 Collection<?> collection = (Collection<?>) mySearch.getValue();
                 if (collection.size() != 2) {
@@ -349,8 +330,8 @@ public class SQLModelUtils {
                         .append(SqlCommon.SQL_AND)
                         .append(SqlCommon.SPACE)
                         .append(SqlCommon.PLACEHOLDER);
-                baseWhereValueList.add(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType()));
-                baseWhereValueList.add(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType()));
+                baseWhereValueList.add(new SqlWhereValue(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType())));
+                baseWhereValueList.add(new SqlWhereValue(WsBeanUtils.objectToT(iterator.next(), columnBaseEntity.getField().getType())));
             }
         }
         return tableColumn.toString();
@@ -365,7 +346,7 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      */
-    public static String inConditionHandle(boolean condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
+    public static String inConditionHandle(boolean condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
         ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), prefix,2);
         StringBuilder tableColumn = new StringBuilder();
         tableColumn.append(SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()));
@@ -393,7 +374,7 @@ public class SQLModelUtils {
                 while (iterator.hasNext()) {
                     Object o = iterator.next();
                     symbols.add(SqlCommon.PLACEHOLDER);
-                    baseWhereValueList.add(WsBeanUtils.objectToT(o, columnBaseEntity.getFieldColumnRelation().getFieldClass()));
+                    baseWhereValueList.add(new SqlWhereValue(WsBeanUtils.objectToT(o, columnBaseEntity.getFieldColumnRelation().getFieldClass())));
                 }
                 tableColumn.append(SqlCommon.LEFT_BRACKETS);
                 tableColumn.append(WsStringUtils.jointListString(symbols, SqlCommon.COMMA));
@@ -404,9 +385,8 @@ public class SQLModelUtils {
                 List<String> symbols = new ArrayList<>();
                 for (Object o : os) {
                     symbols.add(SqlCommon.PLACEHOLDER);
-                    baseWhereValueList.add(WsBeanUtils.objectToT(o, columnBaseEntity.getFieldColumnRelation().getFieldClass()));
+                    baseWhereValueList.add(new SqlWhereValue(WsBeanUtils.objectToT(o, columnBaseEntity.getFieldColumnRelation().getFieldClass())));
                 }
-                //tableColumn.append(" in");
                 tableColumn.append(SqlCommon.LEFT_BRACKETS);
                 tableColumn.append(WsStringUtils.jointListString(symbols, SqlCommon.COMMA));
                 tableColumn.append(SqlCommon.RIGHT_BRACKETS);
@@ -426,7 +406,7 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      */
-    public static String nullConditionHandle(boolean condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
+    public static String nullConditionHandle(boolean condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
 
         ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), prefix,2);
         return condition ? SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()) +
@@ -447,7 +427,7 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      */
-    public static String sortConditionHandle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
+    public static String sortConditionHandle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
         StringBuilder tableColumn = new StringBuilder();
         if (mySearch.getFieldName().endsWith(String.valueOf(SqlCommon.RIGHT_BRACKETS))) {
             tableColumn.append(mySearch.getFieldName());
@@ -464,7 +444,6 @@ public class SQLModelUtils {
 
     /**
      * 通用无参数条件处理
-     *
      * @param condition
      * @param translateNameUtils
      * @param mySearch
@@ -472,7 +451,7 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      **/
-    public static String commonNoValueConditionHandle(String condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
+    public static String commonNoValueConditionHandle(String condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
         ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), prefix,2);
         ColumnBaseEntity conditionColumn = translateNameUtils.getColumnBaseEntity(WsStringUtils.anyToString(mySearch.getValue()), prefix,2);
         return SQLModelUtils.guardKeyword(columnBaseEntity.getAlias()) +
@@ -486,7 +465,6 @@ public class SQLModelUtils {
 
     /**
      * 修改条件的条件处理
-     *
      * @param condition
      * @param translateNameUtils
      * @param mySearch
@@ -494,9 +472,9 @@ public class SQLModelUtils {
      * @param baseWhereValueList
      * @return
      */
-    public static String commonUpdateConditionHandle(String condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<Object> baseWhereValueList) {
+    public static String commonUpdateConditionHandle(String condition, TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlWhereValue> baseWhereValueList) {
         ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), prefix,2);
-        baseWhereValueList.add(WsBeanUtils.objectToT(mySearch.getValue(), columnBaseEntity.getFieldColumnRelation().getFieldClass()));
+        baseWhereValueList.add(new SqlWhereValue(WsBeanUtils.objectToT(mySearch.getValue(), columnBaseEntity.getFieldColumnRelation().getFieldClass())));
         return SQLModelUtils.guardKeyword(translateNameUtils.getAbbreviation(prefix)) +
                 '.' +
                 SQLModelUtils.guardKeyword(columnBaseEntity.getColumnName()) +
@@ -645,7 +623,6 @@ public class SQLModelUtils {
 
     /**
      * 生成whereSql语句
-     *
      * @param prefix
      * @param mySearch
      * @return
@@ -731,7 +708,6 @@ public class SQLModelUtils {
 
     /**
      * 创建表连接语句
-     *
      * @param tableNickName     主表别名
      * @param tableColumn       主表连接数据库字段
      * @param joinTableName     连接表名
@@ -755,7 +731,11 @@ public class SQLModelUtils {
         return new TableEntity(joinType, joinTableName, sJoinTableNickName, c);
     }
 
-    //创建查询语句
+    /**
+     * 创建查询条件
+     * @param clazz
+     * @return
+     */
     private SqlEntity modelToSqlSelect(Class<?> clazz) {
         SqlEntity sqlEntity = new SqlEntity();
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(clazz);
@@ -843,7 +823,6 @@ public class SQLModelUtils {
 
     /**
      * 判断连接条件是否符合
-     *
      * @param fieldJoinClass
      * @return
      */
@@ -853,7 +832,6 @@ public class SQLModelUtils {
 
     /**
      * 完善FieldJoinClass
-     *
      * @param tableNickName
      * @param fieldJoinClass
      * @param tableRelationList
@@ -941,7 +919,6 @@ public class SQLModelUtils {
 
     /**
      * 单个添加
-     *
      * @param t
      * @param <T>
      * @return
@@ -951,7 +928,7 @@ public class SQLModelUtils {
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
         List<FieldColumnRelation> fieldColumnRelationList = fieldColumnRelationMapper.getFieldColumnRelations();
         List<FieldColumnRelation> validList = new ArrayList<>();
-        List<Object> valueList = new ArrayList<>();
+        List<SqlWhereValue> valueList = new ArrayList<>();
         List<String> columnNameList = new ArrayList<>();
         List<String> placeholderList = new ArrayList<>();
 
@@ -965,7 +942,7 @@ public class SQLModelUtils {
                     columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
                     placeholderList.add(SqlCommon.PLACEHOLDER);
                     validList.add(fieldColumnRelation);
-                    valueList.add(o);
+                    valueList.add(new SqlWhereValue(o));
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -991,7 +968,7 @@ public class SQLModelUtils {
                 columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
                 placeholderList.add(SqlCommon.PLACEHOLDER);
                 validList.add(fieldColumnRelation);
-                valueList.add(o);
+                valueList.add(new SqlWhereValue(o));
             }
         }
 
@@ -1005,7 +982,6 @@ public class SQLModelUtils {
 
     /**
      * 批量添加
-     *
      * @param tList
      * @param <T>
      * @return
@@ -1019,7 +995,7 @@ public class SQLModelUtils {
         List<FieldColumnRelation> validField = new ArrayList<>();
         List<String> columnNameList = new ArrayList<>();
         List<String> placeholderList = new ArrayList<>();
-        List<Object> valueList = new ArrayList<>();
+        List<SqlWhereValue> valueList = new ArrayList<>();
 
 
         List<FieldColumnRelation> idList = fieldColumnRelationMapper.getIds();
@@ -1030,7 +1006,7 @@ public class SQLModelUtils {
                 validField.add(fieldColumnRelation);
                 columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
                 placeholderList.add(SqlCommon.PLACEHOLDER);
-                valueList.add(o);
+                valueList.add(new SqlWhereValue(o));
                 /*if (o != null) {
                     validField.add(fieldColumnRelation);
                     columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
@@ -1061,7 +1037,7 @@ public class SQLModelUtils {
             validField.add(fieldColumnRelation);
             columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
             placeholderList.add(SqlCommon.PLACEHOLDER);
-            valueList.add(o);
+            valueList.add(new SqlWhereValue(o));
             /*if (o != null) {
                 validField.add(fieldColumnRelation);
                 columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
@@ -1088,7 +1064,7 @@ public class SQLModelUtils {
                     }
 
                 }
-                valueList.add(o);
+                valueList.add(new SqlWhereValue(o));
             }
             placeholderList.add(placeholderSql);
         }
@@ -1102,8 +1078,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 修改通过对象
-     *
+     * 通过对象修改
      * @param t
      * @param <T>
      * @return
@@ -1114,7 +1089,7 @@ public class SQLModelUtils {
         List<FieldColumnRelation> columnList = fieldColumnRelationMapper.getFieldColumnRelations();
         List<String> columnStrList = new ArrayList<>();
         List<String> idStrList = new ArrayList<>();
-        List<Object> valueList = new ArrayList<>();
+        List<SqlWhereValue> valueList = new ArrayList<>();
 
         List<FieldColumnRelation> validColumnList = new ArrayList<>();
         List<FieldColumnRelation> validIdList = new ArrayList<>();
@@ -1135,7 +1110,7 @@ public class SQLModelUtils {
             if (isAll || o != null) {
                 String str = guardKeyword(fieldColumnRelation.getColumnName()) + SqlCommon.EQ + SqlCommon.PLACEHOLDER;
                 columnStrList.add(str);
-                valueList.add(o);
+                valueList.add(new SqlWhereValue(o));
                 validColumnList.add(fieldColumnRelation);
             }
         }
@@ -1145,7 +1120,7 @@ public class SQLModelUtils {
                 if (o != null) {
                     String str = guardKeyword(fieldColumnRelation.getColumnName()) + SqlCommon.EQ + SqlCommon.PLACEHOLDER;
                     idStrList.add(str);
-                    valueList.add(o);
+                    valueList.add(new SqlWhereValue(o));
                     validIdList.add(fieldColumnRelation);
                 }
             } catch (IllegalAccessException e) {
@@ -1165,8 +1140,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 修改通过MySearchList
-     *
+     * 通过MySearchList修改
      * @param mySearchList
      * @return
      */
@@ -1238,11 +1212,9 @@ public class SQLModelUtils {
     public DeleteSqlEntity delete() {
         searchListBaseSQLProcessor();
         String searchSql = cacheSqlEntity.getCondition();
-        //int index = searchSql.indexOf(" where ");
         if (WsStringUtils.isBlank(searchSql)) {
             throw new RuntimeException("删除不能没有条件");
         }
-        //searchSql = searchSql.substring(index);
         FieldColumnRelationMapper mapper = analysisClassRelation(mainClass);
         String deleteSql = SqlCommon.DELETE + guardKeyword(translateNameUtils.getAbbreviation(mapper.getNickName())) + SqlCommon.FROM + guardKeyword(mapper.getTableName()) + SqlCommon.SPACE + guardKeyword(translateNameUtils.getAbbreviation(mapper.getNickName())) + SqlCommon.SPACE + searchSql;
         DeleteSqlEntity deleteSqlEntity = new DeleteSqlEntity();
@@ -1326,7 +1298,6 @@ public class SQLModelUtils {
                 ReturnEntity returnEntity = returnEntityMap.get(baseTableName);
                 if (returnEntity != null) {
                     ReturnEntity mainEntity = ReturnEntityUtils.getReturnEntity(idReturnEntityMap, returnEntityMap, returnEntity, baseTableName);
-                    //ReturnEntityUtils.packageReturnEntity(idReturnEntityMap, returnEntityMap, mainEntity, baseTableName);
                     if (returnEntity.equals(mainEntity)) {
                         returnEntityList.add(mainEntity);
                     }
@@ -1353,7 +1324,6 @@ public class SQLModelUtils {
 
     /**
      * 合并生成数据
-     *
      * @param mapList
      * @param <T>
      * @return
@@ -1431,7 +1401,6 @@ public class SQLModelUtils {
 
     /**
      * 把简写转换成详细
-     *
      * @param searchSql
      * @return
      */
@@ -1459,7 +1428,6 @@ public class SQLModelUtils {
 
     /**
      * sql语句动态生成
-     *
      * @param sqlEquation
      * @param prefix
      * @return
@@ -1485,12 +1453,12 @@ public class SQLModelUtils {
                     sb.append(SqlCommon.SPACE);
                 } else if (value instanceof SqlFunction) {
                     SqlFunction sqlFunction = (SqlFunction) value;
-                    ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(sqlFunction.getSqlFunctionValue().get(0), prefix,2);
+                    ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity(sqlFunction.getSqlFunctionValue().get(0), prefix, 2);
                     sb.append(guardKeyword(translateNameUtils.getAbbreviation(sqlFunction.getFunctionValue(columnBaseEntity.getTableNickName()))))
                             .append('.')
                             .append(guardKeyword(columnBaseEntity.getColumnName())).append(SqlCommon.SPACE);
                 } else {
-                    ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity((String) value, prefix,2);
+                    ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity((String) value, prefix, 2);
                     sb.append(guardKeyword(translateNameUtils.getAbbreviation(columnBaseEntity.getTableNickName())))
                             .append('.')
                             .append(guardKeyword(columnBaseEntity.getColumnName())).append(SqlCommon.SPACE);
@@ -1512,7 +1480,7 @@ public class SQLModelUtils {
                         Collection<?> collection = (Collection<?>) value;
                         for (Object o : collection) {
                             symbols.add(SqlCommon.PLACEHOLDER);
-                            baseWhereValueList.add(o);
+                            baseWhereValueList.add(new SqlWhereValue(o));
                         }
                         sb.append(SqlCommon.LEFT_BRACKETS)
                                 .append(WsStringUtils.jointListString(symbols, SqlCommon.COMMA))
@@ -1521,7 +1489,7 @@ public class SQLModelUtils {
                         Object[] values = (Object[]) value;
                         for (Object o : values) {
                             symbols.add(SqlCommon.PLACEHOLDER);
-                            baseWhereValueList.add(o);
+                            baseWhereValueList.add(new SqlWhereValue(o));
                         }
                     }
                     sb.append(SqlCommon.LEFT_BRACKETS)
@@ -1530,7 +1498,7 @@ public class SQLModelUtils {
 
                 } else {
                     sb.append(SqlCommon.PLACEHOLDER).append(SqlCommon.SPACE);
-                    baseWhereValueList.add(value);
+                    baseWhereValueList.add(new SqlWhereValue(value));
                 }
             } else if (type == 4) {
                 MySearchList searchList = (MySearchList) value;
@@ -1545,5 +1513,21 @@ public class SQLModelUtils {
         }
         return sb.toString();
     }
+
+    private static void setSqlWhereValue(MySearch mySearch,List<SqlWhereValue> baseWhereValueList){
+        if (mySearch.getValue() != null) {
+            if (mySearch.getValue() instanceof Collection) {
+                Collection<?> collection = (Collection<?>) mySearch.getValue();
+                baseWhereValueList.addAll(collection.stream().map(SqlWhereValue::new).collect(Collectors.toList()));
+            } else if (mySearch.getValue().getClass().isArray()) {
+                Object[] os = (Object[]) mySearch.getValue();
+                baseWhereValueList.addAll(Arrays.stream(os).map(SqlWhereValue::new).collect(Collectors.toList()));
+            } else {
+                baseWhereValueList.add(new SqlWhereValue(mySearch.getValue()));
+            }
+        }
+
+    }
+
 
 }

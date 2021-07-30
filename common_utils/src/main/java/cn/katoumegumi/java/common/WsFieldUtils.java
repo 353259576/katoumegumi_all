@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common;
 
+import sun.misc.Unsafe;
+
 import java.lang.invoke.SerializedLambda;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -39,6 +41,12 @@ public class WsFieldUtils {
         return field;
     }
 
+    /**
+     * 获取所有非静态的字段
+     *
+     * @param clazz
+     * @return
+     */
     public static Field[] getFieldAll(Class<?> clazz) {
         Set<Field> fieldSet = new HashSet<>();
         Map<String, Field> fieldMap = new HashMap<>();
@@ -65,7 +73,6 @@ public class WsFieldUtils {
                     }
                 }
             }
-            //fieldSet = fieldSet.stream().filter(field -> (!Modifier.isStatic(field.getModifiers()))).collect(Collectors.toSet());
             fieldMap.forEach((s, field) -> {
                 fieldSet.add(field);
             });
@@ -76,7 +83,7 @@ public class WsFieldUtils {
         if (fieldSet.isEmpty()) {
             return null;
         } else {
-            for(Field field:fieldSet){
+            for (Field field : fieldSet) {
                 makeAccessible(field);
             }
             return fieldSet.toArray(new Field[0]);
@@ -84,6 +91,12 @@ public class WsFieldUtils {
     }
 
 
+    /**
+     * 通过方法名获取方法
+     * @param methodName
+     * @param clazz
+     * @return
+     */
     public static Method[] getObjectMethodByName(String methodName, Class<?> clazz) {
         Method[] methods = null;
         Set<Method> methodSet = new HashSet<>();
@@ -96,7 +109,7 @@ public class WsFieldUtils {
             methodSet.add(methods[i]);
         }
         List<Method> methodList = new ArrayList<>();
-        methodSet.parallelStream().forEach(method -> {
+        methodSet.stream().forEach(method -> {
             if (method.getName().equals(methodName)) {
                 methodList.add(method);
             }
@@ -105,6 +118,12 @@ public class WsFieldUtils {
 
     }
 
+    /**
+     * 判断是否为基类的子类
+     * @param child
+     * @param parent
+     * @return
+     */
     public static boolean classCompare(Class<?> child, Class<?> parent) {
         if (parent == null || child == null) {
             return false;
@@ -198,9 +217,13 @@ public class WsFieldUtils {
 
     }
 
-
+    /**
+     * 去除方法名的get set is
+     * @param methodName
+     * @return
+     */
     public static String methodToFieldName(String methodName) {
-        if (methodName.startsWith(METHOD_NAME_GET)) {
+        if (methodName.startsWith(METHOD_NAME_GET) || methodName.startsWith(METHOD_NAME_SET)) {
             return WsStringUtils.firstCharToLowerCase(methodName.substring(3));
         } else if (methodName.startsWith(METHOD_NAME_IS)) {
             return WsStringUtils.firstCharToLowerCase(methodName.substring(2));
@@ -211,25 +234,31 @@ public class WsFieldUtils {
 
 
     public static <T> Field getFieldByName(Class<T> tClass, String fieldName) {
-
-        try {
-
-            List<String> stringList = WsStringUtils.split(fieldName, '.');
-            Iterator<String> iterator = stringList.iterator();
-            String nowName;
-            Class<?> nowC = tClass;
-            Field nowField = null;
-            while (iterator.hasNext()) {
-                nowName = iterator.next();
-                nowField = nowC.getDeclaredField(nowName);
-                nowC = nowField.getType();
+        List<String> stringList = WsStringUtils.split(fieldName, '.');
+        Iterator<String> iterator = stringList.iterator();
+        String nowName;
+        Class<?> nowC = tClass;
+        Field nowField = null;
+        while (iterator.hasNext()) {
+            nowField = null;
+            nowName = iterator.next();
+            Field[] fields = getFieldAll(nowC);
+            if(fields == null){
+                return null;
             }
-            return nowField;
-
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getCause());
+            for(Field field:fields){
+                if(field.getName().equals(nowName)){
+                    nowField = field;
+                    break;
+                }
+            }
+            if(nowField == null){
+                return null;
+            }
+            nowC = nowField.getType();
         }
+        return nowField;
+
         //return null;
 
     }
@@ -245,7 +274,12 @@ public class WsFieldUtils {
         return null;
     }
 
-
+    /**
+     * 获取泛型
+     * @param field
+     * @param <T>
+     * @return
+     */
     public static <T> Class<?> getClassTypeof(Field field) {
         Class<?> tClass = field.getType();
         if (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class)) {
@@ -279,17 +313,16 @@ public class WsFieldUtils {
 
     /**
      * 获得值
+     *
      * @param o
      * @param field
      * @return
      */
     public static Object getValue(Object o, Field field) {
         try {
-            field.setAccessible(true);
             return field.get(o);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return getLastValue(o,field);
+            return getLastValue(o, field);
         }
     }
 
@@ -305,6 +338,7 @@ public class WsFieldUtils {
 
     /**
      * 设置值
+     *
      * @param o
      * @param value
      * @param field
@@ -315,12 +349,21 @@ public class WsFieldUtils {
             return true;
         }
         try {
-            //field.setAccessible(true);
+            if(Modifier.isFinal(field.getModifiers())){
+                Field modifiersField = null;
+                try {
+                    modifiersField = Field.class.getDeclaredField("modifiers");
+                    modifiersField.setAccessible(true);
+                    modifiersField.setInt(field,field.getModifiers() & ~Modifier.FINAL);
+                } catch (NoSuchFieldException e) {
+                    e.printStackTrace();
+                }
+
+            }
             field.set(o, value);
             return true;
         } catch (IllegalAccessException e) {
-            //e.printStackTrace();
-            return setLastValue(o,value,field);
+            return setLastValue(o, value, field);
         }
     }
 

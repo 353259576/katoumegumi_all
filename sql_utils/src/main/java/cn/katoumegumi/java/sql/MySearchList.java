@@ -773,11 +773,11 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.EQP, getColumnName(valueTableName, value));
     }
 
-    public MySearchList eqp(String tableName, SFunction<?, ?> columnFieldName, String valueTableName, SFunction<?, ?> value) {
+    public <T,J> MySearchList eqp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<J, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.EQP, getColumnName(valueTableName, value));
     }
 
-    public MySearchList eqp(String tableName, SFunction<?, ?> columnFieldName, String valueTableName, String value) {
+    public <T> MySearchList eqp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, String value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.EQP, getColumnName(valueTableName, value));
     }
 
@@ -785,11 +785,11 @@ public class MySearchList {
         return eqp(null, columnFieldName, null, value);
     }
 
-    public MySearchList eqp(String columnFieldName, String valueTableName, SFunction<?, ?> value) {
+    public <T> MySearchList eqp(String columnFieldName, String valueTableName, SFunction<T, ?> value) {
         return eqp(null, columnFieldName, valueTableName, value);
     }
 
-    public MySearchList eqp(String columnFieldName, SFunction<?, ?> value) {
+    public <T> MySearchList eqp(String columnFieldName, SFunction<T, ?> value) {
         return eqp(null, columnFieldName, null, value);
     }
 

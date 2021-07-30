@@ -2,6 +2,7 @@ package cn.katoumegumi.java.sql.entity;
 
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.SQLModelUtils;
+import cn.katoumegumi.java.sql.common.SqlCommon;
 
 import java.lang.reflect.Field;
 
@@ -83,11 +84,9 @@ public class ColumnBaseEntity {
 
     /**
      * 获取显示的column的值
-     *
      * @return
      */
     public String getColumnValue() {
         return createColumnName(getAlias(), getColumnName()) + " " + createColumnNickName(getAlias(), getFieldName());
     }
-
 }

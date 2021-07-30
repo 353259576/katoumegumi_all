@@ -9,8 +9,6 @@ import cn.katoumegumi.java.sql.common.TableJoinType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import javafx.scene.control.TableColumn;
-
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

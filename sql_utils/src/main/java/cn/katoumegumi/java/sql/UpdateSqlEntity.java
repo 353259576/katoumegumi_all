@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.sql;
 
+import cn.katoumegumi.java.sql.entity.SqlWhereValue;
+
 import java.util.List;
 
 /***
@@ -13,7 +15,7 @@ public class UpdateSqlEntity {
 
     private List<FieldColumnRelation> idList;
 
-    private List<Object> valueList;
+    private List<SqlWhereValue> valueList;
 
 
     public String getUpdateSql() {
@@ -40,11 +42,11 @@ public class UpdateSqlEntity {
         this.idList = idList;
     }
 
-    public List<Object> getValueList() {
+    public List<SqlWhereValue> getValueList() {
         return valueList;
     }
 
-    public void setValueList(List<Object> valueList) {
+    public void setValueList(List<SqlWhereValue> valueList) {
         this.valueList = valueList;
     }
 }

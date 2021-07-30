@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.sql;
 
+import cn.katoumegumi.java.sql.entity.SqlWhereValue;
+
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,7 +15,7 @@ public class SelectSqlEntity {
 
     private String countSql;
 
-    private List<Object> valueList;
+    private List<SqlWhereValue> valueList;
 
     public String getSelectSql() {
         return selectSql;
@@ -31,11 +33,11 @@ public class SelectSqlEntity {
         this.countSql = countSql;
     }
 
-    public List<Object> getValueList() {
+    public List<SqlWhereValue> getValueList() {
         return valueList;
     }
 
-    public void setValueList(List<Object> valueList) {
+    public void setValueList(List<SqlWhereValue> valueList) {
         this.valueList = valueList;
     }
 
