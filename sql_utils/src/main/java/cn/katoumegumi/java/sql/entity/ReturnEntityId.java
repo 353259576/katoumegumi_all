@@ -12,9 +12,9 @@ import java.util.List;
  */
 public class ReturnEntityId {
 
-    //private String idSign;
-
     private final Object[] idSigns;
+
+    private final int hashCode;
 
     public ReturnEntityId(List<FieldColumnRelation> idList, ReturnEntity returnEntity) {
         int length = idList.size();
@@ -28,12 +28,12 @@ public class ReturnEntityId {
             System.arraycopy(parentEntity.getReturnEntityId().getIdSigns(), 0, idSigns, 0, parentEntity.getReturnEntityId().getIdSigns().length);
             System.arraycopy(valueList, 0, idSigns, parentEntity.getReturnEntityId().getIdSigns().length, length);
         }
+        hashCode = Arrays.hashCode(idSigns);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(idSigns);
-        //return idSign.hashCode();
+        return hashCode;
     }
 
     @Override

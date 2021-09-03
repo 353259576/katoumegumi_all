@@ -484,7 +484,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 查询
+     * 获取查询语句
      * @return
      */
     public SelectSqlEntity select() {
@@ -500,7 +500,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 生成sql语句
+     * 生成查询语句
      * @return
      */
     private String searchListBaseSQLProcessor() {
@@ -610,6 +610,10 @@ public class SQLModelUtils {
         return SqlCommon.SELECT + cacheSqlEntity.getColumnStr() + SqlCommon.SPACE + cacheSqlEntity.getTableStr() + SqlCommon.SPACE + cacheSqlEntity.getCondition() + cacheSqlEntity.getSubjoin();
     }
 
+    /**
+     * 获取返回数据数量查询语句
+     * @return
+     */
     private String searchListBaseCountSQLProcessor() {
         if (cacheSqlEntity == null) {
             searchListBaseSQLProcessor();
@@ -617,6 +621,12 @@ public class SQLModelUtils {
         return SqlCommon.SELECT + "count(*) " + cacheSqlEntity.getTableStr() + SqlCommon.SPACE + cacheSqlEntity.getCondition();
     }
 
+    /**
+     * mysql分页
+     * @param limit
+     * @param selectSql
+     * @return
+     */
     private String mysqlPaging(SqlLimit limit, String selectSql) {
         return selectSql + " limit " + limit.getOffset() + "," + limit.getSize();
     }
@@ -717,7 +727,6 @@ public class SQLModelUtils {
      * @return
      */
     private TableEntity createJoinSql(String tableNickName, String tableColumn, String joinTableName, String joinTableNickName, String joinColumn, TableJoinType joinType, String condition) {
-
         String sJoinTableNickName = translateNameUtils.getAbbreviation(joinTableNickName);
         String sTableNickName = translateNameUtils.getAbbreviation(tableNickName);
         String c = SqlCommon.ON +
@@ -908,8 +917,6 @@ public class SQLModelUtils {
                     }
                 }
             }
-
-
             return fieldJoinClass;
 
 
@@ -1007,18 +1014,10 @@ public class SQLModelUtils {
                 columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
                 placeholderList.add(SqlCommon.PLACEHOLDER);
                 valueList.add(new SqlWhereValue(o));
-                /*if (o != null) {
-                    validField.add(fieldColumnRelation);
-                    columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
-                    placeholderList.add(SqlCommon.PLACEHOLDER);
-                    valueList.add(o);
-                }*/
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
-
-
         for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             Field field = fieldColumnRelation.getField();
 
@@ -1038,12 +1037,6 @@ public class SQLModelUtils {
             columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
             placeholderList.add(SqlCommon.PLACEHOLDER);
             valueList.add(new SqlWhereValue(o));
-            /*if (o != null) {
-                validField.add(fieldColumnRelation);
-                columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
-                placeholderList.add(SqlCommon.PLACEHOLDER);
-                valueList.add(o);
-            }*/
         }
         String placeholderSql = SqlCommon.LEFT_BRACKETS + WsStringUtils.jointListString(placeholderList, SqlCommon.COMMA) + SqlCommon.RIGHT_BRACKETS;
         placeholderList = new ArrayList<>();
@@ -1467,8 +1460,6 @@ public class SQLModelUtils {
                 if (i > 0 && typeList.get(i - 1).equals(2)) {
                     throw new RuntimeException("顺序错误,符号不允许相连");
                 }
-                //SqlEquation.Symbol symbol = (SqlEquation.Symbol) value;
-                //sb.append(symbol.getSymbol()).append(' ');
                 sb.append(value);
             } else if (type == 3) {
                 if (i > 0 && !typeList.get(i - 1).equals(2)) {
