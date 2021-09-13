@@ -9,9 +9,20 @@ import java.util.Objects;
  * 对象参数与数据库列名对应关系
  */
 public class FieldColumnRelation {
+    /**
+     * 是否为id
+     */
     private final boolean id;
+
+    /**
+     * 实体字段名称
+     */
     private final String fieldName;
     private final Field field;
+
+    /**
+     * 对应数据库列名
+     */
     private final String columnName;
     private final Class<?> fieldClass;
 

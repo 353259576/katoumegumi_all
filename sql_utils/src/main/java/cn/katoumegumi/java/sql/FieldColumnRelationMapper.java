@@ -10,10 +10,19 @@ import java.util.*;
  */
 public class FieldColumnRelationMapper {
 
+    /**
+     * 实体名称
+     */
     private final String nickName;
 
+    /**
+     * 表名
+     */
     private final String tableName;
 
+    /**
+     * 表对应实体的class
+     */
     private final Class<?> clazz;
 
     /**
@@ -37,6 +46,9 @@ public class FieldColumnRelationMapper {
      */
     private final Map<Object, Integer> locationMap = new HashMap<>();
 
+    /**
+     * 当使用tableTemplate时，此对象不为null且为该模板的基类
+     */
     private final FieldColumnRelationMapper baseTemplateMapper;
 
     public FieldColumnRelationMapper(String nickName, String tableName, Class<?> clazz) {

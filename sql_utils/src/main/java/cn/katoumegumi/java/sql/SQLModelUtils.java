@@ -90,7 +90,7 @@ public class SQLModelUtils {
         for (TableRelation relation : mySearchList.getJoins()) {
             tableName = relation.getTableNickName();
             if (WsStringUtils.isNotBlank(tableName)) {
-                tableName = translateToTableName(tableName);
+                tableName = translateNameUtils.translateToTableName(tableName);
                 if (tableName.startsWith(prefix)) {
                     if (tableName.length() == prefix.length()) {
                         tableName = null;
@@ -103,7 +103,7 @@ public class SQLModelUtils {
             }
             relation.setTableNickName(tableName);
             if (WsStringUtils.isNotBlank(relation.getJoinTableNickName())) {
-                joinTableName = translateToTableName(relation.getJoinTableNickName());
+                joinTableName = translateNameUtils.translateToTableName(relation.getJoinTableNickName());
                 joinTableName = translateNameUtils.getNoPrefixTableName(joinTableName);
                 relation.setJoinTableNickName(joinTableName);
                 joinTableName = prefix + '.' + joinTableName;
@@ -508,7 +508,6 @@ public class SQLModelUtils {
         FieldColumnRelationMapper fieldColumnRelationMapper;
         if (cacheSqlEntity == null) {
             SqlEntity sqlEntity = modelToSqlSelect(mySearchList.getMainClass());
-            //List<String> joinTableList = sqlEntity.getTableNameList();
             List<TableEntity> joinTableList = sqlEntity.getTableNameList();
             List<TableRelation> list = mySearchList.getJoins();
             fieldColumnRelationMapper = analysisClassRelation(mySearchList.getMainClass());
@@ -603,9 +602,7 @@ public class SQLModelUtils {
             } else {
                 sqlEntity.setSubjoin(selectSql.toString());
             }
-
             cacheSqlEntity = sqlEntity;
-
         }
         return SqlCommon.SELECT + cacheSqlEntity.getColumnStr() + SqlCommon.SPACE + cacheSqlEntity.getTableStr() + SqlCommon.SPACE + cacheSqlEntity.getCondition() + cacheSqlEntity.getSubjoin();
     }
@@ -925,7 +922,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 单个添加
+     * 生成单个insert sql语句
      * @param t
      * @param <T>
      * @return
@@ -964,12 +961,7 @@ public class SQLModelUtils {
             if (sqlInterceptor != null && sqlInterceptor.useCondition(analysisClassRelation(mainClass))) {
                 o = sqlInterceptor.insertFill();
             } else {
-                try {
-                    o = field.get(t);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-
+                o = WsFieldUtils.getValue(t,field);
             }
             if (o != null) {
                 columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
@@ -988,7 +980,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 批量添加
+     * 生成insert sql语句
      * @param tList
      * @param <T>
      * @return
@@ -1026,12 +1018,7 @@ public class SQLModelUtils {
             if (sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper)) {
                 o = sqlInterceptor.insertFill();
             } else {
-                try {
-                    o = field.get(tList.get(0));
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-
+                o = WsFieldUtils.getValue(tList.get(0),field);
             }
             validField.add(fieldColumnRelation);
             columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
@@ -1050,12 +1037,7 @@ public class SQLModelUtils {
                 if (sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper)) {
                     o = sqlInterceptor.insertFill();
                 } else {
-                    try {
-                        o = field.get(tList.get(i));
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-
+                    o = WsFieldUtils.getValue(tList.get(i),field);
                 }
                 valueList.add(new SqlWhereValue(o));
             }
@@ -1071,7 +1053,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 通过对象修改
+     * 生成update sql语句
      * @param t
      * @param <T>
      * @return
@@ -1094,11 +1076,7 @@ public class SQLModelUtils {
             if (sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper)) {
                 o = sqlInterceptor.updateFill();
             } else {
-                try {
-                    o = fieldColumnRelation.getField().get(t);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+                o = WsFieldUtils.getValue(t,fieldColumnRelation.getField());
             }
             if (isAll || o != null) {
                 String str = guardKeyword(fieldColumnRelation.getColumnName()) + SqlCommon.EQ + SqlCommon.PLACEHOLDER;
@@ -1133,7 +1111,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 通过MySearchList修改
+     * 生成update sql语句
      * @param mySearchList
      * @return
      */
@@ -1202,6 +1180,10 @@ public class SQLModelUtils {
         return setStrList;
     }
 
+    /**
+     * 生成delete sql语句
+     * @return
+     */
     public DeleteSqlEntity delete() {
         searchListBaseSQLProcessor();
         String searchSql = cacheSqlEntity.getCondition();
@@ -1216,6 +1198,14 @@ public class SQLModelUtils {
         return deleteSqlEntity;
     }
 
+
+    /**
+     * 合并返回数据
+     *
+     * @param resultSet
+     * @param <T>
+     * @return
+     */
     public <T> List<T> margeMap(ResultSet resultSet) {
         if (WsListUtils.isEmpty(mySearchList.getColumnNameList())) {
             return oneLoopMargeMap(resultSet);
@@ -1233,6 +1223,12 @@ public class SQLModelUtils {
         }
     }
 
+    /**
+     * 合并返回数据
+     * @param resultSet
+     * @param <T>
+     * @return
+     */
     public <T> List<T> oneLoopMargeMap(ResultSet resultSet) {
         try {
             int length = 0;
@@ -1316,7 +1312,7 @@ public class SQLModelUtils {
     }
 
     /**
-     * 合并生成数据
+     * 合并返回数据
      * @param mapList
      * @param <T>
      * @return
@@ -1392,28 +1388,7 @@ public class SQLModelUtils {
         return list;
     }
 
-    /**
-     * 把简写转换成详细
-     * @param searchSql
-     * @return
-     */
-    private String translateToTableName(String searchSql) {
-        String[] strs = WsStringUtils.splitArray(searchSql, '.');
-        String ns;
-        String s;
-        for (int i = 0; i < strs.length; i++) {
-            s = strs[i];
-            if (s.startsWith("{")) {
-                s = s.substring(1, s.length() - 1);
-                strs[i] = s;
-            }
-            ns = translateNameUtils.getParticular(s);
-            if (ns != null) {
-                strs[i] = ns;
-            }
-        }
-        return WsStringUtils.jointListString(strs, ".");
-    }
+
 
     public TranslateNameUtils getTranslateNameUtils() {
         return translateNameUtils;

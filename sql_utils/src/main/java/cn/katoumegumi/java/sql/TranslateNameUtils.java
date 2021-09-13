@@ -19,12 +19,12 @@ public class TranslateNameUtils {
     private final List<String> mainClassNameList = new ArrayList<>();
 
     /**
-     * 简写数据
+     * 简写
      */
     private final Map<String, String> abbreviationMap = new HashMap<>();
 
     /**
-     * 详细数据
+     * 原始名称
      */
     private final Map<String, String> particularMap = new HashMap<>();
 
@@ -149,7 +149,7 @@ public class TranslateNameUtils {
      * 根据查询条件生成列基本信息
      * @param originalFieldName
      * @param prefix
-     * @param type 1 返回的列名 1 查询的列名
+     * @param type 1 返回的列名 2 查询的列名
      * @return
      */
     public ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String prefix,int type) {
@@ -235,5 +235,29 @@ public class TranslateNameUtils {
         }
         return stringBuilder.toString();
 
+    }
+
+
+    /**
+     * 转换sql语句里{}里的字段
+     * @param searchSql
+     * @return
+     */
+    public String translateToTableName(String searchSql) {
+        String[] strs = WsStringUtils.splitArray(searchSql, '.');
+        String ns;
+        String s;
+        for (int i = 0; i < strs.length; i++) {
+            s = strs[i];
+            if (s.startsWith("{")) {
+                s = s.substring(1, s.length() - 1);
+                strs[i] = s;
+            }
+            ns = getParticular(s);
+            if (ns != null) {
+                strs[i] = ns;
+            }
+        }
+        return WsStringUtils.jointListString(strs, ".");
     }
 }

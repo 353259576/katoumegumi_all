@@ -9,9 +9,16 @@ import java.lang.reflect.Field;
  */
 public class FieldJoinClass {
 
+    /**
+     * 是否是数组
+     */
     private final boolean isArray;
 
+    /**
+     * 关联的实体的class
+     */
     private final Class<?> joinClass;
+
 
     private final Field field;
 
