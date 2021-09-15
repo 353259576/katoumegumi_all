@@ -1,7 +1,5 @@
 package cn.katoumegumi.java.common;
 
-import sun.misc.Unsafe;
-
 import java.lang.invoke.SerializedLambda;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;

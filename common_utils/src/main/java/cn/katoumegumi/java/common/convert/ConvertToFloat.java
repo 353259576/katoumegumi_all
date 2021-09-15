@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common.convert;
 
+import cn.katoumegumi.java.common.WsStringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -23,7 +25,7 @@ public class ConvertToFloat implements ConvertBean<Float>{
 
     public Float convertBean(Object bean) {
         String s = ConvertUtils.convert(bean,String.class);
-        return s==null?null:Float.valueOf(s);
+        return WsStringUtils.notHasLength(s)?null:Float.valueOf(s);
     }
 
     public Float convertBean(Date date) {

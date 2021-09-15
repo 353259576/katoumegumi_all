@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.common.convert;
 
+import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.convert.ConvertBean;
 import cn.katoumegumi.java.common.convert.ConvertUtils;
 
@@ -30,7 +31,7 @@ public class ConvertToCharacter implements ConvertBean<Character> {
 
     public Character convertBean(Object bean) {
         String s = ConvertUtils.convert(bean,String.class);
-        return s==null?null:convertBean(s);
+        return WsStringUtils.notHasLength(s)?null:convertBean(s);
     }
 
     @Override

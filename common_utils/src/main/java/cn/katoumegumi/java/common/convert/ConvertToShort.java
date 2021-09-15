@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common.convert;
 
+import cn.katoumegumi.java.common.WsStringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -22,7 +24,7 @@ public class ConvertToShort implements ConvertBean<Short>{
 
     public Short convertBean(Object bean) {
         String s = ConvertUtils.convert(bean,String.class);
-        return s==null?null:Short.valueOf(s);
+        return WsStringUtils.notHasLength(s)?null:Short.valueOf(s);
     }
 
     public Short convertBean(Date date) {

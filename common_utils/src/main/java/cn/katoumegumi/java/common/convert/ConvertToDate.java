@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.common.convert;
 
 import cn.katoumegumi.java.common.WsDateUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -40,7 +41,7 @@ public class ConvertToDate implements ConvertBean<Date>{
 
     public Date convertBean(Object bean) {
         String s = ConvertUtils.convert(bean,String.class);
-        return s==null?null:WsDateUtils.stringToDate(WsDateUtils.dateStringFormat(s),WsDateUtils.LONGTIMESTRING);
+        return WsStringUtils.notHasLength(s)?null:WsDateUtils.stringToDate(WsDateUtils.dateStringFormat(s),WsDateUtils.LONGTIMESTRING);
     }
 
     @Override

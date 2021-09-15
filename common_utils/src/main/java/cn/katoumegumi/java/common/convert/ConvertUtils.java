@@ -16,47 +16,6 @@ import java.util.Map;
 
 public class ConvertUtils {
 
-
-    public static void main(String[] args) {
-        /*Date date = new Date();
-        System.out.println(ConvertUtils.convert(date, BigDecimal.class));
-        System.out.println(ConvertUtils.convert(date, Integer.class));
-        System.out.println(ConvertUtils.convert(date, Long.class));
-        System.out.println(ConvertUtils.convert(date, Double.class));
-        System.out.println(ConvertUtils.convert(date, Date.class));
-        System.out.println(ConvertUtils.convert(date, LocalDate.class));
-        System.out.println(ConvertUtils.convert(date, LocalDateTime.class));
-        System.out.println(ConvertUtils.convert(date, BigInteger.class));
-        System.out.println(ConvertUtils.convert(date, String.class));
-        System.out.println(ConvertUtils.convert(date, Boolean.class));
-        System.out.println(ConvertUtils.convert(date, Character.class));
-        System.out.println(ConvertUtils.convert(date, Short.class));
-        System.out.println(ConvertUtils.convert(date, Byte.class));
-        System.out.println(ConvertUtils.convert(date, Float.class));
-        System.out.println(ConvertUtils.convert(date, java.sql.Date.class));
-        System.out.println(ConvertUtils.convert(date,Long.class));
-        System.out.println(ConvertUtils.convert("162631623",Date.class));
-        System.out.println(ConvertUtils.convert(162631623,LocalDate.class));
-        System.out.println(ConvertUtils.convert(162631623,LocalDateTime.class));*/
-
-        Date date = new Date();
-        int length = 1000000;
-
-        WsDateUtils.getExecutionTime.accept(()->{
-            for (int i = 0; i < length; i++){
-                String s = WsBeanUtils.objectToT(1234,String.class);
-                System.out.println(s);
-            }
-        });
-        WsDateUtils.getExecutionTime.accept(()->{
-            for (int i = 0; i < length; i++){
-                String s = ConvertUtils.convert(1234,String.class);
-                System.out.println(s);
-            }
-        });
-    }
-
-
     private static Class<?> getClass(Class<?> c){
         String className = c.getGenericInterfaces()[0].getTypeName();
         int start = className.indexOf("<");

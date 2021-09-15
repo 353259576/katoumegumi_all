@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common.convert;
 
+import cn.katoumegumi.java.common.WsStringUtils;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -20,7 +22,7 @@ public class ConvertToInteger implements ConvertBean<Integer>{
 
     public Integer convertBean(Object bean) {
         String s = ConvertUtils.convert(bean,String.class);
-        return s==null?null:Integer.valueOf(s);
+        return WsStringUtils.notHasLength(s)?null:Integer.valueOf(s);
     }
 
     public Integer convertBean(Date date) {

@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common.convert;
 
+import cn.katoumegumi.java.common.WsStringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -24,7 +26,7 @@ public class ConvertToDouble implements ConvertBean<Double>{
 
     public Double convertBean(Object bean) {
         String s = ConvertUtils.convert(bean,String.class);
-        return s==null?null:Double.valueOf(s);
+        return WsStringUtils.notHasLength(s)?null:Double.valueOf(s);
     }
 
     public Double convertBean(Date date) {

@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common.convert;
 
+import cn.katoumegumi.java.common.WsStringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -78,7 +80,7 @@ public class ConvertToBigDecimal implements ConvertBean<BigDecimal> {
 
     public BigDecimal convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
-        return s == null ? null : new BigDecimal(s);
+        return WsStringUtils.notHasLength(s) ? null : new BigDecimal(s);
     }
 
     @Override

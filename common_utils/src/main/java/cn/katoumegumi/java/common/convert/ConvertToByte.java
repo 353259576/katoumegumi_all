@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common.convert;
 
+import cn.katoumegumi.java.common.WsStringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -22,7 +24,7 @@ public class ConvertToByte implements ConvertBean<Byte>{
 
     public Byte convertBean(Object bean) {
         String s = ConvertUtils.convert(bean,String.class);
-        return s==null?null:Byte.valueOf(s);
+        return WsStringUtils.notHasLength(s) ?null:Byte.valueOf(s);
     }
 
     public Byte convertBean(Date date) {

@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common.convert;
 
+import cn.katoumegumi.java.common.WsStringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -44,7 +46,7 @@ public class ConvertToLong implements ConvertBean<Long>{
 
     public Long convertBean(Object bean) {
         String o = ConvertUtils.convert(bean,String.class);
-        return o==null?null:Long.valueOf(o);
+        return WsStringUtils.notHasLength(o)?null:Long.valueOf(o);
     }
 
     @Override
