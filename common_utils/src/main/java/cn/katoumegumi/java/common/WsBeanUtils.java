@@ -314,7 +314,7 @@ public class WsBeanUtils {
     }
 
     public static <T> T createObject(Class<T> clazz) {
-        try {
+        /*try {
             return clazz.getConstructor().newInstance();
         } catch (NoSuchMethodException
                 | InstantiationException
@@ -322,7 +322,8 @@ public class WsBeanUtils {
                 | InvocationTargetException e) {
             e.printStackTrace();
             return null;
-        }
+        }*/
+        return (T)WsUnsafeUtils.allocateInstance(clazz);
     }
 
     public static <T> Collection convertToList(Object o, Collection collection, Class<T> tClass) {

@@ -2,10 +2,7 @@ package cn.katoumegumi.java.common;
 
 import java.lang.invoke.SerializedLambda;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,7 +24,6 @@ public class WsFieldUtils {
 
     public static Field getFieldForClass(String name, Class clazz) {
         Field field = null;
-
         for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
             try {
                 field = clazz.getDeclaredField(name);
@@ -35,7 +31,6 @@ public class WsFieldUtils {
                 //e.printStackTrace();
             }
         }
-
         return field;
     }
 
@@ -56,7 +51,6 @@ public class WsFieldUtils {
                 if (!Modifier.isStatic(value.getModifiers())) {
                     fieldMap.put(value.getName(), value);
                 }
-
             }
             for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
                 fields = clazz.getDeclaredFields();
@@ -81,9 +75,6 @@ public class WsFieldUtils {
         if (fieldSet.isEmpty()) {
             return null;
         } else {
-            for (Field field : fieldSet) {
-                makeAccessible(field);
-            }
             return fieldSet.toArray(new Field[0]);
         }
     }
@@ -173,6 +164,12 @@ public class WsFieldUtils {
     }
 
 
+    /**
+     * 获取字段名称
+     * @param supplierFunc
+     * @param <T>
+     * @return
+     */
     public static <T> String getFieldName(SupplierFunc<T> supplierFunc) {
         String n = supplierFunc.getClass().getName();
         return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(() -> {
@@ -189,14 +186,16 @@ public class WsFieldUtils {
                 return null;
             }
         });
-
-
     }
 
+    /**
+     * 获取字段名称
+     * @param sFunction
+     * @param <T>
+     * @return
+     */
     public static <T> String getFieldName(SFunction<T, ?> sFunction) {
-
         String n = sFunction.getClass().getName();
-
         return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(() -> {
             try {
                 Method method = sFunction.getClass().getDeclaredMethod("writeReplace");
@@ -230,7 +229,13 @@ public class WsFieldUtils {
         }
     }
 
-
+    /**
+     * 通过字段名获取字段
+     * @param tClass
+     * @param fieldName
+     * @param <T>
+     * @return
+     */
     public static <T> Field getFieldByName(Class<T> tClass, String fieldName) {
         List<String> stringList = WsStringUtils.split(fieldName, '.');
         Iterator<String> iterator = stringList.iterator();
@@ -256,9 +261,6 @@ public class WsFieldUtils {
             nowC = nowField.getType();
         }
         return nowField;
-
-        //return null;
-
     }
 
 
@@ -303,6 +305,11 @@ public class WsFieldUtils {
 
     }
 
+    /**
+     * 判读字段是不是数组
+     * @param field
+     * @return
+     */
     public static boolean isArrayType(Field field) {
         Class<?> tClass = field.getType();
         return (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class));
@@ -317,21 +324,68 @@ public class WsFieldUtils {
      * @return
      */
     public static Object getValue(Object o, Field field) {
-        try {
-            return field.get(o);
-        } catch (IllegalAccessException e) {
-            return getLastValue(o, field);
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(field.getType().isPrimitive()){
+            Class<?> clazz = field.getType();
+            if(clazz.equals(int.class)){
+                if (Modifier.isVolatile(field.getModifiers())) {
+                    return WsUnsafeUtils.getIntVolatile(o, address);
+                } else {
+                    return WsUnsafeUtils.getInt(o, address);
+                }
+            }else if(clazz.equals(long.class)){
+                if (Modifier.isVolatile(field.getModifiers())) {
+                    return WsUnsafeUtils.getLongVolatile(o, address);
+                } else {
+                    return WsUnsafeUtils.getLong(o, address);
+                }
+            }else if(clazz.equals(double.class)){
+                if (Modifier.isVolatile(field.getModifiers())) {
+                    return WsUnsafeUtils.getDoubleVolatile(o, address);
+                } else {
+                    return WsUnsafeUtils.getDouble(o, address);
+                }
+            }else if(clazz.equals(boolean.class)){
+                if (Modifier.isVolatile(field.getModifiers())) {
+                    return WsUnsafeUtils.getBooleanVolatile(o, address);
+                } else {
+                    return WsUnsafeUtils.getBoolean(o, address);
+                }
+            }else if(clazz.equals(float.class)){
+                if (Modifier.isVolatile(field.getModifiers())) {
+                    return WsUnsafeUtils.getObjectVolatile(o, address);
+                } else {
+                    return WsUnsafeUtils.getObject(o, address);
+                }
+            }else if(clazz.equals(short.class)){
+                if (Modifier.isVolatile(field.getModifiers())) {
+                    return WsUnsafeUtils.getShortVolatile(o, address);
+                } else {
+                    return WsUnsafeUtils.getShort(o, address);
+                }
+            }else if(clazz.equals(byte.class)){
+                if (Modifier.isVolatile(field.getModifiers())) {
+                    return WsUnsafeUtils.getByteVolatile(o, address);
+                } else {
+                    return WsUnsafeUtils.getByte(o, address);
+                }
+            }else if (clazz.equals(char.class)){
+                if (Modifier.isVolatile(field.getModifiers())) {
+                    return WsUnsafeUtils.getCharVolatile(o, address);
+                } else {
+                    return WsUnsafeUtils.getChar(o, address);
+                }
+            }else {
+                throw new RuntimeException("不支持的类型");
+            }
+        }else {
+            if (Modifier.isVolatile(field.getModifiers())) {
+                return WsUnsafeUtils.getObjectVolatile(o, address);
+            } else {
+                return WsUnsafeUtils.getObject(o, address);
+            }
         }
-    }
 
-    private static Object getLastValue(Object o, Field field) {
-        try {
-            makeAccessible(field);
-            return field.get(o);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     /**
@@ -343,50 +397,108 @@ public class WsFieldUtils {
      * @return
      */
     public static boolean setValue(Object o, Object value, Field field) {
-        if (value == null) {
-            return true;
-        }
-        try {
-            if(Modifier.isFinal(field.getModifiers())){
-                Field modifiersField = null;
-                try {
-                    modifiersField = Field.class.getDeclaredField("modifiers");
-                    modifiersField.setAccessible(true);
-                    modifiersField.setInt(field,field.getModifiers() & ~Modifier.FINAL);
-                } catch (NoSuchFieldException e) {
-                    e.printStackTrace();
-                }
-
-            }
-            field.set(o, value);
-            return true;
-        } catch (IllegalAccessException e) {
-            return setLastValue(o, value, field);
-        }
-    }
-
-    private static boolean setLastValue(Object o, Object value, Field field) {
-        if (value == null) {
-            return true;
-        }
-        try {
-            makeAccessible(field);
-            field.set(o, value);
-            return true;
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        if(o == null && !Modifier.isStatic(field.getModifiers())){
             return false;
         }
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(Modifier.isVolatile(field.getModifiers())){
+            WsUnsafeUtils.putObjectVolatile(o,address,value);
+        }else {
+            WsUnsafeUtils.putObject(o,address,value);
+        }
+        return true;
+
+
     }
 
+    public static boolean setValue(Object o, int value, Field field) {
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(Modifier.isVolatile(field.getModifiers())){
+            WsUnsafeUtils.putIntVolatile(o,address,value);
+        }else {
+            WsUnsafeUtils.putInt(o,address,value);
+        }
+        return true;
+    }
+
+    public static boolean setValue(Object o, boolean value, Field field) {
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(Modifier.isVolatile(field.getModifiers())){
+            WsUnsafeUtils.putBooleanVolatile(o,address,value);
+        }else {
+            WsUnsafeUtils.putBoolean(o,address,value);
+        }
+        return true;
+    }
+
+    public static boolean setValue(Object o, char value, Field field) {
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(Modifier.isVolatile(field.getModifiers())){
+            WsUnsafeUtils.putCharVolatile(o,address,value);
+        }else {
+            WsUnsafeUtils.putChar(o,address,value);
+        }
+        return true;
+    }
+
+    public static boolean setValue(Object o, byte value, Field field) {
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(Modifier.isVolatile(field.getModifiers())){
+            WsUnsafeUtils.putByteVolatile(o,address,value);
+        }else {
+            WsUnsafeUtils.putByte(o,address,value);
+        }
+        return true;
+    }
+
+    public static boolean setValue(Object o, short value, Field field) {
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(Modifier.isVolatile(field.getModifiers())){
+            WsUnsafeUtils.putShortVolatile(o,address,value);
+        }else {
+            WsUnsafeUtils.putShort(o,address,value);
+        }
+        return true;
+    }
+
+    public static boolean setValue(Object o, long value, Field field) {
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(Modifier.isVolatile(field.getModifiers())){
+            WsUnsafeUtils.putLongVolatile(o,address,value);
+        }else {
+            WsUnsafeUtils.putLong(o,address,value);
+        }
+        return true;
+    }
+
+    public static boolean setValue(Object o, float value, Field field) {
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(Modifier.isVolatile(field.getModifiers())){
+            WsUnsafeUtils.putFloatVolatile(o,address,value);
+        }else {
+            WsUnsafeUtils.putFloat(o,address,value);
+        }
+        return true;
+    }
+
+    public static boolean setValue(Object o, double value, Field field) {
+        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
+        if(Modifier.isVolatile(field.getModifiers())){
+            WsUnsafeUtils.putDoubleVolatile(o,address,value);
+        }else {
+            WsUnsafeUtils.putDouble(o,address,value);
+        }
+        return true;
+    }
+
+    @SuppressWarnings("deprecation")
     public static void makeAccessible(Field field) {
         if ((!Modifier.isPublic(field.getModifiers()) ||
                 !Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
                 Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
-            field.setAccessible(true);
+            ((AccessibleObject)field).setAccessible(true);
         }
     }
-
 }
 
 
