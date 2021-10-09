@@ -26,6 +26,10 @@ public class ExcelPointLocation {
 
     private CellStyle cellStyle;
 
+    private volatile Object rowValue;
+
+    private volatile Object globalValue;
+
 
     public ExcelPointLocation(Integer columnNum, Integer rowNum,Integer columnSize, String columnName, Cell cell,Row row,Sheet sheet,Workbook workbook) {
         this.columnNum = columnNum;
@@ -75,5 +79,24 @@ public class ExcelPointLocation {
 
     public Integer getColumnSize() {
         return columnSize;
+    }
+
+
+    public Object getRowValue() {
+        return rowValue;
+    }
+
+    public ExcelPointLocation setRowValue(Object rowValue) {
+        this.rowValue = rowValue;
+        return this;
+    }
+
+    public Object getGlobalValue() {
+        return globalValue;
+    }
+
+    public ExcelPointLocation setGlobalValue(Object globalValue) {
+        this.globalValue = globalValue;
+        return this;
     }
 }

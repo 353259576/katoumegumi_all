@@ -6,6 +6,7 @@ import cn.katoumegumi.java.sql.MySearch;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.TableRelation;
 import cn.katoumegumi.java.sql.common.SqlOperator;
+import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

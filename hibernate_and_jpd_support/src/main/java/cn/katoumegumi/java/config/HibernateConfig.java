@@ -3,7 +3,6 @@ package cn.katoumegumi.java.config;
 import cn.katoumegumi.java.hibernate.HibernateDao;
 import cn.katoumegumi.java.properties.HibernateWsProperties;
 import org.hibernate.SessionFactory;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -21,11 +20,8 @@ import java.util.Properties;
 
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({DataSource.class, SessionFactory.class})
-@AutoConfigureAfter({DataSourceConfig.class})
 @EnableConfigurationProperties(value = {HibernateWsProperties.class})
 public class HibernateConfig {
-    /*@Resource
-    private DataSource dataSource;*/
 
     @Resource
     private HibernateWsProperties hibernateWsProperties;

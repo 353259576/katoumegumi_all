@@ -161,18 +161,25 @@ public class ExcelGenerator<T> {
         }
         rowNum++;
 
+        Object globalValue = null;
         for (T t : valueList) {
             row = sheet.createRow(rowNum);
             columnNum = 0;
+            Object rowValue = null;
             for (int i = 0; i < excelColumnPropertyList.size(); i++) {
                 cell = row.createCell(columnNum);
                 columnProperty = excelColumnPropertyList.get(i);
                 if (columnProperty.getExcelCellFill() != null) {
                     ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum, rowNum, columnProperty.getColumnSize(), columnProperty.getColumnName(), cell, row, sheet, workbook);
+                    excelPointLocation.setGlobalValue(globalValue);
+                    excelPointLocation.setRowValue(rowValue);
                     columnProperty.getExcelCellFill().fill(excelPointLocation, t);
+                    globalValue = excelPointLocation.getGlobalValue();
+                    rowValue = excelPointLocation.getRowValue();
                 }
                 columnNum += columnProperty.getColumnSize();
             }
+            rowValue = null;
             rowNum++;
         }
 

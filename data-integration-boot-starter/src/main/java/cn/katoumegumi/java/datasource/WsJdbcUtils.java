@@ -406,6 +406,31 @@ public class WsJdbcUtils {
         return getTPage(mySearchList);
     }
 
+    /**
+     * 添加或保存（只支持单主键）
+     * @param t
+     * @param <T>
+     * @return
+     */
+    public <T> Integer saveOrUpdate(T t){
+        FieldColumnRelationMapper fieldColumnRelationMapper = SQLModelUtils.getFieldColumnRelationMapper(t.getClass());
+        List<FieldColumnRelation> fieldColumnRelations = fieldColumnRelationMapper.getIds();
+        FieldColumnRelation relation = fieldColumnRelations.get(0);
+        Object o = WsFieldUtils.getValue(t,relation.getField());
+        if(o == null){
+            return insert(t);
+        }else {
+            MySearchList mySearchList = MySearchList.create(t.getClass());
+            mySearchList.singleColumnName(relation.getFieldName());
+            mySearchList.eq(relation.getFieldName(),o);
+            Object oldIndex = getTOne(mySearchList);
+            if(oldIndex == null){
+                return insert(t);
+            }else {
+                return update(t);
+            }
+        }
+    }
 
     public JdbcTemplate getJdbcTemplate() {
         return jdbcTemplate;

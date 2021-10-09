@@ -15,6 +15,7 @@
         <module>common_utils</module>
         <module>http_client</module>
         <module>excel_utils</module>
+        <module>hibernate_and_jpd_support</module>
     </modules>
 
     <licenses>
@@ -38,32 +39,24 @@
     <properties>
         <megumi.version>1.0.6-SNAPSHOT</megumi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
-        <spring-cloud.version>Hoxton.SR3</spring-cloud.version>
-        <spring-cloud-alibaba.version>2.2.0.RELEASE</spring-cloud-alibaba.version>
-        <!--<spring-cloud-netflix.version>2.2.0.RELEASE</spring-cloud-netflix.version>-->
-        <!--<spring-cloud-openfeign.version>2.2.2.RELEASE</spring-cloud-openfeign.version>-->
-        <spring-boot-admin.version>2.2.2</spring-boot-admin.version>
-        <spring-data-version>Moore-SR6</spring-data-version>
+        <spring-boot.version>2.5.2</spring-boot.version>
+        <!--<spring-cloud.version>Hoxton.SR3</spring-cloud.version>-->
+        <!--<spring-cloud-alibaba.version>2.2.0.RELEASE</spring-cloud-alibaba.version>-->
+        <spring-data-version>2021.0.5</spring-data-version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <lombok.version>1.18.12</lombok.version>
-        <dubbo-version>2.7.5</dubbo-version>
-        <netty-version>4.1.51.Final</netty-version>
-        <zxing.version>3.4.0</zxing.version>
-        <reactor.version>3.3.4.RELEASE</reactor.version>
-        <mail.version>1.6.2</mail.version>
-        <vertx.version>4.0.0</vertx.version>
-        <druid.version>1.1.21</druid.version>
-        <mysql.version>8.0.19</mysql.version>
-        <hibernate.version>5.4.13.Final</hibernate.version>
-        <seata.version>1.2.0</seata.version>
+        <netty-version>4.1.68.Final</netty-version>
+        <zxing.version>3.4.1</zxing.version>
+        <reactor.version>3.4.10</reactor.version>
+        <vertx.version>4.1.4</vertx.version>
+        <hibernate.version>5.5.7.Final</hibernate.version>
+        <seata.version>1.4.2</seata.version>
         <mybatis.plus.version>3.4.0</mybatis.plus.version>
-        <poi.version>4.1.2</poi.version>
+        <poi.version>5.0.0</poi.version>
         <lang3.vaersion>3.12.0</lang3.vaersion>
         <logback.version>1.2.3</logback.version>
         <hikariCP.version>3.4.5</hikariCP.version>
-        <gson.version>2.8.6</gson.version>
+        <gson.version>2.8.8</gson.version>
         <freemarker.version>2.3.30</freemarker.version>
     </properties>
 
@@ -152,11 +145,12 @@
                 <version>${reactor.version}</version>
             </dependency>
 
-            <dependency>
+            <!--移除druid-->
+            <!--<dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid</artifactId>
                 <version>${druid.version}</version>
-            </dependency>
+            </dependency>-->
 
             <dependency>
                 <groupId>org.hibernate</groupId>
@@ -195,17 +189,17 @@
                 <version>${poi.version}</version>
             </dependency>
 
-            <dependency>
+            <!--<dependency>
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml-schemas</artifactId>
                 <version>${poi.version}</version>
-            </dependency>
+            </dependency>-->
 
-            <dependency>
+            <!--<dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
-            </dependency>
+            </dependency>-->
 
             <dependency>
                 <groupId>com.baomidou</groupId>

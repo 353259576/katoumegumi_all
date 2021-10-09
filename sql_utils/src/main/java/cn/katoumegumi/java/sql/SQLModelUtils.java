@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class SQLModelUtils {
 
     private static final Logger log = LoggerFactory.getLogger(SQLModelUtils.class);
+
     /**
      * 插入参数注入
      */
@@ -1493,6 +1494,15 @@ public class SQLModelUtils {
             }
         }
 
+    }
+
+    /**
+     * 获取mapper
+     * @param clazz
+     * @return
+     */
+    public static FieldColumnRelationMapper getFieldColumnRelationMapper(Class<?> clazz){
+        return FieldColumnRelationMapperFactory.analysisClassRelation(clazz);
     }
 
 
