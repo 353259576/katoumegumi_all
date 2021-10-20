@@ -3,7 +3,7 @@
 =================
 
  1. data-integration-boot-starter 
-- 一个spring的starter包，包含对于jpa和hibernate还有spring jdbc的配置
+- spring的starter包，自动配置WsJdbcUtils,需要启用spirng JdbcTemplate
  2. common_utils
 - 通用工具类
  3. code_generator
@@ -37,30 +37,6 @@
          username: root
          password: 199645
      seata-enable: false
-   redis:
-     enable: true
-     host: 127.0.0.1
-     port: 6379
-     defult-cache-time: 600
-     caches:
-       index1: 100
-     #password: 199645
-   hibernate:
-     dialect: cn.katoumegumi.java.hibernate.ExtendedMySQLDialect
-     scan-package: cn.katoumegumi.java.lx.model
-     enable: true
-     show-sql: true
-     physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-     hbm2ddl: update
-     implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
-     other-config:
-       hibernate.globally_quoted_identifiers: true
-   jpa:
-     packages-to-scan: cn.katoumegumi.java.lx.model
-     generate-ddl: true
-     enable: true
-     mapping-resources: cn.katoumegumi.java.lx.jpa
-     show-sql: true
 ```
 ### 多数据库切换使用 @DataBase(dataBaseName = "") 进行切换
 
@@ -227,60 +203,6 @@ ORDER BY
 	`u`.`name` DESC 
 	LIMIT 0,
 	10
-```
-
-hibernate
-使用hibernate时，引用HibernateDao
-```
-    @Resource
-    private HibernateDao hibernateDao;
-```
-```
-        MySearchList mySearchList = MySearchList.newMySearchList().sort("userDetails.id", "desc");
-        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex", "男").eq(User::getName, "你好"),
-                MySearchList.newMySearchList().eq(user::getPassword, "世界")
-        )
-                .eq(User::getId, 1)
-                .lte(User::getCreateDate, "2019-12-13")
-                .eqp(User::getName, user::getPassword)
-                .sort("id", "ASC")
-                .sort("userDetails.sex", "DESC");
-        List<User> users = hibernateDao.selectValueToList(mySearchList, User.class);
-        return JSON.toJSONString(user);
-
-```
-
-jpa
-```
-@Transactional
-public interface UserJpaDao extends JpaDao<Long, User> {
-
-
-}
-
-```
-```
-@Service
-public class UserServiceImpl extends AbstractJpaService<Long, User, UserJpaDao> implements UserService {
-
-    @Autowired
-    private UserJpaDao userJpaDao;
-}
-```
-```
-public void test(){
-        User user = new User();
-        MySearchList mySearchList = MySearchList.newMySearchList().sort("userDetails.id", "desc");
-        mySearchList.or(MySearchList.newMySearchList().eq("userDetails.sex", "男").eq(user::getName, "你好"),
-                MySearchList.newMySearchList().eq(user::getPassword, "世界")
-        )
-                .eq(user::getId, 1)
-                .lte(user::getCreateDate, "2019-12-13")
-                .eqp(user::getName, user::getPassword)
-                .sort("id", "ASC")
-                .sort("userDetails.sex", "DESC");
-        List<User> users = userService.selectList(mySearchList);
-}
 ```
 
 ![https://www.jetbrains.com/?from=katoumegumi_all][logoBase64Str]
