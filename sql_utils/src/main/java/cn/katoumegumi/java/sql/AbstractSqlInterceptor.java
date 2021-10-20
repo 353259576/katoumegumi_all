@@ -7,8 +7,6 @@ package cn.katoumegumi.java.sql;
  */
 public interface AbstractSqlInterceptor {
 
-    //private final Map<Class<?>, FieldColumnRelation> classFieldMap = new ConcurrentHashMap<>();
-
     /**
      * 是否在查询语句中起作用
      *
@@ -80,15 +78,6 @@ public interface AbstractSqlInterceptor {
      * @return
      */
     public String fieldName();
-
-
-    /*protected void addClassFieldName(Class<?> tClass, FieldColumnRelation fieldColumnRelation) {
-        classFieldMap.put(tClass, fieldColumnRelation);
-    }
-
-    public FieldColumnRelation getFieldColumnRelation(Class<?> tClass) {
-        return classFieldMap.get(tClass);
-    }*/
 
 
 }

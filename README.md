@@ -53,9 +53,8 @@ WsJdbcUtils:
     @Resource
     private WsJdbcUtils jdbcUtils;
 ```
-
+2. 基本查询操作
 ```
-
      MySearchList mySearchList = MySearchList.create(User.class)
              //设置主表别名
              .setAlias("u")
@@ -203,6 +202,90 @@ ORDER BY
 	`u`.`name` DESC 
 	LIMIT 0,
 	10
+```
+3. 支持查询拦截器 对查询，添加，修改操作里的字段做自动插入,使用SqlModelUtils.addSqlInterceptor();添加拦截器。
+```
+/**
+ * sql拦截器
+ *
+ * @author ws
+ */
+public interface AbstractSqlInterceptor {
+    
+    /**
+     * 是否在查询语句中起作用
+     *
+     * @return
+     */
+    default boolean isSelect() {
+        return false;
+    }
+
+    /**
+     * 是否在修改语句中起作用
+     *
+     * @return
+     */
+    default boolean isInsert() {
+        return false;
+    }
+
+    /**
+     * 是否在修改语句中起作用
+     *
+     * @return
+     */
+    default boolean isUpdate() {
+        return false;
+    }
+
+
+    /**
+     * 使用条件
+     *
+     * @param fieldColumnRelationMapper
+     * @return
+     */
+    default boolean useCondition(FieldColumnRelationMapper fieldColumnRelationMapper) {
+        return true;
+    }
+
+    /**
+     * 插入语句自动填充
+     *
+     * @return
+     */
+    default Object insertFill() {
+        return null;
+    }
+
+    /**
+     * 修改语句自动填充
+     *
+     * @return
+     */
+    default Object updateFill() {
+        return null;
+    }
+
+    /**
+     * 查询语句自动填充
+     *
+     * @return
+     */
+    default Object selectFill() {
+        return null;
+    }
+
+    /**
+     * 需要自动注入的属性名称
+     *
+     * @return
+     */
+    public String fieldName();
+
+
+}
 ```
 
 ![https://www.jetbrains.com/?from=katoumegumi_all][logoBase64Str]
