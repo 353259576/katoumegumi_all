@@ -1215,7 +1215,10 @@ public class SQLModelUtils {
             ColumnBaseEntity columnBaseEntity = cacheSqlEntity.getColumnList().get(0);
             try {
                 while (resultSet.next()) {
-                    tList.add(WsBeanUtils.objectToT(resultSet.getObject(1), columnBaseEntity.getField().getType()));
+                    Object o = WsBeanUtils.objectToT(resultSet.getObject(1), columnBaseEntity.getField().getType());
+                    if(o != null){
+                        tList.add(o);
+                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();

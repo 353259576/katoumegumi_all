@@ -63,10 +63,10 @@ public class ${table.entityName} implements Serializable {
     /**
     * ${column.columnRemark}
     */
-        <#if enableMybatisPlus == true>
+        <#if enableHibernate == true>
     @Column(name = "${column.columnName}")
         </#if>
-        <#if enableHibernate == true>
+        <#if enableMybatisPlus == true>
     @TableField(value = "${column.columnName}")
         </#if>
         <#if enableSwagger == true>

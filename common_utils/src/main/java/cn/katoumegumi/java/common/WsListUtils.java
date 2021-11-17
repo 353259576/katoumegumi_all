@@ -101,7 +101,7 @@ public class WsListUtils {
      */
     public static <T> List<T> mergeList(List<T> l1, List<T> l2) {
         if (isEmpty(l1) && isEmpty(l2)) {
-            return null;
+            return Collections.emptyList();
         }
         if (isEmpty(l1)) {
             return l2;
