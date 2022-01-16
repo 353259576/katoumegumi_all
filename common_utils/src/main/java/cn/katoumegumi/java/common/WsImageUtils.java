@@ -223,7 +223,6 @@ public class WsImageUtils {
         int a;
         int rgb;
         int[] rgbsArray = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        long start = System.currentTimeMillis();
         int length = rgbsArray.length;
         for (int i = 0; i < length; ++i) {
             rgb = rgbsArray[i] & 0x00FFFFFF;
@@ -231,12 +230,7 @@ public class WsImageUtils {
             a = oa == 0 ? 0 : alpha << 24;
             rgbsArray[i] = a ^ rgb;
         }
-        long end = System.currentTimeMillis();
-        System.out.println(end - start);
-        WsDateUtils.getExecutionTime.accept(() -> {
-            newBufferedImage.setRGB(0, 0, width, height, rgbsArray, 0, width);
-        });
-
+        newBufferedImage.setRGB(0, 0, width, height, rgbsArray, 0, width);
         return newBufferedImage;
     }
 

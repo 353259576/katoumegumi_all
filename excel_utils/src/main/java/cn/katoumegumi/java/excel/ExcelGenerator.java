@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.excel;
 
 import cn.katoumegumi.java.common.WsListUtils;
+import cn.katoumegumi.java.common.WsStreamUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -116,106 +117,122 @@ public class ExcelGenerator<T> {
         if (WsListUtils.isEmpty(excelColumnPropertyList)) {
             throw new RuntimeException("行配置为空");
         }
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet();
-        int rowNum = 0;
-        Row row = null;
-        Cell cell = null;
-        if (WsStringUtils.isNotBlank(title)) {
-            CellRangeAddress cellAddresses = new CellRangeAddress(0, 0, 0, excelColumnPropertyList.size() - 1);
-            sheet.addMergedRegion(cellAddresses);
-            CellStyle cellStyle = workbook.createCellStyle();
-            cellStyle.setAlignment(HorizontalAlignment.CENTER);
-            if (excelColumnStyle != null) {
-                excelColumnStyle.setStyle(cellStyle);
-            }
-            row = sheet.createRow(rowNum);
-            cell = row.createCell(0);
-            cell.setCellStyle(cellStyle);
-            cell.setCellValue(title);
-            rowNum++;
-        }
-        row = sheet.createRow(rowNum);
-
-
-        ExcelColumnProperty<T> columnProperty = null;
-        int columnNum = 0;
-        for (int i = 0; i < excelColumnPropertyList.size(); i++) {
-            cell = row.createCell(columnNum);
-            columnProperty = excelColumnPropertyList.get(i);
-            if (columnProperty.getColumnSize() > 1) {
-                CellRangeAddress addresses = new CellRangeAddress(rowNum, rowNum, columnNum, columnNum + columnProperty.getColumnSize() - 1);
-                sheet.addMergedRegion(addresses);
-            }
-
-            if (columnProperty.getExcelColumnStyle() != null) {
+        Thread currentThread = Thread.currentThread();
+        Workbook workbook = null;
+        try {
+            workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet();
+            int rowNum = 0;
+            Row row = null;
+            Cell cell = null;
+            if (WsStringUtils.isNotBlank(title)) {
+                CellRangeAddress cellAddresses = new CellRangeAddress(0, 0, 0, excelColumnPropertyList.size() - 1);
+                sheet.addMergedRegion(cellAddresses);
                 CellStyle cellStyle = workbook.createCellStyle();
-                columnProperty.getExcelColumnStyle().setStyle(cellStyle);
+                cellStyle.setAlignment(HorizontalAlignment.CENTER);
+                if (excelColumnStyle != null) {
+                    excelColumnStyle.setStyle(cellStyle);
+                }
+                row = sheet.createRow(rowNum);
+                cell = row.createCell(0);
                 cell.setCellStyle(cellStyle);
+                cell.setCellValue(title);
+                rowNum++;
             }
-            if (columnProperty.getColumnWidth() != null) {
-                sheet.setColumnWidth(columnNum, columnProperty.getColumnWidth());
-            }
-            cell.setCellValue(columnProperty.getColumnName());
-            columnNum += columnProperty.getColumnSize();
-        }
-        rowNum++;
+            checkThread(currentThread);
 
-        Object globalValue = null;
-        for (T t : valueList) {
             row = sheet.createRow(rowNum);
-            columnNum = 0;
-            Object rowValue = null;
+
+
+            ExcelColumnProperty<T> columnProperty = null;
+            int columnNum = 0;
             for (int i = 0; i < excelColumnPropertyList.size(); i++) {
+                checkThread(currentThread);
                 cell = row.createCell(columnNum);
                 columnProperty = excelColumnPropertyList.get(i);
-                if (columnProperty.getExcelCellFill() != null) {
-                    ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum, rowNum, columnProperty.getColumnSize(), columnProperty.getColumnName(), cell, row, sheet, workbook);
-                    excelPointLocation.setGlobalValue(globalValue);
-                    excelPointLocation.setRowValue(rowValue);
-                    columnProperty.getExcelCellFill().fill(excelPointLocation, t);
-                    globalValue = excelPointLocation.getGlobalValue();
-                    rowValue = excelPointLocation.getRowValue();
+                if (columnProperty.getColumnSize() > 1) {
+                    CellRangeAddress addresses = new CellRangeAddress(rowNum, rowNum, columnNum, columnNum + columnProperty.getColumnSize() - 1);
+                    sheet.addMergedRegion(addresses);
                 }
+
+                if (columnProperty.getExcelColumnStyle() != null) {
+                    CellStyle cellStyle = workbook.createCellStyle();
+                    columnProperty.getExcelColumnStyle().setStyle(cellStyle);
+                    cell.setCellStyle(cellStyle);
+                }
+                if (columnProperty.getColumnWidth() != null) {
+                    sheet.setColumnWidth(columnNum, columnProperty.getColumnWidth());
+                }
+                cell.setCellValue(columnProperty.getColumnName());
                 columnNum += columnProperty.getColumnSize();
             }
-            rowValue = null;
             rowNum++;
+
+            Object globalValue = null;
+            for (T t : valueList) {
+                checkThread(currentThread);
+                row = sheet.createRow(rowNum);
+                columnNum = 0;
+                Object rowValue = null;
+                for (int i = 0; i < excelColumnPropertyList.size(); i++) {
+                    checkThread(currentThread);
+                    cell = row.createCell(columnNum);
+                    columnProperty = excelColumnPropertyList.get(i);
+                    if (columnProperty.getExcelCellFill() != null) {
+                        ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum, rowNum, columnProperty.getColumnSize(), columnProperty.getColumnName(), cell, row, sheet, workbook);
+                        excelPointLocation.setGlobalValue(globalValue);
+                        excelPointLocation.setRowValue(rowValue);
+                        columnProperty.getExcelCellFill().fill(excelPointLocation, t);
+                        globalValue = excelPointLocation.getGlobalValue();
+                        rowValue = excelPointLocation.getRowValue();
+                    }
+                    columnNum += columnProperty.getColumnSize();
+                }
+                rowValue = null;
+                rowNum++;
+            }
+
+
+            row = sheet.createRow(rowNum);
+            columnNum = 0;
+            for (int i = 0; i < excelColumnPropertyList.size(); i++) {
+                checkThread(currentThread);
+                ExcelColumnProperty<T> excelColumnProperty = excelColumnPropertyList.get(i);
+                ExcelColumnEndFill columnEndFill = excelColumnProperty.getExcelColumnEndFill();
+                if (columnEndFill != null) {
+                    ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum, rowNum, excelColumnProperty.getColumnSize(), excelColumnProperty.getColumnName(), row.createCell(columnNum), row, sheet, workbook);
+                    columnEndFill.fill(excelPointLocation);
+                }
+                columnNum += excelColumnProperty.getColumnSize();
+            }
+        }catch (InterruptedException e){
+            if(workbook != null){
+                WsStreamUtils.close(workbook);
+            }
+            throw new RuntimeException(e);
         }
 
-
-        row = sheet.createRow(rowNum);
-        columnNum = 0;
-        for (int i = 0; i < excelColumnPropertyList.size(); i++) {
-            ExcelColumnProperty<T> excelColumnProperty = excelColumnPropertyList.get(i);
-            ExcelColumnEndFill columnEndFill = excelColumnProperty.getExcelColumnEndFill();
-            if (columnEndFill != null) {
-                ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum, rowNum, excelColumnProperty.getColumnSize(), excelColumnProperty.getColumnName(), row.createCell(columnNum), row, sheet, workbook);
-                columnEndFill.fill(excelPointLocation);
-            }
-            columnNum += excelColumnProperty.getColumnSize();
+        if(workbook == null){
+            return new byte[0];
         }
 
         byte[] returnBytes = null;
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();){
             workbook.write(byteArrayOutputStream);
             returnBytes = byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                workbook.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                byteArrayOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
+        WsStreamUtils.close(workbook);
         return returnBytes;
     }
+
+
+    public void checkThread(Thread thread) throws InterruptedException {
+        if(!thread.isInterrupted()){
+            throw new InterruptedException("当前线程已被标记为中断，excel生成终止");
+        }
+    }
+
 
 }

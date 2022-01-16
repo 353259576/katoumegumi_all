@@ -6,11 +6,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class WsDateUtils {
 
@@ -31,12 +29,15 @@ public class WsDateUtils {
     /**
      * 获取一段程序的执行时间
      */
-    public static final Consumer<WsRun> getExecutionTime = wsRun -> {
+    public static final Function<WsRun,Long> getExecutionTime = wsRun -> {
         long start = System.currentTimeMillis();
         wsRun.run();
         long end = System.currentTimeMillis();
-        System.out.println("执行时间为：" + (end - start));
+        return end - start;
     };
+
+    private static final ThreadLocal<Map<String,SimpleDateFormat>> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<>();
+
     private static final Long SECONDS = 1000L;
     private static final Long MINUTES = 60L * SECONDS;
     private static final Long HOUR = 60L * MINUTES;
@@ -74,7 +75,7 @@ public class WsDateUtils {
     public static Date stringToDate(String date, String mode) {
         try {
             date = dateStringFormat(date);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mode);
+            SimpleDateFormat simpleDateFormat = getDateFormat(mode);
             return simpleDateFormat.parse(date);
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,7 +91,7 @@ public class WsDateUtils {
     public static Date objectToDate(Object date) {
         try {
             String dateString = objectDateFormatString(date);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(LONGTIMESTRING);
+            SimpleDateFormat simpleDateFormat = getDateFormat(LONGTIMESTRING);
             return simpleDateFormat.parse(dateString);
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,7 +101,7 @@ public class WsDateUtils {
     }
 
     public static String dateToString(Date date, String dateType) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateType);
+        SimpleDateFormat simpleDateFormat = getDateFormat(dateType);
         return simpleDateFormat.format(date);
     }
 
@@ -255,5 +256,14 @@ public class WsDateUtils {
                 throw new IllegalArgumentException("length [1,5]");
         }
         return longs;
+    }
+
+    public static SimpleDateFormat getDateFormat(String pattern){
+        Map<String,SimpleDateFormat> stringSimpleDateFormatMap = DATE_FORMAT_THREAD_LOCAL.get();
+        if(stringSimpleDateFormatMap == null){
+            stringSimpleDateFormatMap = new HashMap<>();
+            DATE_FORMAT_THREAD_LOCAL.set(stringSimpleDateFormatMap);
+        }
+        return stringSimpleDateFormatMap.computeIfAbsent(pattern, SimpleDateFormat::new);
     }
 }
