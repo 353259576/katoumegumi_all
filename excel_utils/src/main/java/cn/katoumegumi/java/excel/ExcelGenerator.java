@@ -229,7 +229,7 @@ public class ExcelGenerator<T> {
 
 
     public void checkThread(Thread thread) throws InterruptedException {
-        if(!thread.isInterrupted()){
+        if(thread.isInterrupted()){
             throw new InterruptedException("当前线程已被标记为中断，excel生成终止");
         }
     }
