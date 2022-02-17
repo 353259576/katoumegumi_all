@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 </#if>
 import lombok.Data;
+import lombok.experimental.Accessors;
 <#if enableHibernate == true>
 import javax.persistence.*;
 </#if>
@@ -29,6 +30,7 @@ import ${cl.getName()};
 @ApiModel(value = "${table.tableRemark}实体类")
 </#if>
 @Data
+@Accessors(chain = true)
 public class ${table.entityName} implements Serializable {
 
     private static final long serialVersionUID = 1L;

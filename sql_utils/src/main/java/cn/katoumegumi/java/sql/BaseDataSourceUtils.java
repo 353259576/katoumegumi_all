@@ -3,6 +3,7 @@ package cn.katoumegumi.java.sql;
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStreamUtils;
+import cn.katoumegumi.java.sql.entity.JdkResultSet;
 import cn.katoumegumi.java.sql.entity.SqlWhereValue;
 
 import javax.sql.DataSource;
@@ -42,7 +43,7 @@ public class BaseDataSourceUtils {
             }
             resultSet = preparedStatement.executeQuery();
 
-            return (List<T>) sqlModelUtils.margeMap(resultSet);
+            return (List<T>) sqlModelUtils.margeMap(new JdkResultSet(resultSet));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {

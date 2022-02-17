@@ -1207,7 +1207,7 @@ public class SQLModelUtils {
      * @param <T>
      * @return
      */
-    public <T> List<T> margeMap(ResultSet resultSet) {
+    public <T> List<T> margeMap(WsResultSet resultSet) {
         if (WsListUtils.isEmpty(mySearchList.getColumnNameList())) {
             return oneLoopMargeMap(resultSet);
         } else {
@@ -1233,14 +1233,14 @@ public class SQLModelUtils {
      * @param <T>
      * @return
      */
-    public <T> List<T> oneLoopMargeMap(ResultSet resultSet) {
+    public <T> List<T> oneLoopMargeMap(WsResultSet resultSet) {
         try {
-            int length = 0;
             int classNum = translateNameUtils.locationMapperSize();
-            ResultSetMetaData resultSetMetaData = null;
+            //ResultSetMetaData resultSetMetaData = null;
 
-            resultSetMetaData = resultSet.getMetaData();
-            length = resultSetMetaData.getColumnCount();
+            //resultSetMetaData = resultSet.getMetaData();
+            //length = resultSetMetaData.getColumnCount();
+            final int length = resultSet.getColumnCount();
 
             if (length == 0) {
                 return new ArrayList<>(0);
@@ -1256,7 +1256,7 @@ public class SQLModelUtils {
 
             String columnName = null;
             for (int i = 0; i < length; i++) {
-                columnName = resultSetMetaData.getColumnLabel(i + 1);
+                columnName = resultSet.getColumnLabel(i + 1);
                 List<String> nameList = WsStringUtils.split(columnName, '.');
                 nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
                 FieldColumnRelationMapper mapper = translateNameUtils.getLocalMapper(nameList.get(0));

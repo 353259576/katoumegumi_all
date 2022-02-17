@@ -5,6 +5,7 @@ import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.*;
+import cn.katoumegumi.java.sql.entity.JdkResultSet;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import cn.katoumegumi.java.sql.entity.SqlWhereValue;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -12,6 +13,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ArgumentPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -291,17 +293,16 @@ public class WsJdbcUtils {
     }
 
     private <T> List<T> handleJdbcReturnValue(String sql, List finalList, SQLModelUtils sqlModelUtils) {
-        return jdbcTemplate.query(sql, finalList.toArray(), new ResultSetExtractor<List<T>>() {
+        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(finalList.toArray()), new ResultSetExtractor<List<T>>() {
             @Override
-            public List<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
-                List<T> list = sqlModelUtils.margeMap(rs);
-                return list;
+            public List<T> extractData(ResultSet rs) throws DataAccessException {
+                return sqlModelUtils.margeMap(new JdkResultSet(rs));
             }
         });
     }
 
 
-    private List handleJdbcReturnValue(String sql, List finalList) {
+/*    private List handleJdbcReturnValue(String sql, List finalList) {
 
         List<String> nameList = new ArrayList<>();
 
@@ -324,7 +325,7 @@ public class WsJdbcUtils {
             //return valueList;
         });
         return list;
-    }
+    }*/
 
     public <T> List<T> getListT(T t) {
         MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);

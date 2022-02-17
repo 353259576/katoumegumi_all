@@ -16,6 +16,7 @@
         <module>http_client</module>
         <module>excel_utils</module>
         <module>hibernate_and_jpd_support</module>
+        <module>vertx-mysql-client-support</module>
     </modules>
 
     <licenses>
@@ -58,6 +59,7 @@
         <hikariCP.version>3.4.5</hikariCP.version>
         <gson.version>2.8.8</gson.version>
         <freemarker.version>2.3.30</freemarker.version>
+        <vertx.version>4.2.4</vertx.version>
     </properties>
 
 
@@ -211,6 +213,18 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-extension</artifactId>
                 <version>${mybatis.plus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-core</artifactId>
+                <version>${vertx.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-jdbc-client</artifactId>
+                <version>${vertx.version}</version>
             </dependency>
         </dependencies>
 
