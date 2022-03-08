@@ -183,29 +183,6 @@ public class FieldColumnRelationMapperFactory {
             } else {
                 boolean isArray = WsFieldUtils.isArrayType(field);
                 Class<?> joinClass = WsFieldUtils.getClassTypeof(field);
-                /*Class<?> joinClass = field.getType();
-                if (WsFieldUtils.classCompare(field.getType(), Collection.class)) {
-                    String className = field.getGenericType().getTypeName();
-                    className = className.substring(className.indexOf("<") + 1, className.lastIndexOf(">"));
-                    try {
-                        joinClass = Class.forName(className);
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("不存在的类");
-                    }
-                    isArray = true;
-                } else if (field.getType().isArray()) {
-                    String className = field.getGenericType().getTypeName();
-                    className = className.substring(0, className.length() - 2);
-                    try {
-                        joinClass = Class.forName(className);
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("不存在的类");
-                    }
-                    isArray = true;
-                }*/
-
                 FieldColumnRelationMapper mapper = analysisClassRelation(joinClass);
                 FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
                 fieldJoinClass.setNickName(field.getName());

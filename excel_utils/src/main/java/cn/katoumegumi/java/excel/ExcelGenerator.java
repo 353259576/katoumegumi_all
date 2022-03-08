@@ -5,6 +5,7 @@ import cn.katoumegumi.java.common.WsStreamUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
@@ -120,7 +121,7 @@ public class ExcelGenerator<T> {
         Thread currentThread = Thread.currentThread();
         Workbook workbook = null;
         try {
-            workbook = new XSSFWorkbook();
+            workbook = new SXSSFWorkbook();
             Sheet sheet = workbook.createSheet();
             int rowNum = 0;
             Row row = null;
