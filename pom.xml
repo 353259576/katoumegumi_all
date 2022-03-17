@@ -41,8 +41,6 @@
         <megumi.version>1.0.6-SNAPSHOT</megumi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>2.5.2</spring-boot.version>
-        <!--<spring-cloud.version>Hoxton.SR3</spring-cloud.version>-->
-        <!--<spring-cloud-alibaba.version>2.2.0.RELEASE</spring-cloud-alibaba.version>-->
         <spring-data-version>2021.0.5</spring-data-version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
