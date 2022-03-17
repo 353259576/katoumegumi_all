@@ -46,10 +46,10 @@
         <spring-data-version>2021.0.5</spring-data-version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <netty-version>4.1.68.Final</netty-version>
+        <netty-version>4.1.74.Final</netty-version>
         <zxing.version>3.4.1</zxing.version>
         <reactor.version>3.4.10</reactor.version>
-        <vertx.version>4.1.4</vertx.version>
+        <vertx.version>4.2.6</vertx.version>
         <hibernate.version>5.5.7.Final</hibernate.version>
         <seata.version>1.4.2</seata.version>
         <mybatis.plus.version>3.4.0</mybatis.plus.version>
