@@ -32,6 +32,21 @@ public class Encryption {
     private static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 
+    public static void main(String[] args) {
+        /*ProviderList list = Providers.getProviderList();
+        list.providers().forEach(provider -> {
+            System.out.println(provider.getName());
+        });*/
+
+        //Security.getAlgorithms("Mac").forEach(System.out::println);
+        //Security.getAlgorithms("MessageDigest").forEach(System.out::println);
+        //Security.getAlgorithms("SecretKeyFactory").forEach(System.out::println);
+        //Security.getAlgorithms("Cipher").forEach(System.out::println);
+        //Security.getAlgorithms("KeyFactory").forEach(System.out::println);
+        //Security.getAlgorithms("KeyPairGenerator").forEach(System.out::println);
+    }
+
+
     //*****************************************************************************************************
     public static String desEncoder(String str, String password) {
         try {
@@ -80,7 +95,7 @@ public class Encryption {
     public static String sha1Encoder(String str) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
-            messageDigest.update(str.getBytes("UTF-8"));
+            messageDigest.update(str.getBytes(StandardCharsets.UTF_8));
             byte bytes[] = messageDigest.digest();
             return byteHexToString(bytes);
         } catch (Exception e) {
@@ -98,16 +113,32 @@ public class Encryption {
      */
     public static String hmacSha1Encoder(String str, String key) {
         try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), "HmacSHA1");
             Mac mac = Mac.getInstance("HmacSHA1");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), mac.getAlgorithm());
             mac.init(secretKeySpec);
-            byte bytes[] = mac.doFinal(str.getBytes());
+            byte[] bytes = mac.doFinal(str.getBytes());
             return byteHexToString(bytes);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
+
+
+    public static String hmacSha256Encoder(String str, String key){
+        try {
+            Mac mac = Mac.getInstance("HMACSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), mac.getAlgorithm());
+            mac.init(secretKeySpec);
+            byte[] bytes = mac.doFinal(str.getBytes());
+            return byteHexToString(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 
 
     //***********************************************************************************************************
@@ -163,14 +194,11 @@ public class Encryption {
 
     public static byte[] signECByte(String str, String privateKeyString) {
         try {
-            //KeyStore keyStore = KeyStore.getInstance(PRIVATE_KEY);
             PrivateKey privateKey = getECPrivateKey(privateKeyString);
             Signature signature = Signature.getInstance("SHA256withECDSA");
             signature.initSign(privateKey);
-            signature.update(str.getBytes("UTF-8"));
-            byte bytes[] = signature.sign();
-            //return Base64.getEncoder().encodeToString(bytes);
-            return bytes;
+            signature.update(str.getBytes(StandardCharsets.UTF_8));
+            return signature.sign();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -184,27 +212,11 @@ public class Encryption {
 
     public static boolean verifyEC(String str, String publicKeyString, String sign) {
         try {
-
-            //ecurity.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-
-            //另一种方式获取publicKey
-            /*Reader reader = new CharArrayReader(publicKeyString.toCharArray());
-            PEMParser parser = new PEMParser(reader);
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-            Object obj = parser.readObject();
-            parser.close();
-            SubjectPublicKeyInfo subjectPublicKeyInfo = (SubjectPublicKeyInfo)obj;
-            PublicKey publicKey  = converter.getPublicKey(subjectPublicKeyInfo);*/
-            //byte[] signatureBytes = Base64.getEncoder().encode(str.getBytes("UTF-8"));
-
-
             PublicKey publicKey = getECPublicKey(publicKeyString);
             Signature signature = Signature.getInstance("SHA256withECDSA");
             signature.initVerify(publicKey);
             signature.update(str.getBytes(StandardCharsets.UTF_8));
-            boolean k = signature.verify(Base64.getDecoder().decode(sign));
-            //boolean k = signature.verify(Base64Url.base64DecodeUrl(sign.getBytes("UTF-8")));
-            return k;
+            return signature.verify(Base64.getDecoder().decode(sign));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -215,7 +227,6 @@ public class Encryption {
 
     /**
      * md5加密
-     *
      * @param str
      * @return
      */

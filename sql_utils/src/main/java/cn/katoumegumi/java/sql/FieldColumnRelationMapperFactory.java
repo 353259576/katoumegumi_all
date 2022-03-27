@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.sql;
 
+import ch.qos.logback.core.util.SystemInfo;
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
@@ -9,10 +10,13 @@ import cn.katoumegumi.java.sql.common.TableJoinType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -27,8 +31,11 @@ public class FieldColumnRelationMapperFactory {
      * 缓存实体对应的对象属性与列名的关联
      */
     private static final Map<Class<?>, FieldColumnRelationMapper> MAPPER_MAP = new ConcurrentHashMap<>();
+
+    private static final Map<Class<?>, FieldColumnRelationMapper> INCOMPLETE_MAPPER_MAP = new ConcurrentHashMap<>();
+
     private static final Map<Class<?>, CountDownLatch> CLASS_COUNT_DOWN_LATCH_MAP = new ConcurrentHashMap<>();
-    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(0, 16,0L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(0, 200, 0L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), r -> {
         Thread thread = new Thread(r);
         thread.setDaemon(true);
         thread.setName("sqlUtils mapper生成线程");
@@ -40,23 +47,33 @@ public class FieldColumnRelationMapperFactory {
      */
     public static boolean fieldNameChange = true;
 
+    public static FieldColumnRelationMapper analysisClassRelation(Class<?> clazz) {
+        return analysisClassRelation(clazz, false);
+    }
+
     /**
      * 解析实体对象
      *
      * @param clazz
      * @return
      */
-    public static FieldColumnRelationMapper analysisClassRelation(Class<?> clazz) {
+    public static FieldColumnRelationMapper analysisClassRelation(Class<?> clazz, boolean allowIncomplete) {
         FieldColumnRelationMapper fieldColumnRelationMapper = MAPPER_MAP.get(clazz);
         if (fieldColumnRelationMapper != null) {
             return fieldColumnRelationMapper;
+        }
+        if (allowIncomplete) {
+            fieldColumnRelationMapper = INCOMPLETE_MAPPER_MAP.get(clazz);
+            if (fieldColumnRelationMapper != null) {
+                return fieldColumnRelationMapper;
+            }
         }
         CountDownLatch countDownLatch = CLASS_COUNT_DOWN_LATCH_MAP.computeIfAbsent(clazz, c -> {
             CountDownLatch cdl = new CountDownLatch(1);
             EXECUTOR_SERVICE.execute(() -> {
                 try {
                     TableTemplate tableTemplate = clazz.getAnnotation(TableTemplate.class);
-                    if(tableTemplate == null) {
+                    if (tableTemplate == null) {
                         Annotation annotation = clazz.getAnnotation(Entity.class);
                         if (annotation == null) {
                             annotation = clazz.getAnnotation(Table.class);
@@ -68,45 +85,61 @@ public class FieldColumnRelationMapperFactory {
                             mapper = mybatisPlusAnalysisClassRelation(clazz);
                         }
                         MAPPER_MAP.put(c, mapper);
-                    }else {
+                    } else {
                         Class<?> templateClass = tableTemplate.value();
                         FieldColumnRelationMapper baseMapper = analysisClassRelation(templateClass);
                         Field[] fields = WsFieldUtils.getFieldAll(clazz);
-                        if(WsListUtils.isNotEmpty(fields)) {
-                            FieldColumnRelationMapper mapper = new FieldColumnRelationMapper(baseMapper.getNickName(),baseMapper.getTableName(),clazz,baseMapper);
+                        if (WsListUtils.isNotEmpty(fields)) {
+                            FieldColumnRelationMapper mapper = new FieldColumnRelationMapper(baseMapper.getNickName(), baseMapper.getTableName(), clazz, baseMapper);
+
+                            List<Field> baseTypeFieldList = new ArrayList<>();
+                            List<Field> joinClassFieldList = new ArrayList<>();
+
                             for (Field field : fields) {
-                                Transient annotation = field.getAnnotation(Transient.class);
-                                if(annotation != null){
+                                if (ignoreField(field)) {
                                     continue;
                                 }
                                 if (WsBeanUtils.isBaseType(field.getType())) {
+                                    baseTypeFieldList.add(field);
+                                } else {
+                                    joinClassFieldList.add(field);
+                                }
+                            }
+
+                            if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
+                                for (Field field : baseTypeFieldList) {
                                     FieldColumnRelation templateRelation = baseMapper.containsFieldColumnRelationByFieldName(field.getName());
                                     if (templateRelation != null) {
                                         FieldColumnRelation relation = new FieldColumnRelation(templateRelation.isId(), field.getName(), field, templateRelation.getColumnName(), field.getType());
-                                        if(relation.isId()) {
+                                        if (relation.isId()) {
                                             mapper.getIds().add(relation);
-                                        }else {
+                                        } else {
                                             mapper.getFieldColumnRelations().add(relation);
                                         }
-                                        mapper.putFieldColumnRelationMap(relation.getFieldName(),relation);
+                                        mapper.putFieldColumnRelationMap(relation.getFieldName(), relation);
                                     }
-                                } else {
+                                }
+                            }
+                            INCOMPLETE_MAPPER_MAP.put(c, mapper);
+                            if (WsListUtils.isNotEmpty(joinClassFieldList)) {
+                                for (Field field : joinClassFieldList) {
                                     Class<?> joinClass = WsFieldUtils.getClassTypeof(field);
-                                    FieldJoinClass fieldJoinClass = new FieldJoinClass(WsBeanUtils.isArray(field.getType()),joinClass,field);
+                                    FieldJoinClass fieldJoinClass = new FieldJoinClass(WsBeanUtils.isArray(field.getType()), joinClass, field);
                                     fieldJoinClass.setNickName(field.getName());
                                     fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
                                     mapper.getFieldJoinClasses().add(fieldJoinClass);
                                 }
                             }
                             mapper.markSignLocation();
-                            MAPPER_MAP.put(c,mapper);
+                            MAPPER_MAP.put(c, mapper);
+                            INCOMPLETE_MAPPER_MAP.remove(c);
                         }
 
                     }
-                }catch (Throwable e){
+                } catch (Throwable e) {
                     e.printStackTrace();
                     throw e;
-                }finally {
+                } finally {
                     CLASS_COUNT_DOWN_LATCH_MAP.remove(c);
                     cdl.countDown();
                 }
@@ -117,7 +150,7 @@ public class FieldColumnRelationMapperFactory {
             return cdl;
         });
         try {
-            boolean k = countDownLatch.await(1, TimeUnit.MINUTES);
+            boolean k = countDownLatch.await(3, TimeUnit.MINUTES);
             if (k) {
                 fieldColumnRelationMapper = MAPPER_MAP.get(clazz);
                 if (fieldColumnRelationMapper == null) {
@@ -140,7 +173,7 @@ public class FieldColumnRelationMapperFactory {
      * @return
      */
     private static FieldColumnRelationMapper hibernateAnalysisClassRelation(Class<?> clazz) {
-        if(!check(clazz)){
+        if (ignoreClass(clazz)) {
             return null;
         }
         Table table = clazz.getAnnotation(Table.class);
@@ -153,37 +186,39 @@ public class FieldColumnRelationMapperFactory {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz);
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
+
+        List<Field> baseTypeFieldList = new ArrayList<>();
+        List<Field> joinClassFieldList = new ArrayList<>();
+
         for (Field field : fields) {
-            //field.setAccessible(true);
-            Transient aTransient = field.getAnnotation(Transient.class);
-            if (aTransient != null) {
+            if (ignoreField(field)) {
                 continue;
             }
-
             if (WsBeanUtils.isBaseType(field.getType())) {
-                boolean isId = false;
-                Id id = field.getAnnotation(Id.class);
-                if (id != null) {
-                    isId = true;
-                }
-                Column column = field.getAnnotation(Column.class);
-                String columnName = null;
-                if (column == null || WsStringUtils.isBlank(column.name())) {
-                    columnName = getChangeColumnName(field.getName());
-                } else {
-                    columnName = column.name();
-                }
-                FieldColumnRelation fieldColumnRelation = new FieldColumnRelation(isId, field.getName(), field, columnName, field.getType());
+                baseTypeFieldList.add(field);
+            } else {
+                joinClassFieldList.add(field);
+            }
+        }
+        if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
+            for (Field field : baseTypeFieldList) {
+                FieldColumnRelation fieldColumnRelation = createFieldColumnRelation(field);
                 fieldColumnRelationMapper.putFieldColumnRelationMap(field.getName(), fieldColumnRelation);
-                if (isId) {
+                if (fieldColumnRelation.isId()) {
                     fieldColumnRelationMapper.getIds().add(fieldColumnRelation);
                 } else {
                     fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
                 }
-            } else {
+            }
+        }
+
+        INCOMPLETE_MAPPER_MAP.put(clazz, fieldColumnRelationMapper);
+
+        if (WsListUtils.isNotEmpty(joinClassFieldList)) {
+            for (Field field : joinClassFieldList) {
                 boolean isArray = WsFieldUtils.isArrayType(field);
                 Class<?> joinClass = WsFieldUtils.getClassTypeof(field);
-                FieldColumnRelationMapper mapper = analysisClassRelation(joinClass);
+                FieldColumnRelationMapper mapper = analysisClassRelation(joinClass, true);
                 FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
                 fieldJoinClass.setNickName(field.getName());
                 fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
@@ -213,6 +248,7 @@ public class FieldColumnRelationMapperFactory {
         }
         fieldColumnRelationMapper.markSignLocation();
         MAPPER_MAP.put(clazz, fieldColumnRelationMapper);
+        INCOMPLETE_MAPPER_MAP.remove(clazz);
         return fieldColumnRelationMapper;
     }
 
@@ -237,40 +273,35 @@ public class FieldColumnRelationMapperFactory {
         FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz);
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         assert fields != null;
+
+        List<Field> baseTypeFieldList = new ArrayList<>();
+        List<Field> joinClassFieldList = new ArrayList<>();
+
         for (Field field : fields) {
-            Transient aTransient = field.getAnnotation(Transient.class);
-            if (aTransient != null) {
+            if (ignoreField(field)) {
                 continue;
             }
-            field.setAccessible(true);
             if (WsBeanUtils.isBaseType(field.getType())) {
-                TableId id = field.getAnnotation(TableId.class);
-                FieldColumnRelation fieldColumnRelation = null;
-                if (id == null) {
-                    TableField column = field.getAnnotation(TableField.class);
-                    if (column != null && !column.exist()) {
-                        continue;
-                    }
-                    String columnName = null;
-                    if (column == null || WsStringUtils.isBlank(column.value())) {
-                        columnName = getChangeColumnName(field.getName());
-                    } else {
-                        columnName = column.value();
-                    }
-                    fieldColumnRelation = new FieldColumnRelation(false, field.getName(), field, columnName, field.getType());
-                    fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
-                } else {
-                    String columnName = null;
-                    if (WsStringUtils.isBlank(id.value())) {
-                        columnName = getChangeColumnName(getChangeColumnName(field.getName()));
-                    } else {
-                        columnName = id.value();
-                    }
-                    fieldColumnRelation = new FieldColumnRelation(true, field.getName(), field, columnName, field.getType());
+                baseTypeFieldList.add(field);
+            } else {
+                joinClassFieldList.add(field);
+            }
+        }
+
+        if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
+            for (Field field : baseTypeFieldList) {
+                FieldColumnRelation fieldColumnRelation = createFieldColumnRelation(field);
+                if(fieldColumnRelation.isId()){
                     fieldColumnRelationMapper.getIds().add(fieldColumnRelation);
+                }else {
+                    fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
                 }
                 fieldColumnRelationMapper.putFieldColumnRelationMap(field.getName(), fieldColumnRelation);
-            } else {
+            }
+        }
+        INCOMPLETE_MAPPER_MAP.put(clazz, fieldColumnRelationMapper);
+        if (WsListUtils.isNotEmpty(joinClassFieldList)) {
+            for (Field field : joinClassFieldList) {
                 boolean isArray = false;
                 Class<?> joinClass = field.getType();
                 if (WsFieldUtils.classCompare(field.getType(), Collection.class)) {
@@ -294,7 +325,7 @@ public class FieldColumnRelationMapperFactory {
                     }
                     isArray = true;
                 }
-                analysisClassRelation(joinClass);
+                analysisClassRelation(joinClass, true);
                 FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
                 fieldJoinClass.setNickName(field.getName());
                 fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
@@ -303,6 +334,7 @@ public class FieldColumnRelationMapperFactory {
         }
         fieldColumnRelationMapper.markSignLocation();
         MAPPER_MAP.put(clazz, fieldColumnRelationMapper);
+        INCOMPLETE_MAPPER_MAP.remove(clazz);
         return fieldColumnRelationMapper;
     }
 
@@ -316,17 +348,69 @@ public class FieldColumnRelationMapperFactory {
         return fieldNameChange ? WsStringUtils.camel_case(fieldName) : fieldName;
     }
 
-    public static boolean check(Class<?> clazz){
-        Annotation[] annotations = clazz.getAnnotations();
-        if(WsListUtils.isEmpty(annotations)){
-            return false;
-        }else {
-            for(Annotation annotation:annotations){
-                if(annotation instanceof Table || annotation instanceof TableName || annotation instanceof TableTemplate){
-                    return true;
+    /**
+     * 是否忽略field
+     *
+     * @param field
+     * @return
+     */
+    public static boolean ignoreField(Field field) {
+        Transient aTransient = field.getAnnotation(Transient.class);
+        if (aTransient != null) {
+            return true;
+        }
+        TableField tableField = field.getAnnotation(TableField.class);
+        return tableField != null && !tableField.exist();
+    }
+
+
+    public static FieldColumnRelation createFieldColumnRelation(Field field) {
+        Annotation[] annotations = field.getAnnotations();
+        boolean isId = false;
+        String columnName = null;
+        boolean getId = false;
+        boolean getColumn = false;
+        if (WsListUtils.isNotEmpty(annotations)) {
+            for (Annotation annotation : annotations) {
+                if (!getColumn && annotation instanceof Column) {
+                    columnName = ((Column) annotation).name();
+                    getColumn = true;
+                } else if (!getColumn && annotation instanceof TableField) {
+                    columnName = ((TableField) annotation).value();
+                    getColumn = true;
+                } else if (annotation instanceof TableId) {
+                    isId = true;
+                    columnName = ((TableId) annotation).value();
+                    break;
+                } else if (!getId && annotation instanceof Id) {
+                    isId = true;
+                    getId = true;
                 }
             }
+        }
+        if (WsStringUtils.isBlank(columnName)) {
+            columnName = getChangeColumnName(field.getName());
+        }
+        return new FieldColumnRelation(isId, field.getName(), field, columnName, field.getType());
+    }
+
+    /**
+     * 是否忽略class
+     *
+     * @param clazz
+     * @return
+     */
+    public static boolean ignoreClass(Class<?> clazz) {
+        Annotation[] annotations = clazz.getAnnotations();
+        if (WsListUtils.isEmpty(annotations)) {
             return false;
+        } else {
+            for (Annotation annotation : annotations) {
+                if (annotation instanceof Table || annotation instanceof TableName || annotation instanceof TableTemplate) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 

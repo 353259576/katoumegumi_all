@@ -5,6 +5,7 @@ import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.common.SqlCommon;
+import cn.katoumegumi.java.sql.common.ValueType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,19 +25,19 @@ public class SqlEquation {
     private final List<Object> valueList = new ArrayList<>();
 
     public SqlEquation column(String columnName) {
-        typeList.add(1);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(columnName);
         return this;
     }
 
     public SqlEquation column(SqlEquation equation) {
-        typeList.add(1);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(equation);
         return this;
     }
 
     public SqlEquation column(SqlFunction function) {
-        typeList.add(1);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(function);
         return this;
     }
@@ -45,13 +46,13 @@ public class SqlEquation {
         if (WsStringUtils.isBlank(tableName)) {
             return column(columnName);
         }
-        typeList.add(1);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(tableName + "." + columnName);
         return this;
     }
 
     public <T> SqlEquation column(SFunction<T, ?> columnFunction) {
-        typeList.add(1);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(WsFieldUtils.getFieldName(columnFunction));
         return this;
     }
@@ -60,25 +61,25 @@ public class SqlEquation {
         if (WsStringUtils.isBlank(tableName)) {
             return column(columnFunction);
         }
-        typeList.add(1);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(tableName + "." + WsFieldUtils.getFieldName(columnFunction));
         return this;
     }
 
     public <T> SqlEquation sql(MySearchList mySearchList) {
-        typeList.add(4);
+        typeList.add(ValueType.SEARCH_LIST_TYPE);
         valueList.add(mySearchList);
         return this;
     }
 
     public SqlEquation value(Object o) {
-        typeList.add(3);
+        typeList.add(ValueType.VALUE_TYPE);
         valueList.add(o);
         return this;
     }
 
     public SqlEquation symbol(Object o) {
-        typeList.add(2);
+        typeList.add(ValueType.SYMBOL_TYPE);
         valueList.add(o);
         return this;
     }
