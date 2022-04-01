@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.excel;
 
 import org.apache.poi.ss.usermodel.*;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheet;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
 /**
  * 当前位置坐标
@@ -20,6 +22,8 @@ public class ExcelPointLocation {
 
     private final Sheet sheet;
 
+    private CTWorksheet ctWorksheet;
+
     private final Workbook workbook;
 
     private final Integer columnSize;
@@ -31,7 +35,7 @@ public class ExcelPointLocation {
     private volatile Object globalValue;
 
 
-    public ExcelPointLocation(Integer columnNum, Integer rowNum,Integer columnSize, String columnName, Cell cell,Row row,Sheet sheet,Workbook workbook) {
+    public ExcelPointLocation(Integer columnNum, Integer rowNum,Integer columnSize, String columnName, Cell cell,Row row,Sheet sheet,CTWorksheet ctWorksheet,Workbook workbook) {
         this.columnNum = columnNum;
         this.rowNum = rowNum;
         this.columnSize = columnSize;
@@ -40,6 +44,7 @@ public class ExcelPointLocation {
         this.row = row;
         this.sheet = sheet;
         this.workbook = workbook;
+        this.ctWorksheet = ctWorksheet;
     }
 
     public Integer getColumnNum() {
@@ -98,5 +103,9 @@ public class ExcelPointLocation {
     public ExcelPointLocation setGlobalValue(Object globalValue) {
         this.globalValue = globalValue;
         return this;
+    }
+
+    public CTWorksheet getCtWorksheet() {
+        return ctWorksheet;
     }
 }

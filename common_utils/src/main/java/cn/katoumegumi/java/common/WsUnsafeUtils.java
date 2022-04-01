@@ -3,263 +3,149 @@ package cn.katoumegumi.java.common;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 
 public class WsUnsafeUtils {
 
-    private static Object unsafe;
+    static class UnsafeUtils{
+        private static Object unsafe;
 
-    private static Method objectFieldOffset;
+        static {
+            try {
+                Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
+                Field f = unsafeClass.getDeclaredField("theUnsafe");
+                f.setAccessible(true);
+                unsafe = f.get(null);
+            } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-    private static Method staticFieldOffset;
+    private static Object unsafe = UnsafeUtils.unsafe;
 
-    private static Method arrayBaseOffset;
+    public static final Method objectFieldOffset = getMethod("objectFieldOffset", Field.class);
 
-    private static Method allocateInstance;
+    public static final Method staticFieldOffset = getMethod("staticFieldOffset", Field.class);
 
-    private static Method arrayIndexScale;
+    public static final Method arrayBaseOffset = getMethod("arrayBaseOffset", Class.class);
 
+    public static final Method allocateInstance = getMethod("allocateInstance", Class.class);
 
-    /**
-     * int
-     */
-    private static Method getIntByObjectAndLong;
-
-    private static Method putIntByObjectAndOffsetAndLong;
-
-    private static Method getIntVolatileByObjectAndLong;
-
-    private static Method putIntVolatileByObjectAndOffsetAndLong;
-
-    /**
-     * byte
-     */
-    private static Method getByteByObjectAndLong;
-
-    private static Method putByteByObjectAndOffsetAndLong;
-
-    private static Method getByteVolatileByObjectAndLong;
-
-    private static Method putByteVolatileByObjectAndOffsetAndLong;
-    /**
-     * boolean
-     */
-    private static Method getBooleanByObjectAndLong;
-
-    private static Method putBooleanByObjectAndOffsetAndLong;
-
-    private static Method getBooleanVolatileByObjectAndLong;
-
-    private static Method putBooleanVolatileByObjectAndOffsetAndLong;
-    /**
-     * char
-     */
-    private static Method getCharByObjectAndLong;
-
-    private static Method putCharByObjectAndOffsetAndLong;
-
-    private static Method getCharVolatileByObjectAndLong;
-
-    private static Method putCharVolatileByObjectAndOffsetAndLong;
-
-    /**
-     * short
-     */
-    private static Method getShortByObjectAndLong;
-
-    private static Method putShortByObjectAndOffsetAndLong;
-
-    private static Method getShortVolatileByObjectAndLong;
-
-    private static Method putShortVolatileByObjectAndOffsetAndLong;
-
-    /**
-     * long
-     */
-    private static Method getLongByObjectAndLong;
-
-    private static Method putLongByObjectAndOffsetAndLong;
-
-    private static Method getLongVolatileByObjectAndLong;
-
-    private static Method putLongVolatileByObjectAndOffsetAndLong;
-
-    /**
-     * float
-     */
-    private static Method getFloatByObjectAndLong;
-
-    private static Method putFloatByObjectAndOffsetAndLong;
-
-    private static Method getFloatVolatileByObjectAndLong;
-
-    private static Method putFloatVolatileByObjectAndOffsetAndLong;
-
-    /**
-     * double
-     */
-    private static Method getDoubleByObjectAndLong;
-
-    private static Method putDoubleByObjectAndOffsetAndLong;
-
-    private static Method getDoubleVolatileByObjectAndLong;
-
-    private static Method putDoubleVolatileByObjectAndOffsetAndLong;
-
+    public static final Method arrayIndexScale = getMethod("arrayIndexScale", Class.class);
 
     /**
      * object
      */
-    private static Method getObjectByObjectAndLong;
+    public static final Method getObjectByObjectAndLong = getMethod("getObject", Object.class, long.class);
+    public static final Method putObject = getMethod("putObject", Object.class, long.class, Object.class);
+    public static final Method getObjectVolatile = getMethod("getObjectVolatile", Object.class, long.class);
+    public static final Method putObjectVolatile = getMethod("putObjectVolatile", Object.class, long.class, Object.class);
+    public static final Method putOrderedObject = getMethod("putOrderedObject", Object.class, long.class, Object.class);
 
-    private static Method putObject;
+    /**
+     * int
+     */
+    public static final Method getIntByObjectAndLong = getMethod("getInt", Object.class, long.class);
+    public static final Method putIntByObjectAndOffsetAndLong = getMethod("putInt", Object.class, long.class, int.class);
+    public static final Method getIntVolatileByObjectAndLong = getMethod("getIntVolatile", Object.class, long.class);
+    public static final Method putIntVolatileByObjectAndOffsetAndLong = getMethod("putIntVolatile", Object.class, long.class, int.class);
 
-    private static Method getObjectVolatile;
+    /**
+     * byte
+     */
+    public static final Method getByteByObjectAndLong = getMethod("getByte", Object.class, long.class);
+    public static final Method putByteByObjectAndOffsetAndLong = getMethod("putByte", Object.class, long.class, byte.class);
+    public static final Method getByteVolatileByObjectAndLong = getMethod("getByteVolatile", Object.class, long.class);
+    public static final Method putByteVolatileByObjectAndOffsetAndLong = getMethod("putByteVolatile", Object.class, long.class, byte.class);
 
-    private static Method putObjectVolatile;
+    /**
+     * boolean
+     */
+    public static final Method getBooleanByObjectAndLong = getMethod("getBoolean", Object.class, long.class);
+    public static final Method putBooleanByObjectAndOffsetAndLong = getMethod("putBoolean", Object.class, long.class, boolean.class);
+    public static final Method getBooleanVolatileByObjectAndLong = getMethod("getBooleanVolatile", Object.class, long.class);
+    public static final Method putBooleanVolatileByObjectAndOffsetAndLong = getMethod("putBooleanVolatile", Object.class, long.class, boolean.class);
+    /**
+     * char
+     */
+    public static final Method getCharByObjectAndLong = getMethod("getChar", Object.class, long.class);
+    public static final Method putCharByObjectAndOffsetAndLong = getMethod("putChar", Object.class, long.class, char.class);
+    public static final Method getCharVolatileByObjectAndLong = getMethod("getCharVolatile", Object.class, long.class);
+    public static final Method putCharVolatileByObjectAndOffsetAndLong = getMethod("putCharVolatile", Object.class, long.class, char.class);
+    /**
+     * short
+     */
+    public static final Method getShortByObjectAndLong = getMethod("getShort", Object.class, long.class);
+    public static final Method putShortByObjectAndOffsetAndLong = getMethod("putShort", Object.class, long.class, short.class);
+    public static final Method getShortVolatileByObjectAndLong = getMethod("getShortVolatile", Object.class, long.class);
+    public static final Method putShortVolatileByObjectAndOffsetAndLong = getMethod("putShortVolatile", Object.class, long.class, short.class);
+    /**
+     * long
+     */
+    public static final Method getLongByObjectAndLong = getMethod("getLong", Object.class, long.class);
+    public static final Method putLongByObjectAndOffsetAndLong = getMethod("putLong", Object.class, long.class, long.class);
+    public static final Method getLongVolatileByObjectAndLong = getMethod("getLongVolatile", Object.class, long.class);
+    public static final Method putLongVolatileByObjectAndOffsetAndLong = getMethod("putLongVolatile", Object.class, long.class, long.class);
+    /**
+     * float
+     */
+    public static final Method getFloatByObjectAndLong = getMethod("getFloat", Object.class, long.class);
+    public static final Method putFloatByObjectAndOffsetAndLong = getMethod("putFloat", Object.class, long.class, float.class);
+    public static final Method getFloatVolatileByObjectAndLong = getMethod("getFloatVolatile", Object.class, long.class);
+    public static final Method putFloatVolatileByObjectAndOffsetAndLong = getMethod("putFloatVolatile", Object.class, long.class, float.class);
+    /**
+     * double
+     */
+    public static final Method getDoubleByObjectAndLong = getMethod("getDouble", Object.class, long.class);
+    public static final Method putDoubleByObjectAndOffsetAndLong = getMethod("putDouble", Object.class, long.class, double.class);
+    public static final Method getDoubleVolatileByObjectAndLong = getMethod("getDoubleVolatile", Object.class, long.class);
+    public static final Method putDoubleVolatileByObjectAndOffsetAndLong = getMethod("putDoubleVolatile", Object.class, long.class, double.class);
 
-    private static Method putOrderedObject;
+    /**
+     * cas
+     */
+    public static final Method compareAndSwapObject = getMethod("compareAndSwapObject",Object.class,long.class,Object.class,Object.class);
+    public static final Method compareAndSwapInt = getMethod("compareAndSwapInt",Object.class,long.class,int.class,int.class);
+    public static final Method compareAndSwapLong = getMethod("compareAndSwapLong",Object.class,long.class,long.class,long.class);
 
+    public static final Method getAndAddInt = getMethod("getAndAddInt",Object.class,long.class,int.class);
+    public static final Method getAndAddLong = getMethod("getAndAddLong",Object.class,long.class,long.class);
+    public static final Method getAndSetInt = getMethod("getAndSetInt",Object.class,long.class,int.class);
+    public static final Method getAndSetLong = getMethod("getAndSetLong",Object.class,long.class,long.class);
+    public static final Method getAndSetObject = getMethod("getAndSetObject",Object.class,long.class,Object.class);
 
     /**
      * memory
      */
-    private static Method allocateMemory;
+    public static final Method allocateMemory = getMethod("allocateMemory", long.class);
+    public static final Method reallocateMemory = getMethod("reallocateMemory", long.class, long.class);
+    public static final Method freeMemory = getMethod("freeMemory", long.class);
+    public static final Method setMemoryByAddressAndByteAndValue = getMethod("setMemory", long.class, long.class, byte.class);
+    public static final Method setMemoryByObjectAndOffsetAndBytesAndValue = getMethod("setMemory", Object.class, long.class, long.class, byte.class);
+    public static final Method copyMemoryBySrcAddressAndDestAddressAndBytes = getMethod("copyMemory", long.class, long.class, long.class);
+    public static final Method copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes = getMethod("copyMemory", Object.class, long.class, Object.class, long.class, long.class);
+    public static final Method addressSize = getMethod("addressSize");
+    public static final Method pageSize = getMethod("pageSize");
 
-    private static Method reallocateMemory;
+    public static final Method throwException = getMethod("throwException",Throwable.class);
 
-    private static Method freeMemory;
 
-    private static Method setMemoryByAddressAndByteAndValue;
+    public static final Method park = getMethod("park", boolean.class, long.class);
+    public static final Method unpark = getMethod("unpark", Object.class);
+    public static final Method getLoadAverage = getMethod("getLoadAverage", double[].class, int.class);
 
-    private static Method setMemoryByObjectAndOffsetAndBytesAndValue;
+    public static final Method loadFence = getMethod("loadFence");
+    public static final Method storeFence = getMethod("storeFence");
+    public static final Method fullFence = getMethod("fullFence");
 
-    private static Method copyMemoryBySrcAddressAndDestAddressAndBytes;
+    public static final Method invokeCleaner = getMethod("invokeCleaner", ByteBuffer.class);
 
-    private static Method copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes;
-
-    private static Method park;
-
-    private static Method unpark;
-
-    private static Method getLoadAverage;
-
-    private static Method loadFence;
-
-    private static Method storeFence;
-
-    private static Method fullFence;
-
-    static {
-        try {
-            Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-            Field f = unsafeClass.getDeclaredField("theUnsafe");
-            f.setAccessible(true);
-            unsafe = f.get(null);
-        } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        if (unsafe != null) {
-
-            objectFieldOffset = getMethod("objectFieldOffset", Field.class);
-
-            staticFieldOffset = getMethod("staticFieldOffset", Field.class);
-
-            arrayBaseOffset = getMethod("arrayBaseOffset", Class.class);
-
-            allocateInstance = getMethod("allocateInstance", Class.class);
-
-            arrayIndexScale = getMethod("arrayIndexScale", Class.class);
-
-            /**
-             * object
-             */
-            getObjectByObjectAndLong = getMethod("getObject", Object.class, long.class);
-            putObject = getMethod("putObject", Object.class, long.class, Object.class);
-            getObjectVolatile = getMethod("getObjectVolatile", Object.class, long.class);
-            putObjectVolatile = getMethod("putObjectVolatile", Object.class, long.class, Object.class);
-            putOrderedObject = getMethod("putOrderedObject", Object.class, long.class, Object.class);
-
-            /**
-             * int
-             */
-            getIntByObjectAndLong = getMethod("getInt", Object.class, long.class);
-            putIntByObjectAndOffsetAndLong = getMethod("putInt", Object.class, long.class, int.class);
-            getIntVolatileByObjectAndLong = getMethod("getIntVolatile", Object.class, long.class);
-            putIntVolatileByObjectAndOffsetAndLong = getMethod("putIntVolatile", Object.class, long.class, int.class);
-
-            /**
-             * byte
-             */
-            getByteByObjectAndLong = getMethod("getByte", Object.class, long.class);
-            putByteByObjectAndOffsetAndLong = getMethod("putByte", Object.class, long.class, byte.class);
-            getByteVolatileByObjectAndLong = getMethod("getByteVolatile", Object.class, long.class);
-            putByteVolatileByObjectAndOffsetAndLong = getMethod("putByteVolatile", Object.class, long.class, byte.class);
-
-            /**
-             * boolean
-             */
-            getBooleanByObjectAndLong = getMethod("getBoolean", Object.class, long.class);
-            putBooleanByObjectAndOffsetAndLong = getMethod("putBoolean", Object.class, long.class, boolean.class);
-            getBooleanVolatileByObjectAndLong = getMethod("getBooleanVolatile", Object.class, long.class);
-            putBooleanVolatileByObjectAndOffsetAndLong = getMethod("putBooleanVolatile", Object.class, long.class, boolean.class);
-            /**
-             * char
-             */
-            getCharByObjectAndLong = getMethod("getChar", Object.class, long.class);
-            putCharByObjectAndOffsetAndLong = getMethod("putChar", Object.class, long.class, char.class);
-            getCharVolatileByObjectAndLong = getMethod("getCharVolatile", Object.class, long.class);
-            putCharVolatileByObjectAndOffsetAndLong = getMethod("putCharVolatile", Object.class, long.class, char.class);
-            /**
-             * short
-             */
-            getShortByObjectAndLong = getMethod("getShort", Object.class, long.class);
-            putShortByObjectAndOffsetAndLong = getMethod("putShort", Object.class, long.class, short.class);
-            getShortVolatileByObjectAndLong = getMethod("getShortVolatile", Object.class, long.class);
-            putShortVolatileByObjectAndOffsetAndLong = getMethod("putShortVolatile", Object.class, long.class, short.class);
-            /**
-             * long
-             */
-            getLongByObjectAndLong = getMethod("getLong", Object.class, long.class);
-            putLongByObjectAndOffsetAndLong = getMethod("putLong", Object.class, long.class, long.class);
-            getLongVolatileByObjectAndLong = getMethod("getLongVolatile", Object.class, long.class);
-            putLongVolatileByObjectAndOffsetAndLong = getMethod("putLongVolatile", Object.class, long.class, long.class);
-            /**
-             * float
-             */
-            getFloatByObjectAndLong = getMethod("getFloat", Object.class, long.class);
-            putFloatByObjectAndOffsetAndLong = getMethod("putFloat", Object.class, long.class, float.class);
-            getFloatVolatileByObjectAndLong = getMethod("getFloatVolatile", Object.class, long.class);
-            putFloatVolatileByObjectAndOffsetAndLong = getMethod("putFloatVolatile", Object.class, long.class, float.class);
-            /**
-             * double
-             */
-            getDoubleByObjectAndLong = getMethod("getDouble", Object.class, long.class);
-            putDoubleByObjectAndOffsetAndLong = getMethod("putDouble", Object.class, long.class, double.class);
-            getDoubleVolatileByObjectAndLong = getMethod("getDoubleVolatile", Object.class, long.class);
-            putDoubleVolatileByObjectAndOffsetAndLong = getMethod("putDoubleVolatile", Object.class, long.class, double.class);
-
-            /**
-             * memory
-             */
-            allocateMemory = getMethod("allocateMemory", long.class);
-            reallocateMemory = getMethod("reallocateMemory", long.class, long.class);
-            freeMemory = getMethod("freeMemory", long.class);
-            setMemoryByAddressAndByteAndValue = getMethod("setMemory", long.class, long.class, byte.class);
-            setMemoryByObjectAndOffsetAndBytesAndValue = getMethod("setMemory", Object.class, long.class, long.class, byte.class);
-            copyMemoryBySrcAddressAndDestAddressAndBytes = getMethod("copyMemory", long.class, long.class, long.class);
-            copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes = getMethod("copyMemory", Object.class, long.class, Object.class, long.class, long.class);
-
-            park = getMethod("park", boolean.class, long.class);
-            unpark = getMethod("unpark", Object.class);
-            getLoadAverage = getMethod("getLoadAverage", double[].class, int.class);
-
-            loadFence = getMethod("loadFence");
-            storeFence = getMethod("storeFence");
-            fullFence = getMethod("fullFence");
-        }
-    }
 
     private static Method getMethod(String methodName, Class<?>... parameterTypes) {
+        if(unsafe == null){
+            return null;
+        }
         try {
             return unsafe.getClass().getMethod(methodName, parameterTypes);
         } catch (NoSuchMethodException e) {
@@ -269,6 +155,7 @@ public class WsUnsafeUtils {
     }
 
     private static Object invoke(Method method, Object... objects) {
+        assert method != null;
         try {
             return method.invoke(unsafe, objects);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -509,6 +396,48 @@ public class WsUnsafeUtils {
         invoke(putOrderedObject, o, offset, x);
     }
 
+
+    /**
+     * cas
+     */
+
+    public final boolean compareAndSwapObject(Object o, long offset,
+                                              Object expected,
+                                              Object x) {
+        return (boolean) invoke(compareAndSwapObject,o,offset,expected,x);
+    }
+
+    public final boolean compareAndSwapInt(Object o, long offset,
+                                           int expected,
+                                           int x) {
+        return (boolean) invoke(compareAndSwapInt,o,offset,expected,x);
+    }
+
+    public final boolean compareAndSwapLong(Object o, long offset,
+                                            long expected,
+                                            long x) {
+        return (boolean) invoke(compareAndSwapLong,o,offset,expected,x);
+    }
+
+    public final int getAndAddInt(Object o, long offset, int delta) {
+        return (int) invoke(getAndAddInt,o,offset,delta);
+    }
+
+    public final long getAndAddLong(Object o, long offset, long delta) {
+        return (long) invoke(getAndAddLong,o,offset,delta);
+    }
+
+    public final int getAndSetInt(Object o, long offset, int delta) {
+        return (int) invoke(getAndSetInt,o,offset,delta);
+    }
+
+    public final long getAndSetLong(Object o, long offset, long delta) {
+        return (long) invoke(getAndSetLong,o,offset,delta);
+    }
+    public final Object getAndSetObject(Object o, long offset, Object delta) {
+        return invoke(getAndSetObject,o,offset,delta);
+    }
+
     /**
      * memory
      */
@@ -542,6 +471,18 @@ public class WsUnsafeUtils {
         invoke(copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes, srcBase, srcOffset, destBase, destOffset, bytes);
     }
 
+    public static int addressSize(){
+        return (int)invoke(addressSize);
+    }
+
+    public static int pageSize(){
+        return (int) invoke(pageSize);
+    }
+
+    public static void throwException(Throwable ee){
+        invoke(throwException,ee);
+    }
+
     public static void park(boolean isAbsolute, long time) {
         invoke(park, isAbsolute, time);
     }
@@ -564,6 +505,11 @@ public class WsUnsafeUtils {
 
     public static void fullFence() {
         invoke(fullFence);
+    }
+
+
+    public void invokeCleaner(java.nio.ByteBuffer directBuffer) {
+        invoke(invokeCleaner,directBuffer);
     }
 
 }

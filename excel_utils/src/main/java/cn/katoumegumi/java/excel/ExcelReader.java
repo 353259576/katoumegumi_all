@@ -58,7 +58,7 @@ public class ExcelReader {
                     List<ExcelPointLocation> cellList = new ArrayList<>(lastColumnNum);
                     for(int cellIndex = 0; cellIndex < lastColumnNum; cellIndex++){
                         Cell cell = row.getCell(cellIndex);
-                        ExcelPointLocation location = new ExcelPointLocation(cellIndex,rowIndex,1,null,cell,row,sheet,workbook);
+                        ExcelPointLocation location = new ExcelPointLocation(cellIndex,rowIndex,1,null,cell,row,sheet,null,workbook);
                         cellList.add(location);
                     }
                     rowList.add(cellList);

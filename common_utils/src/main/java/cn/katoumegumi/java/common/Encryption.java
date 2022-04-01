@@ -8,6 +8,7 @@ import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
@@ -44,6 +45,31 @@ public class Encryption {
         //Security.getAlgorithms("Cipher").forEach(System.out::println);
         //Security.getAlgorithms("KeyFactory").forEach(System.out::println);
         //Security.getAlgorithms("KeyPairGenerator").forEach(System.out::println);
+        System.out.println(WsUnsafeUtils.addressSize());
+
+        long tOffset = WsUnsafeUtils.allocateMemory(2);
+
+        WsUnsafeUtils.setMemory(tOffset,1L,(byte)22);
+        WsUnsafeUtils.setMemory(tOffset + 1,1L,(byte)33);
+
+        byte b1 = WsUnsafeUtils.getByte(null,tOffset);
+        byte b2 = WsUnsafeUtils.getByte(null,tOffset+1);
+
+
+        WsUnsafeUtils.reallocateMemory(tOffset,2L);
+        System.out.println(b1);
+        System.out.println(b2);
+
+        Object o = new Object();
+        Class<?> c = o.getClass();
+        long offset = 0;
+        byte[] bytes = new byte[1000];
+        for(int i = 0; i < 1000; i++){
+            byte b = WsUnsafeUtils.getByte(c,offset + i * 8);
+            bytes[i] = b;
+        }
+        System.out.println(new String(bytes,StandardCharsets.UTF_8));
+
     }
 
 
