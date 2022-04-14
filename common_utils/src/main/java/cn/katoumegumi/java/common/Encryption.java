@@ -62,13 +62,26 @@ public class Encryption {
 
         Object o = new Object();
         Class<?> c = o.getClass();
+        int addressSize = WsUnsafeUtils.addressSize();
+        int bitSize = addressSize * 8;
+
         long offset = 0;
-        byte[] bytes = new byte[1000];
+        long mark = WsUnsafeUtils.getLong(o,offset);
+        //offset += bitSize;
+        //long kClass = WsUnsafeUtils.getLong(o,offset);
+        //offset += bitSize;
+        int length = WsUnsafeUtils.getInt(o,offset + 60);
+
+        System.out.println("mark：" + mark);
+        //System.out.println("kClass:" + kClass);
+        System.out.println("length:" + length);
+
+        /*byte[] bytes = new byte[1000];
         for(int i = 0; i < 1000; i++){
             byte b = WsUnsafeUtils.getByte(c,offset + i * 8);
             bytes[i] = b;
         }
-        System.out.println(new String(bytes,StandardCharsets.UTF_8));
+        System.out.println(new String(bytes,StandardCharsets.UTF_8));*/
 
     }
 

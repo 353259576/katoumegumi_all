@@ -24,122 +24,122 @@ public class WsUnsafeUtils {
 
     private static Object unsafe = UnsafeUtils.unsafe;
 
-    public static final Method objectFieldOffset = getMethod("objectFieldOffset", Field.class);
+    private static final Method objectFieldOffset = getMethod("objectFieldOffset", Field.class);
 
-    public static final Method staticFieldOffset = getMethod("staticFieldOffset", Field.class);
+    private static final Method staticFieldOffset = getMethod("staticFieldOffset", Field.class);
 
-    public static final Method arrayBaseOffset = getMethod("arrayBaseOffset", Class.class);
+    private static final Method arrayBaseOffset = getMethod("arrayBaseOffset", Class.class);
 
-    public static final Method allocateInstance = getMethod("allocateInstance", Class.class);
+    private static final Method allocateInstance = getMethod("allocateInstance", Class.class);
 
-    public static final Method arrayIndexScale = getMethod("arrayIndexScale", Class.class);
+    private static final Method arrayIndexScale = getMethod("arrayIndexScale", Class.class);
 
     /**
      * object
      */
-    public static final Method getObjectByObjectAndLong = getMethod("getObject", Object.class, long.class);
-    public static final Method putObject = getMethod("putObject", Object.class, long.class, Object.class);
-    public static final Method getObjectVolatile = getMethod("getObjectVolatile", Object.class, long.class);
-    public static final Method putObjectVolatile = getMethod("putObjectVolatile", Object.class, long.class, Object.class);
-    public static final Method putOrderedObject = getMethod("putOrderedObject", Object.class, long.class, Object.class);
+    private static final Method getObjectByObjectAndLong = getMethod("getObject", Object.class, long.class);
+    private static final Method putObject = getMethod("putObject", Object.class, long.class, Object.class);
+    private static final Method getObjectVolatile = getMethod("getObjectVolatile", Object.class, long.class);
+    private static final Method putObjectVolatile = getMethod("putObjectVolatile", Object.class, long.class, Object.class);
+    private static final Method putOrderedObject = getMethod("putOrderedObject", Object.class, long.class, Object.class);
 
     /**
      * int
      */
-    public static final Method getIntByObjectAndLong = getMethod("getInt", Object.class, long.class);
-    public static final Method putIntByObjectAndOffsetAndLong = getMethod("putInt", Object.class, long.class, int.class);
-    public static final Method getIntVolatileByObjectAndLong = getMethod("getIntVolatile", Object.class, long.class);
-    public static final Method putIntVolatileByObjectAndOffsetAndLong = getMethod("putIntVolatile", Object.class, long.class, int.class);
+    private static final Method getIntByObjectAndLong = getMethod("getInt", Object.class, long.class);
+    private static final Method putIntByObjectAndOffsetAndLong = getMethod("putInt", Object.class, long.class, int.class);
+    private static final Method getIntVolatileByObjectAndLong = getMethod("getIntVolatile", Object.class, long.class);
+    private static final Method putIntVolatileByObjectAndOffsetAndLong = getMethod("putIntVolatile", Object.class, long.class, int.class);
 
     /**
      * byte
      */
-    public static final Method getByteByObjectAndLong = getMethod("getByte", Object.class, long.class);
-    public static final Method putByteByObjectAndOffsetAndLong = getMethod("putByte", Object.class, long.class, byte.class);
-    public static final Method getByteVolatileByObjectAndLong = getMethod("getByteVolatile", Object.class, long.class);
-    public static final Method putByteVolatileByObjectAndOffsetAndLong = getMethod("putByteVolatile", Object.class, long.class, byte.class);
+    private static final Method getByteByObjectAndLong = getMethod("getByte", Object.class, long.class);
+    private static final Method putByteByObjectAndOffsetAndLong = getMethod("putByte", Object.class, long.class, byte.class);
+    private static final Method getByteVolatileByObjectAndLong = getMethod("getByteVolatile", Object.class, long.class);
+    private static final Method putByteVolatileByObjectAndOffsetAndLong = getMethod("putByteVolatile", Object.class, long.class, byte.class);
 
     /**
      * boolean
      */
-    public static final Method getBooleanByObjectAndLong = getMethod("getBoolean", Object.class, long.class);
-    public static final Method putBooleanByObjectAndOffsetAndLong = getMethod("putBoolean", Object.class, long.class, boolean.class);
-    public static final Method getBooleanVolatileByObjectAndLong = getMethod("getBooleanVolatile", Object.class, long.class);
-    public static final Method putBooleanVolatileByObjectAndOffsetAndLong = getMethod("putBooleanVolatile", Object.class, long.class, boolean.class);
+    private static final Method getBooleanByObjectAndLong = getMethod("getBoolean", Object.class, long.class);
+    private static final Method putBooleanByObjectAndOffsetAndLong = getMethod("putBoolean", Object.class, long.class, boolean.class);
+    private static final Method getBooleanVolatileByObjectAndLong = getMethod("getBooleanVolatile", Object.class, long.class);
+    private static final Method putBooleanVolatileByObjectAndOffsetAndLong = getMethod("putBooleanVolatile", Object.class, long.class, boolean.class);
     /**
      * char
      */
-    public static final Method getCharByObjectAndLong = getMethod("getChar", Object.class, long.class);
-    public static final Method putCharByObjectAndOffsetAndLong = getMethod("putChar", Object.class, long.class, char.class);
-    public static final Method getCharVolatileByObjectAndLong = getMethod("getCharVolatile", Object.class, long.class);
-    public static final Method putCharVolatileByObjectAndOffsetAndLong = getMethod("putCharVolatile", Object.class, long.class, char.class);
+    private static final Method getCharByObjectAndLong = getMethod("getChar", Object.class, long.class);
+    private static final Method putCharByObjectAndOffsetAndLong = getMethod("putChar", Object.class, long.class, char.class);
+    private static final Method getCharVolatileByObjectAndLong = getMethod("getCharVolatile", Object.class, long.class);
+    private static final Method putCharVolatileByObjectAndOffsetAndLong = getMethod("putCharVolatile", Object.class, long.class, char.class);
     /**
      * short
      */
-    public static final Method getShortByObjectAndLong = getMethod("getShort", Object.class, long.class);
-    public static final Method putShortByObjectAndOffsetAndLong = getMethod("putShort", Object.class, long.class, short.class);
-    public static final Method getShortVolatileByObjectAndLong = getMethod("getShortVolatile", Object.class, long.class);
-    public static final Method putShortVolatileByObjectAndOffsetAndLong = getMethod("putShortVolatile", Object.class, long.class, short.class);
+    private static final Method getShortByObjectAndLong = getMethod("getShort", Object.class, long.class);
+    private static final Method putShortByObjectAndOffsetAndLong = getMethod("putShort", Object.class, long.class, short.class);
+    private static final Method getShortVolatileByObjectAndLong = getMethod("getShortVolatile", Object.class, long.class);
+    private static final Method putShortVolatileByObjectAndOffsetAndLong = getMethod("putShortVolatile", Object.class, long.class, short.class);
     /**
      * long
      */
-    public static final Method getLongByObjectAndLong = getMethod("getLong", Object.class, long.class);
-    public static final Method putLongByObjectAndOffsetAndLong = getMethod("putLong", Object.class, long.class, long.class);
-    public static final Method getLongVolatileByObjectAndLong = getMethod("getLongVolatile", Object.class, long.class);
-    public static final Method putLongVolatileByObjectAndOffsetAndLong = getMethod("putLongVolatile", Object.class, long.class, long.class);
+    private static final Method getLongByObjectAndLong = getMethod("getLong", Object.class, long.class);
+    private static final Method putLongByObjectAndOffsetAndLong = getMethod("putLong", Object.class, long.class, long.class);
+    private static final Method getLongVolatileByObjectAndLong = getMethod("getLongVolatile", Object.class, long.class);
+    private static final Method putLongVolatileByObjectAndOffsetAndLong = getMethod("putLongVolatile", Object.class, long.class, long.class);
     /**
      * float
      */
-    public static final Method getFloatByObjectAndLong = getMethod("getFloat", Object.class, long.class);
-    public static final Method putFloatByObjectAndOffsetAndLong = getMethod("putFloat", Object.class, long.class, float.class);
-    public static final Method getFloatVolatileByObjectAndLong = getMethod("getFloatVolatile", Object.class, long.class);
-    public static final Method putFloatVolatileByObjectAndOffsetAndLong = getMethod("putFloatVolatile", Object.class, long.class, float.class);
+    private static final Method getFloatByObjectAndLong = getMethod("getFloat", Object.class, long.class);
+    private static final Method putFloatByObjectAndOffsetAndLong = getMethod("putFloat", Object.class, long.class, float.class);
+    private static final Method getFloatVolatileByObjectAndLong = getMethod("getFloatVolatile", Object.class, long.class);
+    private static final Method putFloatVolatileByObjectAndOffsetAndLong = getMethod("putFloatVolatile", Object.class, long.class, float.class);
     /**
      * double
      */
-    public static final Method getDoubleByObjectAndLong = getMethod("getDouble", Object.class, long.class);
-    public static final Method putDoubleByObjectAndOffsetAndLong = getMethod("putDouble", Object.class, long.class, double.class);
-    public static final Method getDoubleVolatileByObjectAndLong = getMethod("getDoubleVolatile", Object.class, long.class);
-    public static final Method putDoubleVolatileByObjectAndOffsetAndLong = getMethod("putDoubleVolatile", Object.class, long.class, double.class);
+    private static final Method getDoubleByObjectAndLong = getMethod("getDouble", Object.class, long.class);
+    private static final Method putDoubleByObjectAndOffsetAndLong = getMethod("putDouble", Object.class, long.class, double.class);
+    private static final Method getDoubleVolatileByObjectAndLong = getMethod("getDoubleVolatile", Object.class, long.class);
+    private static final Method putDoubleVolatileByObjectAndOffsetAndLong = getMethod("putDoubleVolatile", Object.class, long.class, double.class);
 
     /**
      * cas
      */
-    public static final Method compareAndSwapObject = getMethod("compareAndSwapObject",Object.class,long.class,Object.class,Object.class);
-    public static final Method compareAndSwapInt = getMethod("compareAndSwapInt",Object.class,long.class,int.class,int.class);
-    public static final Method compareAndSwapLong = getMethod("compareAndSwapLong",Object.class,long.class,long.class,long.class);
+    private static final Method compareAndSwapObject = getMethod("compareAndSwapObject",Object.class,long.class,Object.class,Object.class);
+    private static final Method compareAndSwapInt = getMethod("compareAndSwapInt",Object.class,long.class,int.class,int.class);
+    private static final Method compareAndSwapLong = getMethod("compareAndSwapLong",Object.class,long.class,long.class,long.class);
 
-    public static final Method getAndAddInt = getMethod("getAndAddInt",Object.class,long.class,int.class);
-    public static final Method getAndAddLong = getMethod("getAndAddLong",Object.class,long.class,long.class);
-    public static final Method getAndSetInt = getMethod("getAndSetInt",Object.class,long.class,int.class);
-    public static final Method getAndSetLong = getMethod("getAndSetLong",Object.class,long.class,long.class);
-    public static final Method getAndSetObject = getMethod("getAndSetObject",Object.class,long.class,Object.class);
+    private static final Method getAndAddInt = getMethod("getAndAddInt",Object.class,long.class,int.class);
+    private static final Method getAndAddLong = getMethod("getAndAddLong",Object.class,long.class,long.class);
+    private static final Method getAndSetInt = getMethod("getAndSetInt",Object.class,long.class,int.class);
+    private static final Method getAndSetLong = getMethod("getAndSetLong",Object.class,long.class,long.class);
+    private static final Method getAndSetObject = getMethod("getAndSetObject",Object.class,long.class,Object.class);
 
     /**
      * memory
      */
-    public static final Method allocateMemory = getMethod("allocateMemory", long.class);
-    public static final Method reallocateMemory = getMethod("reallocateMemory", long.class, long.class);
-    public static final Method freeMemory = getMethod("freeMemory", long.class);
-    public static final Method setMemoryByAddressAndByteAndValue = getMethod("setMemory", long.class, long.class, byte.class);
-    public static final Method setMemoryByObjectAndOffsetAndBytesAndValue = getMethod("setMemory", Object.class, long.class, long.class, byte.class);
-    public static final Method copyMemoryBySrcAddressAndDestAddressAndBytes = getMethod("copyMemory", long.class, long.class, long.class);
-    public static final Method copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes = getMethod("copyMemory", Object.class, long.class, Object.class, long.class, long.class);
-    public static final Method addressSize = getMethod("addressSize");
-    public static final Method pageSize = getMethod("pageSize");
+    private static final Method allocateMemory = getMethod("allocateMemory", long.class);
+    private static final Method reallocateMemory = getMethod("reallocateMemory", long.class, long.class);
+    private static final Method freeMemory = getMethod("freeMemory", long.class);
+    private static final Method setMemoryByAddressAndByteAndValue = getMethod("setMemory", long.class, long.class, byte.class);
+    private static final Method setMemoryByObjectAndOffsetAndBytesAndValue = getMethod("setMemory", Object.class, long.class, long.class, byte.class);
+    private static final Method copyMemoryBySrcAddressAndDestAddressAndBytes = getMethod("copyMemory", long.class, long.class, long.class);
+    private static final Method copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes = getMethod("copyMemory", Object.class, long.class, Object.class, long.class, long.class);
+    private static final Method addressSize = getMethod("addressSize");
+    private static final Method pageSize = getMethod("pageSize");
 
-    public static final Method throwException = getMethod("throwException",Throwable.class);
+    private static final Method throwException = getMethod("throwException",Throwable.class);
 
 
-    public static final Method park = getMethod("park", boolean.class, long.class);
-    public static final Method unpark = getMethod("unpark", Object.class);
-    public static final Method getLoadAverage = getMethod("getLoadAverage", double[].class, int.class);
+    private static final Method park = getMethod("park", boolean.class, long.class);
+    private static final Method unpark = getMethod("unpark", Object.class);
+    private static final Method getLoadAverage = getMethod("getLoadAverage", double[].class, int.class);
 
-    public static final Method loadFence = getMethod("loadFence");
-    public static final Method storeFence = getMethod("storeFence");
-    public static final Method fullFence = getMethod("fullFence");
+    private static final Method loadFence = getMethod("loadFence");
+    private static final Method storeFence = getMethod("storeFence");
+    private static final Method fullFence = getMethod("fullFence");
 
-    public static final Method invokeCleaner = getMethod("invokeCleaner", ByteBuffer.class);
+    private static final Method invokeCleaner = getMethod("invokeCleaner", ByteBuffer.class);
 
 
     private static Method getMethod(String methodName, Class<?>... parameterTypes) {
