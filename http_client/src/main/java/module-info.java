@@ -1,4 +1,4 @@
-module http.client {
+module cn.katoumegumi.java.http.client {
     requires com.google.gson;
     requires io.netty.buffer;
     requires io.netty.codec;
@@ -9,7 +9,7 @@ module http.client {
     requires io.netty.transport;
     requires io.netty.transport.rxtx;
     requires reactor.core;
-    requires common.utils;
+    requires cn.katoumegumi.java.common.utils;
     requires org.slf4j;
 
     exports cn.katoumegumi.java.http.client;

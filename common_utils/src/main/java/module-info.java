@@ -1,4 +1,4 @@
-module common.utils {
+module cn.katoumegumi.java.common.utils {
     requires java.desktop;
     requires java.sql;
     requires java.xml;

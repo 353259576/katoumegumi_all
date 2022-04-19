@@ -1,4 +1,4 @@
-module hibernate.and.jpd.support {
+module cn.katoumegumi.java.hibernate.and.jpd.support {
     requires java.compiler;
     requires java.sql;
     requires org.hibernate.orm.core;
@@ -13,8 +13,8 @@ module hibernate.and.jpd.support {
     requires spring.data.redis;
     requires spring.orm;
     requires spring.tx;
-    requires common.utils;
-    requires sql.utils;
+    requires cn.katoumegumi.java.common.utils;
+    requires cn.katoumegumi.java.sql.utils;
     requires java.annotation;
     requires mybatis.plus.extension;
     requires mybatis.plus.core;

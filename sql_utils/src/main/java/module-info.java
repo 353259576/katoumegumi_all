@@ -1,7 +1,7 @@
-module sql.utils {
+module cn.katoumegumi.java.sql.utils {
     requires java.sql;
     requires com.zaxxer.hikari;
-    requires common.utils;
+    requires cn.katoumegumi.java.common.utils;
     requires logback.core;
     requires mybatis.plus.annotation;
     requires java.persistence;
