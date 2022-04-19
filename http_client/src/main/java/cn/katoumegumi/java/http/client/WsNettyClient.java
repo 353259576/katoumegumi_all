@@ -8,7 +8,6 @@ import cn.katoumegumi.java.http.client.model.HttpResponseBody;
 import cn.katoumegumi.java.http.client.model.HttpResponseTask;
 import cn.katoumegumi.java.http.client.processor.WsChannelHttpRequestBodyBind;
 import cn.katoumegumi.java.http.client.utils.WsNettyClientUtils;
-import com.google.gson.internal.UnsafeAllocator;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -41,7 +40,7 @@ public class WsNettyClient {
     private static volatile ExecutorService executor = Executors.newFixedThreadPool(200);
 
     public static void main(String[] args) {
-        UnsafeAllocator.create();
+        //UnsafeAllocator.create();
         System.setProperty("http.proxyHost", "localhost");
         System.setProperty("https.proxyHost", "127.0.0.1");
         System.setProperty("http.proxyPort", "8888");
