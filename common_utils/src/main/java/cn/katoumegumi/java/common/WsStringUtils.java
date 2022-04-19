@@ -62,7 +62,6 @@ public class WsStringUtils {
     }
 
 
-
     public static boolean isBlank(final CharSequence cs) {
         int strLen;
         if (cs == null || (strLen = cs.length()) == 0) {
@@ -80,11 +79,11 @@ public class WsStringUtils {
         return !isBlank(cs);
     }
 
-    public static boolean hasLength(final String str){
+    public static boolean hasLength(final String str) {
         return !notHasLength(str);
     }
 
-    public static boolean notHasLength(final String str){
+    public static boolean notHasLength(final String str) {
         return str == null || str.length() == 0;
     }
 

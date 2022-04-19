@@ -10,6 +10,7 @@ import java.util.Date;
 
 /**
  * 转换为字符串
+ *
  * @author 星梦苍天
  */
 public class ConvertToString implements ConvertBean<String> {
@@ -20,6 +21,7 @@ public class ConvertToString implements ConvertBean<String> {
 
     /**
      * 数字转String
+     *
      * @param bean
      * @return
      */
@@ -27,45 +29,45 @@ public class ConvertToString implements ConvertBean<String> {
         return bean.toString();
     }
 
-    public String convertBean(Date bean){
-        return WsDateUtils.dateToString(bean,WsDateUtils.DEFAULT_TIME_TEMPLATE);
+    public String convertBean(Date bean) {
+        return WsDateUtils.dateToString(bean, WsDateUtils.DEFAULT_TIME_TEMPLATE);
     }
 
-    public String convertBean(java.sql.Date bean){
-        return WsDateUtils.dateToString(bean,WsDateUtils.DEFAULT_TIME_TEMPLATE);
+    public String convertBean(java.sql.Date bean) {
+        return WsDateUtils.dateToString(bean, WsDateUtils.DEFAULT_TIME_TEMPLATE);
     }
 
-    public String convertBean(byte[] bean){
+    public String convertBean(byte[] bean) {
         return new String(bean);
     }
 
-    public String convertBean(LocalDate bean){
+    public String convertBean(LocalDate bean) {
         return bean.toString();
     }
 
-    public String convertBean(LocalDateTime bean){
+    public String convertBean(LocalDateTime bean) {
         return bean.toString();
     }
 
-    public String convertBean(Boolean bean){
-        return bean?"1":"0";
+    public String convertBean(Boolean bean) {
+        return bean ? "1" : "0";
     }
 
     @Override
     public String convert(Object bean) {
-        if(bean instanceof Number){
+        if (bean instanceof Number) {
             return convertBean((Number) bean);
-        }else if(bean instanceof java.sql.Date){
+        } else if (bean instanceof java.sql.Date) {
             return convertBean((java.sql.Date) bean);
-        }else if(bean instanceof Date){
+        } else if (bean instanceof Date) {
             return convertBean((Date) bean);
-        }else if(bean instanceof LocalDateTime){
+        } else if (bean instanceof LocalDateTime) {
             return convertBean((LocalDateTime) bean);
-        }else if(bean instanceof LocalDate){
+        } else if (bean instanceof LocalDate) {
             return convertBean((LocalDate) bean);
-        }else if(bean instanceof byte[]){
+        } else if (bean instanceof byte[]) {
             return convertBean((byte[]) bean);
-        }else if (bean instanceof Boolean){
+        } else if (bean instanceof Boolean) {
             return convertBean((Boolean) bean);
         } else {
             return this.convertBean(bean);

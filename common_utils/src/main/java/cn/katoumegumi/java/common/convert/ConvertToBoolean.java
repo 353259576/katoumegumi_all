@@ -10,50 +10,51 @@ import java.util.Map;
 
 /**
  * 转换为布尔类型
+ *
  * @author 星梦苍天
  */
-public class ConvertToBoolean implements ConvertBean<Boolean>{
+public class ConvertToBoolean implements ConvertBean<Boolean> {
 
-    private Map<String,Boolean> map = new HashMap<>();
+    private Map<String, Boolean> map = new HashMap<>();
 
     {
-        map.put("是",true);
-        map.put("否",false);
-        map.put("1",true);
-        map.put("0",false);
-        map.put("yes",true);
-        map.put("no",false);
-        map.put("y",true);
-        map.put("n",false);
-        map.put("Y",true);
-        map.put("N",false);
-        map.put("YES",true);
-        map.put("NO",false);
-        map.put("true",true);
-        map.put("false",false);
-        map.put("TRUE",true);
-        map.put("FALSE",false);
+        map.put("是", true);
+        map.put("否", false);
+        map.put("1", true);
+        map.put("0", false);
+        map.put("yes", true);
+        map.put("no", false);
+        map.put("y", true);
+        map.put("n", false);
+        map.put("Y", true);
+        map.put("N", false);
+        map.put("YES", true);
+        map.put("NO", false);
+        map.put("true", true);
+        map.put("false", false);
+        map.put("TRUE", true);
+        map.put("FALSE", false);
     }
 
-    public Boolean convertBean(Number bean){
+    public Boolean convertBean(Number bean) {
         return bean.intValue() == 1;
     }
 
 
     public Boolean convertBean(Object bean) {
-        String s = ConvertUtils.convert(bean,String.class);
-        if(s == null){
+        String s = ConvertUtils.convert(bean, String.class);
+        if (s == null) {
             return null;
-        }else {
+        } else {
             return map.get(s);
         }
     }
 
     @Override
     public Boolean convert(Object bean) {
-        if(bean instanceof Number){
+        if (bean instanceof Number) {
             return convertBean((Number) bean);
-        }else {
+        } else {
             return this.convertBean(bean);
         }
     }

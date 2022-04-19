@@ -10,50 +10,51 @@ import java.util.Date;
 
 /**
  * 转换为短整形
+ *
  * @author 星梦苍天
  */
-public class ConvertToShort implements ConvertBean<Short>{
+public class ConvertToShort implements ConvertBean<Short> {
 
-    public Short convertBean(Number bean){
+    public Short convertBean(Number bean) {
         return bean.shortValue();
     }
 
     public Short convertBean(Boolean bean) {
-        return bean ? (short)1 : (short)0;
+        return bean ? (short) 1 : (short) 0;
     }
 
     public Short convertBean(Object bean) {
-        String s = ConvertUtils.convert(bean,String.class);
-        return WsStringUtils.notHasLength(s)?null:Short.valueOf(s);
+        String s = ConvertUtils.convert(bean, String.class);
+        return WsStringUtils.notHasLength(s) ? null : Short.valueOf(s);
     }
 
     public Short convertBean(Date date) {
-        return ConvertUtils.convert(date,Long.class).shortValue();
+        return ConvertUtils.convert(date, Long.class).shortValue();
     }
 
     public Short convertBean(LocalDate date) {
-        return ConvertUtils.convert(date,Long.class).shortValue();
+        return ConvertUtils.convert(date, Long.class).shortValue();
     }
 
     public Short convertBean(LocalDateTime date) {
-        return ConvertUtils.convert(date,Long.class).shortValue();
+        return ConvertUtils.convert(date, Long.class).shortValue();
     }
 
     @Override
     public Short convert(Object bean) {
-        if(bean instanceof String){
+        if (bean instanceof String) {
             return this.convertBean(bean);
-        }else if (bean instanceof Number){
+        } else if (bean instanceof Number) {
             return convertBean((Number) bean);
-        }else if(bean instanceof Boolean){
+        } else if (bean instanceof Boolean) {
             return convertBean((Boolean) bean);
-        }else if(bean instanceof Date){
+        } else if (bean instanceof Date) {
             return convertBean((Date) bean);
-        }else if(bean instanceof LocalDate){
+        } else if (bean instanceof LocalDate) {
             return convertBean((LocalDate) bean);
-        }else if(bean instanceof LocalDateTime){
+        } else if (bean instanceof LocalDateTime) {
             return convertBean((LocalDateTime) bean);
-        }else {
+        } else {
             return convertBean(bean);
         }
 

@@ -70,11 +70,11 @@ public class ConvertToBigDecimal implements ConvertBean<BigDecimal> {
     }
 
     public BigDecimal convertBean(LocalDate date) {
-        return new BigDecimal(ConvertUtils.convert(date,Date.class).getTime());
+        return new BigDecimal(ConvertUtils.convert(date, Date.class).getTime());
     }
 
     public BigDecimal convertBean(LocalDateTime date) {
-        return new BigDecimal(ConvertUtils.convert(date,Date.class).getTime());
+        return new BigDecimal(ConvertUtils.convert(date, Date.class).getTime());
     }
 
 
@@ -87,24 +87,36 @@ public class ConvertToBigDecimal implements ConvertBean<BigDecimal> {
     public BigDecimal convert(Object bean) {
         Class<?> tClass = bean.getClass();
         int i = 0;
-        for(; i < classes.length; ++i){
-            if(classes[i] == tClass){
+        for (; i < classes.length; ++i) {
+            if (classes[i] == tClass) {
                 break;
             }
         }
-        switch (i){
-            case 0:return convertBean((Integer) bean);
-            case 1:return convertBean((Short) bean);
-            case 2:return convertBean((Byte)bean);
-            case 3:return convertBean((Float)bean);
-            case 4:return convertBean((Double)bean);
-            case 5:return convertBean((Long)bean);
-            case 6:return convertBean((BigInteger)bean);
-            case 7:return convertBean((Date)bean);
-            case 8:return convertBean((java.sql.Date)bean);
-            case 9:return convertBean((LocalDate)bean);
-            case 10:return convertBean((LocalDateTime) bean);
-            default:return convertBean(bean);
+        switch (i) {
+            case 0:
+                return convertBean((Integer) bean);
+            case 1:
+                return convertBean((Short) bean);
+            case 2:
+                return convertBean((Byte) bean);
+            case 3:
+                return convertBean((Float) bean);
+            case 4:
+                return convertBean((Double) bean);
+            case 5:
+                return convertBean((Long) bean);
+            case 6:
+                return convertBean((BigInteger) bean);
+            case 7:
+                return convertBean((Date) bean);
+            case 8:
+                return convertBean((java.sql.Date) bean);
+            case 9:
+                return convertBean((LocalDate) bean);
+            case 10:
+                return convertBean((LocalDateTime) bean);
+            default:
+                return convertBean(bean);
         }
     }
 }

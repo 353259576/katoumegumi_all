@@ -82,6 +82,7 @@ public class WsFieldUtils {
 
     /**
      * 通过方法名获取方法
+     *
      * @param methodName
      * @param clazz
      * @return
@@ -109,6 +110,7 @@ public class WsFieldUtils {
 
     /**
      * 判断是否为基类的子类
+     *
      * @param child
      * @param parent
      * @return
@@ -166,6 +168,7 @@ public class WsFieldUtils {
 
     /**
      * 获取字段名称
+     *
      * @param supplierFunc
      * @param <T>
      * @return
@@ -190,6 +193,7 @@ public class WsFieldUtils {
 
     /**
      * 获取字段名称
+     *
      * @param sFunction
      * @param <T>
      * @return
@@ -216,6 +220,7 @@ public class WsFieldUtils {
 
     /**
      * 去除方法名的get set is
+     *
      * @param methodName
      * @return
      */
@@ -231,6 +236,7 @@ public class WsFieldUtils {
 
     /**
      * 通过字段名获取字段
+     *
      * @param tClass
      * @param fieldName
      * @param <T>
@@ -246,16 +252,16 @@ public class WsFieldUtils {
             nowField = null;
             nowName = iterator.next();
             Field[] fields = getFieldAll(nowC);
-            if(fields == null){
+            if (fields == null) {
                 return null;
             }
-            for(Field field:fields){
-                if(field.getName().equals(nowName)){
+            for (Field field : fields) {
+                if (field.getName().equals(nowName)) {
                     nowField = field;
                     break;
                 }
             }
-            if(nowField == null){
+            if (nowField == null) {
                 return null;
             }
             nowC = nowField.getType();
@@ -276,6 +282,7 @@ public class WsFieldUtils {
 
     /**
      * 获取泛型
+     *
      * @param field
      * @param <T>
      * @return
@@ -307,6 +314,7 @@ public class WsFieldUtils {
 
     /**
      * 判读字段是不是数组
+     *
      * @param field
      * @return
      */
@@ -324,61 +332,61 @@ public class WsFieldUtils {
      * @return
      */
     public static Object getValue(Object o, Field field) {
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(field.getType().isPrimitive()){
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (field.getType().isPrimitive()) {
             Class<?> clazz = field.getType();
-            if(clazz.equals(int.class)){
+            if (clazz.equals(int.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {
                     return WsUnsafeUtils.getIntVolatile(o, address);
                 } else {
                     return WsUnsafeUtils.getInt(o, address);
                 }
-            }else if(clazz.equals(long.class)){
+            } else if (clazz.equals(long.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {
                     return WsUnsafeUtils.getLongVolatile(o, address);
                 } else {
                     return WsUnsafeUtils.getLong(o, address);
                 }
-            }else if(clazz.equals(double.class)){
+            } else if (clazz.equals(double.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {
                     return WsUnsafeUtils.getDoubleVolatile(o, address);
                 } else {
                     return WsUnsafeUtils.getDouble(o, address);
                 }
-            }else if(clazz.equals(boolean.class)){
+            } else if (clazz.equals(boolean.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {
                     return WsUnsafeUtils.getBooleanVolatile(o, address);
                 } else {
                     return WsUnsafeUtils.getBoolean(o, address);
                 }
-            }else if(clazz.equals(float.class)){
+            } else if (clazz.equals(float.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {
                     return WsUnsafeUtils.getObjectVolatile(o, address);
                 } else {
                     return WsUnsafeUtils.getObject(o, address);
                 }
-            }else if(clazz.equals(short.class)){
+            } else if (clazz.equals(short.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {
                     return WsUnsafeUtils.getShortVolatile(o, address);
                 } else {
                     return WsUnsafeUtils.getShort(o, address);
                 }
-            }else if(clazz.equals(byte.class)){
+            } else if (clazz.equals(byte.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {
                     return WsUnsafeUtils.getByteVolatile(o, address);
                 } else {
                     return WsUnsafeUtils.getByte(o, address);
                 }
-            }else if (clazz.equals(char.class)){
+            } else if (clazz.equals(char.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {
                     return WsUnsafeUtils.getCharVolatile(o, address);
                 } else {
                     return WsUnsafeUtils.getChar(o, address);
                 }
-            }else {
+            } else {
                 throw new RuntimeException("不支持的类型");
             }
-        }else {
+        } else {
             if (Modifier.isVolatile(field.getModifiers())) {
                 return WsUnsafeUtils.getObjectVolatile(o, address);
             } else {
@@ -397,14 +405,14 @@ public class WsFieldUtils {
      * @return
      */
     public static boolean setValue(Object o, Object value, Field field) {
-        if(o == null && !Modifier.isStatic(field.getModifiers())){
+        if (o == null && !Modifier.isStatic(field.getModifiers())) {
             return false;
         }
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(Modifier.isVolatile(field.getModifiers())){
-            WsUnsafeUtils.putObjectVolatile(o,address,value);
-        }else {
-            WsUnsafeUtils.putObject(o,address,value);
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (Modifier.isVolatile(field.getModifiers())) {
+            WsUnsafeUtils.putObjectVolatile(o, address, value);
+        } else {
+            WsUnsafeUtils.putObject(o, address, value);
         }
         return true;
 
@@ -412,81 +420,81 @@ public class WsFieldUtils {
     }
 
     public static boolean setValue(Object o, int value, Field field) {
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(Modifier.isVolatile(field.getModifiers())){
-            WsUnsafeUtils.putIntVolatile(o,address,value);
-        }else {
-            WsUnsafeUtils.putInt(o,address,value);
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (Modifier.isVolatile(field.getModifiers())) {
+            WsUnsafeUtils.putIntVolatile(o, address, value);
+        } else {
+            WsUnsafeUtils.putInt(o, address, value);
         }
         return true;
     }
 
     public static boolean setValue(Object o, boolean value, Field field) {
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(Modifier.isVolatile(field.getModifiers())){
-            WsUnsafeUtils.putBooleanVolatile(o,address,value);
-        }else {
-            WsUnsafeUtils.putBoolean(o,address,value);
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (Modifier.isVolatile(field.getModifiers())) {
+            WsUnsafeUtils.putBooleanVolatile(o, address, value);
+        } else {
+            WsUnsafeUtils.putBoolean(o, address, value);
         }
         return true;
     }
 
     public static boolean setValue(Object o, char value, Field field) {
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(Modifier.isVolatile(field.getModifiers())){
-            WsUnsafeUtils.putCharVolatile(o,address,value);
-        }else {
-            WsUnsafeUtils.putChar(o,address,value);
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (Modifier.isVolatile(field.getModifiers())) {
+            WsUnsafeUtils.putCharVolatile(o, address, value);
+        } else {
+            WsUnsafeUtils.putChar(o, address, value);
         }
         return true;
     }
 
     public static boolean setValue(Object o, byte value, Field field) {
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(Modifier.isVolatile(field.getModifiers())){
-            WsUnsafeUtils.putByteVolatile(o,address,value);
-        }else {
-            WsUnsafeUtils.putByte(o,address,value);
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (Modifier.isVolatile(field.getModifiers())) {
+            WsUnsafeUtils.putByteVolatile(o, address, value);
+        } else {
+            WsUnsafeUtils.putByte(o, address, value);
         }
         return true;
     }
 
     public static boolean setValue(Object o, short value, Field field) {
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(Modifier.isVolatile(field.getModifiers())){
-            WsUnsafeUtils.putShortVolatile(o,address,value);
-        }else {
-            WsUnsafeUtils.putShort(o,address,value);
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (Modifier.isVolatile(field.getModifiers())) {
+            WsUnsafeUtils.putShortVolatile(o, address, value);
+        } else {
+            WsUnsafeUtils.putShort(o, address, value);
         }
         return true;
     }
 
     public static boolean setValue(Object o, long value, Field field) {
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(Modifier.isVolatile(field.getModifiers())){
-            WsUnsafeUtils.putLongVolatile(o,address,value);
-        }else {
-            WsUnsafeUtils.putLong(o,address,value);
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (Modifier.isVolatile(field.getModifiers())) {
+            WsUnsafeUtils.putLongVolatile(o, address, value);
+        } else {
+            WsUnsafeUtils.putLong(o, address, value);
         }
         return true;
     }
 
     public static boolean setValue(Object o, float value, Field field) {
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(Modifier.isVolatile(field.getModifiers())){
-            WsUnsafeUtils.putFloatVolatile(o,address,value);
-        }else {
-            WsUnsafeUtils.putFloat(o,address,value);
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (Modifier.isVolatile(field.getModifiers())) {
+            WsUnsafeUtils.putFloatVolatile(o, address, value);
+        } else {
+            WsUnsafeUtils.putFloat(o, address, value);
         }
         return true;
     }
 
     public static boolean setValue(Object o, double value, Field field) {
-        long address = Modifier.isStatic(field.getModifiers())? WsUnsafeUtils.staticFieldOffset(field): WsUnsafeUtils.objectFieldOffset(field);
-        if(Modifier.isVolatile(field.getModifiers())){
-            WsUnsafeUtils.putDoubleVolatile(o,address,value);
-        }else {
-            WsUnsafeUtils.putDouble(o,address,value);
+        long address = Modifier.isStatic(field.getModifiers()) ? WsUnsafeUtils.staticFieldOffset(field) : WsUnsafeUtils.objectFieldOffset(field);
+        if (Modifier.isVolatile(field.getModifiers())) {
+            WsUnsafeUtils.putDoubleVolatile(o, address, value);
+        } else {
+            WsUnsafeUtils.putDouble(o, address, value);
         }
         return true;
     }
@@ -496,7 +504,7 @@ public class WsFieldUtils {
         if ((!Modifier.isPublic(field.getModifiers()) ||
                 !Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
                 Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
-            ((AccessibleObject)field).setAccessible(true);
+            ((AccessibleObject) field).setAccessible(true);
         }
     }
 }

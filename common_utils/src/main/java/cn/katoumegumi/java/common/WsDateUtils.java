@@ -18,7 +18,6 @@ public class WsDateUtils {
     public static final String[] CN_WEEK_NAMES = new String[]{"星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"};
 
 
-
     public static final String DEFAULT_TIME_TEMPLATE = "yyyy-MM-dd'T'HH:mm:ss";
 
     public static final String LONGTIMESTRING = "yyyy-MM-dd HH:mm:ss";
@@ -29,14 +28,14 @@ public class WsDateUtils {
     /**
      * 获取一段程序的执行时间
      */
-    public static final Function<WsRun,Long> getExecutionTime = wsRun -> {
+    public static final Function<WsRun, Long> getExecutionTime = wsRun -> {
         long start = System.currentTimeMillis();
         wsRun.run();
         long end = System.currentTimeMillis();
         return end - start;
     };
 
-    private static final ThreadLocal<Map<String,SimpleDateFormat>> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, SimpleDateFormat>> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<>();
 
     private static final Long SECONDS = 1000L;
     private static final Long MINUTES = 60L * SECONDS;
@@ -258,9 +257,9 @@ public class WsDateUtils {
         return longs;
     }
 
-    public static SimpleDateFormat getDateFormat(String pattern){
-        Map<String,SimpleDateFormat> stringSimpleDateFormatMap = DATE_FORMAT_THREAD_LOCAL.get();
-        if(stringSimpleDateFormatMap == null){
+    public static SimpleDateFormat getDateFormat(String pattern) {
+        Map<String, SimpleDateFormat> stringSimpleDateFormatMap = DATE_FORMAT_THREAD_LOCAL.get();
+        if (stringSimpleDateFormatMap == null) {
             stringSimpleDateFormatMap = new HashMap<>();
             DATE_FORMAT_THREAD_LOCAL.set(stringSimpleDateFormatMap);
         }

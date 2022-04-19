@@ -38,15 +38,15 @@ public class ConvertToBigInteger implements ConvertBean<BigInteger> {
 
     @Override
     public BigInteger convert(Object bean) {
-        if(bean instanceof String){
+        if (bean instanceof String) {
             return this.convertBean(bean);
-        }else if(bean instanceof Date){
+        } else if (bean instanceof Date) {
             return convertBean((Date) bean);
-        }else if(bean instanceof LocalDate){
+        } else if (bean instanceof LocalDate) {
             return convertBean((LocalDate) bean);
-        }else if(bean instanceof LocalDateTime){
+        } else if (bean instanceof LocalDateTime) {
             return convertBean((LocalDateTime) bean);
-        }else {
+        } else {
             return convertBean(bean);
         }
 

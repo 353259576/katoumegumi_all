@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 public class WsUnsafeUtils {
 
-    static class UnsafeUtils{
+    static class UnsafeUtils {
         private static Object unsafe;
 
         static {
@@ -105,15 +105,15 @@ public class WsUnsafeUtils {
     /**
      * cas
      */
-    private static final Method compareAndSwapObject = getMethod("compareAndSwapObject",Object.class,long.class,Object.class,Object.class);
-    private static final Method compareAndSwapInt = getMethod("compareAndSwapInt",Object.class,long.class,int.class,int.class);
-    private static final Method compareAndSwapLong = getMethod("compareAndSwapLong",Object.class,long.class,long.class,long.class);
+    private static final Method compareAndSwapObject = getMethod("compareAndSwapObject", Object.class, long.class, Object.class, Object.class);
+    private static final Method compareAndSwapInt = getMethod("compareAndSwapInt", Object.class, long.class, int.class, int.class);
+    private static final Method compareAndSwapLong = getMethod("compareAndSwapLong", Object.class, long.class, long.class, long.class);
 
-    private static final Method getAndAddInt = getMethod("getAndAddInt",Object.class,long.class,int.class);
-    private static final Method getAndAddLong = getMethod("getAndAddLong",Object.class,long.class,long.class);
-    private static final Method getAndSetInt = getMethod("getAndSetInt",Object.class,long.class,int.class);
-    private static final Method getAndSetLong = getMethod("getAndSetLong",Object.class,long.class,long.class);
-    private static final Method getAndSetObject = getMethod("getAndSetObject",Object.class,long.class,Object.class);
+    private static final Method getAndAddInt = getMethod("getAndAddInt", Object.class, long.class, int.class);
+    private static final Method getAndAddLong = getMethod("getAndAddLong", Object.class, long.class, long.class);
+    private static final Method getAndSetInt = getMethod("getAndSetInt", Object.class, long.class, int.class);
+    private static final Method getAndSetLong = getMethod("getAndSetLong", Object.class, long.class, long.class);
+    private static final Method getAndSetObject = getMethod("getAndSetObject", Object.class, long.class, Object.class);
 
     /**
      * memory
@@ -128,7 +128,7 @@ public class WsUnsafeUtils {
     private static final Method addressSize = getMethod("addressSize");
     private static final Method pageSize = getMethod("pageSize");
 
-    private static final Method throwException = getMethod("throwException",Throwable.class);
+    private static final Method throwException = getMethod("throwException", Throwable.class);
 
 
     private static final Method park = getMethod("park", boolean.class, long.class);
@@ -143,7 +143,7 @@ public class WsUnsafeUtils {
 
 
     private static Method getMethod(String methodName, Class<?>... parameterTypes) {
-        if(unsafe == null){
+        if (unsafe == null) {
             return null;
         }
         try {
@@ -404,38 +404,39 @@ public class WsUnsafeUtils {
     public final boolean compareAndSwapObject(Object o, long offset,
                                               Object expected,
                                               Object x) {
-        return (boolean) invoke(compareAndSwapObject,o,offset,expected,x);
+        return (boolean) invoke(compareAndSwapObject, o, offset, expected, x);
     }
 
     public final boolean compareAndSwapInt(Object o, long offset,
                                            int expected,
                                            int x) {
-        return (boolean) invoke(compareAndSwapInt,o,offset,expected,x);
+        return (boolean) invoke(compareAndSwapInt, o, offset, expected, x);
     }
 
     public final boolean compareAndSwapLong(Object o, long offset,
                                             long expected,
                                             long x) {
-        return (boolean) invoke(compareAndSwapLong,o,offset,expected,x);
+        return (boolean) invoke(compareAndSwapLong, o, offset, expected, x);
     }
 
     public final int getAndAddInt(Object o, long offset, int delta) {
-        return (int) invoke(getAndAddInt,o,offset,delta);
+        return (int) invoke(getAndAddInt, o, offset, delta);
     }
 
     public final long getAndAddLong(Object o, long offset, long delta) {
-        return (long) invoke(getAndAddLong,o,offset,delta);
+        return (long) invoke(getAndAddLong, o, offset, delta);
     }
 
     public final int getAndSetInt(Object o, long offset, int delta) {
-        return (int) invoke(getAndSetInt,o,offset,delta);
+        return (int) invoke(getAndSetInt, o, offset, delta);
     }
 
     public final long getAndSetLong(Object o, long offset, long delta) {
-        return (long) invoke(getAndSetLong,o,offset,delta);
+        return (long) invoke(getAndSetLong, o, offset, delta);
     }
+
     public final Object getAndSetObject(Object o, long offset, Object delta) {
-        return invoke(getAndSetObject,o,offset,delta);
+        return invoke(getAndSetObject, o, offset, delta);
     }
 
     /**
@@ -471,16 +472,16 @@ public class WsUnsafeUtils {
         invoke(copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes, srcBase, srcOffset, destBase, destOffset, bytes);
     }
 
-    public static int addressSize(){
-        return (int)invoke(addressSize);
+    public static int addressSize() {
+        return (int) invoke(addressSize);
     }
 
-    public static int pageSize(){
+    public static int pageSize() {
         return (int) invoke(pageSize);
     }
 
-    public static void throwException(Throwable ee){
-        invoke(throwException,ee);
+    public static void throwException(Throwable ee) {
+        invoke(throwException, ee);
     }
 
     public static void park(boolean isAbsolute, long time) {
@@ -509,7 +510,7 @@ public class WsUnsafeUtils {
 
 
     public void invokeCleaner(java.nio.ByteBuffer directBuffer) {
-        invoke(invokeCleaner,directBuffer);
+        invoke(invokeCleaner, directBuffer);
     }
 
 }

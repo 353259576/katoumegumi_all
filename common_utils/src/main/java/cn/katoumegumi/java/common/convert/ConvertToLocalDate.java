@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class ConvertToLocalDate implements ConvertBean<LocalDate> {
 
-    public LocalDate convertBean(LocalDateTime bean){
+    public LocalDate convertBean(LocalDateTime bean) {
         return bean.toLocalDate();
     }
 
@@ -22,9 +22,9 @@ public class ConvertToLocalDate implements ConvertBean<LocalDate> {
 
     @Override
     public LocalDate convert(Object bean) {
-        if(bean instanceof LocalDateTime){
+        if (bean instanceof LocalDateTime) {
             return ((LocalDateTime) bean).toLocalDate();
-        }else {
+        } else {
             return this.convertBean(bean);
         }
     }

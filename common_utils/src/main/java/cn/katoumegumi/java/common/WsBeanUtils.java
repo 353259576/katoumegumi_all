@@ -187,7 +187,7 @@ public class WsBeanUtils {
     public static <T> T objectToT(Object object, Class<T> tClass) {
         boolean isPrimitive = tClass.isPrimitive();
         //Object o = convertToT(object, tClass);
-        Object o = ConvertUtils.convert(object,tClass);
+        Object o = ConvertUtils.convert(object, tClass);
         if (isPrimitive && o == null) {
             if (tClass == int.class) {
                 o = 0;
@@ -323,7 +323,7 @@ public class WsBeanUtils {
             e.printStackTrace();
             return null;
         }*/
-        return (T)WsUnsafeUtils.allocateInstance(clazz);
+        return (T) WsUnsafeUtils.allocateInstance(clazz);
     }
 
     public static <T> Collection convertToList(Object o, Collection collection, Class<T> tClass) {

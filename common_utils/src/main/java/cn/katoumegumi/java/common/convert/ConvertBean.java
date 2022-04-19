@@ -4,6 +4,7 @@ public interface ConvertBean<T> {
 
     /**
      * 通用转化
+     *
      * @param bean
      * @return
      */

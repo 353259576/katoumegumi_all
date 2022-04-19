@@ -224,12 +224,12 @@ public class WsListUtils {
         int length = tList.size();
         Object[] objects = new Object[length];
 
-        for (int i = 0; i < length; ++i){
+        for (int i = 0; i < length; ++i) {
             objects[i] = function.apply(tList.get(i));
         }
 
 
-        return (I[])objects;
+        return (I[]) objects;
     }
 
     /**

@@ -21,7 +21,7 @@ public class OSMessageUtils {
         return System.getProperty("os.name").toLowerCase(Locale.ROOT);
     }
 
-    public static String getJdkVersion(){
+    public static String getJdkVersion() {
         return System.getProperty("java.vm.specification.version");
     }
 

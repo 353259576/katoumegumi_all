@@ -49,14 +49,14 @@ public class Encryption {
 
         long tOffset = WsUnsafeUtils.allocateMemory(2);
 
-        WsUnsafeUtils.setMemory(tOffset,1L,(byte)22);
-        WsUnsafeUtils.setMemory(tOffset + 1,1L,(byte)33);
+        WsUnsafeUtils.setMemory(tOffset, 1L, (byte) 22);
+        WsUnsafeUtils.setMemory(tOffset + 1, 1L, (byte) 33);
 
-        byte b1 = WsUnsafeUtils.getByte(null,tOffset);
-        byte b2 = WsUnsafeUtils.getByte(null,tOffset+1);
+        byte b1 = WsUnsafeUtils.getByte(null, tOffset);
+        byte b2 = WsUnsafeUtils.getByte(null, tOffset + 1);
 
 
-        WsUnsafeUtils.reallocateMemory(tOffset,2L);
+        WsUnsafeUtils.reallocateMemory(tOffset, 2L);
         System.out.println(b1);
         System.out.println(b2);
 
@@ -66,11 +66,11 @@ public class Encryption {
         int bitSize = addressSize * 8;
 
         long offset = 0;
-        long mark = WsUnsafeUtils.getLong(o,offset);
+        long mark = WsUnsafeUtils.getLong(o, offset);
         //offset += bitSize;
         //long kClass = WsUnsafeUtils.getLong(o,offset);
         //offset += bitSize;
-        int length = WsUnsafeUtils.getInt(o,offset + 60);
+        int length = WsUnsafeUtils.getInt(o, offset + 60);
 
         System.out.println("mark：" + mark);
         //System.out.println("kClass:" + kClass);
@@ -164,7 +164,7 @@ public class Encryption {
     }
 
 
-    public static String hmacSha256Encoder(String str, String key){
+    public static String hmacSha256Encoder(String str, String key) {
         try {
             Mac mac = Mac.getInstance("HMACSHA256");
             SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), mac.getAlgorithm());
@@ -176,8 +176,6 @@ public class Encryption {
             return null;
         }
     }
-
-
 
 
     //***********************************************************************************************************
@@ -266,6 +264,7 @@ public class Encryption {
 
     /**
      * md5加密
+     *
      * @param str
      * @return
      */
