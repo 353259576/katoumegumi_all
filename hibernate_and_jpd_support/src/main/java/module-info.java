@@ -19,6 +19,7 @@ module cn.katoumegumi.java.hibernate.and.jpd.support {
     requires mybatis.plus.extension;
     requires mybatis.plus.core;
     requires org.mybatis;
+    requires java.persistence;
 
     exports cn.katoumegumi.java.starter.jpa.config;
     exports cn.katoumegumi.java.starter.jpa.hibernate;
