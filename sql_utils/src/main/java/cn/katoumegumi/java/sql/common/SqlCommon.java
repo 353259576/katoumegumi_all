@@ -84,5 +84,9 @@ public interface SqlCommon {
 
     char RIGHT_BRACKETS = ')';
 
+    char KEY_COMMON_DELIMITER = '_';
+
+    char PATH_COMMON_DELIMITER = '.';
+
 
 }

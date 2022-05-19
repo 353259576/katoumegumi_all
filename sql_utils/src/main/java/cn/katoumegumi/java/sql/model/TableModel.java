@@ -8,23 +8,26 @@ import java.util.List;
  * 表
  */
 public class TableModel {
-
     /**
      * 表信息
      */
-    private FieldColumnRelationMapper table;
+    private final FieldColumnRelationMapper table;
 
     /**
      * 别名（一次查询中唯一）
      */
-    private String alias;
+    private final String alias;
 
-    private TableModel parentTable;
+    public TableModel(FieldColumnRelationMapper table,String alias){
+        this.table = table;
+        this.alias = alias;
+    }
 
-    private ConditionModel columnCondition;
+    public FieldColumnRelationMapper getTable() {
+        return table;
+    }
 
-    private List<ConditionModel> extConditionList;
-
-
-
+    public String getAlias() {
+        return alias;
+    }
 }

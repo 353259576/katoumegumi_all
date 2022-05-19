@@ -9,21 +9,41 @@ import java.util.List;
  */
 public class SelectModel {
 
-    /**
-     * 需要查询的列名
-     */
-    private List<ColumnBaseEntity> selectColumnList;
+    private final List<ColumnBaseEntity> select;
 
-    /**
-     * 查询主表
-     */
-    private TableModel mainTable;
+    private final TableModel from;
 
-    /**
-     * 关联表
-     */
-    private List<TableModel> joinTableList;
+    private final List<JoinTableModel> joinList;
 
+    private final ConditionRelationModel where;
 
+    private final List<OrderByModel> orderBy;
 
+    public SelectModel(List<ColumnBaseEntity> select, TableModel from, List<JoinTableModel> joinList, ConditionRelationModel where, List<OrderByModel> orderBy) {
+        this.select = select;
+        this.from = from;
+        this.joinList = joinList;
+        this.where = where;
+        this.orderBy = orderBy;
+    }
+
+    public List<ColumnBaseEntity> getSelect() {
+        return select;
+    }
+
+    public TableModel getFrom() {
+        return from;
+    }
+
+    public List<JoinTableModel> getJoinList() {
+        return joinList;
+    }
+
+    public ConditionRelationModel getWhere() {
+        return where;
+    }
+
+    public List<OrderByModel> getOrderBy() {
+        return orderBy;
+    }
 }

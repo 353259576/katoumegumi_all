@@ -195,7 +195,13 @@ public class SqlEquation {
         AND(SqlCommon.AND),
         OR(SqlCommon.OR),
         XOR(SqlCommon.XOR),
-        NOT(SqlCommon.NOT);
+        NOT(SqlCommon.NOT),
+        LIKE(SqlCommon.LIKE),
+        BETWEEN(SqlCommon.BETWEEN),
+        NOT_BETWEEN(SqlCommon.NOT_BETWEEN),
+        SET(SqlCommon.SET),
+        SQL(null)
+        ;
 
         private final String symbol;
 

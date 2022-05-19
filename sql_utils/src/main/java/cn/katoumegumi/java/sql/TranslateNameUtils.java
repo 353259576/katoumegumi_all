@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.common.SqlCommon;
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
 
 import java.util.ArrayList;
@@ -16,27 +17,51 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TranslateNameUtils {
 
-    private final List<String> mainClassNameList = new ArrayList<>();
+    private final TranslateNameUtils parent;
+
+    private final List<String> mainClassNameList;
 
     /**
      * 简写
      */
-    private final Map<String, String> abbreviationMap = new HashMap<>();
+    private final Map<String, String> abbreviationMap;
 
     /**
      * 原始名称
      */
-    private final Map<String, String> particularMap = new HashMap<>();
+    private final Map<String, String> particularMap;
 
     /**
      * 缩写防重复
      */
-    private final AtomicInteger abbreviationNum = new AtomicInteger();
+    private final AtomicInteger abbreviationNum;
 
     /**
      * 本地对象与表的对应关系
      */
-    private final Map<String, FieldColumnRelationMapper> localMapperMap = new HashMap<>();
+    private final Map<String, FieldColumnRelationMapper> localMapperMap;
+
+    //private final Map<String,ColumnBaseEntity> columnBaseEntityCacheMap = new HashMap<>();
+
+
+    public TranslateNameUtils(){
+        this.parent = null;
+        this.mainClassNameList = new ArrayList<>();
+        this.abbreviationMap = new HashMap<>();
+        this.particularMap = new HashMap<>();
+        this.abbreviationNum = new AtomicInteger();
+        this.localMapperMap = new HashMap<>();
+    }
+
+    public TranslateNameUtils(TranslateNameUtils translateNameUtils){
+        this.parent = translateNameUtils;
+        this.abbreviationNum = translateNameUtils.abbreviationNum;
+
+        this.localMapperMap = new HashMap<>();
+        this.mainClassNameList = new ArrayList<>();
+        this.abbreviationMap = new HashMap<>();
+        this.particularMap = new HashMap<>();
+    }
 
 
     /**
@@ -46,9 +71,9 @@ public class TranslateNameUtils {
      */
     public String createAbbreviation(String keyword) {
         if (keyword.length() < 2) {
-            return keyword + '_' + abbreviationNum.getAndAdd(1);
+            return keyword + SqlCommon.KEY_COMMON_DELIMITER + abbreviationNum.getAndAdd(1);
         } else {
-            return keyword.substring(0, 1) + '_' + abbreviationNum.getAndAdd(1);
+            return keyword.substring(0, 1) + SqlCommon.KEY_COMMON_DELIMITER + abbreviationNum.getAndAdd(1);
         }
     }
 
@@ -58,7 +83,14 @@ public class TranslateNameUtils {
      * @return
      */
     public String getParticular(String value) {
-        return particularMap.get(value);
+        TranslateNameUtils parent = this.parent;
+        String returnValue = particularMap.get(value);
+        if(returnValue == null && parent != null){
+            returnValue = parent.particularMap.get(value);
+            parent = parent.parent;
+        }
+        return returnValue;
+        //return particularMap.get(value);
     }
 
 
@@ -68,6 +100,34 @@ public class TranslateNameUtils {
      * @return
      */
     public String getAbbreviation(String keyword) {
+        TranslateNameUtils parent = this.parent;
+        String value = abbreviationMap.get(keyword);
+        while (value == null && parent != null){
+            value = parent.abbreviationMap.get(keyword);
+            parent = parent.parent;
+        }
+        if (value == null) {
+            //value = particularMap.get(keyword);
+            value = getParticular(keyword);
+            if (value == null) {
+                value = createAbbreviation(keyword);
+                abbreviationMap.put(keyword, value);
+                particularMap.put(value, keyword);
+                return value;
+            } else {
+                return value;
+            }
+        } else {
+            return value;
+        }
+    }
+
+    /**
+     * 获取当前的简称
+     * @param keyword
+     * @return
+     */
+    public String getCurrentAbbreviation(String keyword) {
         String value = abbreviationMap.get(keyword);
         if (value == null) {
             value = particularMap.get(keyword);
@@ -86,11 +146,24 @@ public class TranslateNameUtils {
 
     /**
      * 设置简称
-     * @param keyword
+     * @param keyword 实际名称
+     * @param value 简称
      */
     public void setAbbreviation(String keyword, String value) {
         abbreviationMap.put(keyword, value);
         particularMap.put(value, keyword);
+    }
+
+    /**
+     * 设置简称并返回
+     * @param keyword
+     * @return
+     */
+    public String setAbbreviation(String keyword) {
+        String value = createAbbreviation(keyword);
+        abbreviationMap.put(keyword, value);
+        particularMap.put(value, keyword);
+        return value;
     }
 
     /**
@@ -99,7 +172,14 @@ public class TranslateNameUtils {
      * @return
      */
     public FieldColumnRelationMapper getLocalMapper(String locationName) {
-        return localMapperMap.get(locationName);
+        TranslateNameUtils parent = this.parent;
+        FieldColumnRelationMapper mapper = localMapperMap.get(locationName);
+        while (mapper == null && parent != null){
+            mapper = parent.localMapperMap.get(locationName);
+            parent = parent.parent;
+        }
+        return mapper;
+        //return localMapperMap.get(locationName);
     }
 
     /**
@@ -142,56 +222,109 @@ public class TranslateNameUtils {
                 return tableName.substring(prefix.length());
             }
         }
+        TranslateNameUtils parent = this.parent;
+        while (parent != null){
+            for (String prefix : parent.mainClassNameList) {
+                if (tableName.startsWith(prefix)) {
+                    return tableName.substring(prefix.length());
+                }
+            }
+            parent = parent.parent;
+        }
         return tableName;
     }
 
     /**
      * 根据查询条件生成列基本信息
      * @param originalFieldName
-     * @param prefix
+     * @param rootPath
      * @param type 1 返回的列名 2 查询的列名
      * @return
      */
-    public ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String prefix,int type) {
-        String prefixString;
+    public ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String rootPath,int type) {
+
+        /*String searchKey = rootPath+ SqlCommon.KEY_COMMON_DELIMITER +originalFieldName+SqlCommon.KEY_COMMON_DELIMITER+type;
+        ColumnBaseEntity columnBaseEntity = this.columnBaseEntityCacheMap.get(searchKey);
+        if(columnBaseEntity != null){
+            return columnBaseEntity;
+        }*/
+
+        String path;
         String fieldName;
-        originalFieldName = translateTableNickName(prefix,originalFieldName);
-        List<String> fieldNameList = WsStringUtils.split(originalFieldName, '.');
+        originalFieldName = translateTableNickName(rootPath,originalFieldName);
+        List<String> fieldNameList = WsStringUtils.split(originalFieldName, SqlCommon.PATH_COMMON_DELIMITER);
         int size = fieldNameList.size();
         if (size == 1) {
             fieldName = fieldNameList.get(0);
-            prefixString = prefix;
+            path = rootPath;
         } else if (size == 2) {
             fieldName = fieldNameList.get(1);
             String key = getParticular(fieldNameList.get(0));
             if (key == null) {
                 if (!startsWithMainClassName(fieldNameList.get(0))) {
-                    key = prefix + '.' + fieldNameList.get(0);
+                    key = rootPath + SqlCommon.PATH_COMMON_DELIMITER + fieldNameList.get(0);
                 } else {
                     key = fieldNameList.get(0);
                 }
+            }else {
+                return createColumnBaseEntity(fieldName,key,fieldNameList.get(0),type);
             }
-            prefixString = key;
+            path = key;
+
         } else {
             fieldName = fieldNameList.get(size - 1);
             fieldNameList.remove(size - 1);
             if (startsWithMainClassName(fieldNameList.get(0))) {
-                prefixString = String.join(".", fieldNameList);
+                path = String.join(".", fieldNameList);
             } else {
-                prefixString = prefix + '.' + String.join(".", fieldNameList);
+                path = rootPath + SqlCommon.PATH_COMMON_DELIMITER + String.join(".", fieldNameList);
             }
-
         }
-        FieldColumnRelationMapper mapper = getLocalMapper(prefixString);
+        return createColumnBaseEntity(fieldName,path,type);
+        /*FieldColumnRelationMapper mapper = getLocalMapper(path);
         if (mapper == null) {
-            throw new RuntimeException(prefixString + "不存在");
+            throw new RuntimeException(path + "不存在");
+        }
+        if(type == 2){
+            mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();
+        }
+        FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);*/
+        /*columnBaseEntity =  new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
+        columnBaseEntityCacheMap.put(searchKey,columnBaseEntity);
+        return columnBaseEntity;*/
+        //return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
+    }
+
+
+    public ColumnBaseEntity createColumnBaseEntity(FieldColumnRelation fieldColumnRelation,FieldColumnRelationMapper mapper,String path){
+        return new ColumnBaseEntity(fieldColumnRelation,mapper.getTableName(),path,getAbbreviation(path));
+    }
+
+    public ColumnBaseEntity createColumnBaseEntity(String fieldName,String path,int type){
+        /*FieldColumnRelationMapper mapper = getLocalMapper(path);
+        if (mapper == null) {
+            throw new RuntimeException(path + "不存在");
         }
         if(type == 2){
             mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();
         }
         FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
-        return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), prefixString, getAbbreviation(prefixString));
+        return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), path, getAbbreviation(path));*/
+        return createColumnBaseEntity(fieldName,path,getAbbreviation(path),type);
     }
+
+    public ColumnBaseEntity createColumnBaseEntity(String fieldName,String path,String abbreviation,int type){
+        FieldColumnRelationMapper mapper = getLocalMapper(path);
+        if (mapper == null) {
+            throw new RuntimeException(path + "不存在");
+        }
+        if(type == 2){
+            mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();
+        }
+        FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
+        return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), path, abbreviation);
+    }
+
 
 
     /**
@@ -215,10 +348,10 @@ public class TranslateNameUtils {
                         if (replaceSb.toString().startsWith(prefix)) {
                             stringBuilder.append(getAbbreviation(replaceSb.toString()));
                         } else {
-                            stringBuilder.append(getAbbreviation(prefix + "." + replaceSb.toString()));
+                            stringBuilder.append(getAbbreviation(prefix + SqlCommon.PATH_COMMON_DELIMITER + replaceSb));
                         }
                     } else {
-                        stringBuilder.append(replaceSb.toString());
+                        stringBuilder.append(replaceSb);
                     }
                     isReplace = false;
                 } else {
