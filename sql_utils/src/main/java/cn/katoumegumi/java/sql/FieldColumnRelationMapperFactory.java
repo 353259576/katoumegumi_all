@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.sql;
 
-import ch.qos.logback.core.util.SystemInfo;
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
@@ -35,7 +34,7 @@ public class FieldColumnRelationMapperFactory {
     private static final Map<Class<?>, FieldColumnRelationMapper> INCOMPLETE_MAPPER_MAP = new ConcurrentHashMap<>();
 
     private static final Map<Class<?>, CountDownLatch> CLASS_COUNT_DOWN_LATCH_MAP = new ConcurrentHashMap<>();
-    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(0, 200, 0L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), r -> {
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(0, 200, 0L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
         Thread thread = new Thread(r);
         thread.setDaemon(true);
         thread.setName("sqlUtils mapper生成线程");
@@ -54,8 +53,9 @@ public class FieldColumnRelationMapperFactory {
     /**
      * 解析实体对象
      *
-     * @param clazz
-     * @return
+     * @param clazz class
+     * @param allowIncomplete 允许不完整的
+     * @return 表与实例映射关系
      */
     public static FieldColumnRelationMapper analysisClassRelation(Class<?> clazz, boolean allowIncomplete) {
         FieldColumnRelationMapper fieldColumnRelationMapper = MAPPER_MAP.get(clazz);
@@ -78,7 +78,7 @@ public class FieldColumnRelationMapperFactory {
                         if (annotation == null) {
                             annotation = clazz.getAnnotation(Table.class);
                         }
-                        FieldColumnRelationMapper mapper = null;
+                        FieldColumnRelationMapper mapper;
                         if (annotation != null) {
                             mapper = hibernateAnalysisClassRelation(clazz);
                         } else {
@@ -87,7 +87,7 @@ public class FieldColumnRelationMapperFactory {
                         MAPPER_MAP.put(c, mapper);
                     } else {
                         Class<?> templateClass = tableTemplate.value();
-                        FieldColumnRelationMapper baseMapper = analysisClassRelation(templateClass);
+                        FieldColumnRelationMapper baseMapper = analysisClassRelation(templateClass,true);
                         Field[] fields = WsFieldUtils.getFieldAll(clazz);
                         if (WsListUtils.isNotEmpty(fields)) {
                             FieldColumnRelationMapper mapper = new FieldColumnRelationMapper(baseMapper.getNickName(), baseMapper.getTableName(), clazz, baseMapper);
@@ -169,15 +169,15 @@ public class FieldColumnRelationMapperFactory {
     /**
      * 解析hibernate注解
      *
-     * @param clazz
-     * @return
+     * @param clazz class
+     * @return 表与对象映射关系
      */
     private static FieldColumnRelationMapper hibernateAnalysisClassRelation(Class<?> clazz) {
         if (ignoreClass(clazz)) {
             return null;
         }
         Table table = clazz.getAnnotation(Table.class);
-        String tableName = null;
+        String tableName;
         if (WsStringUtils.isBlank(table.name())) {
             tableName = getChangeColumnName(table.name());
         } else {
@@ -255,12 +255,12 @@ public class FieldColumnRelationMapperFactory {
     /**
      * 解析mybatis plus注解
      *
-     * @param clazz
-     * @return
+     * @param clazz class
+     * @return 表与对象映射关系
      */
     private static FieldColumnRelationMapper mybatisPlusAnalysisClassRelation(Class<?> clazz) {
         TableName table = clazz.getAnnotation(TableName.class);
-        String tableName = null;
+        String tableName;
         if (table == null) {
             tableName = getChangeColumnName(clazz.getSimpleName());
         } else {
@@ -341,8 +341,8 @@ public class FieldColumnRelationMapperFactory {
     /**
      * 对没有指定名称的列名自动驼峰更改
      *
-     * @param fieldName
-     * @return
+     * @param fieldName 对象字段名称
+     * @return 返回表列名
      */
     public static String getChangeColumnName(String fieldName) {
         return fieldNameChange ? WsStringUtils.camel_case(fieldName) : fieldName;
@@ -351,8 +351,8 @@ public class FieldColumnRelationMapperFactory {
     /**
      * 是否忽略field
      *
-     * @param field
-     * @return
+     * @param field 字段
+     * @return 是否忽略的字段
      */
     public static boolean ignoreField(Field field) {
         Transient aTransient = field.getAnnotation(Transient.class);
@@ -397,8 +397,8 @@ public class FieldColumnRelationMapperFactory {
     /**
      * 是否忽略class
      *
-     * @param clazz
-     * @return
+     * @param clazz class
+     * @return 是否忽略类
      */
     public static boolean ignoreClass(Class<?> clazz) {
         Annotation[] annotations = clazz.getAnnotations();
