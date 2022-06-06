@@ -88,5 +88,7 @@ public interface SqlCommon {
 
     char PATH_COMMON_DELIMITER = '.';
 
+    char SQL_COMMON_DELIMITER = '.';
+
 
 }

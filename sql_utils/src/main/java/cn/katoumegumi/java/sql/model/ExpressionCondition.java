@@ -20,9 +20,6 @@ public class ExpressionCondition implements Condition {
 
     private final SqlEquation.Symbol symbol;
 
-    /**
-     * 0 空 1 基本类型 2 集合类型 3 数组 4 子查询 5 SqlEquation 6 ColumnBaseEntity
-     */
     private final int rightType;
     private final Object right;
 
@@ -45,12 +42,14 @@ public class ExpressionCondition implements Condition {
             return 2;
         }else if(WsBeanUtils.isArray(value.getClass())){
             return 3;
-        }else if(value instanceof String){
+        }else if(value instanceof SqlStringModel){
             return 7;
         } else if(value instanceof SelectModel){
             return 4;
         } else if(value instanceof ConditionRelationModel){
             return 8;
+        }else if (value instanceof SqlEquation){
+            return 5;
         }
         throw new IllegalArgumentException("不支持的类型:"+value.getClass());
     }

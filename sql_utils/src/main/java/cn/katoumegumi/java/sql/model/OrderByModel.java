@@ -1,8 +1,11 @@
 package cn.katoumegumi.java.sql.model;
 
+import cn.katoumegumi.java.sql.SQLModelUtils;
+import cn.katoumegumi.java.sql.TranslateNameUtils;
+import cn.katoumegumi.java.sql.common.SqlCommon;
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
 
-public class OrderByModel {
+public class OrderByModel implements Condition {
 
     private final ColumnBaseEntity column;
 
@@ -20,4 +23,10 @@ public class OrderByModel {
     public String getType() {
         return type;
     }
+
+    /*@Override
+    public SqlStringAndParameters toSqlString() {
+        String sql = SQLModelUtils.guardKeyword(column.getAlias()) + SqlCommon.SQL_COMMON_DELIMITER + SQLModelUtils.guardKeyword(column.getColumnName()) + SqlCommon.SPACE + type;
+        return new SqlStringAndParameters(sql,null);
+    }*/
 }

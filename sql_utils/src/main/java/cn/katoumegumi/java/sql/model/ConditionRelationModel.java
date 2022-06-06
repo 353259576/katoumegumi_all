@@ -7,19 +7,19 @@ import java.util.List;
 /**
  * and与or
  */
-public class ConditionRelationModel {
+public class ConditionRelationModel implements Condition {
 
-    private final List<ExpressionCondition> expressionConditionList;
+    private final List<Condition> conditionList;
 
     private final SqlOperator relation;
 
-    public ConditionRelationModel(List<ExpressionCondition> expressionConditionList, SqlOperator relation) {
-        this.expressionConditionList = expressionConditionList;
+    public ConditionRelationModel(List<Condition> conditionList, SqlOperator relation) {
+        this.conditionList = conditionList;
         this.relation = relation;
     }
 
-    public List<ExpressionCondition> getExpressionConditionList() {
-        return expressionConditionList;
+    public List<Condition> getConditionList() {
+        return conditionList;
     }
 
     public SqlOperator getRelation() {
