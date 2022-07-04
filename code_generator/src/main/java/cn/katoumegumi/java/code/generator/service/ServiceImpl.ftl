@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 <#if type == 0>
 import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.datasource.WsJdbcUtils;
+import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
 </#if>
 import cn.katoumegumi.java.common.WsListUtils;
 import org.springframework.transaction.annotation.Transactional;

@@ -1791,5 +1791,15 @@ public class SQLModelUtils {
         }
     }
 
+    /**
+     * 查询语句拦截器处理
+     * @param selectModel
+     */
+    public static void selectSqlInterceptorHandle(SelectModel selectModel){
+        for (FieldColumnRelation fieldColumnRelation:selectModel.getFrom().getTable().getFieldColumnRelations()){
+            selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+        }
+    }
+
 
 }
