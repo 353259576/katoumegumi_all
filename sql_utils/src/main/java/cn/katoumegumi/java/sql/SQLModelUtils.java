@@ -1582,8 +1582,12 @@ public class SQLModelUtils {
                 checkChild = true;
                 joinMapper = analysisClassRelation(fieldJoinClass.getJoinClass());
                 translateNameUtils.addLocalMapper(joinPath,joinMapper);
-                List<Condition> conditionModelList = new ArrayList<>(tableRelation.getConditionSearchList() == null?1:1 + tableRelation.getConditionSearchList().getAll().size());
+                List<Condition> selectInterceptorConditionList = getSelectSqlInterceptorConditionList(joinPath,joinMapper);
+                List<Condition> conditionModelList = new ArrayList<>((tableRelation.getConditionSearchList() == null?1:1 + tableRelation.getConditionSearchList().getAll().size()) + selectInterceptorConditionList.size());
                 conditionModelList.add(new ExpressionCondition(translateNameUtils.createColumnBaseEntity(tableRelation.getTableColumn(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(tableRelation.getJoinTableColumn(), joinPath, 2)));
+                if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
+                    conditionModelList.addAll(selectInterceptorConditionList);
+                }
                 JoinTableModel joinTableModel = new JoinTableModel(new TableModel(translateNameUtils.getLocalMapper(path),tableAlias),new TableModel(joinMapper,joinTableAlias),tableRelation.getJoinType(),new ConditionRelationModel(conditionModelList,SqlOperator.AND));
                 joinTableModelList.add(joinTableModel);
                 usedRelationMap.put(tableRelation,joinTableModel);
@@ -1592,8 +1596,12 @@ public class SQLModelUtils {
                 joinMapper = analysisClassRelation(fieldJoinClass.getJoinClass());
                 FieldColumnRelationMapper mapper = translateNameUtils.getLocalMapper(path);
                 translateNameUtils.addLocalMapper(joinPath,joinMapper);
-                List<Condition> conditionModelList = new ArrayList<>(1);
+                List<Condition> selectInterceptorConditionList = getSelectSqlInterceptorConditionList(joinPath,joinMapper);
+                List<Condition> conditionModelList = new ArrayList<>(1+selectInterceptorConditionList.size());
                 conditionModelList.add(new ExpressionCondition(translateNameUtils.createColumnBaseEntity(mapper.getFieldColumnRelationByColumn(fieldJoinClass.getJoinColumn()).getFieldName(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(joinMapper.getFieldColumnRelationByColumn(fieldJoinClass.getAnotherJoinColumn()).getFieldName(), joinPath, 2)));
+                if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
+                    conditionModelList.addAll(selectInterceptorConditionList);
+                }
                 joinTableModelList.add(new JoinTableModel(new TableModel(translateNameUtils.getLocalMapper(path),tableAlias),new TableModel(joinMapper,joinTableAlias),TableJoinType.INNER_JOIN,new ConditionRelationModel(conditionModelList,SqlOperator.AND)));
             }
             if(checkChild) {
@@ -1616,6 +1624,10 @@ public class SQLModelUtils {
                 FieldColumnRelationMapper mapper = tableRelation.getTableNickName()==null?mainMapper:translateNameUtils.getLocalMapper(path);
                 List<Condition> conditionModelList = new ArrayList<>();
                 conditionModelList.add(new ExpressionCondition(translateNameUtils.createColumnBaseEntity(tableRelation.getTableColumn(),path,2), SqlEquation.Symbol.EQUAL,translateNameUtils.createColumnBaseEntity(tableRelation.getJoinTableColumn(),joinPath,2)));
+                List<Condition> selectInterceptorConditionList = getSelectSqlInterceptorConditionList(joinPath,joinMapper);
+                if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
+                    conditionModelList.addAll(selectInterceptorConditionList);
+                }
                 if(tableRelation.getConditionSearchList() != null && WsListUtils.isNotEmpty(tableRelation.getConditionSearchList().getAll())){
                     searchToExpressionCondition(rootPath,tableRelation.getConditionSearchList().getOrderSearches(),conditionModelList);
                 }
@@ -1634,6 +1646,14 @@ public class SQLModelUtils {
         }
 
         ConditionRelationModel where = searchListToConditionRelation(rootPath,this.mySearchList,SqlOperator.AND);
+        List<Condition> selectInterceptorConditionList = getSelectSqlInterceptorConditionList(rootPath,mainMapper);
+        if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
+            if(where == null){
+                where = new ConditionRelationModel(selectInterceptorConditionList,SqlOperator.AND);
+            }else {
+                where.getConditionList().addAll(selectInterceptorConditionList);
+            }
+        }
         List<OrderByModel> orderByModelList = null;
         if(WsListUtils.isNotEmpty(this.mySearchList.getOrderSearches())){
             orderByModelList = new ArrayList<>(this.mySearchList.getOrderSearches().size());
@@ -1792,12 +1812,28 @@ public class SQLModelUtils {
     }
 
     /**
-     * 查询语句拦截器处理
-     * @param selectModel
+     * 获取select拦截器添加的条件
+     * @param path
+     * @param mapper
+     * @return
      */
-    public static void selectSqlInterceptorHandle(SelectModel selectModel){
-        for (FieldColumnRelation fieldColumnRelation:selectModel.getFrom().getTable().getFieldColumnRelations()){
-            selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+    public List<Condition> getSelectSqlInterceptorConditionList(String path,FieldColumnRelationMapper mapper){
+        List<Condition> conditionList = new ArrayList<>();
+        fillSelectSqlInterceptorConditionList(conditionList,path,mapper,mapper.getIds());
+        fillSelectSqlInterceptorConditionList(conditionList,path,mapper,mapper.getFieldColumnRelations());
+        return conditionList;
+    }
+    public void fillSelectSqlInterceptorConditionList(List<Condition> conditionList,String path,FieldColumnRelationMapper mapper,List<FieldColumnRelation> fieldColumnRelationList){
+        if(WsListUtils.isEmpty(fieldColumnRelationList)){
+            return;
+        }
+        for (FieldColumnRelation fieldColumnRelation:fieldColumnRelationList){
+            AbstractSqlInterceptor interceptor = selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
+            if(interceptor != null && interceptor.useCondition(mapper)){
+                conditionList.add(
+                        new ExpressionCondition(translateNameUtils.createColumnBaseEntity(fieldColumnRelation.getFieldName(),path,2), SqlEquation.Symbol.EQUAL,interceptor.selectFill())
+                );
+            }
         }
     }
 

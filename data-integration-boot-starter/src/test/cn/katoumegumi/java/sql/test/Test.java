@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.sql.test;
 
+import cn.katoumegumi.java.sql.AbstractSqlInterceptor;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.SelectSqlEntity;
@@ -13,6 +14,22 @@ import com.google.gson.Gson;
 public class Test {
 
     public static void main(String[] args) {
+        SQLModelUtils.addSqlInterceptor(new AbstractSqlInterceptor() {
+            @Override
+            public String fieldName() {
+                return "name";
+            }
+
+            @Override
+            public Object selectFill() {
+                return "你好世界";
+            }
+
+            @Override
+            public boolean isSelect() {
+                return true;
+            }
+        });
         MySearchList mySearchList = MySearchList.create(User.class)
                 .setAlias("u")
                 .leftJoin(UserDetails.class,t->t.setJoinTableNickName("ud1").on(User::getId,UserDetails::getUserId))
