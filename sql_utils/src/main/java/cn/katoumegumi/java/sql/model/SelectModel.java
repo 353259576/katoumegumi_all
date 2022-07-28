@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql.model;
 
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
+import cn.katoumegumi.java.sql.entity.SqlLimit;
 
 import java.util.List;
 
@@ -19,12 +20,15 @@ public class SelectModel {
 
     private final List<OrderByModel> orderBy;
 
-    public SelectModel(List<ColumnBaseEntity> select, TableModel from, List<JoinTableModel> joinList, ConditionRelationModel where, List<OrderByModel> orderBy) {
+    private final SqlLimit sqlLimit;
+
+    public SelectModel(List<ColumnBaseEntity> select, TableModel from, List<JoinTableModel> joinList, ConditionRelationModel where, List<OrderByModel> orderBy,SqlLimit sqlLimit) {
         this.select = select;
         this.from = from;
         this.joinList = joinList;
         this.where = where;
         this.orderBy = orderBy;
+        this.sqlLimit = sqlLimit;
     }
 
     public List<ColumnBaseEntity> getSelect() {
@@ -45,5 +49,9 @@ public class SelectModel {
 
     public List<OrderByModel> getOrderBy() {
         return orderBy;
+    }
+
+    public SqlLimit getSqlLimit() {
+        return sqlLimit;
     }
 }

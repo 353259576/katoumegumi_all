@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.sql.model;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.sql.common.ValueType;
+import cn.katoumegumi.java.sql.entity.SqlWhereValue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,13 +35,13 @@ public class SqlStringAndParameters {
         this.value = value;
         this.placeholderNum = placeholderNum;
         if(value == null){
-            this.valueType = 0;
+            this.valueType = ValueType.NULL_TYPE;
         }else if (WsBeanUtils.isBaseType(value.getClass())){
-            this.valueType = 1;
+            this.valueType = ValueType.BASE_VALUE_TYPE;
         }else if (value instanceof Collection){
-            this.valueType = 2;
+            this.valueType = ValueType.COLLECTION_TYPE;
         }else if(WsBeanUtils.isArray(value.getClass())){
-            this.valueType = 3;
+            this.valueType = ValueType.ARRAY_TYPE;
         }else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());
         }
@@ -50,18 +52,18 @@ public class SqlStringAndParameters {
         this.sql = sql;
         this.value = value;
         if(value == null){
-            this.valueType = 0;
+            this.valueType = ValueType.NULL_TYPE;
             this.placeholderNum = 0;
         }else if (WsBeanUtils.isBaseType(value.getClass())){
-            this.valueType = 1;
+            this.valueType = ValueType.BASE_VALUE_TYPE;
             this.placeholderNum = 1;
         }else if (value instanceof Collection){
-            this.valueType = 2;
+            this.valueType = ValueType.COLLECTION_TYPE;
             this.placeholderNum = ((Collection<?>)value).size();
         }else if(WsBeanUtils.isArray(value.getClass())){
-            this.valueType = 3;
+            this.valueType = ValueType.ARRAY_TYPE;
             this.placeholderNum = ((Object[])value).length;
-        }else {
+        } else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());
         }
         this.onlyValue = this.sql == null;

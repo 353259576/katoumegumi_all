@@ -18,7 +18,7 @@ public class JoinTableModel{
     public JoinTableModel(TableModel table, TableModel joinTable, TableJoinType joinType, ConditionRelationModel on) {
         this.table = table;
         this.joinTable = joinTable;
-        this.joinType = joinType;
+        this.joinType = joinType == null?TableJoinType.INNER_JOIN:joinType;
         this.on = on;
     }
 

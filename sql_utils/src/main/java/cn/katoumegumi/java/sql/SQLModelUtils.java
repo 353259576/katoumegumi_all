@@ -79,9 +79,9 @@ public class SQLModelUtils {
         this(mySearchList,translateNameUtils,true);
     }
 
-    public SQLModelUtils(MySearchList mySearchList, TranslateNameUtils parentTranslateNameUtils,boolean isNest) {
+    public SQLModelUtils(MySearchList mySearchList, TranslateNameUtils parentTranslateNameUtils,boolean isNested) {
         this.mySearchList = mySearchList;
-        this.translateNameUtils = isNest?new TranslateNameUtils(parentTranslateNameUtils):parentTranslateNameUtils;
+        this.translateNameUtils = isNested?new TranslateNameUtils(parentTranslateNameUtils):parentTranslateNameUtils;
         mainClass = mySearchList.getMainClass();
         FieldColumnRelationMapper mapper = analysisClassRelation(mainClass);
         if (WsStringUtils.isBlank(mySearchList.getAlias())) {
@@ -1470,7 +1470,84 @@ public class SQLModelUtils {
         for (int i = 0; i < length; ++i) {
             type = typeList.get(i);
             value = valueList.get(i);
-            if (type == ValueType.COLUMN_NAME_TYPE) {
+            switch (type){
+                case ValueType.COLUMN_NAME_TYPE:
+                    if (i > 0 && !typeList.get(i - 1).equals(ValueType.SYMBOL_TYPE)) {
+                        throw new RuntimeException("顺序错误,列前面必须为符号");
+                    }
+                    ColumnBaseEntity columnBaseEntity = translateNameUtils.getColumnBaseEntity((String) value, prefix, 2);
+                    sb.append(guardKeyword(translateNameUtils.getAbbreviation(columnBaseEntity.getTableNickName())))
+                            .append('.')
+                            .append(guardKeyword(columnBaseEntity.getColumnName())).append(SqlCommon.SPACE);
+                    break;
+                case  ValueType.SQL_EQUATION_MODEL:
+                    sb.append(SqlCommon.LEFT_BRACKETS);
+                    sb.append(sqlEquationHandel((SqlEquation) value, prefix)).append(SqlCommon.SPACE);
+                    sb.append(SqlCommon.RIGHT_BRACKETS);
+                    sb.append(SqlCommon.SPACE);
+                    break;
+                case ValueType.SYMBOL_TYPE:
+                    if (i > 0 && typeList.get(i - 1).equals(ValueType.SYMBOL_TYPE)) {
+                        throw new RuntimeException("顺序错误,符号不允许相连");
+                    }
+                    sb.append(((SqlEquation.Symbol)value).getSymbol());
+                    break;
+                case ValueType.BASE_VALUE_TYPE:
+                    if (i > 0 && !typeList.get(i - 1).equals(ValueType.SYMBOL_TYPE)) {
+                        throw new RuntimeException("顺序错误,值前面必须为符号");
+                    }
+                    sb.append(SqlCommon.PLACEHOLDER).append(SqlCommon.SPACE);
+                    baseWhereValueList.add(new SqlWhereValue(value));
+                    break;
+                case ValueType.COLLECTION_TYPE:
+                    if (i > 0 && !typeList.get(i - 1).equals(ValueType.SYMBOL_TYPE)) {
+                        throw new RuntimeException("顺序错误,值前面必须为符号");
+                    }
+                    List<String> symbols = new ArrayList<>();
+                    Collection<?> collection = (Collection<?>) value;
+                    for (Object o : collection) {
+                        symbols.add(SqlCommon.PLACEHOLDER);
+                        baseWhereValueList.add(new SqlWhereValue(o));
+                    }
+                    sb.append(SqlCommon.LEFT_BRACKETS)
+                            .append(WsStringUtils.jointListString(symbols, SqlCommon.COMMA))
+                            .append(SqlCommon.RIGHT_BRACKETS).append(SqlCommon.SPACE);
+                    break;
+                case ValueType.ARRAY_TYPE:
+                    if (i > 0 && !typeList.get(i - 1).equals(ValueType.SYMBOL_TYPE)) {
+                        throw new RuntimeException("顺序错误,值前面必须为符号");
+                    }
+                    List<String> arraySymbols = new ArrayList<>();
+                    Object[] values = (Object[]) value;
+                    for (Object o : values) {
+                        arraySymbols.add(SqlCommon.PLACEHOLDER);
+                        baseWhereValueList.add(new SqlWhereValue(o));
+                    }
+                    sb.append(SqlCommon.LEFT_BRACKETS)
+                            .append(WsStringUtils.jointListString(arraySymbols, SqlCommon.COMMA))
+                            .append(SqlCommon.RIGHT_BRACKETS).append(SqlCommon.SPACE);
+                    break;
+                case ValueType.SEARCH_LIST_TYPE:
+                    MySearchList searchList = (MySearchList) value;
+                    SQLModelUtils sqlModelUtils = new SQLModelUtils(searchList, translateNameUtils);
+                    SelectSqlEntity entity = sqlModelUtils.select();
+                    sb.append(SqlCommon.LEFT_BRACKETS)
+                            .append(entity.getSelectSql())
+                            .append(SqlCommon.RIGHT_BRACKETS);
+                    baseWhereValueList.addAll(entity.getValueList());
+                    break;
+                case ValueType.SQL_FUNCTION_MODEL:
+                    SqlFunction sqlFunction = (SqlFunction) value;
+                    ColumnBaseEntity functionColumnBaseEntity = translateNameUtils.getColumnBaseEntity(sqlFunction.getSqlFunctionValue().get(0), prefix, 2);
+                    sb.append(guardKeyword(translateNameUtils.getAbbreviation(sqlFunction.getFunctionValue(functionColumnBaseEntity.getTableNickName()))))
+                            .append('.')
+                            .append(guardKeyword(functionColumnBaseEntity.getColumnName())).append(SqlCommon.SPACE);
+                    break;
+            }
+
+
+
+            /*if (type == ValueType.COLUMN_NAME_TYPE || type == ValueType.SQL_EQUATION_MODEL) {
                 if (i > 0 && !typeList.get(i - 1).equals(ValueType.SYMBOL_TYPE)) {
                     throw new RuntimeException("顺序错误,列前面必须为符号");
                 }
@@ -1495,8 +1572,8 @@ public class SQLModelUtils {
                 if (i > 0 && typeList.get(i - 1).equals(ValueType.SYMBOL_TYPE)) {
                     throw new RuntimeException("顺序错误,符号不允许相连");
                 }
-                sb.append(value);
-            } else if (type == ValueType.VALUE_TYPE) {
+                sb.append(((SqlEquation.Symbol)value).getSymbol());
+            } else if (type == ValueType.BASE_VALUE_TYPE) {
                 if (i > 0 && !typeList.get(i - 1).equals(ValueType.SYMBOL_TYPE)) {
                     throw new RuntimeException("顺序错误,值前面必须为符号");
                 }
@@ -1534,7 +1611,7 @@ public class SQLModelUtils {
                         .append(entity.getSelectSql())
                         .append(SqlCommon.RIGHT_BRACKETS);
                 baseWhereValueList.addAll(entity.getValueList());
-            }
+            }*/
 
         }
         return sb.toString();
@@ -1582,9 +1659,9 @@ public class SQLModelUtils {
                 checkChild = true;
                 joinMapper = analysisClassRelation(fieldJoinClass.getJoinClass());
                 translateNameUtils.addLocalMapper(joinPath,joinMapper);
-                List<Condition> selectInterceptorConditionList = getSelectSqlInterceptorConditionList(joinPath,joinMapper);
+                List<Condition> selectInterceptorConditionList = getConditionSqlInterceptorConditionList(joinPath,joinMapper);
                 List<Condition> conditionModelList = new ArrayList<>((tableRelation.getConditionSearchList() == null?1:1 + tableRelation.getConditionSearchList().getAll().size()) + selectInterceptorConditionList.size());
-                conditionModelList.add(new ExpressionCondition(translateNameUtils.createColumnBaseEntity(tableRelation.getTableColumn(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(tableRelation.getJoinTableColumn(), joinPath, 2)));
+                conditionModelList.add(new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(tableRelation.getTableColumn(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(tableRelation.getJoinTableColumn(), joinPath, 2)));
                 if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
                     conditionModelList.addAll(selectInterceptorConditionList);
                 }
@@ -1596,13 +1673,13 @@ public class SQLModelUtils {
                 joinMapper = analysisClassRelation(fieldJoinClass.getJoinClass());
                 FieldColumnRelationMapper mapper = translateNameUtils.getLocalMapper(path);
                 translateNameUtils.addLocalMapper(joinPath,joinMapper);
-                List<Condition> selectInterceptorConditionList = getSelectSqlInterceptorConditionList(joinPath,joinMapper);
+                List<Condition> selectInterceptorConditionList = getConditionSqlInterceptorConditionList(joinPath,joinMapper);
                 List<Condition> conditionModelList = new ArrayList<>(1+selectInterceptorConditionList.size());
-                conditionModelList.add(new ExpressionCondition(translateNameUtils.createColumnBaseEntity(mapper.getFieldColumnRelationByColumn(fieldJoinClass.getJoinColumn()).getFieldName(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(joinMapper.getFieldColumnRelationByColumn(fieldJoinClass.getAnotherJoinColumn()).getFieldName(), joinPath, 2)));
+                conditionModelList.add(new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(mapper.getFieldColumnRelationByColumn(fieldJoinClass.getJoinColumn()).getFieldName(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(joinMapper.getFieldColumnRelationByColumn(fieldJoinClass.getAnotherJoinColumn()).getFieldName(), joinPath, 2)));
                 if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
                     conditionModelList.addAll(selectInterceptorConditionList);
                 }
-                joinTableModelList.add(new JoinTableModel(new TableModel(translateNameUtils.getLocalMapper(path),tableAlias),new TableModel(joinMapper,joinTableAlias),TableJoinType.INNER_JOIN,new ConditionRelationModel(conditionModelList,SqlOperator.AND)));
+                joinTableModelList.add(new JoinTableModel(new TableModel(translateNameUtils.getLocalMapper(path),tableAlias),new TableModel(joinMapper,joinTableAlias),fieldJoinClass.getJoinType(),new ConditionRelationModel(conditionModelList,SqlOperator.AND)));
             }
             if(checkChild) {
                 if(!appointQueryColumn) {
@@ -1623,8 +1700,8 @@ public class SQLModelUtils {
                 translateNameUtils.addLocalMapper(joinPath,joinMapper);
                 FieldColumnRelationMapper mapper = tableRelation.getTableNickName()==null?mainMapper:translateNameUtils.getLocalMapper(path);
                 List<Condition> conditionModelList = new ArrayList<>();
-                conditionModelList.add(new ExpressionCondition(translateNameUtils.createColumnBaseEntity(tableRelation.getTableColumn(),path,2), SqlEquation.Symbol.EQUAL,translateNameUtils.createColumnBaseEntity(tableRelation.getJoinTableColumn(),joinPath,2)));
-                List<Condition> selectInterceptorConditionList = getSelectSqlInterceptorConditionList(joinPath,joinMapper);
+                conditionModelList.add(new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(tableRelation.getTableColumn(),path,2), SqlEquation.Symbol.EQUAL,translateNameUtils.createColumnBaseEntity(tableRelation.getJoinTableColumn(),joinPath,2)));
+                List<Condition> selectInterceptorConditionList = getConditionSqlInterceptorConditionList(joinPath,joinMapper);
                 if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
                     conditionModelList.addAll(selectInterceptorConditionList);
                 }
@@ -1646,7 +1723,7 @@ public class SQLModelUtils {
         }
 
         ConditionRelationModel where = searchListToConditionRelation(rootPath,this.mySearchList,SqlOperator.AND);
-        List<Condition> selectInterceptorConditionList = getSelectSqlInterceptorConditionList(rootPath,mainMapper);
+        List<Condition> selectInterceptorConditionList = getConditionSqlInterceptorConditionList(rootPath,mainMapper);
         if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
             if(where == null){
                 where = new ConditionRelationModel(selectInterceptorConditionList,SqlOperator.AND);
@@ -1662,7 +1739,7 @@ public class SQLModelUtils {
             }
         }
 
-        SelectModel selectModel = new SelectModel(queryColumnList,from,joinTableModelList,where,orderByModelList);
+        SelectModel selectModel = new SelectModel(queryColumnList,from,joinTableModelList,where,orderByModelList,this.mySearchList.getSqlLimit());
         return selectModel;
     }
 
@@ -1733,7 +1810,7 @@ public class SQLModelUtils {
         for (MySearch search:searches){
             Object left = null;
             SqlOperator operator = search.getOperator();
-            SqlEquation.Symbol symbol = sqlOperatorToSymbol(operator);
+
             Object right = null;
             switch (operator){
                 case EQP:
@@ -1757,8 +1834,9 @@ public class SQLModelUtils {
                     }
                     break;
                 case EQUATION:
-
-                    break;
+                    SqlEquation sqlEquation = (SqlEquation) search.getValue();
+                    expressionConditionList.add(transferSqlEquationToCondition(rootPath,sqlEquation));
+                    continue;
                 default:
                     left = translateNameUtils.getColumnBaseEntity(search.getFieldName(),rootPath,2);
                     right = search.getValue();
@@ -1768,7 +1846,8 @@ public class SQLModelUtils {
                 SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) right,translateNameUtils);
                 right = sqlModelUtils.transferToSelectModel();
             }
-            expressionConditionList.add(new ExpressionCondition(left,symbol,right));
+            SqlEquation.Symbol symbol = sqlOperatorToSymbol(operator);
+            expressionConditionList.add(new SingleExpressionCondition(left,symbol,right));
         }
 
         return expressionConditionList;
@@ -1811,19 +1890,50 @@ public class SQLModelUtils {
         }
     }
 
+    private MultiExpressionCondition transferSqlEquationToCondition(String rootPath, SqlEquation sqlEquation){
+        MultiExpressionCondition multiExpressionCondition = new MultiExpressionCondition(sqlEquation.getValueList().size());
+        for (int i = 0; i < sqlEquation.getValueList().size(); ++i){
+            Integer type = sqlEquation.getTypeList().get(i);
+            Object value = sqlEquation.getValueList().get(i);
+            switch (type){
+                case ValueType.COLUMN_NAME_TYPE:
+                    multiExpressionCondition.add(translateNameUtils.createColumnBaseEntity((String) value,rootPath,2));
+                    break;
+                case ValueType.SYMBOL_TYPE:
+                    multiExpressionCondition.add(value);
+                    break;
+                case ValueType.BASE_VALUE_TYPE:
+                case ValueType.COLLECTION_TYPE:
+                case ValueType.ARRAY_TYPE:
+                    multiExpressionCondition.add(value);
+                    break;
+                case ValueType.SEARCH_LIST_TYPE:
+                    SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) value,translateNameUtils);
+                    multiExpressionCondition.add(sqlModelUtils.transferToSelectModel());
+                    break;
+                case ValueType.SQL_EQUATION_MODEL:
+                    multiExpressionCondition.add(transferSqlEquationToCondition(rootPath,(SqlEquation) value));
+                    break;
+                default:
+                    throw new IllegalArgumentException("SqlEquation未知的类型："+type);
+            }
+        }
+        return multiExpressionCondition;
+    }
+
     /**
      * 获取select拦截器添加的条件
-     * @param path
+     * @param path 当前mapper路径
      * @param mapper
-     * @return
+     * @return 拦截器添加的条件
      */
-    public List<Condition> getSelectSqlInterceptorConditionList(String path,FieldColumnRelationMapper mapper){
+    public List<Condition> getConditionSqlInterceptorConditionList(String path, FieldColumnRelationMapper mapper){
         List<Condition> conditionList = new ArrayList<>();
-        fillSelectSqlInterceptorConditionList(conditionList,path,mapper,mapper.getIds());
-        fillSelectSqlInterceptorConditionList(conditionList,path,mapper,mapper.getFieldColumnRelations());
+        fillConditionSqlInterceptorConditionList(conditionList,path,mapper,mapper.getIds());
+        fillConditionSqlInterceptorConditionList(conditionList,path,mapper,mapper.getFieldColumnRelations());
         return conditionList;
     }
-    public void fillSelectSqlInterceptorConditionList(List<Condition> conditionList,String path,FieldColumnRelationMapper mapper,List<FieldColumnRelation> fieldColumnRelationList){
+    public void fillConditionSqlInterceptorConditionList(List<Condition> conditionList, String path, FieldColumnRelationMapper mapper, List<FieldColumnRelation> fieldColumnRelationList){
         if(WsListUtils.isEmpty(fieldColumnRelationList)){
             return;
         }
@@ -1831,7 +1941,7 @@ public class SQLModelUtils {
             AbstractSqlInterceptor interceptor = selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
             if(interceptor != null && interceptor.useCondition(mapper)){
                 conditionList.add(
-                        new ExpressionCondition(translateNameUtils.createColumnBaseEntity(fieldColumnRelation.getFieldName(),path,2), SqlEquation.Symbol.EQUAL,interceptor.selectFill())
+                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(fieldColumnRelation.getFieldName(),path,2), SqlEquation.Symbol.EQUAL,interceptor.selectFill())
                 );
             }
         }

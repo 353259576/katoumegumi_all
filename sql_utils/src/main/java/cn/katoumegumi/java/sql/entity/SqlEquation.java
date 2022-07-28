@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql.entity;
 
 import cn.katoumegumi.java.common.SFunction;
+import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearchList;
@@ -8,6 +9,7 @@ import cn.katoumegumi.java.sql.common.SqlCommon;
 import cn.katoumegumi.java.sql.common.ValueType;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -31,13 +33,13 @@ public class SqlEquation {
     }
 
     public SqlEquation column(SqlEquation equation) {
-        typeList.add(ValueType.COLUMN_NAME_TYPE);
+        typeList.add(ValueType.SQL_EQUATION_MODEL);
         valueList.add(equation);
         return this;
     }
 
     public SqlEquation column(SqlFunction function) {
-        typeList.add(ValueType.COLUMN_NAME_TYPE);
+        typeList.add(ValueType.SQL_FUNCTION_MODEL);
         valueList.add(function);
         return this;
     }
@@ -73,7 +75,17 @@ public class SqlEquation {
     }
 
     public SqlEquation value(Object o) {
-        typeList.add(ValueType.VALUE_TYPE);
+        int valueType;
+        if(WsBeanUtils.isBaseType(o.getClass())){
+            valueType = ValueType.BASE_VALUE_TYPE;
+        }else if(o instanceof Collection){
+            valueType = ValueType.COLLECTION_TYPE;
+        }else if(WsBeanUtils.isArray(o.getClass())){
+            valueType = ValueType.ARRAY_TYPE;
+        }else {
+            throw new IllegalArgumentException("不支持的值");
+        }
+        typeList.add(valueType);
         valueList.add(o);
         return this;
     }
@@ -85,83 +97,83 @@ public class SqlEquation {
     }
 
     public SqlEquation add() {
-        return symbol(Symbol.ADD.getSymbol());
+        return symbol(Symbol.ADD);
     }
 
     public SqlEquation subtract() {
-        return symbol(Symbol.SUBTRACT.getSymbol());
+        return symbol(Symbol.SUBTRACT);
     }
 
     public SqlEquation multiply() {
-        return symbol(Symbol.MULTIPLY.getSymbol());
+        return symbol(Symbol.MULTIPLY);
     }
 
     public SqlEquation equal() {
-        return symbol(Symbol.EQUAL.getSymbol());
+        return symbol(Symbol.EQUAL);
     }
 
     public SqlEquation notEqual() {
-        return symbol(Symbol.NOT_EQUAL.getSymbol());
+        return symbol(Symbol.NOT_EQUAL);
     }
 
     public SqlEquation in() {
-        return symbol(Symbol.IN.getSymbol());
+        return symbol(Symbol.IN);
     }
 
     public SqlEquation notIn() {
-        return symbol(Symbol.NOT_IN.getSymbol());
+        return symbol(Symbol.NOT_IN);
     }
 
     public SqlEquation isNull() {
-        return symbol(Symbol.NULL.getSymbol());
+        return symbol(Symbol.NULL);
     }
 
     public SqlEquation isNotNull() {
-        return symbol(Symbol.NOT_NULL.getSymbol());
+        return symbol(Symbol.NOT_NULL);
     }
 
     public SqlEquation exists() {
-        return symbol(Symbol.EXISTS.getSymbol());
+        return symbol(Symbol.EXISTS);
     }
 
     public SqlEquation notExists() {
-        return symbol(Symbol.NOT_EXISTS.getSymbol());
+        return symbol(Symbol.NOT_EXISTS);
     }
 
     public SqlEquation divide() {
-        return symbol(Symbol.DIVIDE.getSymbol());
+        return symbol(Symbol.DIVIDE);
     }
 
     public SqlEquation gt() {
-        return symbol(Symbol.GT.getSymbol());
+        return symbol(Symbol.GT);
     }
 
     public SqlEquation gte() {
-        return symbol(Symbol.GTE.getSymbol());
+        return symbol(Symbol.GTE);
     }
 
     public SqlEquation lt() {
-        return symbol(Symbol.LT.getSymbol());
+        return symbol(Symbol.LT);
     }
 
     public SqlEquation lte() {
-        return symbol(Symbol.LTE.getSymbol());
+        return symbol(Symbol.LTE);
     }
 
     public SqlEquation and() {
-        return symbol(Symbol.AND.getSymbol());
+        return symbol(Symbol.AND);
     }
 
     public SqlEquation or() {
-        return symbol(Symbol.OR.getSymbol());
+        return symbol(Symbol.OR);
     }
 
     public SqlEquation xor() {
-        return symbol(Symbol.XOR.getSymbol());
+        return symbol(Symbol.XOR);
     }
 
     public SqlEquation not() {
-        return symbol(Symbol.NOT.getSymbol());
+        return symbol(Symbol.NOT);
     }
 
     public List<Integer> getTypeList() {
@@ -211,6 +223,11 @@ public class SqlEquation {
 
         public String getSymbol() {
             return symbol;
+        }
+
+        @Override
+        public String toString() {
+            return this.getSymbol();
         }
     }
 }

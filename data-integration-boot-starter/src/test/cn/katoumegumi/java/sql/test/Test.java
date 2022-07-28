@@ -1,15 +1,20 @@
 package cn.katoumegumi.java.sql.test;
 
+import cn.katoumegumi.java.common.WsDateUtils;
+import cn.katoumegumi.java.common.model.WsRun;
 import cn.katoumegumi.java.sql.AbstractSqlInterceptor;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.SelectSqlEntity;
+import cn.katoumegumi.java.sql.entity.SqlEquation;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
 import cn.katoumegumi.java.sql.model.SelectModel;
 import cn.katoumegumi.java.sql.model.SqlConditionModel;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
 import com.google.gson.Gson;
+
+import java.util.Arrays;
 
 public class Test {
 
@@ -31,6 +36,7 @@ public class Test {
             }
         });
         MySearchList mySearchList = MySearchList.create(User.class)
+                .setSqlLimit(sqlLimit -> sqlLimit.setCurrent(5).setSize(10))
                 .setAlias("u")
                 .leftJoin(UserDetails.class,t->t.setJoinTableNickName("ud1").on(User::getId,UserDetails::getUserId))
                 .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).setAlias("ud").on(User::getId,UserDetails::getUserId));
@@ -46,12 +52,35 @@ public class Test {
                 m->m.eq("ud",UserDetails::getId,1).eq("ud",UserDetails::getId,1).eq("ud",UserDetails::getId,1),
                 m->m.eq("ud",UserDetails::getId,1).eq("ud",UserDetails::getId,1).eq("ud",UserDetails::getId,1)
         );
+        mySearchList.sqlEquation(
+                sqlEquation -> sqlEquation.column(User::getName).add().column(User::getPassword).equal().column(User::getName)
+        );
+        mySearchList.sqlEquation(
+                sqlEquation -> sqlEquation.column(User::getName).in().value(Arrays.asList("1","2"))
+        );
+        mySearchList.sqlEquation(
+                sqlEquation -> sqlEquation.column(User::getName).add().column(new SqlEquation().column(User::getName).subtract().value(3)).equal().value(1)
+        );
         mySearchList.sort(User::getId,"asc");
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+
+        Long date = WsDateUtils.getExecutionTime.apply(()->{
+            for (int i = 0; i < 1; i++){
+                SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+                SelectModel selectModel = sqlModelUtils.transferToSelectModel();
+                SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(selectModel);
+                System.out.println(selectSqlEntity.getSelectSql());
+                System.out.println(selectSqlEntity.getCountSql());
+                System.out.println(new Gson().toJson(selectSqlEntity.getValueList()));
+                System.out.println(sqlModelUtils.select().getSelectSql());
+
+            }
+        });
+        System.out.println(date);
+        /*SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         SelectModel selectModel = sqlModelUtils.transferToSelectModel();
         SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(selectModel);
         System.out.println(selectSqlEntity.getSelectSql());
         System.out.println(new Gson().toJson(selectSqlEntity.getValueList()));
-        System.out.println(sqlModelUtils.select().getSelectSql());
+        System.out.println(sqlModelUtils.select().getSelectSql());*/
     }
 }
