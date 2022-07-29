@@ -4,10 +4,8 @@ import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.common.SqlCommon;
 import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -42,7 +40,6 @@ public class TranslateNameUtils {
     private final Map<String, FieldColumnRelationMapper> localMapperMap;
 
     //private final Map<String,ColumnBaseEntity> columnBaseEntityCacheMap = new HashMap<>();
-
 
     public TranslateNameUtils(){
         this.parent = null;
@@ -142,6 +139,15 @@ public class TranslateNameUtils {
         } else {
             return value;
         }
+    }
+
+    /**
+     * 获取当前简称并不自动设置简称
+     * @param keyword
+     * @return
+     */
+    public String getCurrentAbbreviationAndNotAutoSet(String keyword){
+        return abbreviationMap.get(keyword);
     }
 
     /**
@@ -334,7 +340,46 @@ public class TranslateNameUtils {
      */
     public String translateTableNickName(String prefix, String searchSql) {
         char[] cs = searchSql.toCharArray();
-        StringBuilder stringBuilder = new StringBuilder();
+        List<int[]> locationList = new ArrayList<>();
+
+        boolean isStart = false;
+        int startIndex = 0;
+        for (int i = 0; i < cs.length; ++i){
+            if(cs[i] == '{'){
+                isStart = true;
+                startIndex = i;
+            }else if(cs[i] == '}' && isStart){
+                locationList.add(new int[]{startIndex,i});
+            }
+        }
+        if(locationList.size() == 0){
+            return searchSql;
+        }else {
+            startIndex = 0;
+            StringBuilder translateStringBuilder = new StringBuilder();
+            String replaceStr = null;
+
+            for (int[] ints:locationList){
+                if(ints[0] > startIndex) {
+                    translateStringBuilder.append(Arrays.copyOfRange(cs, startIndex, ints[0]));
+                }
+                String needReplaceStr = new String(Arrays.copyOfRange(cs,ints[0] + 1,ints[1]));
+                replaceStr = getParticular(needReplaceStr);
+                if (replaceStr == null) {
+                    needReplaceStr = getAddPathTableNickName(prefix,needReplaceStr);
+                    translateStringBuilder.append(getAbbreviation(needReplaceStr));
+                } else {
+                    translateStringBuilder.append(needReplaceStr);
+                }
+                startIndex = ints[1] + 1;
+            }
+            if(startIndex < cs.length){
+                translateStringBuilder.append(Arrays.copyOfRange(cs,startIndex,cs.length));
+            }
+            return translateStringBuilder.toString();
+        }
+
+        /*StringBuilder stringBuilder = new StringBuilder();
         StringBuilder replaceSb = new StringBuilder();
         char c;
         boolean isReplace = false;
@@ -366,7 +411,7 @@ public class TranslateNameUtils {
                 }
             }
         }
-        return stringBuilder.toString();
+        return stringBuilder.toString();*/
 
     }
 
@@ -392,5 +437,35 @@ public class TranslateNameUtils {
             }
         }
         return WsStringUtils.jointListString(strs, ".");
+    }
+
+
+    /**
+     * 获取完成表名称
+     * @param rootPath
+     * @param originalTableNickName
+     * @return
+     */
+    public String getCompleteTableNickName(String rootPath,String originalTableNickName){
+        String tableNickName = getCurrentAbbreviationAndNotAutoSet(originalTableNickName);
+        if(tableNickName == null){
+            return getAddPathTableNickName(rootPath,originalTableNickName);
+        }
+        return originalTableNickName;
+    }
+
+    public String getAddPathTableNickName(String rootPath,String tableNickName){
+        if(tableNickName.length() < rootPath.length()){
+            tableNickName = rootPath + SqlCommon.PATH_COMMON_DELIMITER + tableNickName;
+        }else {
+            if(tableNickName.startsWith(rootPath)){
+                if(!(tableNickName.length() == rootPath.length() || tableNickName.charAt(rootPath.length()) == SqlCommon.PATH_COMMON_DELIMITER)){
+                    tableNickName = rootPath + SqlCommon.PATH_COMMON_DELIMITER + tableNickName;
+                }
+            }else {
+                tableNickName = rootPath + SqlCommon.PATH_COMMON_DELIMITER + tableNickName;
+            }
+        }
+        return tableNickName;
     }
 }

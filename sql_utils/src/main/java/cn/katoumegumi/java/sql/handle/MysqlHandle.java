@@ -331,7 +331,7 @@ public class MysqlHandle {
                 return new SqlStringAndParameters(null, value, ((Object[]) value).length, ValueType.ARRAY_TYPE);
             case ValueType.SELECT_MODEL_TYPE:
                 SelectSqlEntity entity = MysqlHandle.handleSelect((SelectModel) value);
-                return new SqlStringAndParameters(entity.getSelectSql(), entity.getValueList(), entity.getValueList().size());
+                return new SqlStringAndParameters(entity.getSelectSql(), entity.getValueList().stream().map(SqlWhereValue::getValue).collect(Collectors.toList()), entity.getValueList().size());
             case ValueType.COLUMN_NAME_TYPE:
                 ColumnBaseEntity columnBaseEntity = (ColumnBaseEntity) value;
                 return new SqlStringAndParameters(
@@ -346,7 +346,7 @@ public class MysqlHandle {
                 StringBuilder stringBuilder = new StringBuilder();
                 List<SqlWhereValue> objectList = new ArrayList<>();
                 handleRelation((ConditionRelationModel) value, stringBuilder, objectList, true);
-                return new SqlStringAndParameters(stringBuilder.toString(), objectList, objectList.size(), ValueType.COLLECTION_TYPE);
+                return new SqlStringAndParameters(stringBuilder.toString(), objectList.stream().map(SqlWhereValue::getValue).collect(Collectors.toList()), objectList.size(), ValueType.COLLECTION_TYPE);
             case ValueType.SYMBOL_TYPE:
                 return new SqlStringAndParameters(((SqlEquation.Symbol) value).getSymbol(), null);
             case ValueType.SINGLE_EXPRESSION_CONDITION_MODEL:

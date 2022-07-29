@@ -8,6 +8,7 @@ import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.JdkResultSet;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import cn.katoumegumi.java.sql.entity.SqlWhereValue;
+import cn.katoumegumi.java.sql.handle.MysqlHandle;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
@@ -278,7 +279,8 @@ public class WsJdbcUtils {
      */
     public <T> List<T> getListT(MySearchList mySearchList) {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+        SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel());
+        //SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
 
@@ -379,7 +381,8 @@ public class WsJdbcUtils {
      */
     public <T> IPage<T> getTPage(MySearchList mySearchList) {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
+        SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel());
+        //SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
         String countSql = selectSqlEntity.getCountSql();

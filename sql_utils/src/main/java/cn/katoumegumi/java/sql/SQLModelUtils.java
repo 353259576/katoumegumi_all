@@ -70,6 +70,7 @@ public class SQLModelUtils {
      * 缓存的sqlEntity
      */
     private SqlEntity cacheSqlEntity;
+    private SelectModel cacheSelectModel;
 
     public SQLModelUtils(MySearchList mySearchList) {
         this(mySearchList, new TranslateNameUtils(),false);
@@ -1267,7 +1268,7 @@ public class SQLModelUtils {
             return oneLoopMargeMap(resultSet);
         } else {
             List<Object> tList = new ArrayList<>();
-            ColumnBaseEntity columnBaseEntity = cacheSqlEntity.getColumnList().get(0);
+            ColumnBaseEntity columnBaseEntity = this.cacheSelectModel == null?cacheSqlEntity.getColumnList().get(0):this.cacheSelectModel.getSelect().get(0);
             try {
                 while (resultSet.next()) {
                     Object o = WsBeanUtils.objectToT(resultSet.getObject(1), columnBaseEntity.getField().getType());
@@ -1627,9 +1628,10 @@ public class SQLModelUtils {
         Map<String,TableRelation> tableRelationMap = new HashMap<>();
         for (TableRelation tableRelation:tableRelationList){
             if(tableRelation.getTableNickName() == null){
-                tableRelationMap.put(translateNameUtils.getCurrentAbbreviation(rootPath) + SqlCommon.KEY_COMMON_DELIMITER + translateNameUtils.getAbbreviation(rootPath+SqlCommon.PATH_COMMON_DELIMITER+tableRelation.getJoinTableNickName()),tableRelation);
+                tableRelationMap.put(translateNameUtils.getCurrentAbbreviation(rootPath) + SqlCommon.KEY_COMMON_DELIMITER + translateNameUtils.getAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath,tableRelation.getJoinTableNickName())),tableRelation);
             }else {
-                tableRelationMap.put(translateNameUtils.getCurrentAbbreviation(tableRelation.getTableNickName()) + SqlCommon.KEY_COMMON_DELIMITER + translateNameUtils.getAbbreviation(tableRelation.getJoinTableNickName()),tableRelation);
+
+                tableRelationMap.put(translateNameUtils.getCurrentAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath,tableRelation.getTableNickName())) + SqlCommon.KEY_COMMON_DELIMITER + translateNameUtils.getAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath,tableRelation.getJoinTableNickName())),tableRelation);
             }
         }
         Queue<KeyValue<String,FieldJoinClass>> queue = new ArrayDeque<>();
@@ -1705,13 +1707,26 @@ public class SQLModelUtils {
                 if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
                     conditionModelList.addAll(selectInterceptorConditionList);
                 }
-                if(tableRelation.getConditionSearchList() != null && WsListUtils.isNotEmpty(tableRelation.getConditionSearchList().getAll())){
-                    searchToExpressionCondition(rootPath,tableRelation.getConditionSearchList().getOrderSearches(),conditionModelList);
+                if(tableRelation.getConditionSearchList() != null){
+                    /*if(WsListUtils.isNotEmpty(tableRelation.getConditionSearchList().getAll())){
+                        searchToExpressionCondition(rootPath,tableRelation.getConditionSearchList().getAll(),conditionModelList);
+                    }*/
+                    ConditionRelationModel conditionRelationModel = searchListToConditionRelation(rootPath,tableRelation.getConditionSearchList(),SqlOperator.AND);
+                    if(conditionRelationModel != null && WsListUtils.isNotEmpty(conditionRelationModel.getConditionList())){
+                        conditionModelList.addAll(conditionRelationModel.getConditionList());
+                    }
+
                 }
                 joinTableModelList.add(new JoinTableModel(new TableModel(mapper,translateNameUtils.getCurrentAbbreviation(path)),new TableModel(joinMapper,translateNameUtils.getCurrentAbbreviation(joinPath)),tableRelation.getJoinType(), new ConditionRelationModel(conditionModelList,SqlOperator.AND)));
             }else {
-                if(tableRelation.getConditionSearchList() != null && WsListUtils.isNotEmpty(tableRelation.getConditionSearchList().getAll())){
-                    searchToExpressionCondition(rootPath,tableRelation.getConditionSearchList().getOrderSearches(),joinTableModel.getOn().getConditionList());
+                /*if(tableRelation.getConditionSearchList() != null && WsListUtils.isNotEmpty(tableRelation.getConditionSearchList().getAll())){
+                    searchToExpressionCondition(rootPath,tableRelation.getConditionSearchList().getAll(),joinTableModel.getOn().getConditionList());
+                }*/
+                if(tableRelation.getConditionSearchList() != null){
+                    ConditionRelationModel conditionRelationModel = searchListToConditionRelation(rootPath,tableRelation.getConditionSearchList(),SqlOperator.AND);
+                    if(conditionRelationModel != null && WsListUtils.isNotEmpty(conditionRelationModel.getConditionList())){
+                        joinTableModel.getOn().getConditionList().addAll(conditionRelationModel.getConditionList());
+                    }
                 }
             }
         }
@@ -1740,6 +1755,7 @@ public class SQLModelUtils {
         }
 
         SelectModel selectModel = new SelectModel(queryColumnList,from,joinTableModelList,where,orderByModelList,this.mySearchList.getSqlLimit());
+        this.cacheSelectModel = selectModel;
         return selectModel;
     }
 
@@ -1828,7 +1844,8 @@ public class SQLModelUtils {
                 case EXISTS:
                 case NOT_EXISTS:
                     if(search.getValue() instanceof MySearchList){
-                        right = search.getValue();
+                        //right = search.getValue();
+                        left = search.getValue();
                     }else {
                         left = new SqlStringModel(translateNameUtils.translateTableNickName(rootPath,search.getFieldName()),search.getValue());
                     }
@@ -1845,6 +1862,10 @@ public class SQLModelUtils {
             if(right instanceof MySearchList){
                 SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) right,translateNameUtils);
                 right = sqlModelUtils.transferToSelectModel();
+            }
+            if(left instanceof MySearchList){
+                SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) left,translateNameUtils);
+                left = sqlModelUtils.transferToSelectModel();
             }
             SqlEquation.Symbol symbol = sqlOperatorToSymbol(operator);
             expressionConditionList.add(new SingleExpressionCondition(left,symbol,right));
@@ -1886,6 +1907,8 @@ public class SQLModelUtils {
             case MULTIPLY:return SqlEquation.Symbol.MULTIPLY;
             case DIVIDE:return SqlEquation.Symbol.DIVIDE;
             case SET:return SqlEquation.Symbol.SET;
+            case NULL:return SqlEquation.Symbol.NULL;
+            case NOTNULL:return SqlEquation.Symbol.NOT_NULL;
             default:throw new IllegalArgumentException(sqlOperator.name()+"无法转换");
         }
     }

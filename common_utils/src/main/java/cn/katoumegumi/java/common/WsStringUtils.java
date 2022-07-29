@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.common;
 
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -13,6 +14,11 @@ import java.util.stream.Collectors;
 
 public class WsStringUtils {
     private static final byte SPACE = 32;
+
+    /**
+     * 空白字符串
+     */
+    private static final String BLANK_STRING = "";
 
     private static final String[] CN_NUMBER_NAME = new String[]{"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
 
@@ -503,8 +509,31 @@ public class WsStringUtils {
     public static List<String> split(String str, char c) {
         char[] cs = str.toCharArray();
         List<String> list = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < cs.length; i++) {
+
+        int startIndex = 0;
+        int endIndex = 0;
+
+        for (int i = 0; i < cs.length; ++i) {
+            if (cs[i] == c) {
+                endIndex = i;
+                if (startIndex == endIndex) {
+                    list.add(BLANK_STRING);
+                } else {
+                    list.add(new String(Arrays.copyOfRange(cs, startIndex, endIndex)));
+                }
+                startIndex = i + 1;
+            }
+
+        }
+        endIndex = cs.length;
+        if (startIndex == endIndex) {
+            list.add(BLANK_STRING);
+        } else {
+            list.add(new String(Arrays.copyOfRange(cs, startIndex, endIndex)));
+        }
+
+        /*StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cs.length; ++i) {
             if (cs[i] != c) {
                 sb.append(cs[i]);
             } else {
@@ -514,7 +543,7 @@ public class WsStringUtils {
         }
         if (sb.length() > 0) {
             list.add(sb.toString());
-        }
+        }*/
         return list;
     }
 

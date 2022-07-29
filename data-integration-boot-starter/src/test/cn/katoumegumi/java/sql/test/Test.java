@@ -1,11 +1,9 @@
 package cn.katoumegumi.java.sql.test;
 
 import cn.katoumegumi.java.common.WsDateUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.WsRun;
-import cn.katoumegumi.java.sql.AbstractSqlInterceptor;
-import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.SQLModelUtils;
-import cn.katoumegumi.java.sql.SelectSqlEntity;
+import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.SqlEquation;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
 import cn.katoumegumi.java.sql.model.SelectModel;
@@ -18,7 +16,15 @@ import java.util.Arrays;
 
 public class Test {
 
+    /*public static void main(String[] args) {
+        TranslateNameUtils translateNameUtils = new TranslateNameUtils();
+        System.out.println(translateNameUtils.translateTableNickName("user","{useradminsfauser.addsdfasdfdsf}"));
+
+    }*/
+
     public static void main(String[] args) {
+
+
         SQLModelUtils.addSqlInterceptor(new AbstractSqlInterceptor() {
             @Override
             public String fieldName() {
@@ -38,7 +44,7 @@ public class Test {
         MySearchList mySearchList = MySearchList.create(User.class)
                 .setSqlLimit(sqlLimit -> sqlLimit.setCurrent(5).setSize(10))
                 .setAlias("u")
-                .leftJoin(UserDetails.class,t->t.setJoinTableNickName("ud1").on(User::getId,UserDetails::getUserId))
+                .leftJoin(UserDetails.class,t->t.setJoinTableNickName("ud1").on(User::getId,UserDetails::getUserId).condition(m->m.eq("ud1",UserDetails::getId,1)))
                 .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).setAlias("ud").on(User::getId,UserDetails::getUserId));
         mySearchList.eq(User::getName,"你好世界");
         mySearchList.eq("ud",UserDetails::getNickName,"你好世界2");
@@ -61,6 +67,9 @@ public class Test {
         mySearchList.sqlEquation(
                 sqlEquation -> sqlEquation.column(User::getName).add().column(new SqlEquation().column(User::getName).subtract().value(3)).equal().value(1)
         );
+        mySearchList.sql(" {ud}.id23 = {u}.id433",null);
+        mySearchList.isNull(User::getName);
+        mySearchList.isNotNull(User::getName);
         mySearchList.sort(User::getId,"asc");
 
         Long date = WsDateUtils.getExecutionTime.apply(()->{

@@ -12,4 +12,5 @@ module cn.katoumegumi.java.sql.utils {
     exports cn.katoumegumi.java.sql.entity;
     exports cn.katoumegumi.java.sql.annotation;
     exports cn.katoumegumi.java.sql.model;
+    exports cn.katoumegumi.java.sql.handle;
 }
