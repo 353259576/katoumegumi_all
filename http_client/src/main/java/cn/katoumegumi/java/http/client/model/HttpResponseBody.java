@@ -162,7 +162,7 @@ public class HttpResponseBody {
                 String str = (String) o;
                 if ("gzip".equals(str.toLowerCase())) {
                     isGzip = true;
-                    if (!(returnBytes == null && returnBytes.length == 0)) {
+                    if (!(returnBytes == null || returnBytes.length == 0)) {
                         this.returnBytes = uncompressByGZIP(this.returnBytes);
                     }
                     if (!(errorReturnBytes == null || errorReturnBytes.length == 0)) {
@@ -175,7 +175,7 @@ public class HttpResponseBody {
     }
 
 
-    public byte[] uncompressByGZIP(byte bytes[]) {
+    public byte[] uncompressByGZIP(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return bytes;
         }
@@ -193,14 +193,14 @@ public class HttpResponseBody {
                 }
                 byteBuffer.clear();
             }
-            byte newbytes[] = byteArrayOutputStream.toByteArray();
+            byte[] newBytes = byteArrayOutputStream.toByteArray();
             writableByteChannel.close();
             readableByteChannel.close();
             byteArrayOutputStream.flush();
             byteArrayOutputStream.close();
             gzipInputStream.close();
             byteArrayInputStream.close();
-            return newbytes;
+            return newBytes;
         } catch (Exception e) {
             e.printStackTrace();
             return bytes;

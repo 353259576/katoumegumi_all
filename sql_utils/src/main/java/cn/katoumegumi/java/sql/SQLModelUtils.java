@@ -1620,10 +1620,45 @@ public class SQLModelUtils {
 
 
     public SelectModel transferToSelectModel(){
-        FieldColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
-        TableModel from = new TableModel(mainMapper,translateNameUtils.getAbbreviation(mainMapper.getNickName()));
-        String rootPath = mainMapper.getNickName();
+        final FieldColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
+        TableModel from = new TableModel(mainMapper,translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
+        final String rootPath = mainMapper.getNickName();
         translateNameUtils.addLocalMapper(rootPath,mainMapper);
+        final boolean appointQueryColumn = WsListUtils.isNotEmpty(this.mySearchList.getColumnNameList());
+        List<ColumnBaseEntity> queryColumnList = new ArrayList<>();
+
+        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath,mainMapper,queryColumnList,appointQueryColumn);
+
+        if(appointQueryColumn){
+            for (String columnName:this.mySearchList.getColumnNameList()){
+                queryColumnList.add(translateNameUtils.getColumnBaseEntity(columnName,rootPath,2));
+            }
+        }
+
+        ConditionRelationModel where = handleWhere(rootPath,mainMapper,this.mySearchList);
+
+
+        List<OrderByModel> orderByModelList = null;
+        if(WsListUtils.isNotEmpty(this.mySearchList.getOrderSearches())){
+            orderByModelList = new ArrayList<>(this.mySearchList.getOrderSearches().size());
+            for (MySearch mySearch:this.mySearchList.getOrderSearches()){
+                orderByModelList.add(new OrderByModel(translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(),rootPath,2),WsBeanUtils.objectToT(mySearch.getValue(),String.class)));
+            }
+        }
+
+        SelectModel selectModel = new SelectModel(queryColumnList,from,joinTableModelList,where,orderByModelList,this.mySearchList.getSqlLimit());
+        this.cacheSelectModel = selectModel;
+        return selectModel;
+    }
+
+    /**
+     * 表关联处理
+     * @param rootPath
+     * @param mainMapper
+     * @param appointQueryColumn
+     * @return
+     */
+    private List<JoinTableModel> handleJoinTableModel(final String rootPath,final FieldColumnRelationMapper mainMapper,final List<ColumnBaseEntity> queryColumnList,final boolean appointQueryColumn){
         List<TableRelation> tableRelationList = this.mySearchList.getJoins();
         Map<String,TableRelation> tableRelationMap = new HashMap<>();
         for (TableRelation tableRelation:tableRelationList){
@@ -1640,8 +1675,7 @@ public class SQLModelUtils {
         }
         List<JoinTableModel> joinTableModelList = new ArrayList<>();
         Map<TableRelation,JoinTableModel> usedRelationMap = new HashMap<>();
-        List<ColumnBaseEntity> queryColumnList = new ArrayList<>();
-        boolean appointQueryColumn = WsListUtils.isNotEmpty(this.mySearchList.getColumnNameList());
+
         if (!appointQueryColumn){
             addQueryColumnList(mainMapper, rootPath, queryColumnList);
         }
@@ -1708,9 +1742,6 @@ public class SQLModelUtils {
                     conditionModelList.addAll(selectInterceptorConditionList);
                 }
                 if(tableRelation.getConditionSearchList() != null){
-                    /*if(WsListUtils.isNotEmpty(tableRelation.getConditionSearchList().getAll())){
-                        searchToExpressionCondition(rootPath,tableRelation.getConditionSearchList().getAll(),conditionModelList);
-                    }*/
                     ConditionRelationModel conditionRelationModel = searchListToConditionRelation(rootPath,tableRelation.getConditionSearchList(),SqlOperator.AND);
                     if(conditionRelationModel != null && WsListUtils.isNotEmpty(conditionRelationModel.getConditionList())){
                         conditionModelList.addAll(conditionRelationModel.getConditionList());
@@ -1719,9 +1750,6 @@ public class SQLModelUtils {
                 }
                 joinTableModelList.add(new JoinTableModel(new TableModel(mapper,translateNameUtils.getCurrentAbbreviation(path)),new TableModel(joinMapper,translateNameUtils.getCurrentAbbreviation(joinPath)),tableRelation.getJoinType(), new ConditionRelationModel(conditionModelList,SqlOperator.AND)));
             }else {
-                /*if(tableRelation.getConditionSearchList() != null && WsListUtils.isNotEmpty(tableRelation.getConditionSearchList().getAll())){
-                    searchToExpressionCondition(rootPath,tableRelation.getConditionSearchList().getAll(),joinTableModel.getOn().getConditionList());
-                }*/
                 if(tableRelation.getConditionSearchList() != null){
                     ConditionRelationModel conditionRelationModel = searchListToConditionRelation(rootPath,tableRelation.getConditionSearchList(),SqlOperator.AND);
                     if(conditionRelationModel != null && WsListUtils.isNotEmpty(conditionRelationModel.getConditionList())){
@@ -1730,14 +1758,18 @@ public class SQLModelUtils {
                 }
             }
         }
+        return joinTableModelList;
+    }
 
-        if(appointQueryColumn){
-            for (String columnName:this.mySearchList.getColumnNameList()){
-                queryColumnList.add(translateNameUtils.getColumnBaseEntity(columnName,rootPath,2));
-            }
-        }
-
-        ConditionRelationModel where = searchListToConditionRelation(rootPath,this.mySearchList,SqlOperator.AND);
+    /**
+     * 处理where条件（必须在处理表关联关系之后进行）
+     * @param rootPath
+     * @param mainMapper
+     * @param mySearchList
+     * @return
+     */
+    private ConditionRelationModel handleWhere(final String rootPath,final FieldColumnRelationMapper mainMapper,final MySearchList mySearchList){
+        ConditionRelationModel where = searchListToConditionRelation(rootPath,mySearchList,SqlOperator.AND);
         List<Condition> selectInterceptorConditionList = getConditionSqlInterceptorConditionList(rootPath,mainMapper);
         if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
             if(where == null){
@@ -1746,17 +1778,7 @@ public class SQLModelUtils {
                 where.getConditionList().addAll(selectInterceptorConditionList);
             }
         }
-        List<OrderByModel> orderByModelList = null;
-        if(WsListUtils.isNotEmpty(this.mySearchList.getOrderSearches())){
-            orderByModelList = new ArrayList<>(this.mySearchList.getOrderSearches().size());
-            for (MySearch mySearch:this.mySearchList.getOrderSearches()){
-                orderByModelList.add(new OrderByModel(translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(),rootPath,2),WsBeanUtils.objectToT(mySearch.getValue(),String.class)));
-            }
-        }
-
-        SelectModel selectModel = new SelectModel(queryColumnList,from,joinTableModelList,where,orderByModelList,this.mySearchList.getSqlLimit());
-        this.cacheSelectModel = selectModel;
-        return selectModel;
+        return where;
     }
 
     /**
@@ -1765,7 +1787,7 @@ public class SQLModelUtils {
      * @param path
      * @param queryColumnList
      */
-    private void addQueryColumnList(FieldColumnRelationMapper mapper, String path, List<ColumnBaseEntity> queryColumnList) {
+    private void addQueryColumnList(final FieldColumnRelationMapper mapper,final String path,final List<ColumnBaseEntity> queryColumnList) {
         if(WsListUtils.isNotEmpty(mapper.getIds())){
             for (FieldColumnRelation fieldColumnRelation:mapper.getIds()){
                 queryColumnList.add(translateNameUtils.createColumnBaseEntity(fieldColumnRelation,mapper,path));
@@ -1779,7 +1801,7 @@ public class SQLModelUtils {
     }
 
 
-    private ConditionRelationModel searchListToConditionRelation(String rootPath,MySearchList searchList,SqlOperator relation){
+    private ConditionRelationModel searchListToConditionRelation(final String rootPath,final MySearchList searchList,final SqlOperator relation){
         if(WsListUtils.isEmpty(searchList.getAll()) && WsListUtils.isEmpty(searchList.getAnds()) && WsListUtils.isEmpty(searchList.getOrs())){
             return null;
         }

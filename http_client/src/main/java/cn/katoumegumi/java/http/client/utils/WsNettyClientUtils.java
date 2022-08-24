@@ -96,7 +96,7 @@ public class WsNettyClientUtils {
         httpRequest.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         //fullHttpRequest.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
         //httpRequest.headers().set(HttpHeaderNames.ACCEPT, "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2");
-        httpRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, httpRequestBody.getMediaType().getCoed());
+        httpRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, httpRequestBody.getMediaType().getValue());
         httpRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpContent.content().readableBytes());
         List<WsRequestProperty> list = httpRequestBody.getRequestProperty();
         list.stream().forEach(wsRequestProperty -> {

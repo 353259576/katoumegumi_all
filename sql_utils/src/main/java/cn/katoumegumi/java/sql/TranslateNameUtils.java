@@ -247,7 +247,7 @@ public class TranslateNameUtils {
      * @param type 1 返回的列名 2 查询的列名
      * @return
      */
-    public ColumnBaseEntity getColumnBaseEntity(String originalFieldName, String rootPath,int type) {
+    public ColumnBaseEntity getColumnBaseEntity(String originalFieldName,final String rootPath,final int type) {
 
         /*String searchKey = rootPath+ SqlCommon.KEY_COMMON_DELIMITER +originalFieldName+SqlCommon.KEY_COMMON_DELIMITER+type;
         ColumnBaseEntity columnBaseEntity = this.columnBaseEntityCacheMap.get(searchKey);
@@ -302,11 +302,11 @@ public class TranslateNameUtils {
     }
 
 
-    public ColumnBaseEntity createColumnBaseEntity(FieldColumnRelation fieldColumnRelation,FieldColumnRelationMapper mapper,String path){
+    public ColumnBaseEntity createColumnBaseEntity(final FieldColumnRelation fieldColumnRelation,final FieldColumnRelationMapper mapper,final String path){
         return new ColumnBaseEntity(fieldColumnRelation,mapper.getTableName(),path,getAbbreviation(path));
     }
 
-    public ColumnBaseEntity createColumnBaseEntity(String fieldName,String path,int type){
+    public ColumnBaseEntity createColumnBaseEntity(final String fieldName,final String path,final int type){
         /*FieldColumnRelationMapper mapper = getLocalMapper(path);
         if (mapper == null) {
             throw new RuntimeException(path + "不存在");
@@ -319,7 +319,7 @@ public class TranslateNameUtils {
         return createColumnBaseEntity(fieldName,path,getAbbreviation(path),type);
     }
 
-    public ColumnBaseEntity createColumnBaseEntity(String fieldName,String path,String abbreviation,int type){
+    public ColumnBaseEntity createColumnBaseEntity(final String fieldName,final String path,final String abbreviation,final int type){
         FieldColumnRelationMapper mapper = getLocalMapper(path);
         if (mapper == null) {
             throw new RuntimeException(path + "不存在");
@@ -378,41 +378,6 @@ public class TranslateNameUtils {
             }
             return translateStringBuilder.toString();
         }
-
-        /*StringBuilder stringBuilder = new StringBuilder();
-        StringBuilder replaceSb = new StringBuilder();
-        char c;
-        boolean isReplace = false;
-        String replaceStr = null;
-        for (char value : cs) {
-            c = value;
-            if (isReplace) {
-                if (c == '}') {
-                    replaceStr = getParticular(replaceSb.toString());
-                    if (replaceStr == null) {
-                        if (replaceSb.toString().startsWith(prefix)) {
-                            stringBuilder.append(getAbbreviation(replaceSb.toString()));
-                        } else {
-                            stringBuilder.append(getAbbreviation(prefix + SqlCommon.PATH_COMMON_DELIMITER + replaceSb));
-                        }
-                    } else {
-                        stringBuilder.append(replaceSb);
-                    }
-                    isReplace = false;
-                } else {
-                    replaceSb.append(c);
-                }
-            } else {
-                if (c == '{') {
-                    replaceSb = new StringBuilder();
-                    isReplace = true;
-                } else {
-                    stringBuilder.append(c);
-                }
-            }
-        }
-        return stringBuilder.toString();*/
-
     }
 
 
@@ -446,7 +411,7 @@ public class TranslateNameUtils {
      * @param originalTableNickName
      * @return
      */
-    public String getCompleteTableNickName(String rootPath,String originalTableNickName){
+    public String getCompleteTableNickName(final String rootPath,String originalTableNickName){
         String tableNickName = getCurrentAbbreviationAndNotAutoSet(originalTableNickName);
         if(tableNickName == null){
             return getAddPathTableNickName(rootPath,originalTableNickName);
@@ -454,7 +419,7 @@ public class TranslateNameUtils {
         return originalTableNickName;
     }
 
-    public String getAddPathTableNickName(String rootPath,String tableNickName){
+    public String getAddPathTableNickName(final String rootPath,String tableNickName){
         if(tableNickName.length() < rootPath.length()){
             tableNickName = rootPath + SqlCommon.PATH_COMMON_DELIMITER + tableNickName;
         }else {

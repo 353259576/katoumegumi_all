@@ -14,20 +14,23 @@ public class WsFieldUtils {
 
     private static final String METHOD_NAME_IS = "is";
 
+    private static final String WRITE_REPLACE_FUNCTION_NAME = "writeReplace";
+
     private static final Map<String, WeakReference<String>> FIELD_NAME_MAP = new ConcurrentHashMap<>();
+
+    private static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
 
     public static Field getFieldForObject(String name, Object object) {
         Class<?> clazz = object.getClass();
         return getFieldForClass(name, clazz);
     }
 
-
-    public static Field getFieldForClass(String name, Class clazz) {
+    public static Field getFieldForClass(String name, Class<?> clazz) {
         Field field = null;
         for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
             try {
                 field = clazz.getDeclaredField(name);
-            } catch (Exception e) {
+            } catch (NoSuchFieldException e) {
                 //e.printStackTrace();
             }
         }
@@ -41,42 +44,24 @@ public class WsFieldUtils {
      * @return
      */
     public static Field[] getFieldAll(Class<?> clazz) {
-        Set<Field> fieldSet = new HashSet<>();
-        Map<String, Field> fieldMap = new HashMap<>();
-        try {
-            Field[] fields;
+        return getFieldList(clazz).toArray(EMPTY_FIELD_ARRAY);
+    }
 
-            fields = clazz.getDeclaredFields();
+    public static List<Field> getFieldList(Class<?> clazz) {
+        Set<String> fieldNameSet = new HashSet<>();
+        List<Field> fieldList = new ArrayList<>();
+        for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
+            Field[] fields = clazz.getDeclaredFields();
             for (Field value : fields) {
                 if (!Modifier.isStatic(value.getModifiers())) {
-                    fieldMap.put(value.getName(), value);
-                }
-            }
-            for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
-                fields = clazz.getDeclaredFields();
-                if (!(fields.length == 0)) {
-                    for (Field field : fields) {
-                        if (!Modifier.isStatic(field.getModifiers())) {
-                            if (!fieldMap.containsKey(field.getName())) {
-                                fieldMap.put(field.getName(), field);
-                            }
-                        }
-
+                    if(!fieldNameSet.contains(value.getName())){
+                        fieldNameSet.add(value.getName());
+                        fieldList.add(value);
                     }
                 }
             }
-            fieldMap.forEach((s, field) -> {
-                fieldSet.add(field);
-            });
-            fieldMap.clear();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        if (fieldSet.isEmpty()) {
-            return null;
-        } else {
-            return fieldSet.toArray(new Field[0]);
-        }
+        return fieldList;
     }
 
 
@@ -99,7 +84,7 @@ public class WsFieldUtils {
             methodSet.add(methods[i]);
         }
         List<Method> methodList = new ArrayList<>();
-        methodSet.stream().forEach(method -> {
+        methodSet.forEach(method -> {
             if (method.getName().equals(methodName)) {
                 methodList.add(method);
             }
@@ -177,7 +162,7 @@ public class WsFieldUtils {
         String n = supplierFunc.getClass().getName();
         return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(() -> {
             try {
-                Method method = supplierFunc.getClass().getDeclaredMethod("writeReplace");
+                Method method = supplierFunc.getClass().getDeclaredMethod(WRITE_REPLACE_FUNCTION_NAME);
                 method.setAccessible(true);
                 SerializedLambda serializedLambda = (SerializedLambda) method.invoke(supplierFunc);
                 String name = serializedLambda.getImplMethodName();
@@ -202,7 +187,7 @@ public class WsFieldUtils {
         String n = sFunction.getClass().getName();
         return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(() -> {
             try {
-                Method method = sFunction.getClass().getDeclaredMethod("writeReplace");
+                Method method = sFunction.getClass().getDeclaredMethod(WRITE_REPLACE_FUNCTION_NAME);
                 method.setAccessible(true);
                 SerializedLambda serializedLambda = (SerializedLambda) method.invoke(sFunction);
                 String name = serializedLambda.getImplMethodName();
@@ -244,40 +229,27 @@ public class WsFieldUtils {
      */
     public static <T> Field getFieldByName(Class<T> tClass, String fieldName) {
         List<String> stringList = WsStringUtils.split(fieldName, '.');
-        Iterator<String> iterator = stringList.iterator();
-        String nowName;
-        Class<?> nowC = tClass;
-        Field nowField = null;
-        while (iterator.hasNext()) {
-            nowField = null;
-            nowName = iterator.next();
-            Field[] fields = getFieldAll(nowC);
-            if (fields == null) {
-                return null;
-            }
-            for (Field field : fields) {
-                if (field.getName().equals(nowName)) {
-                    nowField = field;
-                    break;
-                }
-            }
-            if (nowField == null) {
-                return null;
-            }
-            nowC = nowField.getType();
+        Class<?> currentClass = tClass;
+        Field field = null;
+        for (String name:stringList){
+            field = getFieldForClass(name,currentClass);
+            assert field != null;
+            currentClass = field.getType();
         }
-        return nowField;
+        return field;
     }
 
 
-    public static Field getFieldByType(Type type, Class clazz) {
+    public static List<Field> getFieldByType(Type type, Class<?> clazz) {
+        List<Field> fieldList = new ArrayList<>();
         Field[] fields = getFieldAll(clazz);
         for (Field field : fields) {
             if (field.getType().equals(type)) {
-                return field;
+                //return field;
+                fieldList.add(field);
             }
         }
-        return null;
+        return fieldList;
     }
 
     /**

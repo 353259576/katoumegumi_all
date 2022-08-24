@@ -26,8 +26,9 @@ public abstract class AbstractJpaService<K, P, D extends JpaDao<K, P>> implement
             Type type = this.getClass().getGenericSuperclass();
             ParameterizedType parameterizedType = (ParameterizedType) type;
             type = parameterizedType.getActualTypeArguments()[2];
-            Field field = WsFieldUtils.getFieldByType(type, this.getClass());
+            List<Field> fieldList = WsFieldUtils.getFieldByType(type, this.getClass());
             try {
+                Field field = fieldList.get(0);
                 field.setAccessible(true);
                 entityDao = (D) field.get(this);
             } catch (IllegalAccessException e) {

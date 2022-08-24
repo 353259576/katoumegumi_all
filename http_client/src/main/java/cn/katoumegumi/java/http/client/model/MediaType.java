@@ -2,23 +2,34 @@ package cn.katoumegumi.java.http.client.model;
 
 public enum MediaType {
     ALL_VALUE("*/*"),
-    APPLICATION_XML_VALUE("application/xml"),
-    APPLICATION_FORM_URLENCODED_VALUE("application/x-www-form-urlencoded"),
-    APPLICATION_JSON_VALUE("application/json"),
-    APPLICATION_OCTET_STREAM_VALUE("application/octet-stream");
+    TEXT_HTML("text/html"),
+    TEXT_PLAIN("text/plain"),
+    TEXT_XML("text/xml"),
+    IMAGE_GIF("image/gif"),
+    IMAGE_JPEG("image/jpeg"),
+    IMAGE_PNG("image/png"),
+    APPLICATION_XML("application/xml"),
+    APPLICATION_XHTML("application/xhtml+xml"),
+    APPLICATION_ATOM("application/atom+xml"),
+    APPLICATION_PDF("application/pdf"),
+    APPLICATION_MS_WORD("application/msword"),
+    MULTIPART_FORM_DATA("multipart/form-data"),
+    APPLICATION_FORM_URLENCODED("application/x-www-form-urlencoded"),
+    APPLICATION_JSON("application/json"),
+    APPLICATION_OCTET_STREAM("application/octet-stream");
 
 
-    private String coed;
+    private String value;
 
-    private MediaType(String code) {
-        this.coed = code;
+    private MediaType(String value) {
+        this.value = value;
     }
 
-    public String getCoed() {
-        return coed;
+    public String getValue() {
+        return value;
     }
 
-    public void setCoed(String coed) {
-        this.coed = coed;
+    public void setValue(String value) {
+        this.value = value;
     }
 }

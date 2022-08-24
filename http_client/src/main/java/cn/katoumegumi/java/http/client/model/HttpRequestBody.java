@@ -10,6 +10,8 @@ import cn.katoumegumi.java.http.model.FileEntity;
 import cn.katoumegumi.java.http.model.ValueEntity;
 import cn.katoumegumi.java.http.utils.HttpUtils;
 import com.google.gson.Gson;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpMethod;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -30,7 +32,7 @@ public class HttpRequestBody {
     private final List<WsRequestProperty> requestProperty = new ArrayList<>();
     private String stringHttpRequestBody = null;
     private String charset = "UTF-8";
-    private String method = "GET";
+    private String method = HttpMethod.GET.toString();
     private boolean isHttps = false;
     private String contextType;
     private String url;
@@ -125,7 +127,7 @@ public class HttpRequestBody {
             for (Map.Entry<String, Object> e : set) {
                 bodyEntityList.add(new ValueEntity().setValue(e.getValue()).setName(e.getKey()));
             }
-            this.mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
+            this.mediaType = MediaType.APPLICATION_FORM_URLENCODED;
         }
         return this;
     }
@@ -134,21 +136,21 @@ public class HttpRequestBody {
     public HttpRequestBody addHttpRequestBodyEntry(String name, String value) {
         //httpRequestBodyEntries.add(new HttpRequestBodyEntry(name, value));
         bodyEntityList.add(new ValueEntity().setValue(value).setName(name));
-        this.mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
+        this.mediaType = MediaType.APPLICATION_FORM_URLENCODED;
         return this;
     }
 
     public HttpRequestBody addHttpRequestBodyEntry(String name, File file) {
         //httpRequestBodyEntries.add(new HttpRequestBodyEntry(name, file));
         bodyEntityList.add(new FileEntity().setValue(file).setName(name));
-        this.mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        this.mediaType = MediaType.APPLICATION_OCTET_STREAM;
         return this;
     }
 
     public HttpRequestBody addHttpRequestBodyEntry(String name, String fileName, InputStream inputStream) {
         //httpRequestBodyEntries.add(new HttpRequestBodyEntry(name, fileName, inputStream));
         bodyEntityList.add(new FileEntity().setValue(inputStream).setFileName(fileName).setName(name));
-        this.mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        this.mediaType = MediaType.APPLICATION_OCTET_STREAM;
         return this;
     }
 
@@ -189,13 +191,13 @@ public class HttpRequestBody {
         byte[] bytes = null;
         if (WsStringUtils.isBlank(this.stringHttpRequestBody)) {
             switch (mediaType) {
-                case APPLICATION_FORM_URLENCODED_VALUE:
+                case APPLICATION_FORM_URLENCODED:
                     bytes = simpleFormData(this);
                     break;
-                case APPLICATION_JSON_VALUE:
+                case APPLICATION_JSON:
                     bytes = jsonFormData(this);
                     break;
-                case APPLICATION_OCTET_STREAM_VALUE:
+                case APPLICATION_OCTET_STREAM:
                     bytes = multipartFormData(this);
                     break;
                 default:
@@ -228,9 +230,9 @@ public class HttpRequestBody {
     public HttpRequestBody setStringHttpRequestBody(String stringHttpRequestBody) {
         this.stringHttpRequestBody = stringHttpRequestBody;
         if (stringHttpRequestBody.startsWith("{")) {
-            mediaType = MediaType.APPLICATION_JSON_VALUE;
+            mediaType = MediaType.APPLICATION_JSON;
         } else if (stringHttpRequestBody.startsWith("<")) {
-            mediaType = MediaType.APPLICATION_XML_VALUE;
+            mediaType = MediaType.APPLICATION_XML;
         }
         return this;
     }
@@ -239,7 +241,7 @@ public class HttpRequestBody {
     //生成formData数据格式
     public byte[] multipartFormData(HttpRequestBody httpRequestBody) throws RuntimeException {
         String boundary = HttpUtils.getFormDataBoundary();
-        httpRequestBody.setRequestProperty("content-type", "multipart/form-data; boundary=" + boundary);
+        httpRequestBody.setRequestProperty(HttpHeaderNames.CONTENT_TYPE.toString(), "multipart/form-data; boundary=" + boundary);
         return HttpUtils.toFormData(bodyEntityList, boundary, charset);
     }
 
@@ -251,7 +253,7 @@ public class HttpRequestBody {
 
     //生成JSON数据格式
     public byte[] jsonFormData(HttpRequestBody httpRequestBody) {
-        httpRequestBody.setRequestProperty("content-type", MediaType.APPLICATION_JSON_VALUE.getCoed());
+        httpRequestBody.setRequestProperty(HttpHeaderNames.CONTENT_TYPE.toString(), MediaType.APPLICATION_JSON.getValue());
         Map<String, Object> map = new HashMap<>();
         for (BaseEntity entity : bodyEntityList) {
             if (entity instanceof ValueEntity) {
@@ -407,7 +409,7 @@ public class HttpRequestBody {
     }
 
     public HttpRequestBody setUserAgent(String userAgent) {
-        setRequestProperty("User-Agent", userAgent);
+        setRequestProperty(HttpHeaderNames.USER_AGENT.toString(), userAgent);
         return this;
     }
 
@@ -447,8 +449,10 @@ public class HttpRequestBody {
     }
 
     public HttpRequestBody setGZIP(boolean GZIP) {
-        this.setRequestProperty("Accept-Encoding", "gzip, deflate");
-        this.setRequestProperty("Vary", "Accept-Encoding");
+        this.setRequestProperty(HttpHeaderNames.ACCEPT_ENCODING.toString(), "gzip, deflate");
+        //this.setRequestProperty("Accept-Encoding", "gzip, deflate");
+        this.setRequestProperty(HttpHeaderNames.VARY.toString(), HttpHeaderNames.ACCEPT_ENCODING.toString());
+        //this.setRequestProperty("Vary", "Accept-Encoding");
         isGZIP = GZIP;
         return this;
     }
@@ -481,12 +485,12 @@ public class HttpRequestBody {
     }
 
     public HttpRequestBody setJson(boolean json) {
-        mediaType = MediaType.APPLICATION_JSON_VALUE;
+        mediaType = MediaType.APPLICATION_JSON;
         return this;
     }
 
     public HttpRequestBody setXml(boolean xml) {
-        mediaType = MediaType.APPLICATION_XML_VALUE;
+        mediaType = MediaType.APPLICATION_XML;
         return this;
     }
 
@@ -494,7 +498,7 @@ public class HttpRequestBody {
         if ("desc".equals(sort)) {
             bodyEntityList.sort((o1, o2) -> -(o1.compareTo(o2)));
         } else if ("asc".equals(sort)) {
-            bodyEntityList.sort((o1, o2) -> o1.compareTo(o2));
+            bodyEntityList.sort(BaseEntity::compareTo);
         }
         /*if ("desc".equals(sort)) {
             httpRequestBodyEntries.sort(new Comparator<HttpRequestBodyEntry>() {

@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql.test;
 
 import cn.katoumegumi.java.common.WsDateUtils;
+import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.WsRun;
 import cn.katoumegumi.java.sql.*;
@@ -8,21 +9,22 @@ import cn.katoumegumi.java.sql.entity.SqlEquation;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
 import cn.katoumegumi.java.sql.model.SelectModel;
 import cn.katoumegumi.java.sql.model.SqlConditionModel;
+import cn.katoumegumi.java.sql.test.model.ChildTestBean2;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
 import com.google.gson.Gson;
+import io.netty.handler.codec.http.HttpHeaderNames;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 public class Test {
 
-    /*public static void main(String[] args) {
-        TranslateNameUtils translateNameUtils = new TranslateNameUtils();
-        System.out.println(translateNameUtils.translateTableNickName("user","{useradminsfauser.addsdfasdfdsf}"));
-
-    }*/
-
     public static void main(String[] args) {
+        System.out.println(HttpHeaderNames.CONTENT_TYPE.toString());
+    }
+
+    public static void test() {
 
 
         SQLModelUtils.addSqlInterceptor(new AbstractSqlInterceptor() {
@@ -73,14 +75,14 @@ public class Test {
         mySearchList.sort(User::getId,"asc");
 
         Long date = WsDateUtils.getExecutionTime.apply(()->{
-            for (int i = 0; i < 1; i++){
+            for (int i = 0; i < 1000000; i++){
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectModel selectModel = sqlModelUtils.transferToSelectModel();
                 SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(selectModel);
-                System.out.println(selectSqlEntity.getSelectSql());
+                /*System.out.println(selectSqlEntity.getSelectSql());
                 System.out.println(selectSqlEntity.getCountSql());
                 System.out.println(new Gson().toJson(selectSqlEntity.getValueList()));
-                System.out.println(sqlModelUtils.select().getSelectSql());
+                System.out.println(sqlModelUtils.select().getSelectSql());*/
 
             }
         });
