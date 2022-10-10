@@ -1,5 +1,8 @@
 package cn.katoumegumi.java.sql.model;
 
+/**
+ * 多表达式条件(例如：a + b = c)
+ */
 public class MultiExpressionCondition extends AbstractExpressionCondition{
 
     private int index;

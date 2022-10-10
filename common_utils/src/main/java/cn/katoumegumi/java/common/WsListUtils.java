@@ -128,9 +128,7 @@ public class WsListUtils {
             return null;
         }
         List<T> list = new ArrayList<>();
-        for (int i = 0; i < array.length; i++) {
-            list.add(array[i]);
-        }
+        Collections.addAll(list, array);
         return list;
     }
 

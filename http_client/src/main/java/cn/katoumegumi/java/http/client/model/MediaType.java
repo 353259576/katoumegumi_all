@@ -21,7 +21,7 @@ public enum MediaType {
 
     private String value;
 
-    private MediaType(String value) {
+    MediaType(String value) {
         this.value = value;
     }
 

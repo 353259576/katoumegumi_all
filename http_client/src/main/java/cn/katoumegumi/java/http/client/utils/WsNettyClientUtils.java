@@ -55,7 +55,6 @@ public class WsNettyClientUtils {
                 }
             }
         });
-        ;
         //ctx.write(LastHttpContent.EMPTY_LAST_CONTENT);
         ctx.write(LastHttpContent.EMPTY_LAST_CONTENT).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override

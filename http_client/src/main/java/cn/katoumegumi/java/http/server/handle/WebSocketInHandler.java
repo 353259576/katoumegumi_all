@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -142,7 +143,7 @@ public class WebSocketInHandler extends SimpleChannelInboundHandler {
         log.info("HTTP传输的数据为：{}", new String(bytes));
         String str = "<html><head><title>Netty响应</title></head><body><div style=\"text-align:centre;\">当前时间为" + WsDateUtils.dateToString(new Date(), WsDateUtils.CNLONGTIMESTRING) + "</div></body></html>";
         try {
-            byteBuf = Unpooled.copiedBuffer(str.getBytes("UTF-8"));
+            byteBuf = Unpooled.copiedBuffer(str.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             e.printStackTrace();
             byteBuf = Unpooled.copiedBuffer(str.getBytes());

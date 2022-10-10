@@ -143,14 +143,14 @@ public class HibernateDao {
         if (sqlLimit == null) {
             sqlLimit = new SqlLimit();
         }
-        Integer firstResult = Math.toIntExact(sqlLimit.getOffset());
+        int firstResult = Math.toIntExact(sqlLimit.getOffset());
         List<T> list = (List<T>) hibernateTemplate.findByCriteria(detachedCriteria, firstResult, Long.valueOf(sqlLimit.getSize()).intValue());
-        Integer count = 0;
+        int count;
         if (list.size() == 0) {
-            count = list.size();
+            count = 0;
         } else {
             detachedCriteria.setProjection(Projections.rowCount());
-            List counts = hibernateTemplate.findByCriteria(detachedCriteria, 0, 1);
+            List<?> counts = hibernateTemplate.findByCriteria(detachedCriteria, 0, 1);
             count = Integer.parseInt(counts.get(0).toString());
         }
         Page<T> pageVO = new Page<>();

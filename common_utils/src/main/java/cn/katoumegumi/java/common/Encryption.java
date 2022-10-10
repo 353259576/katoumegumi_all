@@ -17,6 +17,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,54 +35,13 @@ public class Encryption {
 
 
     public static void main(String[] args) {
-        /*ProviderList list = Providers.getProviderList();
-        list.providers().forEach(provider -> {
-            System.out.println(provider.getName());
-        });*/
-
         //Security.getAlgorithms("Mac").forEach(System.out::println);
         //Security.getAlgorithms("MessageDigest").forEach(System.out::println);
         //Security.getAlgorithms("SecretKeyFactory").forEach(System.out::println);
         //Security.getAlgorithms("Cipher").forEach(System.out::println);
         //Security.getAlgorithms("KeyFactory").forEach(System.out::println);
         //Security.getAlgorithms("KeyPairGenerator").forEach(System.out::println);
-        System.out.println(WsUnsafeUtils.addressSize());
-
-        long tOffset = WsUnsafeUtils.allocateMemory(2);
-
-        WsUnsafeUtils.setMemory(tOffset, 1L, (byte) 22);
-        WsUnsafeUtils.setMemory(tOffset + 1, 1L, (byte) 33);
-
-        byte b1 = WsUnsafeUtils.getByte(null, tOffset);
-        byte b2 = WsUnsafeUtils.getByte(null, tOffset + 1);
-
-
-        WsUnsafeUtils.reallocateMemory(tOffset, 2L);
-        System.out.println(b1);
-        System.out.println(b2);
-
-        Object o = new Object();
-        Class<?> c = o.getClass();
-        int addressSize = WsUnsafeUtils.addressSize();
-        int bitSize = addressSize * 8;
-
-        long offset = 0;
-        long mark = WsUnsafeUtils.getLong(o, offset);
-        //offset += bitSize;
-        //long kClass = WsUnsafeUtils.getLong(o,offset);
-        //offset += bitSize;
-        int length = WsUnsafeUtils.getInt(o, offset + 60);
-
-        System.out.println("mark：" + mark);
-        //System.out.println("kClass:" + kClass);
-        System.out.println("length:" + length);
-
-        /*byte[] bytes = new byte[1000];
-        for(int i = 0; i < 1000; i++){
-            byte b = WsUnsafeUtils.getByte(c,offset + i * 8);
-            bytes[i] = b;
-        }
-        System.out.println(new String(bytes,StandardCharsets.UTF_8));*/
+        //Arrays.stream(Security.getProviders()).map(Provider::getInfo).forEach(System.out::println);
 
     }
 
@@ -91,13 +51,13 @@ public class Encryption {
         try {
             password = md5Encoder(password).substring(0, 8);
             //SecureRandom secureRandom = new SecureRandom();
-            IvParameterSpec ivParameterSpec = new IvParameterSpec(password.getBytes("UTF-8"));
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(password.getBytes(StandardCharsets.UTF_8));
             DESKeySpec desKeySpec = new DESKeySpec(password.getBytes());
             SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(DES_ALGORITHM);
             SecretKey secretKey = secretKeyFactory.generateSecret(desKeySpec);
             Cipher cipher = Cipher.getInstance(DES_INTERFACE);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
-            return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes("UTF-8")));
+            return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -135,7 +95,7 @@ public class Encryption {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
             messageDigest.update(str.getBytes(StandardCharsets.UTF_8));
-            byte bytes[] = messageDigest.digest();
+            byte[] bytes = messageDigest.digest();
             return byteHexToString(bytes);
         } catch (Exception e) {
             e.printStackTrace();

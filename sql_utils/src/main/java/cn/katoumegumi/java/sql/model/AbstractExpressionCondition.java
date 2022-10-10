@@ -1,14 +1,15 @@
 package cn.katoumegumi.java.sql.model;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.sql.common.ValueType;
-import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
+import cn.katoumegumi.java.sql.common.ValueTypeConstants;
+import cn.katoumegumi.java.sql.entity.BaseTableColumn;
+import cn.katoumegumi.java.sql.entity.NullValue;
 import cn.katoumegumi.java.sql.entity.SqlEquation;
 
 import java.util.Collection;
 
 /**
- * 表达式条件
+ * 抽象表达式条件
  *
  */
 public abstract class AbstractExpressionCondition implements Condition {
@@ -30,34 +31,33 @@ public abstract class AbstractExpressionCondition implements Condition {
         }
     }
 
-    /**
-     * 0 空 1 基本类型 2 集合 3 数组 4 内联查询语句 6 列名 7 sql语句 8 关系条件 9 符号
-     * @param value
-     * @return
-     */
     protected int getValueType(Object value){
         if(value == null){
-            return ValueType.NULL_TYPE;
-        }else if(value instanceof ColumnBaseEntity){
-            return ValueType.COLUMN_NAME_TYPE;
+            return ValueTypeConstants.NULL_TYPE;
+        }else if(value instanceof BaseTableColumn){
+            return ValueTypeConstants.COLUMN_NAME_TYPE;
         }else if (value instanceof SqlEquation.Symbol){
-            return ValueType.SYMBOL_TYPE;
+            return ValueTypeConstants.SYMBOL_TYPE;
         }else if(WsBeanUtils.isBaseType(value.getClass())){
-            return ValueType.BASE_VALUE_TYPE;
+            return ValueTypeConstants.BASE_VALUE_TYPE;
         } else if(value instanceof Collection){
-            return ValueType.COLLECTION_TYPE;
+            return ValueTypeConstants.COLLECTION_TYPE;
         }else if(WsBeanUtils.isArray(value.getClass())){
-            return ValueType.ARRAY_TYPE;
+            return ValueTypeConstants.ARRAY_TYPE;
         }else if(value instanceof SqlStringModel){
-            return ValueType.SQL_STRING_MODEL_TYPE;
+            return ValueTypeConstants.SQL_STRING_MODEL_TYPE;
         } else if(value instanceof SelectModel){
-            return ValueType.SELECT_MODEL_TYPE;
-        } else if(value instanceof ConditionRelationModel){
-            return ValueType.CONDITION_RELATION_MODEL_TYPE;
+            return ValueTypeConstants.SELECT_MODEL_TYPE;
+        } else if(value instanceof RelationCondition){
+            return ValueTypeConstants.CONDITION_RELATION_MODEL_TYPE;
         }else if (value instanceof SingleExpressionCondition){
-            return ValueType.SINGLE_EXPRESSION_CONDITION_MODEL;
+            return ValueTypeConstants.SINGLE_EXPRESSION_CONDITION_MODEL;
         }else if (value instanceof MultiExpressionCondition){
-            return ValueType.MULTI_EXPRESSION_CONDITION_MODEL;
+            return ValueTypeConstants.MULTI_EXPRESSION_CONDITION_MODEL;
+        }else if(value instanceof SqlFunctionCondition){
+            return ValueTypeConstants.SQL_FUNCTION_CONDITION;
+        }else if(value instanceof NullValue){
+            return ValueTypeConstants.NULL_VALUE_MODEL;
         }
         /*else if (value instanceof SqlEquation){
             return 5;

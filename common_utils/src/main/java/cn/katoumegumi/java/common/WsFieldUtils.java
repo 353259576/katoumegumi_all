@@ -76,13 +76,9 @@ public class WsFieldUtils {
         Method[] methods = null;
         Set<Method> methodSet = new HashSet<>();
         methods = clazz.getDeclaredMethods();
-        for (int i = 0; i < methods.length; i++) {
-            methodSet.add(methods[i]);
-        }
+        Collections.addAll(methodSet, methods);
         methods = clazz.getMethods();
-        for (int i = 0; i < methods.length; i++) {
-            methodSet.add(methods[i]);
-        }
+        Collections.addAll(methodSet, methods);
         List<Method> methodList = new ArrayList<>();
         methodSet.forEach(method -> {
             if (method.getName().equals(methodName)) {

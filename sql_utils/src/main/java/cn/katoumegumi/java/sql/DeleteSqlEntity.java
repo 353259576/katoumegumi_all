@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.sql.entity.SqlWhereValue;
+import cn.katoumegumi.java.sql.entity.SqlParameter;
 
 import java.util.List;
 
@@ -9,23 +9,22 @@ import java.util.List;
  */
 public class DeleteSqlEntity {
 
-    private String deleteSql;
+    private final String deleteSql;
 
-    private List<SqlWhereValue> valueList;
+    private final List<SqlParameter> valueList;
+
+    public DeleteSqlEntity(String deleteSql, List<SqlParameter> valueList) {
+        this.deleteSql = deleteSql;
+        this.valueList = valueList;
+    }
 
     public String getDeleteSql() {
         return deleteSql;
     }
 
-    public void setDeleteSql(String deleteSql) {
-        this.deleteSql = deleteSql;
-    }
 
-    public List<SqlWhereValue> getValueList() {
+    public List<SqlParameter> getValueList() {
         return valueList;
     }
 
-    public void setValueList(List<SqlWhereValue> valueList) {
-        this.valueList = valueList;
-    }
 }

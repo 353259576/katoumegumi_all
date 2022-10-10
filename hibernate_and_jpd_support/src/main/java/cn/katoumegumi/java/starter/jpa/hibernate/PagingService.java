@@ -10,14 +10,14 @@ import java.util.List;
  */
 public interface PagingService<T> {
 
-    public <S extends T> S save(S var1);
+    <S extends T> S save(S var1);
 
-    public <S extends T> List<S> saveAll(Iterable<S> var1);
+    <S extends T> List<S> saveAll(Iterable<S> var1);
 
-    public <S extends T> S saveAndFlush(S var1);
+    <S extends T> S saveAndFlush(S var1);
 
-    public IPage<T> selectPage(MySearchList mySearchList);
+    IPage<T> selectPage(MySearchList mySearchList);
 
-    public List<T> selectList(MySearchList mySearchList);
+    List<T> selectList(MySearchList mySearchList);
 
 }

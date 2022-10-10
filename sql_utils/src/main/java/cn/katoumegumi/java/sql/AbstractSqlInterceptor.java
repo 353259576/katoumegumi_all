@@ -77,7 +77,7 @@ public interface AbstractSqlInterceptor {
      *
      * @return
      */
-    public String fieldName();
+    String fieldName();
 
 
 }

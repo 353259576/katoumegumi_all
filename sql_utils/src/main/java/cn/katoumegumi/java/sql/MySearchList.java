@@ -1399,5 +1399,30 @@ public class MySearchList {
         mySearches.add(new MySearch(null, SqlOperator.EQUATION, sqlEquation));
         return this;
     }
+
+    /**
+     * 过滤update search
+     * @return
+     */
+    public List<MySearch> filterUpdateSearch(){
+        List<MySearch> updateSearchList = new ArrayList<>();
+        Iterator<MySearch> iterator = this.getAll().iterator();
+        while (iterator.hasNext()){
+            MySearch search = iterator.next();
+            switch (search.getOperator()){
+                case ADD:
+                case SUBTRACT:
+                case DIVIDE:
+                case MULTIPLY:
+                case SET:
+                    updateSearchList.add(search);
+                    iterator.remove();
+                    break;
+                default:
+                    break;
+            }
+        }
+        return updateSearchList;
+    }
 }
 

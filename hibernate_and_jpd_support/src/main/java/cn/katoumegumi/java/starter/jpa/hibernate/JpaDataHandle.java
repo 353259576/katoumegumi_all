@@ -266,10 +266,10 @@ public class JpaDataHandle {
             }
 
             if (andList.size() != 0) {
-                predicates.add(criteriaBuilder.and(andList.toArray(new Predicate[andList.size()])));
+                predicates.add(criteriaBuilder.and(andList.toArray(new Predicate[0])));
             }
             if (orList.size() != 0) {
-                predicates.add(criteriaBuilder.or(orList.toArray(new Predicate[orList.size()])));
+                predicates.add(criteriaBuilder.or(orList.toArray(new Predicate[0])));
             }
 
             criteriaQuery.orderBy(orders);
@@ -279,7 +279,7 @@ public class JpaDataHandle {
                 }else {
                     return criteriaBuilder.or((Predicate[]) predicates.toArray(new Predicate[predicates.size()]));
                 }*/
-                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+                return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
             } else {
                 return criteriaBuilder.conjunction();
             }

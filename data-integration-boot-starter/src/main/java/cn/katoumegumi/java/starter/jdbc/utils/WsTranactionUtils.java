@@ -31,7 +31,7 @@ public class WsTranactionUtils {
 
 
     public interface WsTranactionRun {
-        public Object run() throws RuntimeException;
+        Object run() throws RuntimeException;
     }
 
 }

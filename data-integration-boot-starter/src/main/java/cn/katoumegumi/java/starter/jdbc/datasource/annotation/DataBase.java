@@ -8,5 +8,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DataBase {
 
-    public String dataBaseName() default "master";
+    String dataBaseName() default "master";
 }

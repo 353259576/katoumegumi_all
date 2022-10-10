@@ -8,6 +8,6 @@ public interface ConvertBean<T> {
      * @param bean
      * @return
      */
-    public T convert(Object bean);
+    T convert(Object bean);
 
 }

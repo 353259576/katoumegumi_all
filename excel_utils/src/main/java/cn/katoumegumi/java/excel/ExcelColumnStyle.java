@@ -12,7 +12,7 @@ public interface ExcelColumnStyle {
      * 设置excel表格表头
      * @param cellStyle 表格风格
      */
-    public void setStyle(CellStyle cellStyle);
+    void setStyle(CellStyle cellStyle);
 
 
 }

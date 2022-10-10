@@ -1,14 +1,10 @@
 package cn.katoumegumi.java.sql.model;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
 import cn.katoumegumi.java.sql.entity.SqlEquation;
-
-import java.util.Collection;
 
 /**
  * 单一表达式条件
- * 格式：Left Symbol Right
+ * 格式：Left Symbol Right (例如： a = b)
  *
  */
 public class SingleExpressionCondition extends AbstractExpressionCondition {

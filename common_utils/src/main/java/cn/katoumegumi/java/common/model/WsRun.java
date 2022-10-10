@@ -6,6 +6,6 @@ package cn.katoumegumi.java.common.model;
 public interface WsRun {
 
 
-    public void run();
+    void run();
 
 }

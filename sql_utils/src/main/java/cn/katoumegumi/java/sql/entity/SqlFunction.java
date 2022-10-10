@@ -3,7 +3,7 @@ package cn.katoumegumi.java.sql.entity;
 import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
-import cn.katoumegumi.java.sql.common.SqlCommon;
+import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +35,7 @@ public class SqlFunction {
         this.functionSplitList = WsStringUtils.split(sqlFunctionStr, '?');
         int valueSize = sqlFunctionValue == null ? 0 : sqlFunctionValue.size();
         int splitSize = functionSplitList.size();
-        if (sqlFunctionStr.endsWith(SqlCommon.PLACEHOLDER)) {
+        if (sqlFunctionStr.endsWith(SqlCommonConstants.PLACEHOLDER)) {
             splitSize++;
         }
         if (valueSize != splitSize - 1) {

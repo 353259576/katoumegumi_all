@@ -5,8 +5,8 @@ import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.common.SqlCommon;
-import cn.katoumegumi.java.sql.common.ValueType;
+import cn.katoumegumi.java.sql.common.SqlCommonConstants;
+import cn.katoumegumi.java.sql.common.ValueTypeConstants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,19 +27,19 @@ public class SqlEquation {
     private final List<Object> valueList = new ArrayList<>();
 
     public SqlEquation column(String columnName) {
-        typeList.add(ValueType.COLUMN_NAME_TYPE);
+        typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
         valueList.add(columnName);
         return this;
     }
 
     public SqlEquation column(SqlEquation equation) {
-        typeList.add(ValueType.SQL_EQUATION_MODEL);
+        typeList.add(ValueTypeConstants.SQL_EQUATION_MODEL);
         valueList.add(equation);
         return this;
     }
 
     public SqlEquation column(SqlFunction function) {
-        typeList.add(ValueType.SQL_FUNCTION_MODEL);
+        typeList.add(ValueTypeConstants.SQL_FUNCTION_MODEL);
         valueList.add(function);
         return this;
     }
@@ -48,13 +48,13 @@ public class SqlEquation {
         if (WsStringUtils.isBlank(tableName)) {
             return column(columnName);
         }
-        typeList.add(ValueType.COLUMN_NAME_TYPE);
+        typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
         valueList.add(tableName + "." + columnName);
         return this;
     }
 
     public <T> SqlEquation column(SFunction<T, ?> columnFunction) {
-        typeList.add(ValueType.COLUMN_NAME_TYPE);
+        typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
         valueList.add(WsFieldUtils.getFieldName(columnFunction));
         return this;
     }
@@ -63,26 +63,31 @@ public class SqlEquation {
         if (WsStringUtils.isBlank(tableName)) {
             return column(columnFunction);
         }
-        typeList.add(ValueType.COLUMN_NAME_TYPE);
+        typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
         valueList.add(tableName + "." + WsFieldUtils.getFieldName(columnFunction));
         return this;
     }
 
     public <T> SqlEquation sql(MySearchList mySearchList) {
-        typeList.add(ValueType.SEARCH_LIST_TYPE);
+        typeList.add(ValueTypeConstants.SEARCH_LIST_TYPE);
         valueList.add(mySearchList);
         return this;
     }
 
     public SqlEquation value(Object o) {
         int valueType;
-        if(WsBeanUtils.isBaseType(o.getClass())){
-            valueType = ValueType.BASE_VALUE_TYPE;
+        if(o == null){
+            valueType = ValueTypeConstants.NULL_VALUE_MODEL;
+            o = SqlCommonConstants.NULL_VALUE;
+        }else if(WsBeanUtils.isBaseType(o.getClass())){
+            valueType = ValueTypeConstants.BASE_VALUE_TYPE;
         }else if(o instanceof Collection){
-            valueType = ValueType.COLLECTION_TYPE;
+            valueType = ValueTypeConstants.COLLECTION_TYPE;
         }else if(WsBeanUtils.isArray(o.getClass())){
-            valueType = ValueType.ARRAY_TYPE;
-        }else {
+            valueType = ValueTypeConstants.ARRAY_TYPE;
+        }else if(o instanceof NullValue){
+            valueType = ValueTypeConstants.NULL_VALUE_MODEL;
+        } else {
             throw new IllegalArgumentException("不支持的值");
         }
         typeList.add(valueType);
@@ -91,7 +96,7 @@ public class SqlEquation {
     }
 
     public SqlEquation symbol(Object o) {
-        typeList.add(ValueType.SYMBOL_TYPE);
+        typeList.add(ValueTypeConstants.SYMBOL_TYPE);
         valueList.add(o);
         return this;
     }
@@ -188,36 +193,36 @@ public class SqlEquation {
         /**
          * 符号
          */
-        ADD(SqlCommon.ADD),
-        SUBTRACT(SqlCommon.SUBTRACT),
-        MULTIPLY(SqlCommon.MULTIPLY),
-        DIVIDE(SqlCommon.DIVIDE),
-        EQUAL(SqlCommon.EQ),
-        NOT_EQUAL(SqlCommon.NEQ),
-        NULL(SqlCommon.NULL),
-        NOT_NULL(SqlCommon.NOT_NULL),
-        IN(SqlCommon.IN),
-        NOT_IN(SqlCommon.NOT_IN),
-        EXISTS(SqlCommon.EXISTS),
-        NOT_EXISTS(SqlCommon.NOT_EXISTS),
-        GT(SqlCommon.GT),
-        GTE(SqlCommon.GTE),
-        LT(SqlCommon.LT),
-        LTE(SqlCommon.LTE),
-        AND(SqlCommon.AND),
-        OR(SqlCommon.OR),
-        XOR(SqlCommon.XOR),
-        NOT(SqlCommon.NOT),
-        LIKE(SqlCommon.LIKE),
-        BETWEEN(SqlCommon.BETWEEN),
-        NOT_BETWEEN(SqlCommon.NOT_BETWEEN),
-        SET(SqlCommon.SET),
+        ADD(SqlCommonConstants.ADD),
+        SUBTRACT(SqlCommonConstants.SUBTRACT),
+        MULTIPLY(SqlCommonConstants.MULTIPLY),
+        DIVIDE(SqlCommonConstants.DIVIDE),
+        EQUAL(SqlCommonConstants.EQ),
+        NOT_EQUAL(SqlCommonConstants.NEQ),
+        NULL(SqlCommonConstants.NULL),
+        NOT_NULL(SqlCommonConstants.NOT_NULL),
+        IN(SqlCommonConstants.IN),
+        NOT_IN(SqlCommonConstants.NOT_IN),
+        EXISTS(SqlCommonConstants.EXISTS),
+        NOT_EXISTS(SqlCommonConstants.NOT_EXISTS),
+        GT(SqlCommonConstants.GT),
+        GTE(SqlCommonConstants.GTE),
+        LT(SqlCommonConstants.LT),
+        LTE(SqlCommonConstants.LTE),
+        AND(SqlCommonConstants.AND),
+        OR(SqlCommonConstants.OR),
+        XOR(SqlCommonConstants.XOR),
+        NOT(SqlCommonConstants.NOT),
+        LIKE(SqlCommonConstants.LIKE),
+        BETWEEN(SqlCommonConstants.BETWEEN),
+        NOT_BETWEEN(SqlCommonConstants.NOT_BETWEEN),
+        SET(SqlCommonConstants.SET),
         SQL(null)
         ;
 
         private final String symbol;
 
-        private Symbol(String symbol) {
+        Symbol(String symbol) {
             this.symbol = symbol;
         }
 

@@ -8,7 +8,7 @@ import java.util.List;
  * @author ws
  */
 
-@ConfigurationProperties(value = "megumi.datasource")
+@ConfigurationProperties(prefix = "megumi.datasource",ignoreInvalidFields = true,ignoreUnknownFields = true)
 public class DataSourcePropertiesList {
     private boolean enable = false;
     private boolean seataEnable = false;

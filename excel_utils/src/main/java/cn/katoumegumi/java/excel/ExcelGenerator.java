@@ -227,7 +227,7 @@ public class ExcelGenerator<T> {
         }
 
         byte[] returnBytes = null;
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();){
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()){
             workbook.write(byteArrayOutputStream);
             returnBytes = byteArrayOutputStream.toByteArray();
         } catch (IOException e) {

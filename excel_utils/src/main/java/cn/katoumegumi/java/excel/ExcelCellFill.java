@@ -11,7 +11,7 @@ public interface ExcelCellFill<T> {
      * @param location 当前位置
      * @param t 参数
      */
-    public void fill(ExcelPointLocation location, T t);
+    void fill(ExcelPointLocation location, T t);
 
 
 }

@@ -22,7 +22,7 @@ public class WsUnsafeUtils {
         }
     }
 
-    private static Object unsafe = UnsafeUtils.unsafe;
+    private static final Object unsafe = UnsafeUtils.unsafe;
 
     private static final Method objectFieldOffset = getMethod("objectFieldOffset", Field.class);
 

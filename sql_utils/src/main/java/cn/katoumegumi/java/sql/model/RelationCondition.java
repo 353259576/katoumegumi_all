@@ -5,15 +5,15 @@ import cn.katoumegumi.java.sql.common.SqlOperator;
 import java.util.List;
 
 /**
- * and与or
+ * 关系条件(and和or)
  */
-public class ConditionRelationModel implements Condition {
+public class RelationCondition implements Condition {
 
     private final List<Condition> conditionList;
 
     private final SqlOperator relation;
 
-    public ConditionRelationModel(List<Condition> conditionList, SqlOperator relation) {
+    public RelationCondition(List<Condition> conditionList, SqlOperator relation) {
         this.conditionList = conditionList;
         this.relation = relation;
     }

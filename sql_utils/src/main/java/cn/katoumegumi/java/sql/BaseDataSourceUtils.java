@@ -4,7 +4,7 @@ import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStreamUtils;
 import cn.katoumegumi.java.sql.entity.JdkResultSet;
-import cn.katoumegumi.java.sql.entity.SqlWhereValue;
+import cn.katoumegumi.java.sql.entity.SqlParameter;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -33,7 +33,7 @@ public class BaseDataSourceUtils {
         try {
             connection = dataSource.getConnection();
             preparedStatement = connection.prepareStatement(entity.getSelectSql());
-            List<Object> objectList = WsListUtils.listToList(entity.getValueList(), SqlWhereValue::getValue);
+            List<Object> objectList = WsListUtils.listToList(entity.getValueList(), SqlParameter::getValue);
             for (int i = 0; i < objectList.size(); i++) {
                 Object o = objectList.get(i);
                 if (o instanceof Date) {

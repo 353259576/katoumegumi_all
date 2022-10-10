@@ -11,7 +11,7 @@ public interface ExcelColumnEndFill {
      * 填充数据
      * @param location
      */
-    public void fill(ExcelPointLocation location);
+    void fill(ExcelPointLocation location);
 
 
 }

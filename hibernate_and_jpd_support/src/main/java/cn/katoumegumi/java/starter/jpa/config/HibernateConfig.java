@@ -62,7 +62,7 @@ public class HibernateConfig {
     public LocalSessionFactoryBean localSessionFactoryBean(DataSource dataSource) {
         LocalSessionFactoryBean localSessionFactoryBean = new LocalSessionFactoryBean();
         localSessionFactoryBean.setDataSource(dataSource);
-        String scans[] = hibernateWsProperties.getScanPackage().toArray(new String[hibernateWsProperties.getScanPackage().size()]);
+        String[] scans = hibernateWsProperties.getScanPackage().toArray(new String[0]);
         localSessionFactoryBean.setPackagesToScan(scans);
         localSessionFactoryBean.setAnnotatedPackages(scans);
         try {
@@ -73,7 +73,6 @@ public class HibernateConfig {
         }
 
         localSessionFactoryBean.setHibernateProperties(createProperties());
-        ;
         return localSessionFactoryBean;
     }
 

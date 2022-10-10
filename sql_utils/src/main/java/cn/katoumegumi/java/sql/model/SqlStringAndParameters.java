@@ -1,13 +1,13 @@
 package cn.katoumegumi.java.sql.model;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.sql.common.ValueType;
-import cn.katoumegumi.java.sql.entity.SqlWhereValue;
+import cn.katoumegumi.java.sql.common.ValueTypeConstants;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
+/**
+ * sql与参数
+ */
 public class SqlStringAndParameters {
 
     private final boolean onlyValue;
@@ -35,13 +35,13 @@ public class SqlStringAndParameters {
         this.value = value;
         this.placeholderNum = placeholderNum;
         if(value == null){
-            this.valueType = ValueType.NULL_TYPE;
+            this.valueType = ValueTypeConstants.NULL_TYPE;
         }else if (WsBeanUtils.isBaseType(value.getClass())){
-            this.valueType = ValueType.BASE_VALUE_TYPE;
+            this.valueType = ValueTypeConstants.BASE_VALUE_TYPE;
         }else if (value instanceof Collection){
-            this.valueType = ValueType.COLLECTION_TYPE;
+            this.valueType = ValueTypeConstants.COLLECTION_TYPE;
         }else if(WsBeanUtils.isArray(value.getClass())){
-            this.valueType = ValueType.ARRAY_TYPE;
+            this.valueType = ValueTypeConstants.ARRAY_TYPE;
         }else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());
         }
@@ -52,16 +52,16 @@ public class SqlStringAndParameters {
         this.sql = sql;
         this.value = value;
         if(value == null){
-            this.valueType = ValueType.NULL_TYPE;
+            this.valueType = ValueTypeConstants.NULL_TYPE;
             this.placeholderNum = 0;
         }else if (WsBeanUtils.isBaseType(value.getClass())){
-            this.valueType = ValueType.BASE_VALUE_TYPE;
+            this.valueType = ValueTypeConstants.BASE_VALUE_TYPE;
             this.placeholderNum = 1;
         }else if (value instanceof Collection){
-            this.valueType = ValueType.COLLECTION_TYPE;
+            this.valueType = ValueTypeConstants.COLLECTION_TYPE;
             this.placeholderNum = ((Collection<?>)value).size();
         }else if(WsBeanUtils.isArray(value.getClass())){
-            this.valueType = ValueType.ARRAY_TYPE;
+            this.valueType = ValueTypeConstants.ARRAY_TYPE;
             this.placeholderNum = ((Object[])value).length;
         } else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());

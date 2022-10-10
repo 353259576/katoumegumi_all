@@ -32,7 +32,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
         ByteBuf byteBuf = fullHttpRequest.content();
         int start = byteBuf.readerIndex();
         int end = byteBuf.readableBytes();
-        byte bytes[] = new byte[end - start];
+        byte[] bytes = new byte[end - start];
         byteBuf.readBytes(bytes, start, end);
         log.info("\r\n" + new String(bytes));
 

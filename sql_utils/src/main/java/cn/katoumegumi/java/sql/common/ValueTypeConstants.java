@@ -1,10 +1,13 @@
 package cn.katoumegumi.java.sql.common;
 
 /**
- * 值类型
+ * 值类型常量
  */
-public class ValueType {
+public class ValueTypeConstants {
 
+    /**
+     * 空值
+     */
     public static final int NULL_TYPE = 0;
 
     /**
@@ -67,5 +70,12 @@ public class ValueType {
     public static final int MULTI_EXPRESSION_CONDITION_MODEL = 13;
 
     public static final int SQL_WHERE_VALUE_MODEL = 14;
+
+    public static final int SQL_FUNCTION_CONDITION = 15;
+
+    /**
+     * 空值
+     */
+    public static final int NULL_VALUE_MODEL = 16;
 
 }

@@ -1,10 +1,10 @@
 package cn.katoumegumi.java.sql.model;
 
-import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 
-import javax.persistence.criteria.JoinType;
-
+/**
+ * 关联表
+ */
 public class JoinTableModel{
 
     private final TableModel table;
@@ -13,9 +13,9 @@ public class JoinTableModel{
 
     private final TableJoinType joinType;
 
-    private final ConditionRelationModel on;
+    private final RelationCondition on;
 
-    public JoinTableModel(TableModel table, TableModel joinTable, TableJoinType joinType, ConditionRelationModel on) {
+    public JoinTableModel(TableModel table, TableModel joinTable, TableJoinType joinType, RelationCondition on) {
         this.table = table;
         this.joinTable = joinTable;
         this.joinType = joinType == null?TableJoinType.INNER_JOIN:joinType;
@@ -34,7 +34,7 @@ public class JoinTableModel{
         return joinType;
     }
 
-    public ConditionRelationModel getOn() {
+    public RelationCondition getOn() {
         return on;
     }
 }

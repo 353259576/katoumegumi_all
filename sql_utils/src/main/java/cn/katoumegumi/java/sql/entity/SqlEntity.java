@@ -2,7 +2,7 @@ package cn.katoumegumi.java.sql.entity;
 
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.sql.SQLModelUtils;
-import cn.katoumegumi.java.sql.common.SqlCommon;
+import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ public class SqlEntity {
     /**
      * 需要查询的列的信息
      */
-    private final List<ColumnBaseEntity> columnList = new ArrayList<>();
+    private final List<BaseTableColumn> columnList = new ArrayList<>();
 
     /**
      * 查询的表的数据
@@ -70,9 +70,9 @@ public class SqlEntity {
     public String getColumnStr() {
         if (columnStr == null) {
             if (columnList.size() == 1) {
-                columnStr = SqlCommon.DISTINCT + columnList.get(0).getColumnValue();
+                columnStr = SqlCommonConstants.DISTINCT + columnList.get(0).getColumnValue();
             } else {
-                columnStr = columnList.stream().map(ColumnBaseEntity::getColumnValue).collect(Collectors.joining(SqlCommon.COMMA));
+                columnStr = columnList.stream().map(BaseTableColumn::getColumnValue).collect(Collectors.joining(SqlCommonConstants.COMMA));
             }
 
         }
@@ -101,7 +101,7 @@ public class SqlEntity {
     public String getCondition() {
         if (condition == null) {
             if (WsListUtils.isNotEmpty(conditionList)) {
-                condition = SqlCommon.WHERE + String.join(SqlCommon.SQL_AND, conditionList);
+                condition = SqlCommonConstants.WHERE + String.join(SqlCommonConstants.SQL_AND, conditionList);
             } else {
                 condition = "";
             }
@@ -123,7 +123,7 @@ public class SqlEntity {
         return this;
     }
 
-    public List<ColumnBaseEntity> getColumnList() {
+    public List<BaseTableColumn> getColumnList() {
         return columnList;
     }
 }

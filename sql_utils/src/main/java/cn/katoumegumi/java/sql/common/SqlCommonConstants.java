@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.sql.common;
 
-public interface SqlCommon {
+import cn.katoumegumi.java.sql.entity.NullValue;
+
+public interface SqlCommonConstants {
 
     String PLACEHOLDER = "?";
 
@@ -90,5 +92,14 @@ public interface SqlCommon {
 
     char SQL_COMMON_DELIMITER = '.';
 
+    /**
+     * sql通用update set条件分隔符
+     */
+    char SQL_COMMON_UPDATE_SET_CONDITION_DELIMITER = ',';
+
+    /**
+     * 表示空值
+     */
+    NullValue NULL_VALUE = new NullValue();
 
 }

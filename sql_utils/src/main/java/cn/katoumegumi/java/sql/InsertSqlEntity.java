@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.sql.entity.SqlWhereValue;
+import cn.katoumegumi.java.sql.entity.SqlParameter;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class InsertSqlEntity {
 
     private List<FieldColumnRelation> idList;
 
-    private List<SqlWhereValue> valueList;
+    private List<SqlParameter> valueList;
 
     public String getInsertSql() {
         return insertSql;
@@ -25,11 +25,11 @@ public class InsertSqlEntity {
         this.insertSql = insertSql;
     }
 
-    public List<SqlWhereValue> getValueList() {
+    public List<SqlParameter> getValueList() {
         return valueList;
     }
 
-    public void setValueList(List<SqlWhereValue> valueList) {
+    public void setValueList(List<SqlParameter> valueList) {
         this.valueList = valueList;
     }
 

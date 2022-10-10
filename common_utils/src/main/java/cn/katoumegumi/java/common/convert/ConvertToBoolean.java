@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class ConvertToBoolean implements ConvertBean<Boolean> {
 
-    private Map<String, Boolean> map = new HashMap<>();
+    private final Map<String, Boolean> map = new HashMap<>();
 
     {
         map.put("是", true);

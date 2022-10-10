@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -84,7 +85,7 @@ public class WsUrlConnection {
     public static String getPath() {
         String str = WsUrlConnection.class.getResource("/").getPath();
         try {
-            return URLDecoder.decode(str, "utf-8");
+            return URLDecoder.decode(str, StandardCharsets.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
             return str;

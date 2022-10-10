@@ -110,7 +110,7 @@ public class HttpUrlRelolver {
     public static void getUrlFromHtml(String html, String url) {
         Integer length = html.length();
         boolean isUrl = false;
-        char chars[] = html.toCharArray();
+        char[] chars = html.toCharArray();
         StringBuffer stringBuffer = null;
         for (int i = 0; i < length; i++) {
             if (!isUrl) {

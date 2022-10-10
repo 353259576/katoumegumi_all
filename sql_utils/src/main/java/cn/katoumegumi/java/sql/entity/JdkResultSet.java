@@ -4,6 +4,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+/**
+ * 转换ResultSet
+ */
 public class JdkResultSet implements WsResultSet {
 
     private final ResultSet resultSet;

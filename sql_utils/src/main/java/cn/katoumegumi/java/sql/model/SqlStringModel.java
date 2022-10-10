@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.sql.model;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.sql.common.ValueTypeConstants;
+import cn.katoumegumi.java.sql.entity.NullValue;
 
 import java.util.Collection;
 
@@ -20,13 +22,15 @@ public class SqlStringModel {
         this.sql = sql;
         this.value = value;
         if(value == null){
-            this.valueType = 0;
+            this.valueType = ValueTypeConstants.NULL_TYPE;
         }else if (WsBeanUtils.isBaseType(value.getClass())){
-            this.valueType = 1;
+            this.valueType = ValueTypeConstants.BASE_VALUE_TYPE;
         }else if (value instanceof Collection){
-            this.valueType = 2;
+            this.valueType = ValueTypeConstants.COLLECTION_TYPE;
         }else if(WsBeanUtils.isArray(value.getClass())){
-            this.valueType = 3;
+            this.valueType = ValueTypeConstants.ARRAY_TYPE;
+        }else if(value instanceof NullValue){
+            this.valueType = ValueTypeConstants.NULL_VALUE_MODEL;
         }else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());
         }

@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql.model;
 
-import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
+import cn.katoumegumi.java.sql.entity.BaseTableColumn;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 
 import java.util.List;
@@ -10,19 +10,19 @@ import java.util.List;
  */
 public class SelectModel {
 
-    private final List<ColumnBaseEntity> select;
+    private final List<TableColumn> select;
 
     private final TableModel from;
 
     private final List<JoinTableModel> joinList;
 
-    private final ConditionRelationModel where;
+    private final RelationCondition where;
 
-    private final List<OrderByModel> orderBy;
+    private final List<OrderByCondition> orderBy;
 
     private final SqlLimit sqlLimit;
 
-    public SelectModel(List<ColumnBaseEntity> select, TableModel from, List<JoinTableModel> joinList, ConditionRelationModel where, List<OrderByModel> orderBy,SqlLimit sqlLimit) {
+    public SelectModel(List<TableColumn> select, TableModel from, List<JoinTableModel> joinList, RelationCondition where, List<OrderByCondition> orderBy, SqlLimit sqlLimit) {
         this.select = select;
         this.from = from;
         this.joinList = joinList;
@@ -31,7 +31,7 @@ public class SelectModel {
         this.sqlLimit = sqlLimit;
     }
 
-    public List<ColumnBaseEntity> getSelect() {
+    public List<TableColumn> getSelect() {
         return select;
     }
 
@@ -43,11 +43,11 @@ public class SelectModel {
         return joinList;
     }
 
-    public ConditionRelationModel getWhere() {
+    public RelationCondition getWhere() {
         return where;
     }
 
-    public List<OrderByModel> getOrderBy() {
+    public List<OrderByCondition> getOrderBy() {
         return orderBy;
     }
 

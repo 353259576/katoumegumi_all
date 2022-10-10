@@ -1,10 +1,9 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsStringUtils;
-import cn.katoumegumi.java.sql.common.SqlCommon;
-import cn.katoumegumi.java.sql.entity.ColumnBaseEntity;
+import cn.katoumegumi.java.sql.common.SqlCommonConstants;
+import cn.katoumegumi.java.sql.entity.BaseTableColumn;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -68,9 +67,9 @@ public class TranslateNameUtils {
      */
     public String createAbbreviation(String keyword) {
         if (keyword.length() < 2) {
-            return keyword + SqlCommon.KEY_COMMON_DELIMITER + abbreviationNum.getAndAdd(1);
+            return keyword + SqlCommonConstants.KEY_COMMON_DELIMITER + abbreviationNum.getAndAdd(1);
         } else {
-            return keyword.substring(0, 1) + SqlCommon.KEY_COMMON_DELIMITER + abbreviationNum.getAndAdd(1);
+            return keyword.substring(0, 1) + SqlCommonConstants.KEY_COMMON_DELIMITER + abbreviationNum.getAndAdd(1);
         }
     }
 
@@ -247,18 +246,11 @@ public class TranslateNameUtils {
      * @param type 1 返回的列名 2 查询的列名
      * @return
      */
-    public ColumnBaseEntity getColumnBaseEntity(String originalFieldName,final String rootPath,final int type) {
-
-        /*String searchKey = rootPath+ SqlCommon.KEY_COMMON_DELIMITER +originalFieldName+SqlCommon.KEY_COMMON_DELIMITER+type;
-        ColumnBaseEntity columnBaseEntity = this.columnBaseEntityCacheMap.get(searchKey);
-        if(columnBaseEntity != null){
-            return columnBaseEntity;
-        }*/
-
+    public BaseTableColumn getColumnBaseEntity(String originalFieldName, final String rootPath, final int type) {
         String path;
         String fieldName;
         originalFieldName = translateTableNickName(rootPath,originalFieldName);
-        List<String> fieldNameList = WsStringUtils.split(originalFieldName, SqlCommon.PATH_COMMON_DELIMITER);
+        List<String> fieldNameList = WsStringUtils.split(originalFieldName, SqlCommonConstants.PATH_COMMON_DELIMITER);
         int size = fieldNameList.size();
         if (size == 1) {
             fieldName = fieldNameList.get(0);
@@ -268,7 +260,7 @@ public class TranslateNameUtils {
             String key = getParticular(fieldNameList.get(0));
             if (key == null) {
                 if (!startsWithMainClassName(fieldNameList.get(0))) {
-                    key = rootPath + SqlCommon.PATH_COMMON_DELIMITER + fieldNameList.get(0);
+                    key = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + fieldNameList.get(0);
                 } else {
                     key = fieldNameList.get(0);
                 }
@@ -283,43 +275,22 @@ public class TranslateNameUtils {
             if (startsWithMainClassName(fieldNameList.get(0))) {
                 path = String.join(".", fieldNameList);
             } else {
-                path = rootPath + SqlCommon.PATH_COMMON_DELIMITER + String.join(".", fieldNameList);
+                path = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + String.join(".", fieldNameList);
             }
         }
         return createColumnBaseEntity(fieldName,path,type);
-        /*FieldColumnRelationMapper mapper = getLocalMapper(path);
-        if (mapper == null) {
-            throw new RuntimeException(path + "不存在");
-        }
-        if(type == 2){
-            mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();
-        }
-        FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);*/
-        /*columnBaseEntity =  new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
-        columnBaseEntityCacheMap.put(searchKey,columnBaseEntity);
-        return columnBaseEntity;*/
-        //return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
     }
 
 
-    public ColumnBaseEntity createColumnBaseEntity(final FieldColumnRelation fieldColumnRelation,final FieldColumnRelationMapper mapper,final String path){
-        return new ColumnBaseEntity(fieldColumnRelation,mapper.getTableName(),path,getAbbreviation(path));
+    public BaseTableColumn createColumnBaseEntity(final FieldColumnRelation fieldColumnRelation, final FieldColumnRelationMapper mapper, final String path){
+        return new BaseTableColumn(fieldColumnRelation,mapper.getTableName(),path,getAbbreviation(path));
     }
 
-    public ColumnBaseEntity createColumnBaseEntity(final String fieldName,final String path,final int type){
-        /*FieldColumnRelationMapper mapper = getLocalMapper(path);
-        if (mapper == null) {
-            throw new RuntimeException(path + "不存在");
-        }
-        if(type == 2){
-            mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();
-        }
-        FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
-        return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), path, getAbbreviation(path));*/
+    public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final int type){
         return createColumnBaseEntity(fieldName,path,getAbbreviation(path),type);
     }
 
-    public ColumnBaseEntity createColumnBaseEntity(final String fieldName,final String path,final String abbreviation,final int type){
+    public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final String abbreviation, final int type){
         FieldColumnRelationMapper mapper = getLocalMapper(path);
         if (mapper == null) {
             throw new RuntimeException(path + "不存在");
@@ -328,7 +299,7 @@ public class TranslateNameUtils {
             mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();
         }
         FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
-        return new ColumnBaseEntity(fieldColumnRelation, mapper.getTableName(), path, abbreviation);
+        return new BaseTableColumn(fieldColumnRelation, mapper.getTableName(), path, abbreviation);
     }
 
 
@@ -421,14 +392,14 @@ public class TranslateNameUtils {
 
     public String getAddPathTableNickName(final String rootPath,String tableNickName){
         if(tableNickName.length() < rootPath.length()){
-            tableNickName = rootPath + SqlCommon.PATH_COMMON_DELIMITER + tableNickName;
+            tableNickName = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableNickName;
         }else {
             if(tableNickName.startsWith(rootPath)){
-                if(!(tableNickName.length() == rootPath.length() || tableNickName.charAt(rootPath.length()) == SqlCommon.PATH_COMMON_DELIMITER)){
-                    tableNickName = rootPath + SqlCommon.PATH_COMMON_DELIMITER + tableNickName;
+                if(!(tableNickName.length() == rootPath.length() || tableNickName.charAt(rootPath.length()) == SqlCommonConstants.PATH_COMMON_DELIMITER)){
+                    tableNickName = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableNickName;
                 }
             }else {
-                tableNickName = rootPath + SqlCommon.PATH_COMMON_DELIMITER + tableNickName;
+                tableNickName = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableNickName;
             }
         }
         return tableNickName;

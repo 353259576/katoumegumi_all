@@ -2,35 +2,34 @@ package cn.katoumegumi.java.sql.entity;
 
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.SQLModelUtils;
-import cn.katoumegumi.java.sql.common.SqlCommon;
+import cn.katoumegumi.java.sql.model.TableColumn;
 
 import java.lang.reflect.Field;
 
 /**
- * 列基本信息
+ * 基本表列
  * @author ws
  */
-public class ColumnBaseEntity {
+public class BaseTableColumn implements TableColumn {
 
     private final String tableName;
 
-    private final String tableNickName;
+    private final String tablePath;
 
-    private final String alias;
+    private final String tableAlias;
 
     private final FieldColumnRelation fieldColumnRelation;
 
 
-    public ColumnBaseEntity(FieldColumnRelation relation, String tableName, String tableNickName, String alias) {
+    public BaseTableColumn(FieldColumnRelation relation, String tableName, String tablePath, String tableAlias) {
         this.fieldColumnRelation = relation;
         this.tableName = tableName;
-        this.tableNickName = tableNickName;
-        this.alias = alias;
+        this.tablePath = tablePath;
+        this.tableAlias = tableAlias;
     }
 
     /**
      * 创建table column name
-     *
      * @param tableNickName
      * @param columnName
      * @return
@@ -50,10 +49,12 @@ public class ColumnBaseEntity {
         return SQLModelUtils.guardKeyword(tableNickName + '.' + columnName);
     }
 
+    @Override
     public boolean isId() {
         return fieldColumnRelation.isId();
     }
 
+    @Override
     public Field getField() {
         return fieldColumnRelation.getField();
     }
@@ -62,22 +63,26 @@ public class ColumnBaseEntity {
         return tableName;
     }
 
-    public String getTableNickName() {
-        return tableNickName;
+    @Override
+    public String getTablePath() {
+        return tablePath;
     }
 
-    public String getAlias() {
-        return alias;
+    @Override
+    public String getTableAlias() {
+        return tableAlias;
     }
 
     public String getColumnName() {
         return fieldColumnRelation.getColumnName();
     }
 
+    @Override
     public String getFieldName() {
         return fieldColumnRelation.getFieldName();
     }
 
+    @Override
     public FieldColumnRelation getFieldColumnRelation() {
         return fieldColumnRelation;
     }
@@ -87,6 +92,6 @@ public class ColumnBaseEntity {
      * @return
      */
     public String getColumnValue() {
-        return createColumnName(getAlias(), getColumnName()) + " " + createColumnNickName(getAlias(), getFieldName());
+        return createColumnName(getTableAlias(), getColumnName()) + " " + createColumnNickName(getTableAlias(), getFieldName());
     }
 }
