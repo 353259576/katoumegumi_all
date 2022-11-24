@@ -17,183 +17,95 @@ public enum SqlOperator {
     /**
      * 等于
      */
-    EQ((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonConditionHandle(SqlCommonConstants.EQ, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    }),
-    EQP(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonNoValueConditionHandle(SqlCommonConstants.EQ, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
+    EQ,
+    EQP,
     /**
      * 模糊查询
      */
-    LIKE(SQLModelUtils::likeConditionHandle),
+    LIKE,
     /**
      * 大于
      */
-    GT((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonConditionHandle(SqlCommonConstants.GT, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    }),
-    GTP(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonNoValueConditionHandle(SqlCommonConstants.GT, translateNameUtils, mySearch, prefix, baseWhereValueList);
-
-    })),
+    GT,
+    GTP,
     /**
      * 小于
      */
-    LT((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonConditionHandle(SqlCommonConstants.LT, translateNameUtils, mySearch, prefix, baseWhereValueList);
-
-    }),
-    LTP(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonNoValueConditionHandle(SqlCommonConstants.LT, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
+    LT,
+    LTP,
     /**
      * 大于等于
      */
-    GTE((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonConditionHandle(SqlCommonConstants.GTE, translateNameUtils, mySearch, prefix, baseWhereValueList);
-
-    }),
-    GTEP(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonNoValueConditionHandle(SqlCommonConstants.GTE, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
+    GTE,
+    GTEP,
     /**
      * 小于等于
      */
-    LTE((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonConditionHandle(SqlCommonConstants.LTE, translateNameUtils, mySearch, prefix, baseWhereValueList);
-
-    }),
-    LTEP(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonNoValueConditionHandle(SqlCommonConstants.LTE, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
+    LTE,
+    LTEP,
     /**
      * in
      */
-    IN((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.inConditionHandle(true, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    }),
+    IN,
     /**
      * not in
      */
-    NIN((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.inConditionHandle(false, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    }),
+    NIN,
     /**
      * not null
      */
-    NOTNULL((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.nullConditionHandle(false, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    }),
+    NOTNULL,
     /**
      * is null
      */
-    NULL((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.nullConditionHandle(true, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    }),
+    NULL,
     /**
      * 不等于
      */
-    NE((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonConditionHandle(SqlCommonConstants.NEQ, translateNameUtils, mySearch, prefix, baseWhereValueList);
-
-    }),
-    NEP(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonNoValueConditionHandle(SqlCommonConstants.NEQ, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
+    NE,
+    NEP,
     /**
      * 嵌入sql 只有hibernate支持
      */
-    SQL((SQLModelUtils::sqlConditionHandle)),
-    EXISTS(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.existsConditionHandle(true, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
-    NOT_EXISTS(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.existsConditionHandle(false, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
-    BETWEEN(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.betweenConditionHandle(true, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
-    NOT_BETWEEN(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.betweenConditionHandle(false, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
+    SQL,
+    EXISTS,
+    NOT_EXISTS,
+    BETWEEN,
+    NOT_BETWEEN,
     /**
      * 排序
      */
-    SORT((SQLModelUtils::sortConditionHandle)),
+    SORT,
     /**
      * and
      */
-    AND(null),
+    AND,
     /**
      * or
      */
-    OR(null),
+    OR,
     /**
      * 修改
      */
-    SET(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonConditionHandle(SqlCommonConstants.EQ, translateNameUtils, mySearch, prefix, baseWhereValueList);
-
-    })),
+    SET,
     /**
      * 加
      */
-    ADD(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonUpdateConditionHandle(SqlCommonConstants.ADD, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
+    ADD,
     /**
      * 减
      */
-    SUBTRACT(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonUpdateConditionHandle(SqlCommonConstants.SUBTRACT, translateNameUtils, mySearch, prefix, baseWhereValueList);
-
-    })),
+    SUBTRACT,
     /**
      * 乘
      */
-    MULTIPLY(((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonUpdateConditionHandle(SqlCommonConstants.MULTIPLY, translateNameUtils, mySearch, prefix, baseWhereValueList);
-    })),
+    MULTIPLY,
     /**
      * 除
      */
-    DIVIDE((translateNameUtils, mySearch, prefix, baseWhereValueList) -> {
-        return SQLModelUtils.commonUpdateConditionHandle(SqlCommonConstants.DIVIDE, translateNameUtils, mySearch, prefix, baseWhereValueList);
-
-    }),
+    DIVIDE,
     /**
      * 等式
      */
-    EQUATION(null);
-
-
-    //private final String value;
-
-    private final ColumnConditionHandle handle;
-
-    SqlOperator(ColumnConditionHandle handle) {
-        //this.value = value;
-        this.handle = handle;
-    }
-
-
-    public ColumnConditionHandle getHandle() {
-        return handle;
-    }
-
-    public interface ColumnConditionHandle {
-
-        /**
-         * 处理方法
-         *
-         * @param translateNameUtils
-         * @param mySearch
-         * @param prefix
-         * @param baseWhereValueList
-         * @return
-         */
-        String handle(TranslateNameUtils translateNameUtils, MySearch mySearch, String prefix, List<SqlParameter> baseWhereValueList);
-    }
-
+    EQUATION;
 }

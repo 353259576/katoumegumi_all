@@ -293,7 +293,7 @@ public class TranslateNameUtils {
     public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final String abbreviation, final int type){
         FieldColumnRelationMapper mapper = getLocalMapper(path);
         if (mapper == null) {
-            throw new RuntimeException(path + "不存在");
+            throw new NullPointerException("can not find mapper by path:" + path);
         }
         if(type == 2){
             mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();

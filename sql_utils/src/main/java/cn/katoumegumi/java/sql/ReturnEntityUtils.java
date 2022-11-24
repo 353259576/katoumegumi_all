@@ -12,9 +12,9 @@ import java.util.*;
 public class ReturnEntityUtils {
 
 
-    public static ReturnEntity getReturnEntity(Map<Class<?>, Map<ReturnEntityId, ReturnEntity>> idReturnEntityMap, Map<String, ReturnEntity> returnEntityMap, ReturnEntity returnEntity, String tableName) {
+    public static ReturnEntity getReturnEntity(Map<Class<?>, Map<ReturnEntityId, ReturnEntity>> idReturnEntityMap, Map<String, ReturnEntity> returnEntityMap, ReturnEntity returnEntity, String rootPath) {
         ReturnEntity entity = getReturnEntity(idReturnEntityMap, returnEntity);
-        packageReturnEntity(idReturnEntityMap, returnEntityMap, entity, tableName);
+        packageReturnEntity(idReturnEntityMap, returnEntityMap, entity, rootPath);
         return entity;
     }
 
@@ -117,24 +117,24 @@ public class ReturnEntityUtils {
      * @param idReturnEntityMap
      * @param returnEntityMap
      * @param returnEntity
-     * @param tableName
+     * @param path
      * @return
      */
-    private static ReturnEntity packageReturnEntity(Map<Class<?>, Map<ReturnEntityId, ReturnEntity>> idReturnEntityMap, Map<String, ReturnEntity> returnEntityMap, ReturnEntity returnEntity, String tableName) {
+    private static ReturnEntity packageReturnEntity(Map<Class<?>, Map<ReturnEntityId, ReturnEntity>> idReturnEntityMap, Map<String, ReturnEntity> returnEntityMap, ReturnEntity returnEntity, String path) {
         FieldColumnRelationMapper mapper = returnEntity.getFieldColumnRelationMapper();
         if (WsListUtils.isNotEmpty(mapper.getFieldJoinClasses())) {
             List<FieldJoinClass> fieldJoinClassList = mapper.getFieldJoinClasses();
             //int length = fieldJoinClassList.size();
             Object o = returnEntity.getValue();
-            String nextTableName;
+            String nextPath;
             ReturnEntity nextEntity;
             ReturnEntity entity;
             Field field;
             Object value;
             List<Object> list;
             for (FieldJoinClass fieldJoinClass : fieldJoinClassList) {
-                nextTableName = tableName + "." + fieldJoinClass.getNickName();
-                nextEntity = returnEntityMap.get(nextTableName);
+                nextPath = path + "." + fieldJoinClass.getNickName();
+                nextEntity = returnEntityMap.get(nextPath);
                 if (nextEntity != null) {
                     nextEntity.setParentReturnEntity(returnEntity);
                     entity = getReturnEntity(idReturnEntityMap, nextEntity);
@@ -163,7 +163,7 @@ public class ReturnEntityUtils {
                         }
 
                     }
-                    packageReturnEntity(idReturnEntityMap, returnEntityMap, entity, nextTableName);
+                    packageReturnEntity(idReturnEntityMap, returnEntityMap, entity, nextPath);
                 }
             }
         }

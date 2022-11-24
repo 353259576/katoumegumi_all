@@ -1,10 +1,10 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.common.WsStreamUtils;
+import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.entity.JdkResultSet;
 import cn.katoumegumi.java.sql.entity.SqlParameter;
+import cn.katoumegumi.java.sql.handle.MysqlHandle;
+import cn.katoumegumi.java.sql.model.SelectModel;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -25,8 +25,7 @@ public class BaseDataSourceUtils {
 
     public <T> List<T> selectList(MySearchList mySearchList) {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        SelectSqlEntity entity = sqlModelUtils.select();
-
+        SelectSqlEntity entity = MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel());
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -42,7 +41,6 @@ public class BaseDataSourceUtils {
                 preparedStatement.setObject(i + 1, o);
             }
             resultSet = preparedStatement.executeQuery();
-
             return (List<T>) sqlModelUtils.margeMap(new JdkResultSet(resultSet));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -51,6 +49,38 @@ public class BaseDataSourceUtils {
         }
         return null;
     }
+
+    public <T> int insert(T t){
+        if(t == null){
+            throw new IllegalArgumentException("need insert Object is null");
+        }
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(MySearchList.create(t.getClass()));
+        InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSql(t);
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(insertSqlEntity.getInsertSql(),Statement.RETURN_GENERATED_KEYS)){
+            List<SqlParameter> list = insertSqlEntity.getValueList();
+            for (int i = 0; i < list.size(); i++){
+                preparedStatement.setObject(i+1,list.get(i).getValue());
+            }
+            int updateRow = preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            List<FieldColumnRelation> idList = insertSqlEntity.getIdList();
+            if(WsListUtils.isNotEmpty(idList) && resultSet != null){
+                int count = resultSet.getMetaData().getColumnCount();
+                if (resultSet.next()){
+                    for (int i = 0; i < count && i < idList.size(); i++){
+                        WsFieldUtils.setValue(t,WsBeanUtils.objectToT(resultSet.getObject(i + 1),idList.get(i).getFieldClass()),idList.get(i).getField());
+                    }
+                }
+            }
+            return updateRow;
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
 
 
 }

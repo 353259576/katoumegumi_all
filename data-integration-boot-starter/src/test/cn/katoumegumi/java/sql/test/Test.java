@@ -5,18 +5,54 @@ import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.SqlEquation;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
 import cn.katoumegumi.java.sql.model.SelectModel;
+import cn.katoumegumi.java.sql.model.SqlStringModel;
 import cn.katoumegumi.java.sql.model.UpdateModel;
+import cn.katoumegumi.java.sql.test.model.LUser;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
+import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
 import com.google.gson.Gson;
+import org.springframework.jdbc.core.JdbcTemplate;
 
+import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Test {
 
     public static void main(String[] args) {
+        DataSource dataSource = getDataSource();
+        BaseDataSourceUtils dataSourceUtils = new BaseDataSourceUtils(dataSource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        WsJdbcUtils jdbcUtils = new WsJdbcUtils();
+        jdbcUtils.setJdbcTemplate(jdbcTemplate);
 
-        test();
+        List<LUser> lUserList = new ArrayList<>();
+        for (int i = 0; i < 20; i++){
+            LUser lUser = new LUser()
+                    //.setId(14L)
+                    .setAge(1)
+                    .setName("你好")
+                    .setPassword("1")
+                    .setSex(1)
+                    .setStatus(1);
+            lUserList.add(lUser);
+        }
+        int row = jdbcUtils.insert(lUserList);
+        System.out.println(row);
+        for (LUser lUser : lUserList) {
+            System.out.println(lUser.getId());
+        }
+        //System.out.println(dataSourceUtils.insert(lUser));
+
+
+
+
+        //test();
     }
 
     public static void test() {
@@ -103,13 +139,13 @@ public class Test {
         System.out.println(new Gson().toJson(updateSqlEntity.getValueList()));
 
         Long date = WsDateUtils.getExecutionTime.apply(()->{
-            for (int i = 0; i < 1000000; i++){
+            for (int i = 0; i < 1; i++){
                 SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
                 SelectModel selectModel = sqlModelUtils.transferToSelectModel();
                 SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(selectModel);
-                /*System.out.println(selectSqlEntity.getSelectSql());
+                System.out.println(selectSqlEntity.getSelectSql());
                 System.out.println(selectSqlEntity.getCountSql());
-                System.out.println(new Gson().toJson(selectSqlEntity.getValueList()));*/
+                System.out.println(new Gson().toJson(selectSqlEntity.getValueList()));
                 //System.out.println(sqlModelUtils.select().getSelectSql());
 
             }
@@ -137,5 +173,15 @@ public class Test {
                 )
 
         );
+    }
+
+
+    public static DataSource getDataSource(){
+        String url = "jdbc:mysql://192.168.3.18:3306/lx?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai";
+        String userName = "root";
+        String password = "123456";
+        String driverClassName = "com.mysql.cj.jdbc.Driver";
+        String dataBaseName = "root";
+        return HikariCPDataSourceFactory.getDataSource(url,userName,password,driverClassName);
     }
 }

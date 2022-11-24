@@ -20,6 +20,8 @@ import java.util.function.Supplier;
  */
 public class MySearchList {
 
+    private boolean isSingleColumn = false;
+
     private final List<String> columnNameList = new ArrayList<>();
 
     private final List<MySearch> orderSearches = new ArrayList<>();
@@ -1355,6 +1357,7 @@ public class MySearchList {
      */
     public MySearchList singleColumnName(String columnName) {
         this.columnNameList.add(columnName);
+        this.isSingleColumn = true;
         return this;
     }
 
@@ -1423,6 +1426,10 @@ public class MySearchList {
             }
         }
         return updateSearchList;
+    }
+
+    public boolean isSingleColumn() {
+        return isSingleColumn;
     }
 }
 

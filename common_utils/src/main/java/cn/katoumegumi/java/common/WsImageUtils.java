@@ -1,6 +1,9 @@
 package cn.katoumegumi.java.common;
 
 
+import cn.katoumegumi.java.common.image.WsMargin;
+import cn.katoumegumi.java.common.image.WsTextArea;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +24,32 @@ public class WsImageUtils {
     private final static JLabel J_LABEL = new JLabel();
 
     public static void main(String[] args) throws Exception {
-        System.out.println(convertToBase64("png", new FileInputStream("D:\\test\\jetbrains.png")));
+        //Font font = new Font("微软雅黑",Font.PLAIN,15);
+        Font sourceBlack = Font.createFont(Font.TRUETYPE_FONT,new File("C:/UserData/work/tmp/img/SubsetOTF/CN/SourceHanSansCN-Normal.otf"));
+        Font font = sourceBlack.deriveFont(Font.PLAIN,15F);
+        FontMetrics fontMetrics = J_LABEL.getFontMetrics(font);
+        WsTextArea textArea = new WsTextArea(fontMetrics,"     测试123测试\n测试123测试")
+                .setTextAlign((3<<8)|1)
+                .setMargin(new WsMargin(20,20,20,20))
+                .setColor(Color.RED)
+                .setWordSpace(10)
+                .setLineSpace(10)
+                .setCoordinateX(200)
+                .setCoordinateY(200)
+                .setWidth(200)
+                .setHeight(200);
+
+        textArea.build();
+        System.out.println(textArea.getText());
+        BufferedImage bufferedImage = loadImage(new File("C:\\UserData\\work\\tmp\\img\\1.jpg"));
+        textArea.draw(bufferedImage);
+        File file = new File("C:\\UserData\\work\\tmp\\img\\1c.jpg");
+        if(!file.exists()){
+            file.createNewFile();
+        }
+        ImageIO.write(bufferedImage,"png",file);
+
+        //System.out.println(convertToBase64("png", new FileInputStream("D:\\test\\jetbrains.png")));
     }
 
     /**
@@ -35,6 +63,14 @@ public class WsImageUtils {
             return ImageIO.read(inputStream);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public static BufferedImage loadImage(File file){
+        try {
+            return ImageIO.read(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

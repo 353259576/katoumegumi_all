@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class WsDateUtils {
@@ -25,6 +24,7 @@ public class WsDateUtils {
     public static final String CNLONGTIMESTRING = "yyyy年MM月dd日 HH时mm分ss秒";
     public static final String SMALLTIMESTRING = "yyyy-MM-dd";
     public static final String CNSMALLTIMESTRING = "yyyy年MM月dd日";
+
     /**
      * 获取一段程序的执行时间
      */
@@ -37,11 +37,19 @@ public class WsDateUtils {
 
     private static final ThreadLocal<Map<String, SimpleDateFormat>> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<>();
 
-    private static final Long SECONDS = 1000L;
-    private static final Long MINUTES = 60L * SECONDS;
-    private static final Long HOUR = 60L * MINUTES;
-    private static final Long DAY = 24 * HOUR;
-    private static final Long WEEK = 7 * DAY;
+    public static final long ONE_SECONDS = 1000L;
+    public static final long ONE_MINUTES = 60L * ONE_SECONDS;
+    public static final long ONE_HOUR = 60L * ONE_MINUTES;
+    public static final long ONE_DAY = 24L * ONE_HOUR;
+    public static final long ONE_WEEK = 7L * ONE_DAY;
+    public static final long DEFAULT_ZONE_OFFSET = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
+
+    public static void main(String[] args) {
+        Date date = new Date();
+        System.out.println(objectDateFormatString(ignoreTime(date)));
+        System.out.println(objectDateFormatString(ignoreMinute(date)));
+        System.out.println(objectDateFormatString(ignoreSecond(date)));
+    }
 
     public static String dateStringFormat(String date) {
         char[] chars = date.toCharArray();
@@ -112,7 +120,6 @@ public class WsDateUtils {
                 } else {
                     return dateStringFormat((String) object);
                 }
-
             } else if (object instanceof Date) {
                 return dateToString((Date) object, LONGTIMESTRING);
             } else if (object.getClass().isPrimitive()) {
@@ -175,7 +182,7 @@ public class WsDateUtils {
      * @return
      */
     public static long getTimeDifferenceByDay(Date before, Date after) {
-        return (after.getTime() - before.getTime()) / DAY;
+        return (after.getTime() - before.getTime()) / ONE_DAY;
     }
 
     /**
@@ -186,7 +193,7 @@ public class WsDateUtils {
      * @return
      */
     public static long getTimeDifferenceBySeconds(Date before, Date after) {
-        return (after.getTime() - before.getTime()) / SECONDS;
+        return (after.getTime() - before.getTime()) / ONE_SECONDS;
     }
 
     /**
@@ -197,7 +204,7 @@ public class WsDateUtils {
      * @return
      */
     public static long getTimeDifferenceByMinutes(Date before, Date after) {
-        return (after.getTime() - before.getTime()) / MINUTES;
+        return (after.getTime() - before.getTime()) / ONE_MINUTES;
     }
 
     /**
@@ -208,7 +215,7 @@ public class WsDateUtils {
      * @return
      */
     public static long getTimeDifferenceByHour(Date before, Date after) {
-        return (after.getTime() - before.getTime()) / HOUR;
+        return (after.getTime() - before.getTime()) / ONE_HOUR;
     }
 
     /**
@@ -219,7 +226,7 @@ public class WsDateUtils {
      * @return
      */
     public static long getTimeDifferenceByWeek(Date before, Date after) {
-        return (after.getTime() - before.getTime()) / WEEK;
+        return (after.getTime() - before.getTime()) / ONE_WEEK;
     }
 
     /**
@@ -237,19 +244,19 @@ public class WsDateUtils {
 
         switch (length) {
             case 5:
-                longs[index++] = difference / WEEK;
-                difference = difference % WEEK;
+                longs[index++] = difference / ONE_WEEK;
+                difference = difference % ONE_WEEK;
             case 4:
-                longs[index++] = difference / DAY;
-                difference = difference % DAY;
+                longs[index++] = difference / ONE_DAY;
+                difference = difference % ONE_DAY;
             case 3:
-                longs[index++] = difference / HOUR;
-                difference = difference % HOUR;
+                longs[index++] = difference / ONE_HOUR;
+                difference = difference % ONE_HOUR;
             case 2:
-                longs[index++] = difference / MINUTES;
-                difference = difference % MINUTES;
+                longs[index++] = difference / ONE_MINUTES;
+                difference = difference % ONE_MINUTES;
             case 1:
-                longs[index] = difference / SECONDS;
+                longs[index] = difference / ONE_SECONDS;
                 break;
             default:
                 throw new IllegalArgumentException("length [1,5]");
@@ -265,4 +272,53 @@ public class WsDateUtils {
         }
         return stringSimpleDateFormatMap.computeIfAbsent(pattern, SimpleDateFormat::new);
     }
+
+    /**
+     * 日期与时间忽略时间
+     * @param timestamp 时间戳
+     * @param zoneOffset 时区偏移
+     * @return
+     */
+    public static long ignoreTime(long timestamp,long zoneOffset){
+        return timestamp - timestamp % ONE_DAY - zoneOffset;
+    }
+
+    public static long ignoreTime(long timestamp){
+        return ignoreTime(timestamp,DEFAULT_ZONE_OFFSET);
+    }
+
+    public static Date ignoreTime(Date dateTime,long zoneOffset){
+        return new Date(ignoreTime(dateTime.getTime(),zoneOffset));
+    }
+
+    public static Date ignoreTime(Date dateTime){
+        return new Date(ignoreTime(dateTime.getTime(),DEFAULT_ZONE_OFFSET));
+    }
+
+    /**
+     * 日期与时间忽略分钟
+     * @param timestamp
+     * @return
+     */
+    public static long ignoreMinute(long timestamp){
+        return timestamp - timestamp % ONE_HOUR;
+    }
+
+    public static Date ignoreMinute(Date dateTime){
+        return new Date(ignoreMinute(dateTime.getTime()));
+    }
+
+    /**
+     * 日期与时间忽略秒
+     * @param timestamp
+     * @return
+     */
+    public static long ignoreSecond(long timestamp){
+        return timestamp - timestamp % ONE_MINUTES;
+    }
+
+    public static Date ignoreSecond(Date dateTime){
+        return new Date(ignoreSecond(dateTime.getTime()));
+    }
+
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /***
- * @author 王松
+ * @author ws
  */
 public class SelectSqlEntity {
 

@@ -42,8 +42,8 @@ public class WsJdbcUtils {
 
 
     public <T> int insert(T t) {
-        if (t == null) {
-            return 0;
+        if(t == null){
+            throw new IllegalArgumentException("need insert Object is null");
         }
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
@@ -52,44 +52,12 @@ public class WsJdbcUtils {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         Map<String, Object> keyMap = keyHolder.getKeys();
-        if (WsListUtils.isNotEmpty(keyMap) && keyMap.size() > 0) {
-            Map<String, FieldColumnRelation> stringFieldColumnRelationMap = new HashMap<>();
-            for (FieldColumnRelation fieldColumnRelation : insertSqlEntity.getIdList()) {
-                stringFieldColumnRelationMap.put(fieldColumnRelation.getColumnName(), fieldColumnRelation);
-            }
-            List<String> unUsedSet = new ArrayList<>();
-            keyMap.forEach((s, o) -> {
-                FieldColumnRelation fieldColumnRelation = stringFieldColumnRelationMap.get(s);
-                if (fieldColumnRelation != null) {
-                    Field field = fieldColumnRelation.getField();
-                    field.setAccessible(true);
-                    try {
-                        field.set(t, o);
-                        stringFieldColumnRelationMap.remove(s);
-                        keyMap.remove(s);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    unUsedSet.add(s);
-                }
-            });
-            if (stringFieldColumnRelationMap.size() > 0 && unUsedSet.size() > 0) {
-                Set<Map.Entry<String, FieldColumnRelation>> fSet = stringFieldColumnRelationMap.entrySet();
-                for (Map.Entry<String, FieldColumnRelation> entry : fSet) {
-                    FieldColumnRelation fieldColumnRelation = entry.getValue();
-                    try {
-                        fieldColumnRelation.getField().set(t, WsBeanUtils.objectToT(keyMap.get(unUsedSet.remove(0)), fieldColumnRelation.getField().getType()));
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-            }
+        if (WsListUtils.isNotEmpty(keyMap)) {
+            List<FieldColumnRelation> idList = insertSqlEntity.getIdList();
+            boolean[] isUseArray = new boolean[idList.size()];
+            Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
+            setGeneratedKey(t,keyMap,idList,isUseArray,fieldNameAndIndexMap);
         }
-
-
         return row;
     }
 
@@ -104,49 +72,14 @@ public class WsJdbcUtils {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         List<Map<String, Object>> keyMapList = keyHolder.getKeyList();
-
-        if (WsListUtils.isNotEmpty(keyMapList) && keyMapList.size() > 0) {
-            Map<String, FieldColumnRelation> stringFieldColumnRelationMap = new HashMap<>();
-            for (FieldColumnRelation fieldColumnRelation : insertSqlEntity.getIdList()) {
-                stringFieldColumnRelationMap.put(fieldColumnRelation.getColumnName(), fieldColumnRelation);
-            }
-
-            for (int i = 0; i < keyMapList.size(); i++) {
-                Map<String, Object> objectMap = keyMapList.get(i);
-                List<String> unUsedSet = new ArrayList<>();
-                int finalI = i;
-                objectMap.forEach((s, o) -> {
-                    FieldColumnRelation fieldColumnRelation = stringFieldColumnRelationMap.get(s);
-                    if (fieldColumnRelation != null) {
-                        Field field = fieldColumnRelation.getField();
-                        field.setAccessible(true);
-                        try {
-                            field.set(tList.get(finalI), o);
-                            stringFieldColumnRelationMap.remove(s);
-                            objectMap.remove(s);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        unUsedSet.add(s);
-                    }
-                });
-                if (stringFieldColumnRelationMap.size() > 0 && unUsedSet.size() > 0) {
-                    Set<Map.Entry<String, FieldColumnRelation>> fSet = stringFieldColumnRelationMap.entrySet();
-                    for (Map.Entry<String, FieldColumnRelation> entry : fSet) {
-                        FieldColumnRelation fieldColumnRelation = entry.getValue();
-                        try {
-                            fieldColumnRelation.getField().set(tList.get(i), WsBeanUtils.objectToT(objectMap.get(unUsedSet.remove(0)), fieldColumnRelation.getField().getType()));
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-
-                }
+        if(WsListUtils.isNotEmpty(keyMapList)){
+            List<FieldColumnRelation> idList = insertSqlEntity.getIdList();
+            boolean[] isUseArray = new boolean[idList.size()];
+            Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
+            for (int i = 0; i < keyMapList.size(); i++){
+                setGeneratedKey(tList.get(i),keyMapList.get(i),idList,isUseArray,fieldNameAndIndexMap);
             }
         }
-        //log.info(JSON.toJSONString(keyHolder));
         return row;
     }
 
@@ -253,9 +186,7 @@ public class WsJdbcUtils {
             MySearchList mySearchList = MySearchList.create(t.getClass());
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
             UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t, isAll);
-            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> {
-                return new ArrayList<>();
-            });
+            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new ArrayList<>());
             objectList.add(WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
         }
         map.forEach((sql, listValue) -> {
@@ -445,5 +376,39 @@ public class WsJdbcUtils {
 
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    private <T> void setGeneratedKey(T t,Map<String,Object> keyMap,List<FieldColumnRelation> idList,boolean[] isUseArray,Map<String, Integer> fieldNameAndIndexMap){
+        for (int i = 0; i < idList.size(); i++){
+            isUseArray[i] = false;
+            fieldNameAndIndexMap.put(idList.get(i).getColumnName(),i);
+        }
+        List<String> unUseColumnNameList = new ArrayList<>();
+        keyMap.forEach((columnName,value)->{
+            Integer index = fieldNameAndIndexMap.get(columnName);
+            if(index == null){
+                unUseColumnNameList.add(columnName);
+                return;
+            }
+            isUseArray[index] = true;
+            FieldColumnRelation fieldColumnRelation = idList.get(index);
+            WsFieldUtils.setValue(t,WsBeanUtils.objectToT(value,fieldColumnRelation.getFieldClass()),fieldColumnRelation.getField());
+        });
+
+        if(WsListUtils.isNotEmpty(unUseColumnNameList)){
+            for (int idIndex = 0,unUseIndex = 0; idIndex < isUseArray.length && unUseIndex < unUseColumnNameList.size();unUseIndex++){
+                Object value = keyMap.get(unUseColumnNameList.get(unUseIndex));
+                while (idIndex < isUseArray.length){
+                    if(!isUseArray[idIndex]){
+                        isUseArray[idIndex] = false;
+                        FieldColumnRelation fieldColumnRelation = idList.get(idIndex);
+                        WsFieldUtils.setValue(t,WsBeanUtils.objectToT(value,fieldColumnRelation.getFieldClass()),fieldColumnRelation.getField());
+                        idIndex++;
+                        break;
+                    }
+                    idIndex++;
+                }
+            }
+        }
     }
 }
