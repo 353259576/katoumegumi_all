@@ -95,9 +95,7 @@ public class WsJdbcUtils {
                     o = valueList.get(i);
                     if (o == null) {
                         statement.setNull(i + 1, Types.NULL);
-                        continue;
-                    }
-                    if (o instanceof String) {
+                    }else if (o instanceof String) {
                         statement.setString(i + 1, WsStringUtils.anyToString(o));
                     } else if (o instanceof Integer || WsFieldUtils.classCompare(int.class, o.getClass())) {
                         statement.setInt(i + 1, WsBeanUtils.objectToT(o, int.class));
@@ -112,7 +110,8 @@ public class WsJdbcUtils {
                     } else if (o instanceof BigDecimal) {
                         statement.setBigDecimal(i + 1, WsBeanUtils.objectToT(o, BigDecimal.class));
                     } else if (o instanceof Date) {
-                        statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
+                        statement.setDate(i + 1,WsBeanUtils.objectToT(o,java.sql.Date.class));
+                        //statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
                     } else if (o instanceof LocalDate || o instanceof LocalDateTime) {
                         statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
                     }else {
