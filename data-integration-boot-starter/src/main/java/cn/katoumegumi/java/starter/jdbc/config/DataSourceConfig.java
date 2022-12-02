@@ -8,6 +8,7 @@ import cn.katoumegumi.java.starter.jdbc.properties.DataSourcePropertiesList;
 import cn.katoumegumi.java.starter.jdbc.properties.DruidDataSourceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,8 +17,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
-
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +31,7 @@ public class DataSourceConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceConfig.class);
 
-    @Resource
+    @Autowired
     private DataSourcePropertiesList dataSourcePropertiesList;
 
     @Primary

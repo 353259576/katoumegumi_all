@@ -5,7 +5,6 @@ import cn.katoumegumi.java.common.WsListUtils;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +43,12 @@ public class PageConvertUtils {
     }
 
 
-    public static <T> Page<T> convertSpringPage(Pageable pageable) {
+    /*public static <T> Page<T> convertSpringPage(Pageable pageable) {
         Page<T> page = new Page();
         page.setSize(pageable.getPageSize());
         page.setCurrent(page.getCurrent());
         return page;
-    }
+    }*/
 
 
 }

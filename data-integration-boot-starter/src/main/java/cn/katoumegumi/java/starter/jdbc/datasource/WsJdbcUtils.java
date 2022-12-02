@@ -9,6 +9,7 @@ import cn.katoumegumi.java.sql.entity.JdkResultSet;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import cn.katoumegumi.java.sql.entity.SqlParameter;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
+import cn.katoumegumi.java.sql.mapperFactory.FieldColumnRelationMapperFactory;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
@@ -21,7 +22,6 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
@@ -329,7 +329,7 @@ public class WsJdbcUtils {
         if (count == null) {
             count = 0L;
         }
-        Page<T> iPage = new Page<>();
+        IPage<T> iPage = new Page<>();
         SqlLimit sqlLimit = mySearchList.getSqlLimit();
         iPage.setCurrent(sqlLimit.getCurrent());
         iPage.setSize(sqlLimit.getSize());
@@ -338,7 +338,7 @@ public class WsJdbcUtils {
         return iPage;
     }
 
-    public <T> IPage<T> getTPage(T t, Page page) {
+    public <T> IPage<T> getTPage(T t, IPage<?> page) {
         MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);
         mySearchList.setSqlLimit(sqlLimit -> sqlLimit.setCurrent(page.getCurrent()).setSize(page.getSize()));
         return getTPage(mySearchList);

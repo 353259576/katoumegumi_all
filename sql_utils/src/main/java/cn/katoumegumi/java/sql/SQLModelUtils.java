@@ -7,9 +7,9 @@ import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.KeyValue;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.SqlOperator;
-import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.common.ValueTypeConstants;
 import cn.katoumegumi.java.sql.entity.*;
+import cn.katoumegumi.java.sql.mapperFactory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author ws

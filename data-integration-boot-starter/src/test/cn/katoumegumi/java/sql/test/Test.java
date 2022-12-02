@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 public class Test {
 
     public static void main(String[] args) {
-        DataSource dataSource = getDataSource();
+        /*DataSource dataSource = getDataSource();
         BaseDataSourceUtils dataSourceUtils = new BaseDataSourceUtils(dataSource);
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         WsJdbcUtils jdbcUtils = new WsJdbcUtils();
@@ -46,13 +46,14 @@ public class Test {
         System.out.println(row);
         for (LUser lUser : lUserList) {
             System.out.println(lUser.getId());
-        }
+        }*/
         //System.out.println(dataSourceUtils.insert(lUser));
 
 
 
 
         //test();
+        test();
     }
 
     public static void test() {

@@ -7,7 +7,7 @@
     <groupId>cn.katoumegumi.java</groupId>
     <artifactId>katoumegumi_all</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.7-SNAPSHOT</version>
     <modules>
         <module>data-integration-boot-starter</module>
         <module>sql_utils</module>
@@ -15,7 +15,6 @@
         <module>common_utils</module>
         <module>http_client</module>
         <module>excel_utils</module>
-        <module>hibernate_and_jpd_support</module>
         <module>vertx-mysql-client-support</module>
     </modules>
 
@@ -41,23 +40,24 @@
         <java.version>11</java.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <megumi.version>1.0.6-SNAPSHOT</megumi.version>
+        <megumi.version>1.0.7-SNAPSHOT</megumi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>2.6.6</spring-boot.version>
+        <spring-boot.version>3.0.0</spring-boot.version>
         <!--<spring-data-version>2021.0.5</spring-data-version>-->
         <netty.version>4.1.74.Final</netty.version>
         <zxing.version>3.4.1</zxing.version>
         <!--<reactor.version>3.4.10</reactor.version>-->
         <hibernate.version>5.5.7.Final</hibernate.version>
-        <seata.version>1.4.2</seata.version>
-        <mybatis.plus.version>3.4.0</mybatis.plus.version>
+        <seata.version>1.5.2</seata.version>
+        <mybatis.plus.version>3.5.2</mybatis.plus.version>
         <poi.version>5.2.1</poi.version>
         <lang3.vaersion>3.12.0</lang3.vaersion>
         <logback.version>1.2.11</logback.version>
         <hikariCP.version>3.4.5</hikariCP.version>
-        <gson.version>2.8.8</gson.version>
+        <gson.version>2.9.1</gson.version>
         <freemarker.version>2.3.30</freemarker.version>
         <vertx.version>4.2.4</vertx.version>
+        <persistence-api.version>2.2</persistence-api.version>
     </properties>
 
 
@@ -120,11 +120,11 @@
                 <version>${reactor.version}</version>
             </dependency>-->
 
-            <dependency>
+            <!--<dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
-            </dependency>
+            </dependency>-->
 
 
             <dependency>
@@ -180,6 +180,12 @@
                 <artifactId>vertx-jdbc-client</artifactId>
                 <version>${vertx.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>
@@ -209,7 +215,7 @@
 
 
     <repositories>
-        <repository>
+        <!--<repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
             <url>https://repo.spring.io/milestone</url>
@@ -231,8 +237,40 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
+        </repository>-->
+        <repository>
+            <id>alibaba_central</id>
+            <name>阿里云镜像中央仓库</name>
+            <url>https://maven.aliyun.com/repository/central</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
-
+        <repository>
+            <id>alibaba_spring</id>
+            <name>阿里云镜像spring仓库</name>
+            <url>https://maven.aliyun.com/repository/spring</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
     </repositories>
 
     <!--<build>

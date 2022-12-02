@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=cn.katoumegumi.java.starter.jpa.config.HibernateConfig,\
-  cn.katoumegumi.java.starter.jpa.config.JpaConfig,\
-  cn.katoumegumi.java.starter.jpa.config.RedisConfig
