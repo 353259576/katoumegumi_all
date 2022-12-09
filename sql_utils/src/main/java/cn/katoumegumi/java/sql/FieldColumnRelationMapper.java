@@ -80,10 +80,10 @@ public class FieldColumnRelationMapper {
         return null;
     }
 
-    public FieldColumnRelation getFieldColumnRelationByField(String fieldName) {
+    public FieldColumnRelation getFieldColumnRelationByFieldName(String fieldName) {
         FieldColumnRelation fieldColumnRelation = fieldColumnRelationMap.get(fieldName);
         if (fieldColumnRelation == null) {
-            throw new RuntimeException("未发现对象含有属性：" + fieldName);
+            throw new IllegalArgumentException("未发现对象含有属性：" + fieldName);
         }
         return fieldColumnRelation;
     }

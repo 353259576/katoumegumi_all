@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.sql.mapperFactory.strategys;
+package cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandle;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
@@ -9,6 +9,7 @@ import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.mapperFactory.FieldColumnRelationMapperFactory;
+import cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandleStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 
@@ -17,8 +18,25 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldColumnRelationMapperHandleStrategy{
+public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldColumnRelationMapperHandleStrategy {
+
+    private final FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory;
+
+    public HibernateFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory) {
+        this.fieldColumnRelationMapperFactory = fieldColumnRelationMapperFactory;
+    }
+
+    @Override
+    public boolean canUse() {
+        try {
+            Class.forName("javax.persistence.Table");
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public boolean canHandle(Class<?> clazz) {
@@ -27,11 +45,79 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
     }
 
     @Override
+    public Optional<FieldColumnRelationMapper> getTableName(Class<?> clazz) {
+        Table table = clazz.getAnnotation(Table.class);
+        if (table == null) {
+            return Optional.empty();
+        }
+        String tableName;
+        if (WsStringUtils.isBlank(table.name())) {
+            tableName = fieldColumnRelationMapperFactory.getChangeColumnName(clazz.getSimpleName());
+        } else {
+            tableName = table.name();
+        }
+
+        return Optional.of(new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz));
+    }
+
+    @Override
+    public boolean isIgnoreField(Field field) {
+        Transient t = field.getAnnotation(Transient.class);
+        return t != null;
+    }
+
+    @Override
+    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, Field field) {
+        Id id = field.getAnnotation(Id.class);
+        Column column = field.getAnnotation(Column.class);
+        if (id == null && column == null) {
+            return Optional.empty();
+        }
+        String columnName;
+        if (column == null || WsStringUtils.isBlank(column.name())) {
+            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(field.getName());
+        } else {
+            columnName = column.name();
+        }
+        return Optional.of(new FieldColumnRelation(id != null, field.getName(), field, columnName, field.getType()));
+    }
+
+    @Override
+    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field) {
+        JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+        if (joinColumn == null) {
+            return Optional.empty();
+        }
+        String name = joinColumn.name();
+        if (WsStringUtils.isBlank(name)) {
+            name = mainMapper.getIds().get(0).getColumnName();
+        }
+        String referenced = joinColumn.referencedColumnName();
+        if (WsStringUtils.isBlank(referenced)) {
+            referenced = joinMapper.getIds().get(0).getColumnName();
+        }
+        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+        boolean isArray = WsFieldUtils.isArrayType(field);
+        FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinMapper.getClazz(), field);
+        fieldJoinClass.setNickName(field.getName());
+        fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
+        if (oneToMany == null) {
+            fieldJoinClass.setJoinColumn(name);
+            fieldJoinClass.setAnotherJoinColumn(referenced);
+            return Optional.of(fieldJoinClass);
+        } else {
+            fieldJoinClass.setJoinColumn(referenced);
+            fieldJoinClass.setAnotherJoinColumn(name);
+            return Optional.of(fieldJoinClass);
+        }
+    }
+
+    //@Override
     public FieldColumnRelationMapper analysisClassRelation(Class<?> clazz, boolean allowIncomplete) {
         Table table = clazz.getAnnotation(Table.class);
         String tableName;
         if (WsStringUtils.isBlank(table.name())) {
-            tableName = FieldColumnRelationMapperFactory.getChangeColumnName(table.name());
+            tableName = fieldColumnRelationMapperFactory.getChangeColumnName(table.name());
         } else {
             tableName = table.name();
         }
@@ -63,16 +149,16 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
             }
         }
 
-        FieldColumnRelationMapperFactory.putIncompleteMapper(clazz, fieldColumnRelationMapper);
+        fieldColumnRelationMapperFactory.putIncompleteMapper(clazz, fieldColumnRelationMapper);
 
         if (WsListUtils.isNotEmpty(joinClassFieldList)) {
             for (Field field : joinClassFieldList) {
-                fieldColumnRelationMapper.getFieldJoinClasses().add(createFieldJoinClass(fieldColumnRelationMapper,field));
+                fieldColumnRelationMapper.getFieldJoinClasses().add(createFieldJoinClass(fieldColumnRelationMapper, field));
             }
         }
         fieldColumnRelationMapper.markSignLocation();
-        FieldColumnRelationMapperFactory.putMapper(clazz, fieldColumnRelationMapper);
-        FieldColumnRelationMapperFactory.removeIncompleteMapper(clazz);
+        fieldColumnRelationMapperFactory.putMapper(clazz, fieldColumnRelationMapper);
+        fieldColumnRelationMapperFactory.removeIncompleteMapper(clazz);
         return fieldColumnRelationMapper;
     }
 
@@ -84,23 +170,23 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
         boolean getColumn = false;
         if (WsListUtils.isNotEmpty(annotations)) {
             for (Annotation annotation : annotations) {
-                if(!getColumn){
-                    if(annotation instanceof Column){
+                if (!getColumn) {
+                    if (annotation instanceof Column) {
                         columnName = ((Column) annotation).name();
                         getColumn = true;
-                    }else if(annotation instanceof TableField){
+                    } else if (annotation instanceof TableField) {
                         columnName = ((TableField) annotation).value();
                         getColumn = true;
-                    }else if(annotation instanceof TableId){
+                    } else if (annotation instanceof TableId) {
                         columnName = ((TableId) annotation).value();
                         getColumn = true;
                     }
                 }
-                if(!getId){
+                if (!getId) {
                     if (annotation instanceof Id) {
                         isId = true;
                         getId = true;
-                    } else if(annotation instanceof TableId){
+                    } else if (annotation instanceof TableId) {
                         isId = true;
                         getId = true;
                     }
@@ -108,15 +194,15 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
             }
         }
         if (WsStringUtils.isBlank(columnName)) {
-            columnName = FieldColumnRelationMapperFactory.getChangeColumnName(field.getName());
+            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(field.getName());
         }
         return new FieldColumnRelation(isId, field.getName(), field, columnName, field.getType());
     }
 
-    public FieldJoinClass createFieldJoinClass(FieldColumnRelationMapper fieldColumnRelationMapper,Field field) {
+    public FieldJoinClass createFieldJoinClass(FieldColumnRelationMapper fieldColumnRelationMapper, Field field) {
         boolean isArray = WsFieldUtils.isArrayType(field);
         Class<?> joinClass = WsFieldUtils.getClassTypeof(field);
-        FieldColumnRelationMapper mapper = FieldColumnRelationMapperFactory.analysisClassRelation(joinClass, true);
+        FieldColumnRelationMapper mapper = fieldColumnRelationMapperFactory.analysisClassRelation(joinClass, true);
         FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
         fieldJoinClass.setNickName(field.getName());
         fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
@@ -141,18 +227,5 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
             }
         }
         return fieldJoinClass;
-    }
-
-    public boolean isIgnoreField(Field field) {
-        Transient aTransient = field.getAnnotation(Transient.class);
-        if (aTransient != null) {
-            return true;
-        }
-        jakarta.persistence.Transient jTransient = field.getAnnotation(jakarta.persistence.Transient.class);
-        if(jTransient != null){
-            return true;
-        }
-        TableField tableField = field.getAnnotation(TableField.class);
-        return tableField != null && !tableField.exist();
     }
 }

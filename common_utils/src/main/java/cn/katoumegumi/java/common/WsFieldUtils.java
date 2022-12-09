@@ -250,7 +250,6 @@ public class WsFieldUtils {
 
     /**
      * 获取泛型
-     *
      * @param field
      * @param <T>
      * @return

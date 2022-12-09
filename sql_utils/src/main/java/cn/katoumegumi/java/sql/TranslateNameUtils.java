@@ -298,7 +298,7 @@ public class TranslateNameUtils {
         if(type == 2){
             mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();
         }
-        FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(fieldName);
+        FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByFieldName(fieldName);
         return new BaseTableColumn(fieldColumnRelation, mapper.getTableName(), path, abbreviation);
     }
 

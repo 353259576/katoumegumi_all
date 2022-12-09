@@ -7,21 +7,18 @@ import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
-import cn.katoumegumi.java.sql.annotation.TableTemplate;
-import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.mapperFactory.strategys.*;
+import cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandle.*;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 
-import javax.persistence.*;
-import java.lang.annotation.Annotation;
+import javax.persistence.Table;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.function.Function;
 
 /**
  * 用于生成FieldColumnRelationMapper
@@ -46,21 +43,34 @@ public class FieldColumnRelationMapperFactory {
         return thread;
     });
 
-    private static final List<FieldColumnRelationMapperHandleStrategy> fieldColumnRelationMapperHandleStrategyList = new ArrayList<>();
+    /**
+     * 不同的mapper处理方式
+     */
+    private static final List<FieldColumnRelationMapperHandleStrategy> FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST = new ArrayList<>();
 
+
+
+
+    private static final FieldColumnRelationMapperFactory FIELD_COLUMN_RELATION_MAPPER_FACTORY = new FieldColumnRelationMapperFactory();
+
+    /**
+     * 默认的mapper处理方式
+     */
+    private static FieldColumnRelationMapperHandleStrategy defaultFieldColumnRelationMapperHandleStrategy;
     static {
-        fieldColumnRelationMapperHandleStrategyList.add(
-                new TableTemplateFieldColumnRelationMapperHandleStrategy()
+        addFieldColumnRelationMapperHandleStrategy(
+                new TableTemplateFieldColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY)
         );
-        fieldColumnRelationMapperHandleStrategyList.add(
-                new JakartaFieldColumnRelationMapperHandleStrategy()
+        addFieldColumnRelationMapperHandleStrategy(
+                new JakartaFieldColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY)
         );
-        fieldColumnRelationMapperHandleStrategyList.add(
-                new HibernateFieldColumnRelationMapperHandleStrategy()
+        addFieldColumnRelationMapperHandleStrategy(
+                new HibernateFieldColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY)
         );
-        fieldColumnRelationMapperHandleStrategyList.add(
-                new MybatisPlusColumnRelationMapperHandleStrategy()
+        addFieldColumnRelationMapperHandleStrategy(
+                new MybatisPlusColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY)
         );
+        defaultFieldColumnRelationMapperHandleStrategy = new DefaultFieldColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY);
     }
 
     /**
@@ -94,17 +104,7 @@ public class FieldColumnRelationMapperFactory {
             CountDownLatch cdl = new CountDownLatch(1);
             EXECUTOR_SERVICE.execute(() -> {
                 try {
-
-                    FieldColumnRelationMapper mapper = null;
-                    for (FieldColumnRelationMapperHandleStrategy fieldColumnRelationMapperHandleStrategy : fieldColumnRelationMapperHandleStrategyList) {
-                        if(fieldColumnRelationMapperHandleStrategy.canHandle(clazz)){
-                            mapper = fieldColumnRelationMapperHandleStrategy.analysisClassRelation(clazz,allowIncomplete);
-                            break;
-                        }
-                    }
-                    if(mapper == null){
-                        putMapper(clazz,null);
-                    }
+                    FIELD_COLUMN_RELATION_MAPPER_FACTORY.createFieldColumnRelationMapper(c,allowIncomplete);
                 } catch (Throwable e) {
                     e.printStackTrace();
                     throw e;
@@ -136,27 +136,66 @@ public class FieldColumnRelationMapperFactory {
     }
 
 
-    private static boolean ignoreField(Field field) {
-        jakarta.persistence.Transient aTransient = field.getAnnotation(jakarta.persistence.Transient.class);
-        if (aTransient != null) {
-            return true;
-        }
-        javax.persistence.Transient jTransient = field.getAnnotation(javax.persistence.Transient.class);
-        if(jTransient != null){
-            return true;
-        }
-        TableField tableField = field.getAnnotation(TableField.class);
-        return tableField != null && !tableField.exist();
-    }
-
     /**
      * 对没有指定名称的列名自动驼峰更改
-     *
      * @param fieldName 对象字段名称
      * @return 返回表列名
      */
-    public static String getChangeColumnName(String fieldName) {
+    public String getChangeColumnName(String fieldName) {
         return fieldNameChange ? WsStringUtils.camel_case(fieldName) : fieldName;
+    }
+
+    /**
+     * 获取可以处理当前class的策略
+     * @param clazz
+     * @return
+     */
+    public int getCanHandleFieldColumnRelationMapperStrategyIndex(Class<?> clazz){
+        for (int i = 0; i < FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size(); i++){
+            if(FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.get(i).canHandle(clazz)){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public <T> Optional<T> getStrategyAndHandle(int startIndex, Function<FieldColumnRelationMapperHandleStrategy,Optional<T>> function){
+        startIndex = startIndex % FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size();
+        int index = startIndex;
+        Optional<T> optional;
+        do {
+            optional = function.apply(FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.get(index));
+            if(optional.isPresent()){
+                return optional;
+            }
+            index = (index + 1) % FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size();
+        }while (index != startIndex);
+        if (defaultFieldColumnRelationMapperHandleStrategy != null) {
+            return function.apply(defaultFieldColumnRelationMapperHandleStrategy);
+        }
+        return Optional.empty();
+    }
+
+    public FieldColumnRelationMapper getTableName(int startIndex,Class<?> clazz){
+        return getStrategyAndHandle(startIndex,strategy -> strategy.getTableName(clazz)).orElse(null);
+    }
+
+    public boolean isIgnoreField(int startIndex,Field field){
+        return getStrategyAndHandle(startIndex,strategy -> {
+            if(strategy.isIgnoreField(field)){
+                return Optional.of(Boolean.TRUE);
+            }else {
+                return Optional.empty();
+            }
+        }).orElse(false);
+    }
+
+    public FieldColumnRelation getColumnName(int startIndex,FieldColumnRelationMapper mainMapper,Field field){
+        return getStrategyAndHandle(startIndex,strategy -> strategy.getColumnName(mainMapper,field)).orElse(null);
+    }
+
+    public FieldJoinClass getJoinRelation(int startIndex,FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field){
+        return getStrategyAndHandle(startIndex,strategy -> strategy.getJoinRelation(mainMapper,joinMapper,field)).orElse(null);
     }
 
 
@@ -172,7 +211,70 @@ public class FieldColumnRelationMapperFactory {
         return INCOMPLETE_MAPPER_MAP.remove(clazz);
     }
 
+    public static boolean addFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperHandleStrategy strategy){
+        if(strategy.canUse()){
+            FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.add(strategy);
+            return true;
+        }
+        return false;
+    }
 
+
+
+    public FieldColumnRelationMapper createFieldColumnRelationMapper(Class<?> clazz, boolean allowIncomplete) {
+        int startIndex = getCanHandleFieldColumnRelationMapperStrategyIndex(clazz);
+        if(startIndex == -1){
+            return null;
+        }
+        FieldColumnRelationMapper fieldColumnRelationMapper = getTableName(startIndex,clazz);
+
+        Field[] fields = WsFieldUtils.getFieldAll(clazz);
+        List<Field> baseTypeFieldList = new ArrayList<>();
+        List<Field> joinClassFieldList = new ArrayList<>();
+
+        for (Field field : fields) {
+            if (isIgnoreField(startIndex,field)) {
+                continue;
+            }
+            if (WsBeanUtils.isBaseType(field.getType())) {
+                baseTypeFieldList.add(field);
+            } else {
+                joinClassFieldList.add(field);
+            }
+        }
+        if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
+            for (Field field : baseTypeFieldList) {
+                FieldColumnRelation fieldColumnRelation = getColumnName(startIndex,fieldColumnRelationMapper,field);
+                if(fieldColumnRelation == null){
+                    continue;
+                }
+                fieldColumnRelationMapper.putFieldColumnRelationMap(field.getName(), fieldColumnRelation);
+                if (fieldColumnRelation.isId()) {
+                    fieldColumnRelationMapper.getIds().add(fieldColumnRelation);
+                } else {
+                    fieldColumnRelationMapper.getFieldColumnRelations().add(fieldColumnRelation);
+                }
+            }
+        }
+
+        putIncompleteMapper(clazz, fieldColumnRelationMapper);
+
+        if (WsListUtils.isNotEmpty(joinClassFieldList)) {
+            for (Field field : joinClassFieldList) {
+                Class<?> joinClass = WsFieldUtils.getClassTypeof(field);
+                FieldColumnRelationMapper joinMapper = analysisClassRelation(joinClass,true);
+                FieldJoinClass fieldJoinClass = getJoinRelation(startIndex,fieldColumnRelationMapper,joinMapper,field);
+                if(fieldJoinClass == null){
+                    continue;
+                }
+                fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
+            }
+        }
+        fieldColumnRelationMapper.markSignLocation();
+        putMapper(clazz, fieldColumnRelationMapper);
+        removeIncompleteMapper(clazz);
+        return fieldColumnRelationMapper;
+    }
 
 
 }

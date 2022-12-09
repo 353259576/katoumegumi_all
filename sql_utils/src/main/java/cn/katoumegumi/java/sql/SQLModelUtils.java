@@ -466,7 +466,7 @@ public class SQLModelUtils {
                 List<String> nameList = WsStringUtils.split(columnName, '.');
                 nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
                 FieldColumnRelationMapper mapper = translateNameUtils.getLocalMapper(nameList.get(0));
-                FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
+                FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByFieldName(nameList.get(1));
                 columnNameListList.add(nameList);
                 mapperList.add(mapper);
                 columnRelationList.add(fieldColumnRelation);
@@ -549,7 +549,7 @@ public class SQLModelUtils {
             List<String> nameList = WsStringUtils.split((String) entry.getKey(), '.');
             nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
             FieldColumnRelationMapper mapper = translateNameUtils.getLocalMapper(nameList.get(0));
-            FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByField(nameList.get(1));
+            FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByFieldName(nameList.get(1));
 
             columnNameListList.add(nameList);
             mapperList.add(mapper);
