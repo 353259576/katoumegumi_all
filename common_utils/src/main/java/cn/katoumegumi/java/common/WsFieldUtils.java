@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.common;
 
+import java.io.ObjectStreamClass;
 import java.lang.invoke.SerializedLambda;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
@@ -19,6 +20,8 @@ public class WsFieldUtils {
     private static final Map<String, WeakReference<String>> FIELD_NAME_MAP = new ConcurrentHashMap<>();
 
     private static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
+
+    private static final Field WRITE_REPLACE_METHOD_FIELD = WsFieldUtils.getFieldByName(ObjectStreamClass.class,"writeReplaceMethod");
 
     public static Field getFieldForObject(String name, Object object) {
         Class<?> clazz = object.getClass();
@@ -182,22 +185,61 @@ public class WsFieldUtils {
     public static <T> String getFieldName(SFunction<T, ?> sFunction) {
         String n = sFunction.getClass().getName();
         return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(() -> {
-            try {
-                Method method = sFunction.getClass().getDeclaredMethod(WRITE_REPLACE_FUNCTION_NAME);
-                method.setAccessible(true);
-                SerializedLambda serializedLambda = (SerializedLambda) method.invoke(sFunction);
-                String name = serializedLambda.getImplMethodName();
-                String value = methodToFieldName(name);
-                FIELD_NAME_MAP.put(n, new WeakReference<>(value));
-                return value;
-            } catch (ReflectiveOperationException e) {
-                e.printStackTrace();
-                return null;
-            }
+            SerializedLambda serializedLambda = getSerializedLambda(sFunction);
+            String name = serializedLambda.getImplMethodName();
+            String value = methodToFieldName(name);
+            FIELD_NAME_MAP.put(n, new WeakReference<>(value));
+            return value;
         });
-
-
     }
+
+    private static SerializedLambda getSerializedLambda(Object o){
+        SerializedLambda serializedLambda = null;
+        if((serializedLambda = getSerializedLambdaByReflect(o)) == null){
+            serializedLambda = getSerializedLambdaByObjectStreamClass(o);
+        }
+        if(serializedLambda == null){
+            throw new IllegalArgumentException("获取SerializedLambda失败");
+        }
+        return serializedLambda;
+    }
+
+    private static SerializedLambda getSerializedLambdaByObjectStreamClass(Object o) {
+        try {
+            Class<?> cl = o.getClass();
+            ObjectStreamClass desc;
+            Object obj = o;
+            for (;;) {
+                Class<?> repCl;
+                desc = ObjectStreamClass.lookup(cl);
+                Method method = (Method) WsFieldUtils.getValue(desc,WRITE_REPLACE_METHOD_FIELD);
+                if (method == null ||
+                        (obj = method.invoke(obj, (Object[]) null)) == null ||
+                        obj instanceof SerializedLambda ||
+                        (repCl = obj.getClass()) == cl) {
+                    break;
+                }
+                cl = repCl;
+            }
+            return obj instanceof SerializedLambda?(SerializedLambda) obj:null;
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static SerializedLambda getSerializedLambdaByReflect(Object o){
+        try {
+            Method method = o.getClass().getDeclaredMethod(WRITE_REPLACE_FUNCTION_NAME);
+            method.setAccessible(true);
+            return (SerializedLambda) method.invoke(o);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 
     /**
      * 去除方法名的get set is

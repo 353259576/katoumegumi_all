@@ -1,26 +1,29 @@
 package cn.katoumegumi.java.sql.test;
 
+import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsDateUtils;
+import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.SqlEquation;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
 import cn.katoumegumi.java.sql.model.SelectModel;
-import cn.katoumegumi.java.sql.model.SqlStringModel;
 import cn.katoumegumi.java.sql.model.UpdateModel;
 import cn.katoumegumi.java.sql.test.model.LUser;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
-import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.google.gson.Gson;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class Test {
 
@@ -53,8 +56,26 @@ public class Test {
 
 
         //test();
-        test();
+        //test();
+
+//        MySearchList mySearchList = MySearchList.create(LUser.class);
+//        mySearchList/*.and(
+//                m->m.eq(LUser::getName,1),
+//                m->m.eq(LUser::getName,1),
+//                m->m.eq(LUser::getName,1)
+//        )*/.or(
+//                m->m.eq(LUser::getName,1).eq(LUser::getName,1)/*,
+//                m->m.eq(LUser::getName,1),
+//                m->m.eq(LUser::getName,1)*/
+//        ).eq(LUser::getName,1)
+//                .eq(LUser::getName,1)
+//        ;
+//        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+//        System.out.println(MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel()).getSelectSql());
+
+        Arrays.hashCode(new Long[]{});
     }
+
 
     public static void test() {
 

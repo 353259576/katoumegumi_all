@@ -38,24 +38,21 @@ public class ReturnEntityId {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof ReturnEntityId)) {
-            return false;
-        }
         if (obj.hashCode() != this.hashCode()) {
             return false;
         }
-        ReturnEntityId entityId = (ReturnEntityId) obj;
-        if (entityId.getIdSigns().length != this.idSigns.length) {
+        if (!(obj instanceof ReturnEntityId)) {
             return false;
         }
-        Object[] o1 = entityId.getIdSigns();
+        ReturnEntityId entityId = (ReturnEntityId) obj;
         int length = idSigns.length;
+        if (entityId.getIdSigns().length != length) {
+            return false;
+        }
+        Object[] objIdSigns = entityId.getIdSigns();
         for (int i = 0; i < length; i++) {
-            if (o1[i] != idSigns[i]) {
-                if (o1[i] == null || idSigns[i] == null) {
-                    return false;
-                }
-                if (!o1[i].equals(idSigns[i])) {
+            if (objIdSigns[i] != idSigns[i]) {
+                if (objIdSigns[i] == null || !objIdSigns[i].equals(idSigns[i])) {
                     return false;
                 }
             }

@@ -159,6 +159,7 @@ public class FieldColumnRelationMapperFactory {
         return -1;
     }
 
+
     public <T> Optional<T> getStrategyAndHandle(int startIndex, Function<FieldColumnRelationMapperHandleStrategy,Optional<T>> function){
         startIndex = startIndex % FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size();
         int index = startIndex;
@@ -244,7 +245,7 @@ public class FieldColumnRelationMapperFactory {
         }
         if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
             for (Field field : baseTypeFieldList) {
-                FieldColumnRelation fieldColumnRelation = getColumnName(startIndex,fieldColumnRelationMapper,field);
+                FieldColumnRelation fieldColumnRelation = getColumnName(startIndex,fieldColumnRelationMapper.getBaseTemplateMapper() == null?fieldColumnRelationMapper:fieldColumnRelationMapper.getBaseTemplateMapper(),field);
                 if(fieldColumnRelation == null){
                     continue;
                 }

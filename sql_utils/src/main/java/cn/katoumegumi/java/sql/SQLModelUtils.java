@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author ws
@@ -517,13 +518,102 @@ public class SQLModelUtils {
             throwables.printStackTrace();
             return new ArrayList<>(0);
         }
-
-
     }
+
+
+    public <T> List<T> oneLoopMargeMap2(WsResultSet resultSet) {
+        try {
+            int classNum = translateNameUtils.locationMapperSize();
+            final int length = resultSet.getColumnCount();
+
+            if (length == 0) {
+                return new ArrayList<>(0);
+            }
+            FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
+            String rootPath = mainMapper.getNickName();
+
+
+            List<String> columnNameListList = new ArrayList<>(length);
+            List<FieldColumnRelation> columnRelationList = new ArrayList<>(length);
+            List<FieldColumnRelationMapper> mapperList = new ArrayList<>(length);
+            Map<FieldColumnRelationMapper,int[][]> mapperAndLocaltionMap = new HashMap<>();
+            Map<FieldColumnRelationMapper,int[]> mapperAndSplitColumnNameListMap = new HashMap<>();
+            String columnName;
+            List<String> nameList;
+            FieldColumnRelationMapper mapper;
+            FieldColumnRelation fieldColumnRelation;
+            int[][] locationList;
+            int mapperNameSign = 0;
+            Map<String,Integer> mapperNameAndSignMap = new HashMap<>();
+            for (int i = 0; i < length; i++) {
+                columnName = resultSet.getColumnLabel(i + 1);
+                nameList = WsStringUtils.split(columnName, '.');
+                nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
+                mapper = translateNameUtils.getLocalMapper(nameList.get(0));
+                int[] mapperNameSplitArray = mapperAndSplitColumnNameListMap.get(mapper);
+                if(mapperNameSplitArray == null){
+                    List<String> mapperNameSplitList = WsStringUtils.split(nameList.get(0),'.');
+                    mapperNameSplitArray = new int[mapperNameSplitList.size()];
+                    for (int index = 0,aLength = mapperNameSplitList.size(); index < aLength; index++){
+                        Integer sign = mapperNameAndSignMap.get(mapperNameSplitList.get(index));
+                        if(sign == null){
+                            sign = mapperNameSign++;
+                            mapperNameAndSignMap.put(mapperNameSplitList.get(index),sign);
+                        }
+                        mapperNameSplitArray[index] = sign;
+                    }
+                    mapperAndSplitColumnNameListMap.put(mapper,mapperNameSplitArray);
+                }
+                locationList = mapperAndLocaltionMap.computeIfAbsent(mapper,m->{
+                    int[][] integers = new int[2][];
+                    integers[0] = new int[m.getIds().size()];
+                    integers[1] = new int[m.getFieldColumnRelations().size()];
+                    return integers;
+                });
+                fieldColumnRelation = mapper.getFieldColumnRelationByFieldName(nameList.get(1));
+                if(fieldColumnRelation.isId()){
+                    locationList[0][mapper.getLocation(fieldColumnRelation)] = i;
+                }else {
+                    locationList[1][mapper.getLocation(fieldColumnRelation)] = i;
+                }
+                columnNameListList.add(nameList.get(nameList.size() - 1));
+                mapperList.add(mapper);
+                columnRelationList.add(fieldColumnRelation);
+            }
+            MapperDictTree mapperDictTree = new MapperDictTree();
+            for (Map.Entry<FieldColumnRelationMapper, int[]> fieldColumnRelationMapperEntry : mapperAndSplitColumnNameListMap.entrySet()) {
+                mapperDictTree.add(fieldColumnRelationMapperEntry.getValue(),fieldColumnRelationMapperEntry.getKey());
+            }
+
+
+
+            List<ReturnEntity> returnEntityList = new ArrayList<>();
+
+            while (resultSet.next()){
+
+            }
+
+            if (returnEntityList.size() == 0) {
+                return new ArrayList<>(0);
+            }
+            List<Object> list = new ArrayList<>(returnEntityList.size());
+            for (ReturnEntity returnEntity : returnEntityList) {
+                list.add(returnEntity.getValue());
+            }
+
+            return (List<T>) list;
+
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return new ArrayList<>(0);
+        }
+    }
+
+
 
     /**
      * 合并返回数据
-     *
      * @param mapList
      * @param <T>
      * @return
