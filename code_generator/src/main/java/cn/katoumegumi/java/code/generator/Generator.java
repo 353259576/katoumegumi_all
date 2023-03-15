@@ -99,7 +99,9 @@ public class Generator {
     private String baseSearchVOName = ".vo.search";
 
 
-    private Boolean enableSwagger = true;
+    private Boolean enableSwagger = false;
+
+    private Boolean enableSpringDoc = true;
 
     private Boolean enableMybatisPlus = true;
 

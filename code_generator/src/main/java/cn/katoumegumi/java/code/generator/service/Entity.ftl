@@ -9,6 +9,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 </#if>
+<#if enableSpringDoc = true>
+import io.swagger.v3.oas.annotations.media.Schema;
+</#if>
 import lombok.Data;
 import lombok.experimental.Accessors;
 <#if enableHibernate == true>
@@ -28,6 +31,9 @@ import ${cl.getName()};
 </#if>
 <#if enableSwagger == true>
 @ApiModel(value = "${table.tableRemark}实体类")
+</#if>
+<#if enableSpringDoc == true>
+@Schema(description = "${table.tableRemark}实体类")
 </#if>
 @Data
 @Accessors(chain = true)
@@ -57,6 +63,9 @@ public class ${table.entityName} implements Serializable {
     <#if enableSwagger == true>
     @ApiModelProperty(value = "${table.pkColumn.columnRemark}")
     </#if>
+    <#if enableSwagger == true>
+    @Schema(description = "${table.pkColumn.columnRemark}")
+    </#if>
     private ${table.pkColumn.columnClass.getSimpleName()} ${table.pkColumn.beanFieldName};
 
 <#list table.columnList as column>
@@ -73,6 +82,9 @@ public class ${table.entityName} implements Serializable {
         </#if>
         <#if enableSwagger == true>
     @ApiModelProperty(value = "${column.columnRemark}")
+        </#if>
+        <#if enableSwagger == true>
+    @Schema(description = "${column.columnRemark}")
         </#if>
     private ${column.columnClass.getSimpleName()} ${column.beanFieldName};
     </#if>

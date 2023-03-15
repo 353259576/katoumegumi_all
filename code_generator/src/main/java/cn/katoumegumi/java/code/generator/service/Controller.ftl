@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.*;
 <#if enableSwagger == true>
 import io.swagger.annotations.*;
 </#if>
+<#if enableSpringDoc == true>
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+</#if>
 import java.util.List;
 import javax.annotation.Resource;
 
@@ -30,6 +34,9 @@ import javax.annotation.Resource;
 @RestController
 <#if enableSwagger == true>
 @Api(value="${table.firstLowerEntityName}", tags = "${table.tableRemark}controller")
+</#if>
+<#if enableSpringDoc == true>
+@Tag(name="${table.firstLowerEntityName}", description = "${table.tableRemark}controller")
 </#if>
 @RequestMapping(value = "/${table.firstLowerEntityName}/")
 public class ${table.entityName}Controller {
@@ -44,6 +51,9 @@ public class ${table.entityName}Controller {
 <#if enableSwagger == true>
     @ApiOperation("创建${table.tableRemark}")
 </#if>
+<#if enableSpringDoc == true>
+    @Operation(description = "创建${table.tableRemark}", summary = "创建${table.tableRemark}")
+</#if>
     public Integer save(@RequestBody ${table.entityName} ${table.firstLowerEntityName}){
         ${table.firstLowerEntityName}Service.save(${table.firstLowerEntityName});
         return null;
@@ -55,6 +65,9 @@ public class ${table.entityName}Controller {
     @PutMapping(value = "update")
 <#if enableSwagger == true>
     @ApiOperation("修改${table.tableRemark}")
+</#if>
+<#if enableSpringDoc == true>
+    @Operation(description = "修改${table.tableRemark}", summary = "修改${table.tableRemark}")
 </#if>
     public Integer update(@RequestBody ${table.entityName} ${table.firstLowerEntityName}){
         ${table.firstLowerEntityName}Service.update(${table.firstLowerEntityName});
@@ -68,6 +81,9 @@ public class ${table.entityName}Controller {
 <#if enableSwagger == true>
     @ApiOperation("批量创建修改${table.tableRemark}")
 </#if>
+<#if enableSpringDoc == true>
+    @Operation(description = "批量创建修改${table.tableRemark}", summary = "批量创建修改${table.tableRemark}")
+</#if>
     public Integer saveOrUpdateBatch(@RequestBody List<${table.entityName}> ${table.firstLowerEntityName}List){
         ${table.firstLowerEntityName}Service.saveOrUpdateBatch(${table.firstLowerEntityName}List);
         return null;
@@ -79,6 +95,9 @@ public class ${table.entityName}Controller {
     @GetMapping(value = "getPage")
 <#if enableSwagger == true>
     @ApiOperation("分页查询${table.tableRemark}")
+</#if>
+<#if enableSpringDoc == true>
+    @Operation(description = "分页查询${table.tableRemark}", summary = "分页查询${table.tableRemark}")
 </#if>
     public IPage<${table.entityName}> get${table.entityName}Page(Page<?> page,<#if enableSearchVO == true>${table.entityName}SearchVO searchVO</#if>){
 <#if type == 0>
@@ -100,6 +119,9 @@ public class ${table.entityName}Controller {
 <#if enableSwagger == true>
     @ApiOperation("列表查询${table.tableRemark}")
 </#if>
+<#if enableSpringDoc == true>
+    @Operation(description = "列表查询${table.tableRemark}", summary = "列表查询${table.tableRemark}")
+</#if>
     public List<${table.entityName}> get${table.entityName}List(<#if enableSearchVO == true>${table.entityName}SearchVO searchVO</#if>){
 <#if type ==0>
         MySearchList searchList = getMySearchList(searchVO);
@@ -118,6 +140,9 @@ public class ${table.entityName}Controller {
     @DeleteMapping(value = "remove/{${table.pkColumn.beanFieldName}}")
 <#if enableSwagger == true>
     @ApiOperation("删除${table.tableRemark}")
+</#if>
+<#if enableSpringDoc == true>
+    @Operation(description = "删除${table.tableRemark}", summary = "删除${table.tableRemark}")
 </#if>
     public Integer remove(@PathVariable ${table.pkColumn.columnClass.getSimpleName()} ${table.pkColumn.beanFieldName}){
         ${table.firstLowerEntityName}Service.remove(${table.pkColumn.beanFieldName});
