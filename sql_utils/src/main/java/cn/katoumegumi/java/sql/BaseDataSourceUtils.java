@@ -45,42 +45,67 @@ public class BaseDataSourceUtils {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
-            WsStreamUtils.close(resultSet,preparedStatement,connection);
+            WsStreamUtils.close(resultSet, preparedStatement, connection);
         }
         return null;
     }
 
-    public <T> int insert(T t){
-        if(t == null){
+    public <T> List<T> selectList2(MySearchList mySearchList) {
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        SelectSqlEntity entity = MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel());
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(entity.getSelectSql());
+            List<Object> objectList = WsListUtils.listToList(entity.getValueList(), SqlParameter::getValue);
+            for (int i = 0; i < objectList.size(); i++) {
+                Object o = objectList.get(i);
+                if (o instanceof Date) {
+                    o = WsBeanUtils.objectToT(o, Date.class);
+                }
+                preparedStatement.setObject(i + 1, o);
+            }
+            resultSet = preparedStatement.executeQuery();
+            return (List<T>) sqlModelUtils.oneLoopMargeMap(new JdkResultSet(resultSet));
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            WsStreamUtils.close(resultSet, preparedStatement, connection);
+        }
+        return null;
+    }
+
+    public <T> int insert(T t) {
+        if (t == null) {
             throw new IllegalArgumentException("need insert Object is null");
         }
         SQLModelUtils sqlModelUtils = new SQLModelUtils(MySearchList.create(t.getClass()));
         InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSql(t);
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(insertSqlEntity.getInsertSql(),Statement.RETURN_GENERATED_KEYS)){
+             PreparedStatement preparedStatement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS)) {
             List<SqlParameter> list = insertSqlEntity.getValueList();
-            for (int i = 0; i < list.size(); i++){
-                preparedStatement.setObject(i+1,list.get(i).getValue());
+            for (int i = 0; i < list.size(); i++) {
+                preparedStatement.setObject(i + 1, list.get(i).getValue());
             }
             int updateRow = preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
             List<FieldColumnRelation> idList = insertSqlEntity.getIdList();
-            if(WsListUtils.isNotEmpty(idList) && resultSet != null){
+            if (WsListUtils.isNotEmpty(idList) && resultSet != null) {
                 int count = resultSet.getMetaData().getColumnCount();
-                if (resultSet.next()){
-                    for (int i = 0; i < count && i < idList.size(); i++){
-                        WsFieldUtils.setValue(t,WsBeanUtils.objectToT(resultSet.getObject(i + 1),idList.get(i).getFieldClass()),idList.get(i).getField());
+                if (resultSet.next()) {
+                    for (int i = 0; i < count && i < idList.size(); i++) {
+                        WsFieldUtils.setValue(t, WsBeanUtils.objectToT(resultSet.getObject(i + 1), idList.get(i).getFieldClass()), idList.get(i).getField());
                     }
                 }
             }
             return updateRow;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return 0;
     }
-
-
 
 
 }

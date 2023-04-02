@@ -16,16 +16,15 @@ public class SqlParameter {
     private final Object value;
 
 
-    public SqlParameter(String alias, Object value){
+    public SqlParameter(String alias, Object value) {
         this.alias = alias;
         this.value = value;
     }
 
-    public SqlParameter(Object value){
+    public SqlParameter(Object value) {
         this.alias = null;
         this.value = value;
     }
-
 
 
     public String getAlias() {

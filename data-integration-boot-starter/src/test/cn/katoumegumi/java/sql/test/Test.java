@@ -11,6 +11,7 @@ import cn.katoumegumi.java.sql.model.UpdateModel;
 import cn.katoumegumi.java.sql.test.model.LUser;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
+import cn.katoumegumi.java.sql.test.model.UserDetailsRemake;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.google.gson.Gson;
 
@@ -72,8 +73,41 @@ public class Test {
 //        ;
 //        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
 //        System.out.println(MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel()).getSelectSql());
+        DataSource dataSource = getDataSource();
+        BaseDataSourceUtils dataSourceUtils = new BaseDataSourceUtils(dataSource);
 
-        Arrays.hashCode(new Long[]{});
+        long time;
+
+        time = WsDateUtils.getExecutionTime.apply(
+                ()->{
+                    for (int i = 0; i < 10; i++){
+                        dataSourceUtils.selectList(
+                                MySearchList.create(User.class)
+                                        .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
+                        );
+                    }
+                }
+        );
+
+        System.out.println("旧合成方法消耗的时间是：" + time);
+
+        time = WsDateUtils.getExecutionTime.apply(
+                ()->{
+                    for (int i = 0; i < 10; i++){
+                        dataSourceUtils.selectList2(
+                                MySearchList.create(User.class)
+                                        .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
+                        );
+                    }
+                }
+        );
+        System.out.println("新合成方法消耗的时间是：" + time);
+
+
+
+
+
+
     }
 
 
@@ -199,9 +233,9 @@ public class Test {
 
 
     public static DataSource getDataSource(){
-        String url = "jdbc:mysql://192.168.3.18:3306/lx?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai";
+        String url = "jdbc:mysql://localhost:3306/wslx?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true";
         String userName = "root";
-        String password = "123456";
+        String password = "199645";
         String driverClassName = "com.mysql.cj.jdbc.Driver";
         String dataBaseName = "root";
         return HikariCPDataSourceFactory.getDataSource(url,userName,password,driverClassName);

@@ -40,7 +40,7 @@ public class TranslateNameUtils {
 
     //private final Map<String,ColumnBaseEntity> columnBaseEntityCacheMap = new HashMap<>();
 
-    public TranslateNameUtils(){
+    public TranslateNameUtils() {
         this.parent = null;
         this.mainClassNameList = new ArrayList<>();
         this.abbreviationMap = new HashMap<>();
@@ -49,7 +49,7 @@ public class TranslateNameUtils {
         this.localMapperMap = new HashMap<>();
     }
 
-    public TranslateNameUtils(TranslateNameUtils translateNameUtils){
+    public TranslateNameUtils(TranslateNameUtils translateNameUtils) {
         this.parent = translateNameUtils;
         this.abbreviationNum = translateNameUtils.abbreviationNum;
 
@@ -62,6 +62,7 @@ public class TranslateNameUtils {
 
     /**
      * 创建简称
+     *
      * @param keyword
      * @return
      */
@@ -75,13 +76,14 @@ public class TranslateNameUtils {
 
     /**
      * 获取详细名称
+     *
      * @param value 简称
      * @return
      */
     public String getParticular(String value) {
         TranslateNameUtils parent = this.parent;
         String returnValue = particularMap.get(value);
-        if(returnValue == null && parent != null){
+        if (returnValue == null && parent != null) {
             returnValue = parent.particularMap.get(value);
             parent = parent.parent;
         }
@@ -92,13 +94,14 @@ public class TranslateNameUtils {
 
     /**
      * 获取简称
+     *
      * @param keyword
      * @return
      */
     public String getAbbreviation(String keyword) {
         TranslateNameUtils parent = this.parent;
         String value = abbreviationMap.get(keyword);
-        while (value == null && parent != null){
+        while (value == null && parent != null) {
             value = parent.abbreviationMap.get(keyword);
             parent = parent.parent;
         }
@@ -120,6 +123,7 @@ public class TranslateNameUtils {
 
     /**
      * 获取当前的简称
+     *
      * @param keyword
      * @return
      */
@@ -142,17 +146,19 @@ public class TranslateNameUtils {
 
     /**
      * 获取当前简称并不自动设置简称
+     *
      * @param keyword
      * @return
      */
-    public String getCurrentAbbreviationAndNotAutoSet(String keyword){
+    public String getCurrentAbbreviationAndNotAutoSet(String keyword) {
         return abbreviationMap.get(keyword);
     }
 
     /**
      * 设置简称
+     *
      * @param keyword 实际名称
-     * @param value 简称
+     * @param value   简称
      */
     public void setAbbreviation(String keyword, String value) {
         abbreviationMap.put(keyword, value);
@@ -161,6 +167,7 @@ public class TranslateNameUtils {
 
     /**
      * 设置简称并返回
+     *
      * @param keyword
      * @return
      */
@@ -173,13 +180,14 @@ public class TranslateNameUtils {
 
     /**
      * 获取本地缓存的mapper
+     *
      * @param locationName
      * @return
      */
     public FieldColumnRelationMapper getLocalMapper(String locationName) {
         TranslateNameUtils parent = this.parent;
         FieldColumnRelationMapper mapper = localMapperMap.get(locationName);
-        while (mapper == null && parent != null){
+        while (mapper == null && parent != null) {
             mapper = parent.localMapperMap.get(locationName);
             parent = parent.parent;
         }
@@ -189,6 +197,7 @@ public class TranslateNameUtils {
 
     /**
      * 添加本地缓存的mapper
+     *
      * @param locationName
      * @param mapper
      */
@@ -216,6 +225,7 @@ public class TranslateNameUtils {
 
     /**
      * 去除表别名的主表名称
+     *
      * @return
      */
     public String getNoPrefixTableName(final String tableName) {
@@ -228,7 +238,7 @@ public class TranslateNameUtils {
             }
         }
         TranslateNameUtils parent = this.parent;
-        while (parent != null){
+        while (parent != null) {
             for (String prefix : parent.mainClassNameList) {
                 if (tableName.startsWith(prefix)) {
                     return tableName.substring(prefix.length());
@@ -241,15 +251,16 @@ public class TranslateNameUtils {
 
     /**
      * 根据查询条件生成列基本信息
+     *
      * @param originalFieldName
      * @param rootPath
-     * @param type 1 返回的列名 2 查询的列名
+     * @param type              1 返回的列名 2 查询的列名
      * @return
      */
     public BaseTableColumn getColumnBaseEntity(String originalFieldName, final String rootPath, final int type) {
         String path;
         String fieldName;
-        originalFieldName = translateTableNickName(rootPath,originalFieldName);
+        originalFieldName = translateTableNickName(rootPath, originalFieldName);
         List<String> fieldNameList = WsStringUtils.split(originalFieldName, SqlCommonConstants.PATH_COMMON_DELIMITER);
         int size = fieldNameList.size();
         if (size == 1) {
@@ -264,8 +275,8 @@ public class TranslateNameUtils {
                 } else {
                     key = fieldNameList.get(0);
                 }
-            }else {
-                return createColumnBaseEntity(fieldName,key,fieldNameList.get(0),type);
+            } else {
+                return createColumnBaseEntity(fieldName, key, fieldNameList.get(0), type);
             }
             path = key;
 
@@ -278,34 +289,34 @@ public class TranslateNameUtils {
                 path = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + String.join(".", fieldNameList);
             }
         }
-        return createColumnBaseEntity(fieldName,path,type);
+        return createColumnBaseEntity(fieldName, path, type);
     }
 
 
-    public BaseTableColumn createColumnBaseEntity(final FieldColumnRelation fieldColumnRelation, final FieldColumnRelationMapper mapper, final String path){
-        return new BaseTableColumn(fieldColumnRelation,mapper.getTableName(),path,getAbbreviation(path));
+    public BaseTableColumn createColumnBaseEntity(final FieldColumnRelation fieldColumnRelation, final FieldColumnRelationMapper mapper, final String path) {
+        return new BaseTableColumn(fieldColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
     }
 
-    public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final int type){
-        return createColumnBaseEntity(fieldName,path,getAbbreviation(path),type);
+    public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final int type) {
+        return createColumnBaseEntity(fieldName, path, getAbbreviation(path), type);
     }
 
-    public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final String abbreviation, final int type){
+    public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final String abbreviation, final int type) {
         FieldColumnRelationMapper mapper = getLocalMapper(path);
         if (mapper == null) {
             throw new NullPointerException("can not find mapper by path:" + path);
         }
-        if(type == 2){
-            mapper = mapper.getBaseTemplateMapper() == null?mapper:mapper.getBaseTemplateMapper();
+        if (type == 2) {
+            mapper = mapper.getBaseTemplateMapper() == null ? mapper : mapper.getBaseTemplateMapper();
         }
         FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByFieldName(fieldName);
         return new BaseTableColumn(fieldColumnRelation, mapper.getTableName(), path, abbreviation);
     }
 
 
-
     /**
      * 转换sql语句中表名为简写
+     *
      * @param searchSql
      * @return
      */
@@ -315,37 +326,37 @@ public class TranslateNameUtils {
 
         boolean isStart = false;
         int startIndex = 0;
-        for (int i = 0; i < cs.length; ++i){
-            if(cs[i] == '{'){
+        for (int i = 0; i < cs.length; ++i) {
+            if (cs[i] == '{') {
                 isStart = true;
                 startIndex = i;
-            }else if(cs[i] == '}' && isStart){
-                locationList.add(new int[]{startIndex,i});
+            } else if (cs[i] == '}' && isStart) {
+                locationList.add(new int[]{startIndex, i});
             }
         }
-        if(locationList.size() == 0){
+        if (locationList.size() == 0) {
             return searchSql;
-        }else {
+        } else {
             startIndex = 0;
             StringBuilder translateStringBuilder = new StringBuilder();
             String replaceStr = null;
 
-            for (int[] ints:locationList){
-                if(ints[0] > startIndex) {
+            for (int[] ints : locationList) {
+                if (ints[0] > startIndex) {
                     translateStringBuilder.append(Arrays.copyOfRange(cs, startIndex, ints[0]));
                 }
-                String needReplaceStr = new String(Arrays.copyOfRange(cs,ints[0] + 1,ints[1]));
+                String needReplaceStr = new String(Arrays.copyOfRange(cs, ints[0] + 1, ints[1]));
                 replaceStr = getParticular(needReplaceStr);
                 if (replaceStr == null) {
-                    needReplaceStr = getAddPathTableNickName(prefix,needReplaceStr);
+                    needReplaceStr = getAddPathTableNickName(prefix, needReplaceStr);
                     translateStringBuilder.append(getAbbreviation(needReplaceStr));
                 } else {
                     translateStringBuilder.append(needReplaceStr);
                 }
                 startIndex = ints[1] + 1;
             }
-            if(startIndex < cs.length){
-                translateStringBuilder.append(Arrays.copyOfRange(cs,startIndex,cs.length));
+            if (startIndex < cs.length) {
+                translateStringBuilder.append(Arrays.copyOfRange(cs, startIndex, cs.length));
             }
             return translateStringBuilder.toString();
         }
@@ -354,6 +365,7 @@ public class TranslateNameUtils {
 
     /**
      * 转换sql语句里{}里的字段
+     *
      * @param searchSql
      * @return
      */
@@ -378,27 +390,28 @@ public class TranslateNameUtils {
 
     /**
      * 获取完成表名称
+     *
      * @param rootPath
      * @param originalTableNickName
      * @return
      */
-    public String getCompleteTableNickName(final String rootPath,String originalTableNickName){
+    public String getCompleteTableNickName(final String rootPath, String originalTableNickName) {
         String tableNickName = getCurrentAbbreviationAndNotAutoSet(originalTableNickName);
-        if(tableNickName == null){
-            return getAddPathTableNickName(rootPath,originalTableNickName);
+        if (tableNickName == null) {
+            return getAddPathTableNickName(rootPath, originalTableNickName);
         }
         return originalTableNickName;
     }
 
-    public String getAddPathTableNickName(final String rootPath,String tableNickName){
-        if(tableNickName.length() < rootPath.length()){
+    public String getAddPathTableNickName(final String rootPath, String tableNickName) {
+        if (tableNickName.length() < rootPath.length()) {
             tableNickName = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableNickName;
-        }else {
-            if(tableNickName.startsWith(rootPath)){
-                if(!(tableNickName.length() == rootPath.length() || tableNickName.charAt(rootPath.length()) == SqlCommonConstants.PATH_COMMON_DELIMITER)){
+        } else {
+            if (tableNickName.startsWith(rootPath)) {
+                if (!(tableNickName.length() == rootPath.length() || tableNickName.charAt(rootPath.length()) == SqlCommonConstants.PATH_COMMON_DELIMITER)) {
                     tableNickName = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableNickName;
                 }
-            }else {
+            } else {
                 tableNickName = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableNickName;
             }
         }

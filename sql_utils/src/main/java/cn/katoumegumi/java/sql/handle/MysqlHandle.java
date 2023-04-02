@@ -48,28 +48,28 @@ public class MysqlHandle {
         int columnSize = selectModel.getSelect().size();
         for (int i = 0; i < columnSize - 1; i++) {
             TableColumn tableColumn = selectModel.getSelect().get(i);
-            if(tableColumn instanceof BaseTableColumn) {
+            if (tableColumn instanceof BaseTableColumn) {
                 BaseTableColumn columnBase = (BaseTableColumn) tableColumn;
                 columnSql.append(SQLModelUtils.guardKeyword(columnBase.getTableAlias()))
                         .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
                         .append(SQLModelUtils.guardKeyword(columnBase.getColumnName()));
-            }else if (tableColumn instanceof DynamicTableColumn){
+            } else if (tableColumn instanceof DynamicTableColumn) {
                 DynamicTableColumn dynamicTableColumn = (DynamicTableColumn) tableColumn;
-                chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(),columnSql,valueList);
+                chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
             }
             columnSql.append(SqlCommonConstants.SPACE)
                     .append(SQLModelUtils.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getFieldName()))
                     .append(SqlCommonConstants.COMMA);
         }
         TableColumn tableColumn = selectModel.getSelect().get(columnSize - 1);
-        if(tableColumn instanceof BaseTableColumn) {
-            BaseTableColumn columnBase = (BaseTableColumn)tableColumn;
+        if (tableColumn instanceof BaseTableColumn) {
+            BaseTableColumn columnBase = (BaseTableColumn) tableColumn;
             columnSql.append(SQLModelUtils.guardKeyword(columnBase.getTableAlias()))
                     .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
                     .append(SQLModelUtils.guardKeyword(columnBase.getColumnName()));
-        } else if (tableColumn instanceof DynamicTableColumn){
+        } else if (tableColumn instanceof DynamicTableColumn) {
             DynamicTableColumn dynamicTableColumn = (DynamicTableColumn) tableColumn;
-            chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(),columnSql,valueList);
+            chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
         }
         columnSql.append(SqlCommonConstants.SPACE)
                 .append(SQLModelUtils.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getFieldName()));
@@ -107,9 +107,9 @@ public class MysqlHandle {
             for (int i = 0; i < orderByModelSize; i++) {
                 orderByCondition = selectModel.getOrderBy().get(i);
                 entity = orderByCondition.getColumn();
-                if(entity == null){
+                if (entity == null) {
                     orderBySql.append(orderByCondition.getSql().getSql());
-                }else {
+                } else {
                     orderBySql.append(SQLModelUtils.guardKeyword(entity.getTableAlias()))
                             .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
                             .append(SQLModelUtils.guardKeyword(entity.getColumnName()));
@@ -121,9 +121,9 @@ public class MysqlHandle {
             }
             orderByCondition = selectModel.getOrderBy().get(orderByModelSize);
             entity = orderByCondition.getColumn();
-            if(entity == null){
+            if (entity == null) {
                 orderBySql.append(orderByCondition.getSql().getSql());
-            }else {
+            } else {
                 orderBySql.append(SQLModelUtils.guardKeyword(entity.getTableAlias()))
                         .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
                         .append(SQLModelUtils.guardKeyword(entity.getColumnName()));
@@ -134,7 +134,7 @@ public class MysqlHandle {
 
         //处理limit语句
         StringBuilder limitSql = new StringBuilder();
-        if(selectModel.getSqlLimit() != null){
+        if (selectModel.getSqlLimit() != null) {
             limitSql.append(" limit ")
                     .append(selectModel.getSqlLimit().getOffset())
                     .append(",")
@@ -161,7 +161,7 @@ public class MysqlHandle {
     }
 
 
-    public static DeleteSqlEntity handleDelete(DeleteModel deleteModel){
+    public static DeleteSqlEntity handleDelete(DeleteModel deleteModel) {
         List<SqlParameter> valueList = new ArrayList<>();
 
         String mainTableAlias = SQLModelUtils.guardKeyword(deleteModel.getFrom().getAlias());
@@ -194,10 +194,10 @@ public class MysqlHandle {
                 mainTableAlias +
                 tableAndJoinTableSql +
                 whereConditionSql;
-        return new DeleteSqlEntity(sql,valueList);
+        return new DeleteSqlEntity(sql, valueList);
     }
 
-    public static UpdateSqlEntity handleUpdate(UpdateModel updateModel){
+    public static UpdateSqlEntity handleUpdate(UpdateModel updateModel) {
         List<SqlParameter> valueList = new ArrayList<>();
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
@@ -218,10 +218,10 @@ public class MysqlHandle {
 
         StringBuilder updateSetSql = new StringBuilder();
 
-        chooseHandleConditionFunction(updateModel.getUpdateConditionList().get(0),updateSetSql,valueList);
-        for (int i = 1; i < updateModel.getUpdateConditionList().size(); i++){
+        chooseHandleConditionFunction(updateModel.getUpdateConditionList().get(0), updateSetSql, valueList);
+        for (int i = 1; i < updateModel.getUpdateConditionList().size(); i++) {
             updateSetSql.append(SqlCommonConstants.SQL_COMMON_UPDATE_SET_CONDITION_DELIMITER);
-            chooseHandleConditionFunction(updateModel.getUpdateConditionList().get(i),updateSetSql,valueList);
+            chooseHandleConditionFunction(updateModel.getUpdateConditionList().get(i), updateSetSql, valueList);
         }
 
         //处理查询条件
@@ -245,7 +245,6 @@ public class MysqlHandle {
     }
 
 
-
     private static void handleRelation(RelationCondition relationCondition, StringBuilder sql, List<SqlParameter> valueList, boolean needBrackets) {
         if (WsListUtils.isEmpty(relationCondition.getConditionList())) {
             return;
@@ -253,19 +252,19 @@ public class MysqlHandle {
         int conditionSize = relationCondition.getConditionList().size();
         if (conditionSize == 1) {
             Condition condition = relationCondition.getConditionList().get(0);
-            chooseHandleConditionFunction(condition,sql,valueList);
+            chooseHandleConditionFunction(condition, sql, valueList);
             return;
         }
         if (needBrackets) {
             sql.append(SqlCommonConstants.LEFT_BRACKETS);
         }
         Condition condition = relationCondition.getConditionList().get(0);
-        chooseHandleConditionFunction(condition,sql,valueList);
+        chooseHandleConditionFunction(condition, sql, valueList);
 
         for (int i = 1; i < conditionSize; i++) {
             sql.append(relationCondition.getRelation().equals(SqlOperator.AND) ? SqlCommonConstants.SQL_AND : SqlCommonConstants.SQL_OR);
             condition = relationCondition.getConditionList().get(i);
-            chooseHandleConditionFunction(condition,sql,valueList);
+            chooseHandleConditionFunction(condition, sql, valueList);
         }
 
         if (needBrackets) {
@@ -273,15 +272,15 @@ public class MysqlHandle {
         }
     }
 
-    private static void chooseHandleConditionFunction(Condition condition,StringBuilder sql,List<SqlParameter> valueList){
+    private static void chooseHandleConditionFunction(Condition condition, StringBuilder sql, List<SqlParameter> valueList) {
         if (condition instanceof SingleExpressionCondition) {
             handleSingleExpressionCondition((SingleExpressionCondition) condition, sql, valueList);
         } else if (condition instanceof RelationCondition) {
             handleRelation((RelationCondition) condition, sql, valueList, true);
         } else if (condition instanceof MultiExpressionCondition) {
             handleMultiExpressionCondition((MultiExpressionCondition) condition, sql, valueList);
-        }else if(condition instanceof SqlFunctionCondition){
-            handleSqlFunctionCondition((SqlFunctionCondition) condition,sql,valueList);
+        } else if (condition instanceof SqlFunctionCondition) {
+            handleSqlFunctionCondition((SqlFunctionCondition) condition, sql, valueList);
         }
     }
 
@@ -482,49 +481,49 @@ public class MysqlHandle {
         }
     }
 
-    private static void handleSqlFunctionCondition(SqlFunctionCondition sqlFunctionCondition,StringBuilder sql,List<SqlParameter> valueList){
+    private static void handleSqlFunctionCondition(SqlFunctionCondition sqlFunctionCondition, StringBuilder sql, List<SqlParameter> valueList) {
         SqlStringAndParameters sqlStringAndParameters = handleSqlFunctionCondition(sqlFunctionCondition);
-        if(sqlStringAndParameters.isOnlyValue()){
+        if (sqlStringAndParameters.isOnlyValue()) {
             sql.append(createPlaceholder(sqlStringAndParameters.getPlaceholderNum(), SqlCommonConstants.PLACEHOLDER, SqlCommonConstants.COMMA));
-        }else {
+        } else {
             sql.append(sqlStringAndParameters.getSql());
         }
-        sqlStringAndParametersValueAddInList(sqlStringAndParameters,valueList);
+        sqlStringAndParametersValueAddInList(sqlStringAndParameters, valueList);
     }
 
-    private static SqlStringAndParameters handleSqlFunctionCondition(SqlFunctionCondition sqlFunctionCondition){
+    private static SqlStringAndParameters handleSqlFunctionCondition(SqlFunctionCondition sqlFunctionCondition) {
 
         StringBuilder sqlFunction = new StringBuilder();
         List<SqlParameter> valueList = new ArrayList<>();
 
         sqlFunction.append(sqlFunctionCondition.getFunctionName());
-        if(sqlFunctionCondition.isNeedBrackets()) {
+        if (sqlFunctionCondition.isNeedBrackets()) {
             sqlFunction.append(SqlCommonConstants.LEFT_BRACKETS);
         }
 
-        if(sqlFunctionCondition.getValues().length > 0) {
+        if (sqlFunctionCondition.getValues().length > 0) {
             SqlStringAndParameters sqlStringAndParameters = handleExpressionConditionValue(sqlFunctionCondition.getTypes()[0], sqlFunctionCondition.getValues()[0]);
-            if(sqlStringAndParameters.isOnlyValue()){
+            if (sqlStringAndParameters.isOnlyValue()) {
                 sqlFunction.append(createPlaceholder(sqlStringAndParameters.getPlaceholderNum(), SqlCommonConstants.PLACEHOLDER, SqlCommonConstants.COMMA));
-            }else {
+            } else {
                 sqlFunction.append(sqlStringAndParameters.getSql());
             }
-            sqlStringAndParametersValueAddInList(sqlStringAndParameters,valueList);
+            sqlStringAndParametersValueAddInList(sqlStringAndParameters, valueList);
             for (int i = 1; i < sqlFunctionCondition.getValues().length; i++) {
                 sqlFunction.append(SqlCommonConstants.COMMA);
                 sqlStringAndParameters = handleExpressionConditionValue(sqlFunctionCondition.getTypes()[i], sqlFunctionCondition.getValues()[i]);
-                if(sqlStringAndParameters.isOnlyValue()){
+                if (sqlStringAndParameters.isOnlyValue()) {
                     sqlFunction.append(createPlaceholder(sqlStringAndParameters.getPlaceholderNum(), SqlCommonConstants.PLACEHOLDER, SqlCommonConstants.COMMA));
-                }else {
+                } else {
                     sqlFunction.append(sqlStringAndParameters.getSql());
                 }
-                sqlStringAndParametersValueAddInList(sqlStringAndParameters,valueList);
+                sqlStringAndParametersValueAddInList(sqlStringAndParameters, valueList);
             }
         }
-        if(sqlFunctionCondition.isNeedBrackets()) {
+        if (sqlFunctionCondition.isNeedBrackets()) {
             sqlFunction.append(SqlCommonConstants.RIGHT_BRACKETS);
         }
-        return new SqlStringAndParameters(sqlFunction.toString(),valueList.stream().map(SqlParameter::getValue).collect(Collectors.toList()));
+        return new SqlStringAndParameters(sqlFunction.toString(), valueList.stream().map(SqlParameter::getValue).collect(Collectors.toList()));
     }
 
 
@@ -537,7 +536,7 @@ public class MysqlHandle {
 
         switch (sqlStringAndParameters.getValueType()) {
             case ValueTypeConstants.NULL_VALUE_MODEL:
-                valueList.add(new SqlParameter(null,null));
+                valueList.add(new SqlParameter(null, null));
                 break;
             case ValueTypeConstants.BASE_VALUE_TYPE:
                 valueList.add(new SqlParameter(null, sqlStringAndParameters.getValue()));
@@ -588,7 +587,7 @@ public class MysqlHandle {
     }
 
 
-    private static void handleUpdateCondition(List<Condition> conditionList){
+    private static void handleUpdateCondition(List<Condition> conditionList) {
 
     }
 

@@ -14,11 +14,11 @@ public class JdkResultSet implements WsResultSet {
     private final ResultSetMetaData resultSetMetaData;
 
 
-    public JdkResultSet(ResultSet resultSet){
+    public JdkResultSet(ResultSet resultSet) {
         this.resultSet = resultSet;
         try {
             this.resultSetMetaData = resultSet.getMetaData();
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 

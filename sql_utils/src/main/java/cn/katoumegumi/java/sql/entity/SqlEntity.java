@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 /**
  * sql语句
+ *
  * @author ws
  */
 public class SqlEntity {

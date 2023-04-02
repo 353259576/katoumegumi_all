@@ -166,6 +166,7 @@ public class Generator {
         }
         Map<String, Object> map = new HashMap<>();
         map.put("enableSwagger", this.enableSwagger);
+        map.put("enableSpringDoc", this.enableSpringDoc);
         map.put("enableMybatisPlus", this.enableMybatisPlus);
         map.put("enableHibernate", this.enableHibernate);
         Template template = freeMarkerUtils.getTemplate("Entity.ftl");
@@ -210,6 +211,7 @@ public class Generator {
         }
         Map<String, Object> map = new HashMap<>();
         map.put("enableSwagger", this.enableSwagger);
+        map.put("enableSpringDoc", this.enableSpringDoc);
         map.put("enableSearchVO",this.enableSearchVO);
         map.put("type",this.type);
         Template template = freeMarkerUtils.getTemplate("Controller.ftl");
@@ -251,6 +253,7 @@ public class Generator {
             Map<String, Object> map = new HashMap<>();
             map.put("enableMybatisPlus", this.enableMybatisPlus);
             map.put("enableSwagger", this.enableSwagger);
+            map.put("enableSpringDoc", this.enableSpringDoc);
             Template template = freeMarkerUtils.getTemplate("SearchVO.ftl");
             create(exportPath + javaPath + packagePath, searchVOPath, table.getEntityName() + "SearchVO.java", template, table, map);
         }
@@ -423,7 +426,7 @@ public class Generator {
             str = "/" + str;
         }
         if(str.endsWith("/")){
-            str = str.substring(0,str.length());
+            str = str.substring(0,str.length() - 1);
         }
         return str;
     }

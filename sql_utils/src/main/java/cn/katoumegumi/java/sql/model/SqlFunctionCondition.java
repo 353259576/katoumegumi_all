@@ -17,31 +17,31 @@ public class SqlFunctionCondition extends AbstractExpressionCondition {
         this.functionName = functionName;
     }
 
-    public SqlFunctionCondition(Object[] values,String functionName) {
+    public SqlFunctionCondition(Object[] values, String functionName) {
         super(values);
         this.needBrackets = true;
         this.functionName = functionName;
     }
 
-    public SqlFunctionCondition(String functionName,Object... values) {
+    public SqlFunctionCondition(String functionName, Object... values) {
         super(values);
         this.needBrackets = true;
         this.functionName = functionName;
     }
 
-    public SqlFunctionCondition(boolean needBrackets,int length, String functionName) {
+    public SqlFunctionCondition(boolean needBrackets, int length, String functionName) {
         super(length);
         this.needBrackets = needBrackets;
         this.functionName = functionName;
     }
 
-    public SqlFunctionCondition(boolean needBrackets,Object[] values,String functionName) {
+    public SqlFunctionCondition(boolean needBrackets, Object[] values, String functionName) {
         super(values);
         this.needBrackets = needBrackets;
         this.functionName = functionName;
     }
 
-    public SqlFunctionCondition(boolean needBrackets,String functionName,Object... values) {
+    public SqlFunctionCondition(boolean needBrackets, String functionName, Object... values) {
         super(values);
         this.needBrackets = needBrackets;
         this.functionName = functionName;

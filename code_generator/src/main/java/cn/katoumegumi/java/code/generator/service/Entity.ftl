@@ -63,7 +63,7 @@ public class ${table.entityName} implements Serializable {
     <#if enableSwagger == true>
     @ApiModelProperty(value = "${table.pkColumn.columnRemark}")
     </#if>
-    <#if enableSwagger == true>
+    <#if enableSpringDoc == true>
     @Schema(description = "${table.pkColumn.columnRemark}")
     </#if>
     private ${table.pkColumn.columnClass.getSimpleName()} ${table.pkColumn.beanFieldName};
@@ -83,7 +83,7 @@ public class ${table.entityName} implements Serializable {
         <#if enableSwagger == true>
     @ApiModelProperty(value = "${column.columnRemark}")
         </#if>
-        <#if enableSwagger == true>
+        <#if enableSpringDoc == true>
     @Schema(description = "${column.columnRemark}")
         </#if>
     private ${column.columnClass.getSimpleName()} ${column.beanFieldName};

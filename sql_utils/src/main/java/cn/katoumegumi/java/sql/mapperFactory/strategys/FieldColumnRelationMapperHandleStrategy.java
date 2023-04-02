@@ -13,12 +13,14 @@ public interface FieldColumnRelationMapperHandleStrategy {
 
     /**
      * 是否能够使用
+     *
      * @return
      */
     boolean canUse();
 
     /**
      * 判断是否能够处理
+     *
      * @param clazz
      * @return
      */
@@ -26,6 +28,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
 
     /**
      * 获取表名称
+     *
      * @param clazz
      * @return
      */
@@ -33,6 +36,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
 
     /**
      * 是否需要过滤
+     *
      * @param field
      * @return
      */
@@ -40,20 +44,22 @@ public interface FieldColumnRelationMapperHandleStrategy {
 
     /**
      * 获取列名称
+     *
      * @param mainMapper
      * @param field
      * @return
      */
-    Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper,Field field);
+    Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, Field field);
 
     /**
      * 获取关联列对应关系
+     *
      * @param mainMapper
      * @param joinMapper
      * @param field
      * @return key为主表列表 value为关联表列
      */
-    Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper,FieldColumnRelationMapper joinMapper,Field field);
+    Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field);
 
     /**
      * 处理当前数据

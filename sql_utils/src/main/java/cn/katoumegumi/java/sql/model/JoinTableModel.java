@@ -5,7 +5,7 @@ import cn.katoumegumi.java.sql.common.TableJoinType;
 /**
  * 关联表
  */
-public class JoinTableModel{
+public class JoinTableModel {
 
     private final TableModel table;
 
@@ -18,7 +18,7 @@ public class JoinTableModel{
     public JoinTableModel(TableModel table, TableModel joinTable, TableJoinType joinType, RelationCondition on) {
         this.table = table;
         this.joinTable = joinTable;
-        this.joinType = joinType == null?TableJoinType.INNER_JOIN:joinType;
+        this.joinType = joinType == null ? TableJoinType.INNER_JOIN : joinType;
         this.on = on;
     }
 

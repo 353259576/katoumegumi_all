@@ -2,6 +2,7 @@ package cn.katoumegumi.java.sql.entity;
 
 /**
  * limit语句
+ *
  * @author ws
  */
 public class SqlLimit {

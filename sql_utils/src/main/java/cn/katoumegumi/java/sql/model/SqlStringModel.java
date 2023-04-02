@@ -21,17 +21,17 @@ public class SqlStringModel {
     public SqlStringModel(String sql, Object value) {
         this.sql = sql;
         this.value = value;
-        if(value == null){
+        if (value == null) {
             this.valueType = ValueTypeConstants.NULL_TYPE;
-        }else if (WsBeanUtils.isBaseType(value.getClass())){
+        } else if (WsBeanUtils.isBaseType(value.getClass())) {
             this.valueType = ValueTypeConstants.BASE_VALUE_TYPE;
-        }else if (value instanceof Collection){
+        } else if (value instanceof Collection) {
             this.valueType = ValueTypeConstants.COLLECTION_TYPE;
-        }else if(WsBeanUtils.isArray(value.getClass())){
+        } else if (WsBeanUtils.isArray(value.getClass())) {
             this.valueType = ValueTypeConstants.ARRAY_TYPE;
-        }else if(value instanceof NullValue){
+        } else if (value instanceof NullValue) {
             this.valueType = ValueTypeConstants.NULL_VALUE_MODEL;
-        }else {
+        } else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());
         }
     }

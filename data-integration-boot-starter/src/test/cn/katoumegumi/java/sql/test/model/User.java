@@ -38,6 +38,7 @@ public class User implements Serializable {
 
 
     private List<UserDetails> userDetails;
+    //private UserDetails userDetails;
 
 
     //private int[] ints = new int[]{1,2,3};
@@ -87,4 +88,13 @@ public class User implements Serializable {
         this.userDetails = userDetails;
         return this;
     }
+
+    /*public UserDetails getUserDetails() {
+        return userDetails;
+    }
+
+    public User setUserDetails(UserDetails userDetails) {
+        this.userDetails = userDetails;
+        return this;
+    }*/
 }

@@ -185,9 +185,8 @@ public class WsBeanUtils {
      * @return
      */
     public static <T> T objectToT(Object object, Class<T> tClass) {
-        boolean isPrimitive = tClass.isPrimitive();
-        //Object o = convertToT(object, tClass);
         Object o = ConvertUtils.convert(object, tClass);
+        boolean isPrimitive = tClass.isPrimitive();
         if (isPrimitive && o == null) {
             if (tClass == int.class) {
                 o = 0;

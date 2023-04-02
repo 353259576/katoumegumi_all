@@ -76,16 +76,16 @@ public class SqlEquation {
 
     public SqlEquation value(Object o) {
         int valueType;
-        if(o == null){
+        if (o == null) {
             valueType = ValueTypeConstants.NULL_VALUE_MODEL;
             o = SqlCommonConstants.NULL_VALUE;
-        }else if(WsBeanUtils.isBaseType(o.getClass())){
+        } else if (WsBeanUtils.isBaseType(o.getClass())) {
             valueType = ValueTypeConstants.BASE_VALUE_TYPE;
-        }else if(o instanceof Collection){
+        } else if (o instanceof Collection) {
             valueType = ValueTypeConstants.COLLECTION_TYPE;
-        }else if(WsBeanUtils.isArray(o.getClass())){
+        } else if (WsBeanUtils.isArray(o.getClass())) {
             valueType = ValueTypeConstants.ARRAY_TYPE;
-        }else if(o instanceof NullValue){
+        } else if (o instanceof NullValue) {
             valueType = ValueTypeConstants.NULL_VALUE_MODEL;
         } else {
             throw new IllegalArgumentException("不支持的值");
@@ -217,8 +217,7 @@ public class SqlEquation {
         BETWEEN(SqlCommonConstants.BETWEEN),
         NOT_BETWEEN(SqlCommonConstants.NOT_BETWEEN),
         SET(SqlCommonConstants.SET),
-        SQL(null)
-        ;
+        SQL(null);
 
         private final String symbol;
 

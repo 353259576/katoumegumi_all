@@ -18,7 +18,7 @@ public class DeleteModel {
         this.from = from;
         this.joinList = joinList;
         this.where = where;
-        if(where == null){
+        if (where == null) {
             throw new IllegalArgumentException("禁止全表删除");
         }
     }

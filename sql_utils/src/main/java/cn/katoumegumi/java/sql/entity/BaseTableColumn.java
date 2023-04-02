@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 
 /**
  * 基本表列
+ *
  * @author ws
  */
 public class BaseTableColumn implements TableColumn {
@@ -30,6 +31,7 @@ public class BaseTableColumn implements TableColumn {
 
     /**
      * 创建table column name
+     *
      * @param tableNickName
      * @param columnName
      * @return
@@ -89,6 +91,7 @@ public class BaseTableColumn implements TableColumn {
 
     /**
      * 获取显示的column的值
+     *
      * @return
      */
     public String getColumnValue() {

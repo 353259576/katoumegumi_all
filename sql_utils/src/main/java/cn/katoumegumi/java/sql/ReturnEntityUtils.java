@@ -21,6 +21,7 @@ public class ReturnEntityUtils {
 
     /**
      * 获取id对应的returnEntity
+     *
      * @param idReturnEntityMap
      * @param returnEntity
      * @return
@@ -45,6 +46,7 @@ public class ReturnEntityUtils {
 
     /**
      * 把returnEntity转换为相应的对象
+     *
      * @param returnEntity
      * @return
      */
@@ -114,6 +116,7 @@ public class ReturnEntityUtils {
 
     /**
      * 包装returnEntity
+     *
      * @param idReturnEntityMap
      * @param returnEntityMap
      * @param returnEntity

@@ -58,7 +58,7 @@ public class FieldColumnRelationMapper {
         this.baseTemplateMapper = null;
     }
 
-    public FieldColumnRelationMapper(String nickName, String tableName, Class<?> clazz,FieldColumnRelationMapper mapper) {
+    public FieldColumnRelationMapper(String nickName, String tableName, Class<?> clazz, FieldColumnRelationMapper mapper) {
         this.nickName = nickName;
         this.tableName = tableName;
         this.clazz = clazz;
@@ -144,8 +144,8 @@ public class FieldColumnRelationMapper {
         return fieldColumnRelationMap;
     }*/
 
-    public FieldColumnRelation putFieldColumnRelationMap(String key,FieldColumnRelation fieldColumnRelation){
-        return this.fieldColumnRelationMap.put(key,fieldColumnRelation);
+    public FieldColumnRelation putFieldColumnRelationMap(String key, FieldColumnRelation fieldColumnRelation) {
+        return this.fieldColumnRelationMap.put(key, fieldColumnRelation);
     }
 
 

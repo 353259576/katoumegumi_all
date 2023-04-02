@@ -3,7 +3,7 @@ package cn.katoumegumi.java.sql.model;
 /**
  * 多表达式条件(例如：a + b = c)
  */
-public class MultiExpressionCondition extends AbstractExpressionCondition{
+public class MultiExpressionCondition extends AbstractExpressionCondition {
 
     private int index;
     private final int length;
@@ -20,8 +20,8 @@ public class MultiExpressionCondition extends AbstractExpressionCondition{
         this.length = values.length;
     }
 
-    public MultiExpressionCondition add(Object value){
-        if(this.index >= this.length){
+    public MultiExpressionCondition add(Object value) {
+        if (this.index >= this.length) {
             throw new ArrayIndexOutOfBoundsException("已达到最大数量,禁止添加");
         }
         this.values[this.index] = value;

@@ -10,7 +10,6 @@ import java.util.Collection;
 
 /**
  * 抽象表达式条件
- *
  */
 public abstract class AbstractExpressionCondition implements Condition {
 
@@ -18,7 +17,7 @@ public abstract class AbstractExpressionCondition implements Condition {
 
     protected final Object[] values;
 
-    protected AbstractExpressionCondition(int length){
+    protected AbstractExpressionCondition(int length) {
         this.types = new int[length];
         this.values = new Object[length];
     }
@@ -26,43 +25,43 @@ public abstract class AbstractExpressionCondition implements Condition {
     public AbstractExpressionCondition(Object[] values) {
         this.types = new int[values.length];
         this.values = values;
-        for (int i = 0; i < values.length; i++){
+        for (int i = 0; i < values.length; i++) {
             this.types[i] = getValueType(values[i]);
         }
     }
 
-    protected int getValueType(Object value){
-        if(value == null){
+    protected int getValueType(Object value) {
+        if (value == null) {
             return ValueTypeConstants.NULL_TYPE;
-        }else if(value instanceof BaseTableColumn){
+        } else if (value instanceof BaseTableColumn) {
             return ValueTypeConstants.COLUMN_NAME_TYPE;
-        }else if (value instanceof SqlEquation.Symbol){
+        } else if (value instanceof SqlEquation.Symbol) {
             return ValueTypeConstants.SYMBOL_TYPE;
-        }else if(WsBeanUtils.isBaseType(value.getClass())){
+        } else if (WsBeanUtils.isBaseType(value.getClass())) {
             return ValueTypeConstants.BASE_VALUE_TYPE;
-        } else if(value instanceof Collection){
+        } else if (value instanceof Collection) {
             return ValueTypeConstants.COLLECTION_TYPE;
-        }else if(WsBeanUtils.isArray(value.getClass())){
+        } else if (WsBeanUtils.isArray(value.getClass())) {
             return ValueTypeConstants.ARRAY_TYPE;
-        }else if(value instanceof SqlStringModel){
+        } else if (value instanceof SqlStringModel) {
             return ValueTypeConstants.SQL_STRING_MODEL_TYPE;
-        } else if(value instanceof SelectModel){
+        } else if (value instanceof SelectModel) {
             return ValueTypeConstants.SELECT_MODEL_TYPE;
-        } else if(value instanceof RelationCondition){
+        } else if (value instanceof RelationCondition) {
             return ValueTypeConstants.CONDITION_RELATION_MODEL_TYPE;
-        }else if (value instanceof SingleExpressionCondition){
+        } else if (value instanceof SingleExpressionCondition) {
             return ValueTypeConstants.SINGLE_EXPRESSION_CONDITION_MODEL;
-        }else if (value instanceof MultiExpressionCondition){
+        } else if (value instanceof MultiExpressionCondition) {
             return ValueTypeConstants.MULTI_EXPRESSION_CONDITION_MODEL;
-        }else if(value instanceof SqlFunctionCondition){
+        } else if (value instanceof SqlFunctionCondition) {
             return ValueTypeConstants.SQL_FUNCTION_CONDITION;
-        }else if(value instanceof NullValue){
+        } else if (value instanceof NullValue) {
             return ValueTypeConstants.NULL_VALUE_MODEL;
         }
         /*else if (value instanceof SqlEquation){
             return 5;
         }*/
-        throw new IllegalArgumentException("不支持的类型:"+value.getClass());
+        throw new IllegalArgumentException("不支持的类型:" + value.getClass());
     }
 
     public int[] getTypes() {

@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author ws
@@ -73,16 +72,16 @@ public class SQLModelUtils {
     private SelectModel cacheSelectModel;
 
     public SQLModelUtils(MySearchList mySearchList) {
-        this(mySearchList, new TranslateNameUtils(),false);
+        this(mySearchList, new TranslateNameUtils(), false);
     }
 
-    public SQLModelUtils(MySearchList mySearchList, TranslateNameUtils translateNameUtils){
-        this(mySearchList,translateNameUtils,true);
+    public SQLModelUtils(MySearchList mySearchList, TranslateNameUtils translateNameUtils) {
+        this(mySearchList, translateNameUtils, true);
     }
 
-    public SQLModelUtils(MySearchList mySearchList, TranslateNameUtils parentTranslateNameUtils,boolean isNested) {
+    public SQLModelUtils(MySearchList mySearchList, TranslateNameUtils parentTranslateNameUtils, boolean isNested) {
         this.mySearchList = mySearchList;
-        this.translateNameUtils = isNested?new TranslateNameUtils(parentTranslateNameUtils):parentTranslateNameUtils;
+        this.translateNameUtils = isNested ? new TranslateNameUtils(parentTranslateNameUtils) : parentTranslateNameUtils;
         mainClass = mySearchList.getMainClass();
         FieldColumnRelationMapper mapper = analysisClassRelation(mainClass);
         if (WsStringUtils.isBlank(mySearchList.getAlias())) {
@@ -415,10 +414,10 @@ public class SQLModelUtils {
      */
     public <T> List<T> margeMap(WsResultSet resultSet) {
         if (WsListUtils.isEmpty(mySearchList.getColumnNameList())) {
-            return oneLoopMargeMap(resultSet);
+            return oneLoopMargeMap2(resultSet);
         } else {
             List<Object> tList = new ArrayList<>();
-            TableColumn tableColumn = this.cacheSelectModel == null?cacheSqlEntity.getColumnList().get(0):this.cacheSelectModel.getSelect().get(0);
+            TableColumn tableColumn = this.cacheSelectModel == null ? cacheSqlEntity.getColumnList().get(0) : this.cacheSelectModel.getSelect().get(0);
             try {
                 while (resultSet.next()) {
                     Object o = WsBeanUtils.objectToT(resultSet.getObject(1), tableColumn.getField().getType());
@@ -523,85 +522,92 @@ public class SQLModelUtils {
 
     public <T> List<T> oneLoopMargeMap2(WsResultSet resultSet) {
         try {
-            int classNum = translateNameUtils.locationMapperSize();
             final int length = resultSet.getColumnCount();
-
             if (length == 0) {
                 return new ArrayList<>(0);
             }
+
+
             FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
             String rootPath = mainMapper.getNickName();
 
 
-            List<String> columnNameListList = new ArrayList<>(length);
             List<FieldColumnRelation> columnRelationList = new ArrayList<>(length);
-            List<FieldColumnRelationMapper> mapperList = new ArrayList<>(length);
-            Map<FieldColumnRelationMapper,int[][]> mapperAndLocaltionMap = new HashMap<>();
-            Map<FieldColumnRelationMapper,int[]> mapperAndSplitColumnNameListMap = new HashMap<>();
-            String columnName;
-            List<String> nameList;
-            FieldColumnRelationMapper mapper;
-            FieldColumnRelation fieldColumnRelation;
-            int[][] locationList;
+            List<int[][]> localtionList = new ArrayList<>();
+            Map<String, FieldColumnRelationMapperName> abbreviationAndMapperNameMap = new HashMap<>();
+            String columnNameTemp;
+            List<String> nameListTemp;
+            String mapperName;
+            FieldColumnRelationMapper mapperTemp;
+            FieldColumnRelation fieldColumnRelationTemp;
+            FieldColumnRelationMapperName fieldColumnRelationMapperNameTemp;
+            //0是id的坐标 1是非id坐标
+            int[][] locationListTemp;
             int mapperNameSign = 0;
-            Map<String,Integer> mapperNameAndSignMap = new HashMap<>();
+            Map<String, Integer> mapperNameAndSignMap = new HashMap<>();
+
+            int mapperNameIndex = 0;
+
             for (int i = 0; i < length; i++) {
-                columnName = resultSet.getColumnLabel(i + 1);
-                nameList = WsStringUtils.split(columnName, '.');
-                nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
-                mapper = translateNameUtils.getLocalMapper(nameList.get(0));
-                int[] mapperNameSplitArray = mapperAndSplitColumnNameListMap.get(mapper);
-                if(mapperNameSplitArray == null){
-                    List<String> mapperNameSplitList = WsStringUtils.split(nameList.get(0),'.');
-                    mapperNameSplitArray = new int[mapperNameSplitList.size()];
-                    for (int index = 0,aLength = mapperNameSplitList.size(); index < aLength; index++){
-                        Integer sign = mapperNameAndSignMap.get(mapperNameSplitList.get(index));
-                        if(sign == null){
-                            sign = mapperNameSign++;
-                            mapperNameAndSignMap.put(mapperNameSplitList.get(index),sign);
-                        }
-                        mapperNameSplitArray[index] = sign;
-                    }
-                    mapperAndSplitColumnNameListMap.put(mapper,mapperNameSplitArray);
-                }
-                locationList = mapperAndLocaltionMap.computeIfAbsent(mapper,m->{
-                    int[][] integers = new int[2][];
-                    integers[0] = new int[m.getIds().size()];
-                    integers[1] = new int[m.getFieldColumnRelations().size()];
-                    return integers;
-                });
-                fieldColumnRelation = mapper.getFieldColumnRelationByFieldName(nameList.get(1));
-                if(fieldColumnRelation.isId()){
-                    locationList[0][mapper.getLocation(fieldColumnRelation)] = i;
+                columnNameTemp = resultSet.getColumnLabel(i + 1);
+                nameListTemp = WsStringUtils.split(columnNameTemp, '.');
+                //获取映射名称
+                fieldColumnRelationMapperNameTemp = abbreviationAndMapperNameMap.get(nameListTemp.get(0));
+                if (fieldColumnRelationMapperNameTemp == null) {
+                    mapperName = translateNameUtils.getParticular(nameListTemp.get(0));
+                    mapperTemp = translateNameUtils.getLocalMapper(mapperName);
+                    fieldColumnRelationMapperNameTemp = new FieldColumnRelationMapperName(mapperNameIndex++, nameListTemp.get(0), mapperName,mapperTemp);
+                    mapperNameSign = fieldColumnRelationMapperNameTemp.setCompleteNameSplitSignNameList(mapperNameAndSignMap, mapperNameSign);
+                    abbreviationAndMapperNameMap.put(fieldColumnRelationMapperNameTemp.getAbbreviation(), fieldColumnRelationMapperNameTemp);
                 }else {
-                    locationList[1][mapper.getLocation(fieldColumnRelation)] = i;
+                    mapperTemp = fieldColumnRelationMapperNameTemp.getMapper();
                 }
-                columnNameListList.add(nameList.get(nameList.size() - 1));
-                mapperList.add(mapper);
-                columnRelationList.add(fieldColumnRelation);
+
+                //获取位置数组
+                if (fieldColumnRelationMapperNameTemp.getIndex() >= localtionList.size()) {
+                    locationListTemp = new int[2][];
+                    locationListTemp[0] = new int[mapperTemp.getIds().size()];
+                    locationListTemp[1] = new int[mapperTemp.getFieldColumnRelations().size()];
+                    localtionList.add(locationListTemp);
+                } else {
+                    locationListTemp = localtionList.get(fieldColumnRelationMapperNameTemp.getIndex());
+                }
+
+                //填写位置数组
+                fieldColumnRelationTemp = mapperTemp.getFieldColumnRelationByFieldName(nameListTemp.get(1));
+                if (fieldColumnRelationTemp.isId()) {
+                    locationListTemp[0][mapperTemp.getLocation(fieldColumnRelationTemp)] = i;
+                } else {
+                    locationListTemp[1][mapperTemp.getLocation(fieldColumnRelationTemp)] = i;
+                }
+                columnRelationList.add(fieldColumnRelationTemp);
             }
+
             MapperDictTree mapperDictTree = new MapperDictTree();
-            for (Map.Entry<FieldColumnRelationMapper, int[]> fieldColumnRelationMapperEntry : mapperAndSplitColumnNameListMap.entrySet()) {
-                mapperDictTree.add(fieldColumnRelationMapperEntry.getValue(),fieldColumnRelationMapperEntry.getKey());
+            for (FieldColumnRelationMapperName name : abbreviationAndMapperNameMap.values()) {
+                mapperDictTree.add(name);
             }
 
+            //判断是否需要进行数据合并
+            boolean hasArray = mapperDictTree.checkNeedMergeAndBuild();
 
 
-            List<ReturnEntity> returnEntityList = new ArrayList<>();
+            //获取root类
+            mapperDictTree = mapperDictTree.getChildMap().get(mapperNameAndSignMap.get(rootPath));
 
-            while (resultSet.next()){
+            List<Object> valueList = new ArrayList<>();
 
+            ExistEntityInfo existEntityInfo = hasArray ? new ExistEntityInfo(mapperDictTree.getChildMap().size()) : null;
+
+            Object value;
+            while (resultSet.next()) {
+                value = createNeedMergeValue(resultSet, existEntityInfo, mapperDictTree, localtionList, columnRelationList);
+                if (value != null) {
+                    valueList.add(value);
+                }
             }
 
-            if (returnEntityList.size() == 0) {
-                return new ArrayList<>(0);
-            }
-            List<Object> list = new ArrayList<>(returnEntityList.size());
-            for (ReturnEntity returnEntity : returnEntityList) {
-                list.add(returnEntity.getValue());
-            }
-
-            return (List<T>) list;
+            return (List<T>) valueList;
 
 
         } catch (SQLException throwables) {
@@ -611,9 +617,174 @@ public class SQLModelUtils {
     }
 
 
+    private Object createNeedMergeValue(WsResultSet resultSet, ExistEntityInfo parentExistEntityInfo, MapperDictTree mapperDictTree, List<int[][]> locationList, List<FieldColumnRelation> columnRelationList) throws SQLException {
+        if (parentExistEntityInfo == null) {
+            return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
+        }
+        if (!mapperDictTree.isHasArray()) {
+            return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
+        }
+        FieldColumnRelationMapper mapper = mapperDictTree.getCurrentMapperName().getMapper();
+        if (mapper.getIds().size() == 0) {
+            //没有id数据不能合并
+            return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
+        }
+        FieldColumnRelationMapperName mapperName = mapperDictTree.getCurrentMapperName();
+        int[][] location = locationList.get(mapperName.getIndex());
+        Object[] ids = new Object[mapper.getIds().size()];
+        boolean isNotNullObject = false;
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = resultSet.getObject(location[0][i] + 1);
+            if (ids[i] != null) {
+                isNotNullObject = true;
+            }
+        }
+        if (!isNotNullObject) {
+            //id为空,后续数据不合并
+            return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
+        }
+        ReturnEntityId returnEntityId = new ReturnEntityId(ids);
+        Map<ReturnEntityId, KeyValue<Object, Object[]>> valueMap = parentExistEntityInfo.getExistMap();
+        KeyValue<Object, Object[]> keyValue = valueMap.get(returnEntityId);
+        Object value;
+        boolean isNotExist = keyValue == null;
+        if (isNotExist) {
+            value = WsBeanUtils.createObject(mapper.getClazz());
+            fillObjectValue(value, ids, location[0], columnRelationList);
+            fillObjectValue(value, resultSet, location[1], columnRelationList);
+            keyValue = new KeyValue<>(value, new Object[mapperDictTree.getChildMap().size()]);
+            valueMap.put(returnEntityId, keyValue);
+        } else {
+            value = keyValue.getKey();
+        }
+
+        Object subValue;
+        ExistEntityInfo subExistEntityInfo;
+        Object[] cacheSubValue = keyValue.getValue();
+        for (int i = 0; i < mapperDictTree.getChildMap().size(); i++) {
+            MapperDictTree subTree = mapperDictTree.getMapperDictTrees()[i];
+            FieldJoinClass fieldJoinClass = mapperDictTree.getFieldJoinClasses()[i];
+
+            if (parentExistEntityInfo.getNextSize() > i) {
+                subExistEntityInfo = parentExistEntityInfo.getNext(i);
+            } else {
+                subExistEntityInfo = new ExistEntityInfo(subTree.getChildMap().size());
+                parentExistEntityInfo.addNext(subExistEntityInfo);
+            }
+
+            if (cacheSubValue[i] == SqlCommonConstants.NULL_VALUE) {
+                continue;
+            }
+            subValue = createNeedMergeValue(resultSet, subExistEntityInfo, subTree, locationList, columnRelationList);
+            if (cacheSubValue[i] == null) {
+                //第一次获取值
+                if (fieldJoinClass.isArray()) {
+                    if (subValue != null) {
+                        List<Object> list = new ArrayList<>();
+                        list.add(subValue);
+                        cacheSubValue[i] = list;
+                        WsFieldUtils.setValue(value, list, fieldJoinClass.getField());
+                    }
+                } else {
+                    if (subValue == null) {
+                        cacheSubValue[i] = SqlCommonConstants.NULL_VALUE;
+                    } else {
+                        cacheSubValue[i] = subValue;
+                        WsFieldUtils.setValue(value, subValue, fieldJoinClass.getField());
+                    }
+                }
+            } else {
+                if (fieldJoinClass.isArray() && subValue != null) {
+                    List<Object> list = (List<Object>) cacheSubValue[i];
+                    list.add(subValue);
+                }
+            }
+        }
+
+        if (isNotExist) {
+            return value;
+        }
+        return null;
+    }
+
+
+    /**
+     * 创建对象
+     *
+     * @param resultSet
+     * @param mapperDictTree
+     * @param locationList
+     * @param columnRelationList
+     * @return
+     * @throws SQLException
+     */
+    private static Object createValue(WsResultSet resultSet, MapperDictTree mapperDictTree, List<int[][]> locationList, List<FieldColumnRelation> columnRelationList) throws SQLException {
+        FieldColumnRelationMapper mapper = mapperDictTree.getCurrentMapperName().getMapper();
+        FieldColumnRelationMapperName mapperName = mapperDictTree.getCurrentMapperName();
+        int[][] location = locationList.get(mapperName.getIndex());
+        Object value = WsBeanUtils.createObject(mapper.getClazz());
+        boolean isNotNull = fillObjectValue(value, resultSet, location[0], columnRelationList) | fillObjectValue(value, resultSet, location[1], columnRelationList);
+        for (int i = 0; i < mapperDictTree.getChildMap().size(); i++) {
+
+            FieldJoinClass fieldJoinClass = mapperDictTree.getFieldJoinClasses()[i];
+            Object joinValue = createValue(resultSet, mapperDictTree.getMapperDictTrees()[i], locationList, columnRelationList);
+            if (joinValue != null) {
+                isNotNull = true;
+                if (fieldJoinClass.isArray()) {
+                    List<Object> list = new ArrayList<>(1);
+                    list.add(joinValue);
+                    WsFieldUtils.setValue(value, list, fieldJoinClass.getField());
+                } else {
+                    WsFieldUtils.setValue(value, joinValue, fieldJoinClass.getField());
+                }
+            }
+
+
+        }
+        if (isNotNull) {
+            return value;
+        }
+        return null;
+    }
+
+    private static boolean fillObjectValue(Object o, Object[] ids, int[] location, List<FieldColumnRelation> columnRelationList) {
+        boolean isAdd = false;
+        for (int i = 0; i < location.length; i++) {
+            FieldColumnRelation fieldColumnRelationTemp = columnRelationList.get(location[i]);
+            Object value = ids[i];
+            if (value == null) {
+                continue;
+            }
+            isAdd = true;
+            if (value instanceof byte[]) {
+                value = new String((byte[]) value);
+            }
+            WsFieldUtils.setValue(o, WsBeanUtils.objectToT(value, fieldColumnRelationTemp.getFieldClass()), fieldColumnRelationTemp.getField());
+        }
+        return isAdd;
+    }
+
+    private static boolean fillObjectValue(Object o, WsResultSet resultSet, int[] location, List<FieldColumnRelation> columnRelationList) throws SQLException {
+        boolean isAdd = false;
+        for (int j : location) {
+            FieldColumnRelation fieldColumnRelationTemp = columnRelationList.get(j);
+            Object value = resultSet.getObject(j + 1);
+            if (value == null) {
+                continue;
+            }
+            isAdd = true;
+            if (value instanceof byte[]) {
+                value = new String((byte[]) value);
+            }
+            WsFieldUtils.setValue(o, WsBeanUtils.objectToT(value, fieldColumnRelationTemp.getFieldClass()), fieldColumnRelationTemp.getField());
+        }
+        return isAdd;
+    }
+
 
     /**
      * 合并返回数据
+     *
      * @param mapList
      * @param <T>
      * @return
@@ -696,105 +867,109 @@ public class SQLModelUtils {
 
     /**
      * MySearchList转换为SelectModel
+     *
      * @return
      */
-    public SelectModel transferToSelectModel(){
+    public SelectModel transferToSelectModel() {
         final FieldColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
-        TableModel from = new TableModel(mainMapper,translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
         final String rootPath = mainMapper.getNickName();
-        translateNameUtils.addLocalMapper(rootPath,mainMapper);
+        translateNameUtils.addLocalMapper(rootPath, mainMapper);
         final boolean appointQueryColumn = WsListUtils.isNotEmpty(this.mySearchList.getColumnNameList());
         List<TableColumn> queryColumnList = new ArrayList<>();
 
-        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath,mainMapper,queryColumnList,appointQueryColumn,false);
+        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, queryColumnList, appointQueryColumn, false);
 
-        if(appointQueryColumn){
-            if(this.mySearchList.isSingleColumn()){
+        if (appointQueryColumn) {
+            if (this.mySearchList.isSingleColumn()) {
                 //是单列查询自动加入distinct关键字去重
-                BaseTableColumn baseTableColumn = translateNameUtils.getColumnBaseEntity(this.mySearchList.getColumnNameList().get(0),rootPath,2);
+                BaseTableColumn baseTableColumn = translateNameUtils.getColumnBaseEntity(this.mySearchList.getColumnNameList().get(0), rootPath, 2);
                 DynamicTableColumn dynamicTableColumn = new DynamicTableColumn(
-                        new SqlFunctionCondition(false,"distinct ",baseTableColumn),
+                        new SqlFunctionCondition(false, "distinct ", baseTableColumn),
                         baseTableColumn
                 );
                 queryColumnList.add(dynamicTableColumn);
-            }else {
-                for (String columnName:this.mySearchList.getColumnNameList()){
-                    queryColumnList.add(translateNameUtils.getColumnBaseEntity(columnName,rootPath,2));
+            } else {
+                for (String columnName : this.mySearchList.getColumnNameList()) {
+                    queryColumnList.add(translateNameUtils.getColumnBaseEntity(columnName, rootPath, 2));
                 }
             }
 
         }
 
-        RelationCondition where = handleWhere(rootPath,mainMapper,this.mySearchList);
+        RelationCondition where = handleWhere(rootPath, mainMapper, this.mySearchList);
 
 
         List<OrderByCondition> orderByConditionList = null;
-        if(WsListUtils.isNotEmpty(this.mySearchList.getOrderSearches())){
+        if (WsListUtils.isNotEmpty(this.mySearchList.getOrderSearches())) {
             orderByConditionList = new ArrayList<>(this.mySearchList.getOrderSearches().size());
-            for (MySearch mySearch:this.mySearchList.getOrderSearches()){
-                if(mySearch.getFieldName().charAt(mySearch.getFieldName().length() - 1) == SqlCommonConstants.RIGHT_BRACKETS){
-                    orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath,mySearch.getFieldName()),null),WsBeanUtils.objectToT(mySearch.getValue(),String.class)));
-                }else {
-                    orderByConditionList.add(new OrderByCondition(translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(),rootPath,2),WsBeanUtils.objectToT(mySearch.getValue(),String.class)));
+            for (MySearch mySearch : this.mySearchList.getOrderSearches()) {
+                if (mySearch.getFieldName().charAt(mySearch.getFieldName().length() - 1) == SqlCommonConstants.RIGHT_BRACKETS) {
+                    orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, mySearch.getFieldName()), null), WsBeanUtils.objectToT(mySearch.getValue(), String.class)));
+                } else {
+                    orderByConditionList.add(new OrderByCondition(translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), rootPath, 2), WsBeanUtils.objectToT(mySearch.getValue(), String.class)));
                 }
             }
         }
-        SelectModel selectModel = new SelectModel(queryColumnList,from,joinTableModelList,where, orderByConditionList,this.mySearchList.getSqlLimit());
+        SelectModel selectModel = new SelectModel(queryColumnList, from, joinTableModelList, where, orderByConditionList, this.mySearchList.getSqlLimit());
         this.cacheSelectModel = selectModel;
         return selectModel;
     }
 
     /**
      * MySearchList转换为DeleteModel
+     *
      * @return
      */
-    public DeleteModel transferToDeleteModel(){
+    public DeleteModel transferToDeleteModel() {
         final FieldColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
-        TableModel from = new TableModel(mainMapper,translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
         final String rootPath = mainMapper.getNickName();
-        translateNameUtils.addLocalMapper(rootPath,mainMapper);
-        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath,mainMapper,null,true,true);
-        RelationCondition where = handleWhere(rootPath,mainMapper,this.mySearchList);
-        return new DeleteModel(from,joinTableModelList,where);
+        translateNameUtils.addLocalMapper(rootPath, mainMapper);
+        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, null, true, true);
+        RelationCondition where = handleWhere(rootPath, mainMapper, this.mySearchList);
+        return new DeleteModel(from, joinTableModelList, where);
     }
 
     /**
      * MySearchList转换为UpdateModel
+     *
      * @return
      */
-    public UpdateModel transferToUpdateModel(){
+    public UpdateModel transferToUpdateModel() {
         final FieldColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
         List<MySearch> updateSearchList = this.mySearchList.filterUpdateSearch();
-        TableModel from = new TableModel(mainMapper,translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
         final String rootPath = mainMapper.getNickName();
-        translateNameUtils.addLocalMapper(rootPath,mainMapper);
-        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath,mainMapper,null,true,true);
-        RelationCondition where = handleWhere(rootPath,mainMapper,this.mySearchList);
-        List<Condition> conditionList = searchToExpressionCondition(rootPath,updateSearchList,null);
-        if(WsListUtils.isEmpty(conditionList)){
+        translateNameUtils.addLocalMapper(rootPath, mainMapper);
+        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, null, true, true);
+        RelationCondition where = handleWhere(rootPath, mainMapper, this.mySearchList);
+        List<Condition> conditionList = searchToExpressionCondition(rootPath, updateSearchList, null);
+        if (WsListUtils.isEmpty(conditionList)) {
             throw new NullPointerException("update condition is null");
         }
-        List<Condition> updateInterceptorConditionList = getUpdateConditionSqlInterceptorConditionList(rootPath,mainMapper);
-        if(WsListUtils.isNotEmpty(updateInterceptorConditionList)){
+        List<Condition> updateInterceptorConditionList = getUpdateConditionSqlInterceptorConditionList(rootPath, mainMapper);
+        if (WsListUtils.isNotEmpty(updateInterceptorConditionList)) {
             conditionList.addAll(updateInterceptorConditionList);
         }
-        return new UpdateModel(from,joinTableModelList,conditionList,where);
+        return new UpdateModel(from, joinTableModelList, conditionList, where);
     }
 
     /**
      * 表关联处理
-     * @param rootPath 根路径
-     * @param mainMapper 主映射
-     * @param queryColumnList 存储查询列的队列
-     * @param appointQueryColumn 是否指定了需要查询的列
+     *
+     * @param rootPath               根路径
+     * @param mainMapper             主映射
+     * @param queryColumnList        存储查询列的队列
+     * @param appointQueryColumn     是否指定了需要查询的列
      * @param ignoreDefaultJoinTable 是否忽略默认关联的表
      * @return
      */
-    private List<JoinTableModel> handleJoinTableModel(final String rootPath, final FieldColumnRelationMapper mainMapper, final List<TableColumn> queryColumnList, final boolean appointQueryColumn, final boolean ignoreDefaultJoinTable){
+    private List<JoinTableModel> handleJoinTableModel(final String rootPath, final FieldColumnRelationMapper mainMapper, final List<TableColumn> queryColumnList, final boolean appointQueryColumn, final boolean ignoreDefaultJoinTable) {
         final List<TableRelation> tableRelationList = this.mySearchList.getJoins();
         final List<JoinTableModel> joinTableModelList = new ArrayList<>();
-        final Map<TableRelation,JoinTableModel> usedRelationMap = new HashMap<>();
-        if(!ignoreDefaultJoinTable) {
+        final Map<TableRelation, JoinTableModel> usedRelationMap = new HashMap<>();
+        if (!ignoreDefaultJoinTable) {
             final Map<String, TableRelation> tableRelationMap = new HashMap<>();
             for (TableRelation tableRelation : tableRelationList) {
                 if (tableRelation.getTableNickName() == null) {
@@ -861,32 +1036,32 @@ public class SQLModelUtils {
             }
         }
 
-        for (TableRelation tableRelation:tableRelationList){
+        for (TableRelation tableRelation : tableRelationList) {
             JoinTableModel joinTableModel = usedRelationMap.get(tableRelation);
-            if(joinTableModel == null){
-                String path = tableRelation.getTableNickName() == null?rootPath:rootPath+ SqlCommonConstants.PATH_COMMON_DELIMITER+tableRelation.getTableNickName();
-                String joinPath = tableRelation.getJoinTableNickName()==null?rootPath:rootPath+ SqlCommonConstants.PATH_COMMON_DELIMITER+tableRelation.getJoinTableNickName();
+            if (joinTableModel == null) {
+                String path = tableRelation.getTableNickName() == null ? rootPath : rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableRelation.getTableNickName();
+                String joinPath = tableRelation.getJoinTableNickName() == null ? rootPath : rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableRelation.getJoinTableNickName();
                 FieldColumnRelationMapper joinMapper = analysisClassRelation(tableRelation.getJoinTableClass());
-                translateNameUtils.addLocalMapper(joinPath,joinMapper);
-                FieldColumnRelationMapper mapper = tableRelation.getTableNickName()==null?mainMapper:translateNameUtils.getLocalMapper(path);
+                translateNameUtils.addLocalMapper(joinPath, joinMapper);
+                FieldColumnRelationMapper mapper = tableRelation.getTableNickName() == null ? mainMapper : translateNameUtils.getLocalMapper(path);
                 List<Condition> conditionModelList = new ArrayList<>();
-                conditionModelList.add(new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(tableRelation.getTableColumn(),path,2), SqlEquation.Symbol.EQUAL,translateNameUtils.createColumnBaseEntity(tableRelation.getJoinTableColumn(),joinPath,2)));
-                List<Condition> selectInterceptorConditionList = getWhereConditionSqlInterceptorConditionList(joinPath,joinMapper);
-                if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
+                conditionModelList.add(new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(tableRelation.getTableColumn(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(tableRelation.getJoinTableColumn(), joinPath, 2)));
+                List<Condition> selectInterceptorConditionList = getWhereConditionSqlInterceptorConditionList(joinPath, joinMapper);
+                if (WsListUtils.isNotEmpty(selectInterceptorConditionList)) {
                     conditionModelList.addAll(selectInterceptorConditionList);
                 }
-                if(tableRelation.getConditionSearchList() != null){
-                    RelationCondition relationCondition = searchListToConditionRelation(rootPath,tableRelation.getConditionSearchList(),SqlOperator.AND);
-                    if(relationCondition != null && WsListUtils.isNotEmpty(relationCondition.getConditionList())){
+                if (tableRelation.getConditionSearchList() != null) {
+                    RelationCondition relationCondition = searchListToConditionRelation(rootPath, tableRelation.getConditionSearchList(), SqlOperator.AND);
+                    if (relationCondition != null && WsListUtils.isNotEmpty(relationCondition.getConditionList())) {
                         conditionModelList.addAll(relationCondition.getConditionList());
                     }
 
                 }
-                joinTableModelList.add(new JoinTableModel(new TableModel(mapper,translateNameUtils.getCurrentAbbreviation(path)),new TableModel(joinMapper,translateNameUtils.getCurrentAbbreviation(joinPath)),tableRelation.getJoinType(), new RelationCondition(conditionModelList,SqlOperator.AND)));
-            }else {
-                if(tableRelation.getConditionSearchList() != null){
-                    RelationCondition relationCondition = searchListToConditionRelation(rootPath,tableRelation.getConditionSearchList(),SqlOperator.AND);
-                    if(relationCondition != null && WsListUtils.isNotEmpty(relationCondition.getConditionList())){
+                joinTableModelList.add(new JoinTableModel(new TableModel(mapper, translateNameUtils.getCurrentAbbreviation(path)), new TableModel(joinMapper, translateNameUtils.getCurrentAbbreviation(joinPath)), tableRelation.getJoinType(), new RelationCondition(conditionModelList, SqlOperator.AND)));
+            } else {
+                if (tableRelation.getConditionSearchList() != null) {
+                    RelationCondition relationCondition = searchListToConditionRelation(rootPath, tableRelation.getConditionSearchList(), SqlOperator.AND);
+                    if (relationCondition != null && WsListUtils.isNotEmpty(relationCondition.getConditionList())) {
                         joinTableModel.getOn().getConditionList().addAll(relationCondition.getConditionList());
                     }
                 }
@@ -897,18 +1072,19 @@ public class SQLModelUtils {
 
     /**
      * 处理where条件（必须在处理表关联关系之后进行）
+     *
      * @param rootPath
      * @param mainMapper
      * @param mySearchList
      * @return
      */
-    private RelationCondition handleWhere(final String rootPath, final FieldColumnRelationMapper mainMapper, final MySearchList mySearchList){
-        RelationCondition where = searchListToConditionRelation(rootPath,mySearchList,SqlOperator.AND);
-        List<Condition> selectInterceptorConditionList = getWhereConditionSqlInterceptorConditionList(rootPath,mainMapper);
-        if(WsListUtils.isNotEmpty(selectInterceptorConditionList)){
-            if(where == null){
-                where = new RelationCondition(selectInterceptorConditionList,SqlOperator.AND);
-            }else {
+    private RelationCondition handleWhere(final String rootPath, final FieldColumnRelationMapper mainMapper, final MySearchList mySearchList) {
+        RelationCondition where = searchListToConditionRelation(rootPath, mySearchList, SqlOperator.AND);
+        List<Condition> selectInterceptorConditionList = getWhereConditionSqlInterceptorConditionList(rootPath, mainMapper);
+        if (WsListUtils.isNotEmpty(selectInterceptorConditionList)) {
+            if (where == null) {
+                where = new RelationCondition(selectInterceptorConditionList, SqlOperator.AND);
+            } else {
                 where.getConditionList().addAll(selectInterceptorConditionList);
             }
         }
@@ -917,51 +1093,52 @@ public class SQLModelUtils {
 
     /**
      * 解析需要查询的列名
+     *
      * @param mapper
      * @param path
      * @param queryColumnList
      */
-    private void addQueryColumnList(final FieldColumnRelationMapper mapper,final String path,final List<TableColumn> queryColumnList) {
-        if(WsListUtils.isNotEmpty(mapper.getIds())){
-            for (FieldColumnRelation fieldColumnRelation:mapper.getIds()){
-                queryColumnList.add(translateNameUtils.createColumnBaseEntity(fieldColumnRelation,mapper,path));
+    private void addQueryColumnList(final FieldColumnRelationMapper mapper, final String path, final List<TableColumn> queryColumnList) {
+        if (WsListUtils.isNotEmpty(mapper.getIds())) {
+            for (FieldColumnRelation fieldColumnRelation : mapper.getIds()) {
+                queryColumnList.add(translateNameUtils.createColumnBaseEntity(fieldColumnRelation, mapper, path));
             }
         }
-        if(WsListUtils.isNotEmpty(mapper.getFieldColumnRelations())){
-            for (FieldColumnRelation fieldColumnRelation:mapper.getFieldColumnRelations()){
-                queryColumnList.add(translateNameUtils.createColumnBaseEntity(fieldColumnRelation,mapper,path));
+        if (WsListUtils.isNotEmpty(mapper.getFieldColumnRelations())) {
+            for (FieldColumnRelation fieldColumnRelation : mapper.getFieldColumnRelations()) {
+                queryColumnList.add(translateNameUtils.createColumnBaseEntity(fieldColumnRelation, mapper, path));
             }
         }
     }
 
 
-    private RelationCondition searchListToConditionRelation(final String rootPath, final MySearchList searchList, final SqlOperator relation){
-        if(WsListUtils.isEmpty(searchList.getAll()) && WsListUtils.isEmpty(searchList.getAnds()) && WsListUtils.isEmpty(searchList.getOrs())){
+    private RelationCondition searchListToConditionRelation(final String rootPath, final MySearchList searchList, final SqlOperator relation) {
+        if (WsListUtils.isEmpty(searchList.getAll()) && WsListUtils.isEmpty(searchList.getAnds()) && WsListUtils.isEmpty(searchList.getOrs())) {
             return null;
         }
-        RelationCondition where = new RelationCondition(searchToExpressionCondition(rootPath,searchList.getAll(),null),relation);
+        RelationCondition where = new RelationCondition(searchToExpressionCondition(rootPath, searchList.getAll(), null), relation);
 
-        if(WsListUtils.isNotEmpty(searchList.getAnds())){
-            RelationCondition andWhere = new RelationCondition(new ArrayList<>(),SqlOperator.AND);
-            for (MySearchList and:searchList.getAnds()){
-                RelationCondition childCondition = searchListToConditionRelation(rootPath,and,SqlOperator.AND);
-                if(childCondition != null){
+        if (WsListUtils.isNotEmpty(searchList.getAnds())) {
+            RelationCondition andWhere = new RelationCondition(new ArrayList<>(), SqlOperator.AND);
+            for (MySearchList and : searchList.getAnds()) {
+                RelationCondition childCondition = searchListToConditionRelation(rootPath, and, SqlOperator.AND);
+                if (childCondition != null) {
                     andWhere.getConditionList().add(childCondition);
                 }
             }
-            if(!WsListUtils.isEmpty(andWhere.getConditionList())){
+            if (!WsListUtils.isEmpty(andWhere.getConditionList())) {
                 where.getConditionList().add(andWhere);
             }
         }
-        if(WsListUtils.isNotEmpty(searchList.getOrs())){
-            RelationCondition orWhere = new RelationCondition(new ArrayList<>(),SqlOperator.OR);
-            for (MySearchList and:searchList.getOrs()){
-                RelationCondition childCondition = searchListToConditionRelation(rootPath,and,SqlOperator.AND);
-                if(childCondition != null){
+        if (WsListUtils.isNotEmpty(searchList.getOrs())) {
+            RelationCondition orWhere = new RelationCondition(new ArrayList<>(), SqlOperator.OR);
+            for (MySearchList and : searchList.getOrs()) {
+                RelationCondition childCondition = searchListToConditionRelation(rootPath, and, SqlOperator.AND);
+                if (childCondition != null) {
                     orWhere.getConditionList().add(childCondition);
                 }
             }
-            if(!WsListUtils.isEmpty(orWhere.getConditionList())){
+            if (!WsListUtils.isEmpty(orWhere.getConditionList())) {
                 where.getConditionList().add(orWhere);
             }
         }
@@ -970,89 +1147,91 @@ public class SQLModelUtils {
 
     /**
      * mysearch转condition
+     *
      * @param rootPath
      * @param searches
      * @param expressionConditionList
      * @return
      */
-    private List<Condition> searchToExpressionCondition(String rootPath,List<MySearch> searches,List<Condition> expressionConditionList){
-        if(expressionConditionList == null){
+    private List<Condition> searchToExpressionCondition(String rootPath, List<MySearch> searches, List<Condition> expressionConditionList) {
+        if (expressionConditionList == null) {
             expressionConditionList = new ArrayList<>(searches.size());
         }
-        for (MySearch search:searches){
+        for (MySearch search : searches) {
             Object left = null;
             SqlOperator operator = search.getOperator();
 
             Object right = null;
-            switch (operator){
+            switch (operator) {
                 case EQP:
                 case NEP:
                 case GTP:
                 case LTP:
                 case GTEP:
                 case LTEP:
-                    left = translateNameUtils.getColumnBaseEntity(search.getFieldName(),rootPath,2);
-                    right = translateNameUtils.getColumnBaseEntity((String) search.getValue(),rootPath,2);
+                    left = translateNameUtils.getColumnBaseEntity(search.getFieldName(), rootPath, 2);
+                    right = translateNameUtils.getColumnBaseEntity((String) search.getValue(), rootPath, 2);
                     break;
                 case SQL:
-                    left = new SqlStringModel(translateNameUtils.translateTableNickName(rootPath,search.getFieldName()),search.getValue());
+                    left = new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, search.getFieldName()), search.getValue());
                     break;
                 case EXISTS:
                 case NOT_EXISTS:
-                    if(search.getValue() instanceof MySearchList){
+                    if (search.getValue() instanceof MySearchList) {
                         //right = search.getValue();
                         left = search.getValue();
-                    }else {
-                        left = new SqlStringModel(translateNameUtils.translateTableNickName(rootPath,search.getFieldName()),search.getValue());
+                    } else {
+                        left = new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, search.getFieldName()), search.getValue());
                     }
                     break;
                 case EQUATION:
                     SqlEquation sqlEquation = (SqlEquation) search.getValue();
-                    expressionConditionList.add(transferSqlEquationToCondition(rootPath,sqlEquation));
+                    expressionConditionList.add(transferSqlEquationToCondition(rootPath, sqlEquation));
                     continue;
                 case ADD:
                 case SUBTRACT:
                 case MULTIPLY:
                 case DIVIDE:
-                    BaseTableColumn baseTableColumn = translateNameUtils.getColumnBaseEntity(search.getFieldName(),rootPath,2);
+                    BaseTableColumn baseTableColumn = translateNameUtils.getColumnBaseEntity(search.getFieldName(), rootPath, 2);
                     MultiExpressionCondition multiExpressionCondition = new MultiExpressionCondition(5);
                     multiExpressionCondition.add(baseTableColumn)
                             .add(SqlEquation.Symbol.EQUAL);
-                    if(WsFieldUtils.classCompare(baseTableColumn.getField().getType(),Number.class)){
-                        multiExpressionCondition.add(new SqlFunctionCondition("IFNULL", baseTableColumn,0));
-                    }else {
+                    if (WsFieldUtils.classCompare(baseTableColumn.getField().getType(), Number.class)) {
+                        multiExpressionCondition.add(new SqlFunctionCondition("IFNULL", baseTableColumn, 0));
+                    } else {
                         multiExpressionCondition.add(baseTableColumn);
                     }
                     multiExpressionCondition.add(sqlOperatorToSymbol(operator))
-                            .add(search.getValue() == null? SqlCommonConstants.NULL_VALUE:search.getValue());
+                            .add(search.getValue() == null ? SqlCommonConstants.NULL_VALUE : search.getValue());
                     expressionConditionList.add(multiExpressionCondition);
                     continue;
-                case SET: operator = SqlOperator.EQ;
+                case SET:
+                    operator = SqlOperator.EQ;
                 default:
-                    left = translateNameUtils.getColumnBaseEntity(search.getFieldName(),rootPath,2);
+                    left = translateNameUtils.getColumnBaseEntity(search.getFieldName(), rootPath, 2);
                     right = search.getValue();
-                    if(right == null){
+                    if (right == null) {
                         right = SqlCommonConstants.NULL_VALUE;
                     }
                     break;
             }
-            if(right instanceof MySearchList){
-                SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) right,translateNameUtils);
+            if (right instanceof MySearchList) {
+                SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) right, translateNameUtils);
                 right = sqlModelUtils.transferToSelectModel();
             }
-            if(left instanceof MySearchList){
-                SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) left,translateNameUtils);
+            if (left instanceof MySearchList) {
+                SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) left, translateNameUtils);
                 left = sqlModelUtils.transferToSelectModel();
             }
             SqlEquation.Symbol symbol = sqlOperatorToSymbol(operator);
-            expressionConditionList.add(new SingleExpressionCondition(left,symbol,right));
+            expressionConditionList.add(new SingleExpressionCondition(left, symbol, right));
         }
 
         return expressionConditionList;
     }
 
-    private SqlEquation.Symbol sqlOperatorToSymbol(SqlOperator sqlOperator){
-        switch (sqlOperator){
+    private SqlEquation.Symbol sqlOperatorToSymbol(SqlOperator sqlOperator) {
+        switch (sqlOperator) {
             case EQ:
             case EQP:
                 return SqlEquation.Symbol.EQUAL;
@@ -1071,33 +1250,49 @@ public class SQLModelUtils {
             case LTE:
             case LTEP:
                 return SqlEquation.Symbol.LTE;
-            case LIKE:return SqlEquation.Symbol.LIKE;
-            case IN:return SqlEquation.Symbol.IN;
-            case NIN:return SqlEquation.Symbol.NOT_IN;
-            case EXISTS:return SqlEquation.Symbol.EXISTS;
-            case NOT_EXISTS:return SqlEquation.Symbol.NOT_EXISTS;
-            case BETWEEN:return SqlEquation.Symbol.BETWEEN;
-            case NOT_BETWEEN:return SqlEquation.Symbol.NOT;
-            case SQL:return SqlEquation.Symbol.SQL;
-            case ADD:return SqlEquation.Symbol.ADD;
-            case SUBTRACT:return SqlEquation.Symbol.SUBTRACT;
-            case MULTIPLY:return SqlEquation.Symbol.MULTIPLY;
-            case DIVIDE:return SqlEquation.Symbol.DIVIDE;
-            case SET:return SqlEquation.Symbol.SET;
-            case NULL:return SqlEquation.Symbol.NULL;
-            case NOTNULL:return SqlEquation.Symbol.NOT_NULL;
-            default:throw new IllegalArgumentException("Unsupported symbol:" + sqlOperator.name());
+            case LIKE:
+                return SqlEquation.Symbol.LIKE;
+            case IN:
+                return SqlEquation.Symbol.IN;
+            case NIN:
+                return SqlEquation.Symbol.NOT_IN;
+            case EXISTS:
+                return SqlEquation.Symbol.EXISTS;
+            case NOT_EXISTS:
+                return SqlEquation.Symbol.NOT_EXISTS;
+            case BETWEEN:
+                return SqlEquation.Symbol.BETWEEN;
+            case NOT_BETWEEN:
+                return SqlEquation.Symbol.NOT;
+            case SQL:
+                return SqlEquation.Symbol.SQL;
+            case ADD:
+                return SqlEquation.Symbol.ADD;
+            case SUBTRACT:
+                return SqlEquation.Symbol.SUBTRACT;
+            case MULTIPLY:
+                return SqlEquation.Symbol.MULTIPLY;
+            case DIVIDE:
+                return SqlEquation.Symbol.DIVIDE;
+            case SET:
+                return SqlEquation.Symbol.SET;
+            case NULL:
+                return SqlEquation.Symbol.NULL;
+            case NOTNULL:
+                return SqlEquation.Symbol.NOT_NULL;
+            default:
+                throw new IllegalArgumentException("Unsupported symbol:" + sqlOperator.name());
         }
     }
 
-    private MultiExpressionCondition transferSqlEquationToCondition(String rootPath, SqlEquation sqlEquation){
+    private MultiExpressionCondition transferSqlEquationToCondition(String rootPath, SqlEquation sqlEquation) {
         MultiExpressionCondition multiExpressionCondition = new MultiExpressionCondition(sqlEquation.getValueList().size());
-        for (int i = 0; i < sqlEquation.getValueList().size(); ++i){
+        for (int i = 0; i < sqlEquation.getValueList().size(); ++i) {
             Integer type = sqlEquation.getTypeList().get(i);
             Object value = sqlEquation.getValueList().get(i);
-            switch (type){
+            switch (type) {
                 case ValueTypeConstants.COLUMN_NAME_TYPE:
-                    multiExpressionCondition.add(translateNameUtils.getColumnBaseEntity((String) value,rootPath,2));
+                    multiExpressionCondition.add(translateNameUtils.getColumnBaseEntity((String) value, rootPath, 2));
                     break;
                 case ValueTypeConstants.SYMBOL_TYPE:
                     multiExpressionCondition.add(value);
@@ -1109,14 +1304,14 @@ public class SQLModelUtils {
                     multiExpressionCondition.add(value);
                     break;
                 case ValueTypeConstants.SEARCH_LIST_TYPE:
-                    SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) value,translateNameUtils);
+                    SQLModelUtils sqlModelUtils = new SQLModelUtils((MySearchList) value, translateNameUtils);
                     multiExpressionCondition.add(sqlModelUtils.transferToSelectModel());
                     break;
                 case ValueTypeConstants.SQL_EQUATION_MODEL:
-                    multiExpressionCondition.add(transferSqlEquationToCondition(rootPath,(SqlEquation) value));
+                    multiExpressionCondition.add(transferSqlEquationToCondition(rootPath, (SqlEquation) value));
                     break;
                 default:
-                    throw new IllegalArgumentException("Unsupported sqlEquation:"+type);
+                    throw new IllegalArgumentException("Unsupported sqlEquation:" + type);
             }
         }
         return multiExpressionCondition;
@@ -1124,68 +1319,64 @@ public class SQLModelUtils {
 
     /**
      * 获取where拦截器添加的条件
-     * @param path 当前mapper路径
+     *
+     * @param path   当前mapper路径
      * @param mapper
      * @return 拦截器添加的条件
      */
-    public List<Condition> getWhereConditionSqlInterceptorConditionList(String path, FieldColumnRelationMapper mapper){
+    public List<Condition> getWhereConditionSqlInterceptorConditionList(String path, FieldColumnRelationMapper mapper) {
         List<Condition> conditionList = new ArrayList<>();
-        fillWhereConditionSqlInterceptorConditionList(conditionList,path,mapper,mapper.getIds());
-        fillWhereConditionSqlInterceptorConditionList(conditionList,path,mapper,mapper.getFieldColumnRelations());
+        fillWhereConditionSqlInterceptorConditionList(conditionList, path, mapper, mapper.getIds());
+        fillWhereConditionSqlInterceptorConditionList(conditionList, path, mapper, mapper.getFieldColumnRelations());
         return conditionList;
     }
 
-    public List<Condition> getUpdateConditionSqlInterceptorConditionList(String path, FieldColumnRelationMapper mapper){
+    public List<Condition> getUpdateConditionSqlInterceptorConditionList(String path, FieldColumnRelationMapper mapper) {
         List<Condition> conditionList = new ArrayList<>();
-        fillUpdateConditionSqlInterceptorConditionList(conditionList,path,mapper,mapper.getIds());
-        fillUpdateConditionSqlInterceptorConditionList(conditionList,path,mapper,mapper.getFieldColumnRelations());
+        fillUpdateConditionSqlInterceptorConditionList(conditionList, path, mapper, mapper.getIds());
+        fillUpdateConditionSqlInterceptorConditionList(conditionList, path, mapper, mapper.getFieldColumnRelations());
         return conditionList;
     }
 
     public void fillWhereConditionSqlInterceptorConditionList(List<Condition> conditionList,
                                                               String path, FieldColumnRelationMapper mapper,
-                                                              List<FieldColumnRelation> fieldColumnRelationList){
-        if(WsListUtils.isEmpty(fieldColumnRelationList)){
+                                                              List<FieldColumnRelation> fieldColumnRelationList) {
+        if (WsListUtils.isEmpty(fieldColumnRelationList)) {
             return;
         }
-        for (FieldColumnRelation fieldColumnRelation:fieldColumnRelationList){
+        for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             AbstractSqlInterceptor interceptor = selectSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
-            if(interceptor != null && interceptor.useCondition(mapper)){
+            if (interceptor != null && interceptor.useCondition(mapper)) {
                 Object fillValue = interceptor.selectFill();
-                if(fillValue == null){
+                if (fillValue == null) {
                     fillValue = SqlCommonConstants.NULL_VALUE;
                 }
                 conditionList.add(
-                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(fieldColumnRelation.getFieldName(),path,2), SqlEquation.Symbol.EQUAL,fillValue)
+                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(fieldColumnRelation.getFieldName(), path, 2), SqlEquation.Symbol.EQUAL, fillValue)
                 );
             }
         }
     }
 
     public void fillUpdateConditionSqlInterceptorConditionList(List<Condition> conditionList,
-                                                              String path, FieldColumnRelationMapper mapper,
-                                                              List<FieldColumnRelation> fieldColumnRelationList){
-        if(WsListUtils.isEmpty(fieldColumnRelationList)){
+                                                               String path, FieldColumnRelationMapper mapper,
+                                                               List<FieldColumnRelation> fieldColumnRelationList) {
+        if (WsListUtils.isEmpty(fieldColumnRelationList)) {
             return;
         }
-        for (FieldColumnRelation fieldColumnRelation:fieldColumnRelationList){
+        for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             AbstractSqlInterceptor interceptor = updateSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
-            if(interceptor != null && interceptor.useCondition(mapper)){
+            if (interceptor != null && interceptor.useCondition(mapper)) {
                 Object fillValue = interceptor.updateFill();
-                if(fillValue == null){
+                if (fillValue == null) {
                     fillValue = SqlCommonConstants.NULL_VALUE;
                 }
                 conditionList.add(
-                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(fieldColumnRelation.getFieldName(),path,2), SqlEquation.Symbol.EQUAL,fillValue)
+                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(fieldColumnRelation.getFieldName(), path, 2), SqlEquation.Symbol.EQUAL, fillValue)
                 );
             }
         }
     }
-
-
-
-
-
 
 
 }

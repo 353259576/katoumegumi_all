@@ -4,6 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * 设定使用的表模板
+ *
  * @author 星梦苍天
  */
 @Documented

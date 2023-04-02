@@ -4,7 +4,7 @@ package ${packageName}${baseSearchVOName};
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 </#if>
-<#if enableSwagger = true>
+<#if enableSpringDoc = true>
 import io.swagger.v3.oas.annotations.media.Schema;
 </#if>
 import lombok.Data;

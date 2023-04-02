@@ -18,7 +18,7 @@ public class TableModel {
      */
     private final String alias;
 
-    public TableModel(FieldColumnRelationMapper table,String alias){
+    public TableModel(FieldColumnRelationMapper table, String alias) {
         this.table = table;
         this.alias = alias;
     }

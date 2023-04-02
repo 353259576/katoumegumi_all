@@ -34,15 +34,15 @@ public class SqlStringAndParameters {
         this.sql = sql;
         this.value = value;
         this.placeholderNum = placeholderNum;
-        if(value == null){
+        if (value == null) {
             this.valueType = ValueTypeConstants.NULL_TYPE;
-        }else if (WsBeanUtils.isBaseType(value.getClass())){
+        } else if (WsBeanUtils.isBaseType(value.getClass())) {
             this.valueType = ValueTypeConstants.BASE_VALUE_TYPE;
-        }else if (value instanceof Collection){
+        } else if (value instanceof Collection) {
             this.valueType = ValueTypeConstants.COLLECTION_TYPE;
-        }else if(WsBeanUtils.isArray(value.getClass())){
+        } else if (WsBeanUtils.isArray(value.getClass())) {
             this.valueType = ValueTypeConstants.ARRAY_TYPE;
-        }else {
+        } else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());
         }
         this.onlyValue = this.sql == null;
@@ -51,18 +51,18 @@ public class SqlStringAndParameters {
     public SqlStringAndParameters(String sql, Object value) {
         this.sql = sql;
         this.value = value;
-        if(value == null){
+        if (value == null) {
             this.valueType = ValueTypeConstants.NULL_TYPE;
             this.placeholderNum = 0;
-        }else if (WsBeanUtils.isBaseType(value.getClass())){
+        } else if (WsBeanUtils.isBaseType(value.getClass())) {
             this.valueType = ValueTypeConstants.BASE_VALUE_TYPE;
             this.placeholderNum = 1;
-        }else if (value instanceof Collection){
+        } else if (value instanceof Collection) {
             this.valueType = ValueTypeConstants.COLLECTION_TYPE;
-            this.placeholderNum = ((Collection<?>)value).size();
-        }else if(WsBeanUtils.isArray(value.getClass())){
+            this.placeholderNum = ((Collection<?>) value).size();
+        } else if (WsBeanUtils.isArray(value.getClass())) {
             this.valueType = ValueTypeConstants.ARRAY_TYPE;
-            this.placeholderNum = ((Object[])value).length;
+            this.placeholderNum = ((Object[]) value).length;
         } else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());
         }

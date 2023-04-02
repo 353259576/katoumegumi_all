@@ -141,7 +141,7 @@ public class MySearchList {
                 if (!(WsBeanUtils.isArray(value.getClass()) || value instanceof MySearchList)) {
                     throw new RuntimeException(fieldName + "类型不支持，当前的类型是：" + value.getClass());
                 }
-                if(WsListUtils.isEmpty(value)){
+                if (WsListUtils.isEmpty(value)) {
                     throw new RuntimeException("数组为空");
                 }
                 break;
@@ -150,7 +150,7 @@ public class MySearchList {
                 if (!WsBeanUtils.isArray(value.getClass())) {
                     throw new RuntimeException(fieldName + "的参数必须是数组类型，当前的类型是：" + value.getClass());
                 }
-                if(WsListUtils.isEmpty(value)){
+                if (WsListUtils.isEmpty(value)) {
                     throw new RuntimeException("数组为空");
                 }
                 break;
@@ -775,7 +775,7 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.EQP, getColumnName(valueTableName, value));
     }
 
-    public <T,J> MySearchList eqp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<J, ?> value) {
+    public <T, J> MySearchList eqp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<J, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.EQP, getColumnName(valueTableName, value));
     }
 
@@ -1405,14 +1405,15 @@ public class MySearchList {
 
     /**
      * 过滤update search
+     *
      * @return
      */
-    public List<MySearch> filterUpdateSearch(){
+    public List<MySearch> filterUpdateSearch() {
         List<MySearch> updateSearchList = new ArrayList<>();
         Iterator<MySearch> iterator = this.getAll().iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             MySearch search = iterator.next();
-            switch (search.getOperator()){
+            switch (search.getOperator()) {
                 case ADD:
                 case SUBTRACT:
                 case DIVIDE:

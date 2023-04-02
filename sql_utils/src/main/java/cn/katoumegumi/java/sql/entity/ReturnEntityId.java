@@ -16,6 +16,11 @@ public class ReturnEntityId {
 
     private final int hashCode;
 
+    public ReturnEntityId(Object[] idSigns) {
+        this.idSigns = idSigns;
+        hashCode = Arrays.hashCode(idSigns);
+    }
+
     public ReturnEntityId(List<FieldColumnRelation> idList, ReturnEntity returnEntity) {
         int length = idList.size();
         Object[] valueList = returnEntity.getIdValueList();

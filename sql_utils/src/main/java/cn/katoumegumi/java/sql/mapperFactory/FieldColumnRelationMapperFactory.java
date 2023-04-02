@@ -49,14 +49,13 @@ public class FieldColumnRelationMapperFactory {
     private static final List<FieldColumnRelationMapperHandleStrategy> FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST = new ArrayList<>();
 
 
-
-
     private static final FieldColumnRelationMapperFactory FIELD_COLUMN_RELATION_MAPPER_FACTORY = new FieldColumnRelationMapperFactory();
 
     /**
      * 默认的mapper处理方式
      */
     private static FieldColumnRelationMapperHandleStrategy defaultFieldColumnRelationMapperHandleStrategy;
+
     static {
         addFieldColumnRelationMapperHandleStrategy(
                 new TableTemplateFieldColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY)
@@ -85,7 +84,7 @@ public class FieldColumnRelationMapperFactory {
     /**
      * 解析实体对象
      *
-     * @param clazz class
+     * @param clazz           class
      * @param allowIncomplete 允许不完整的
      * @return 表与实例映射关系
      */
@@ -104,7 +103,7 @@ public class FieldColumnRelationMapperFactory {
             CountDownLatch cdl = new CountDownLatch(1);
             EXECUTOR_SERVICE.execute(() -> {
                 try {
-                    FIELD_COLUMN_RELATION_MAPPER_FACTORY.createFieldColumnRelationMapper(c,allowIncomplete);
+                    FIELD_COLUMN_RELATION_MAPPER_FACTORY.createFieldColumnRelationMapper(c, allowIncomplete);
                 } catch (Throwable e) {
                     e.printStackTrace();
                     throw e;
@@ -138,6 +137,7 @@ public class FieldColumnRelationMapperFactory {
 
     /**
      * 对没有指定名称的列名自动驼峰更改
+     *
      * @param fieldName 对象字段名称
      * @return 返回表列名
      */
@@ -147,12 +147,13 @@ public class FieldColumnRelationMapperFactory {
 
     /**
      * 获取可以处理当前class的策略
+     *
      * @param clazz
      * @return
      */
-    public int getCanHandleFieldColumnRelationMapperStrategyIndex(Class<?> clazz){
-        for (int i = 0; i < FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size(); i++){
-            if(FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.get(i).canHandle(clazz)){
+    public int getCanHandleFieldColumnRelationMapperStrategyIndex(Class<?> clazz) {
+        for (int i = 0; i < FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size(); i++) {
+            if (FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.get(i).canHandle(clazz)) {
                 return i;
             }
         }
@@ -160,60 +161,60 @@ public class FieldColumnRelationMapperFactory {
     }
 
 
-    public <T> Optional<T> getStrategyAndHandle(int startIndex, Function<FieldColumnRelationMapperHandleStrategy,Optional<T>> function){
+    public <T> Optional<T> getStrategyAndHandle(int startIndex, Function<FieldColumnRelationMapperHandleStrategy, Optional<T>> function) {
         startIndex = startIndex % FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size();
         int index = startIndex;
         Optional<T> optional;
         do {
             optional = function.apply(FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.get(index));
-            if(optional.isPresent()){
+            if (optional.isPresent()) {
                 return optional;
             }
             index = (index + 1) % FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size();
-        }while (index != startIndex);
+        } while (index != startIndex);
         if (defaultFieldColumnRelationMapperHandleStrategy != null) {
             return function.apply(defaultFieldColumnRelationMapperHandleStrategy);
         }
         return Optional.empty();
     }
 
-    public FieldColumnRelationMapper getTableName(int startIndex,Class<?> clazz){
-        return getStrategyAndHandle(startIndex,strategy -> strategy.getTableName(clazz)).orElse(null);
+    public FieldColumnRelationMapper getTableName(int startIndex, Class<?> clazz) {
+        return getStrategyAndHandle(startIndex, strategy -> strategy.getTableName(clazz)).orElse(null);
     }
 
-    public boolean isIgnoreField(int startIndex,Field field){
-        return getStrategyAndHandle(startIndex,strategy -> {
-            if(strategy.isIgnoreField(field)){
+    public boolean isIgnoreField(int startIndex, Field field) {
+        return getStrategyAndHandle(startIndex, strategy -> {
+            if (strategy.isIgnoreField(field)) {
                 return Optional.of(Boolean.TRUE);
-            }else {
+            } else {
                 return Optional.empty();
             }
         }).orElse(false);
     }
 
-    public FieldColumnRelation getColumnName(int startIndex,FieldColumnRelationMapper mainMapper,Field field){
-        return getStrategyAndHandle(startIndex,strategy -> strategy.getColumnName(mainMapper,field)).orElse(null);
+    public FieldColumnRelation getColumnName(int startIndex, FieldColumnRelationMapper mainMapper, Field field) {
+        return getStrategyAndHandle(startIndex, strategy -> strategy.getColumnName(mainMapper, field)).orElse(null);
     }
 
-    public FieldJoinClass getJoinRelation(int startIndex,FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field){
-        return getStrategyAndHandle(startIndex,strategy -> strategy.getJoinRelation(mainMapper,joinMapper,field)).orElse(null);
+    public FieldJoinClass getJoinRelation(int startIndex, FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field) {
+        return getStrategyAndHandle(startIndex, strategy -> strategy.getJoinRelation(mainMapper, joinMapper, field)).orElse(null);
     }
 
 
-    public static FieldColumnRelationMapper putMapper(Class<?> clazz,FieldColumnRelationMapper fieldColumnRelationMapper){
-        return MAPPER_MAP.put(clazz,fieldColumnRelationMapper);
+    public static FieldColumnRelationMapper putMapper(Class<?> clazz, FieldColumnRelationMapper fieldColumnRelationMapper) {
+        return MAPPER_MAP.put(clazz, fieldColumnRelationMapper);
     }
 
-    public static FieldColumnRelationMapper putIncompleteMapper(Class<?> clazz,FieldColumnRelationMapper fieldColumnRelationMapper){
-        return INCOMPLETE_MAPPER_MAP.put(clazz,fieldColumnRelationMapper);
+    public static FieldColumnRelationMapper putIncompleteMapper(Class<?> clazz, FieldColumnRelationMapper fieldColumnRelationMapper) {
+        return INCOMPLETE_MAPPER_MAP.put(clazz, fieldColumnRelationMapper);
     }
 
-    public static FieldColumnRelationMapper removeIncompleteMapper(Class<?> clazz){
+    public static FieldColumnRelationMapper removeIncompleteMapper(Class<?> clazz) {
         return INCOMPLETE_MAPPER_MAP.remove(clazz);
     }
 
-    public static boolean addFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperHandleStrategy strategy){
-        if(strategy.canUse()){
+    public static boolean addFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperHandleStrategy strategy) {
+        if (strategy.canUse()) {
             FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.add(strategy);
             return true;
         }
@@ -221,20 +222,19 @@ public class FieldColumnRelationMapperFactory {
     }
 
 
-
     public FieldColumnRelationMapper createFieldColumnRelationMapper(Class<?> clazz, boolean allowIncomplete) {
         int startIndex = getCanHandleFieldColumnRelationMapperStrategyIndex(clazz);
-        if(startIndex == -1){
+        if (startIndex == -1) {
             return null;
         }
-        FieldColumnRelationMapper fieldColumnRelationMapper = getTableName(startIndex,clazz);
+        FieldColumnRelationMapper fieldColumnRelationMapper = getTableName(startIndex, clazz);
 
         Field[] fields = WsFieldUtils.getFieldAll(clazz);
         List<Field> baseTypeFieldList = new ArrayList<>();
         List<Field> joinClassFieldList = new ArrayList<>();
 
         for (Field field : fields) {
-            if (isIgnoreField(startIndex,field)) {
+            if (isIgnoreField(startIndex, field)) {
                 continue;
             }
             if (WsBeanUtils.isBaseType(field.getType())) {
@@ -245,8 +245,8 @@ public class FieldColumnRelationMapperFactory {
         }
         if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
             for (Field field : baseTypeFieldList) {
-                FieldColumnRelation fieldColumnRelation = getColumnName(startIndex,fieldColumnRelationMapper.getBaseTemplateMapper() == null?fieldColumnRelationMapper:fieldColumnRelationMapper.getBaseTemplateMapper(),field);
-                if(fieldColumnRelation == null){
+                FieldColumnRelation fieldColumnRelation = getColumnName(startIndex, fieldColumnRelationMapper.getBaseTemplateMapper() == null ? fieldColumnRelationMapper : fieldColumnRelationMapper.getBaseTemplateMapper(), field);
+                if (fieldColumnRelation == null) {
                     continue;
                 }
                 fieldColumnRelationMapper.putFieldColumnRelationMap(field.getName(), fieldColumnRelation);
@@ -263,9 +263,9 @@ public class FieldColumnRelationMapperFactory {
         if (WsListUtils.isNotEmpty(joinClassFieldList)) {
             for (Field field : joinClassFieldList) {
                 Class<?> joinClass = WsFieldUtils.getClassTypeof(field);
-                FieldColumnRelationMapper joinMapper = analysisClassRelation(joinClass,true);
-                FieldJoinClass fieldJoinClass = getJoinRelation(startIndex,fieldColumnRelationMapper,joinMapper,field);
-                if(fieldJoinClass == null){
+                FieldColumnRelationMapper joinMapper = analysisClassRelation(joinClass, true);
+                FieldJoinClass fieldJoinClass = getJoinRelation(startIndex, fieldColumnRelationMapper, joinMapper, field);
+                if (fieldJoinClass == null) {
                     continue;
                 }
                 fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
