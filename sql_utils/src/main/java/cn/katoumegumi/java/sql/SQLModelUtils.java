@@ -439,6 +439,7 @@ public class SQLModelUtils {
      * @param <T>
      * @return
      */
+    @Deprecated
     public <T> List<T> oneLoopMargeMap(WsResultSet resultSet) {
         try {
             int classNum = translateNameUtils.locationMapperSize();
@@ -601,7 +602,7 @@ public class SQLModelUtils {
 
             Object value;
             while (resultSet.next()) {
-                value = createNeedMergeValue(resultSet, existEntityInfo, mapperDictTree, localtionList, columnRelationList);
+                value = createNeedMergeValue(resultSet, existEntityInfo, mapperDictTree, localtionList, columnRelationList,hasArray);
                 if (value != null) {
                     valueList.add(value);
                 }
@@ -617,11 +618,11 @@ public class SQLModelUtils {
     }
 
 
-    private Object createNeedMergeValue(WsResultSet resultSet, ExistEntityInfo parentExistEntityInfo, MapperDictTree mapperDictTree, List<int[][]> locationList, List<FieldColumnRelation> columnRelationList) throws SQLException {
+    private Object createNeedMergeValue(WsResultSet resultSet, ExistEntityInfo parentExistEntityInfo, MapperDictTree mapperDictTree, List<int[][]> locationList, List<FieldColumnRelation> columnRelationList,boolean isArray) throws SQLException {
         if (parentExistEntityInfo == null) {
             return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
         }
-        if (!mapperDictTree.isHasArray()) {
+        if (!isArray) {
             return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
         }
         FieldColumnRelationMapper mapper = mapperDictTree.getCurrentMapperName().getMapper();
@@ -675,7 +676,7 @@ public class SQLModelUtils {
             if (cacheSubValue[i] == SqlCommonConstants.NULL_VALUE) {
                 continue;
             }
-            subValue = createNeedMergeValue(resultSet, subExistEntityInfo, subTree, locationList, columnRelationList);
+            subValue = createNeedMergeValue(resultSet, subExistEntityInfo, subTree, locationList, columnRelationList,mapperDictTree.isHasArray());
             if (cacheSubValue[i] == null) {
                 //第一次获取值
                 if (fieldJoinClass.isArray()) {
@@ -747,11 +748,11 @@ public class SQLModelUtils {
         return null;
     }
 
-    private static boolean fillObjectValue(Object o, Object[] ids, int[] location, List<FieldColumnRelation> columnRelationList) {
+    private static boolean fillObjectValue(Object o, Object[] values, int[] location, List<FieldColumnRelation> columnRelationList) {
         boolean isAdd = false;
         for (int i = 0; i < location.length; i++) {
             FieldColumnRelation fieldColumnRelationTemp = columnRelationList.get(location[i]);
-            Object value = ids[i];
+            Object value = values[i];
             if (value == null) {
                 continue;
             }
@@ -789,6 +790,7 @@ public class SQLModelUtils {
      * @param <T>
      * @return
      */
+    @Deprecated
     public <T> List<T> oneLoopMargeMap(List<Map<Object, Object>> mapList) {
         if (WsListUtils.isEmpty(mapList)) {
             return new ArrayList<>(0);

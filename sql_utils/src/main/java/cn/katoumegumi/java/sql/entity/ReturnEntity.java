@@ -7,6 +7,7 @@ import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
  *
  * @author ws
  */
+@Deprecated
 public class ReturnEntity {
     /**
      * 对象关系数据

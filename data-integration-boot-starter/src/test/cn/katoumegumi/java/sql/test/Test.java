@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 public class Test {
 
@@ -75,7 +76,11 @@ public class Test {
 //        System.out.println(MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel()).getSelectSql());
         DataSource dataSource = getDataSource();
         BaseDataSourceUtils dataSourceUtils = new BaseDataSourceUtils(dataSource);
-
+        /*List<User> list = dataSourceUtils.selectList(
+                MySearchList.create(User.class)
+                        .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
+        );
+        System.out.println(list.size());*/
         long time;
 
         time = WsDateUtils.getExecutionTime.apply(
