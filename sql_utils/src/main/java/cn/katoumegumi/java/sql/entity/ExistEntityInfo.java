@@ -1,8 +1,7 @@
 package cn.katoumegumi.java.sql.entity;
 
-import cn.katoumegumi.java.common.model.KeyValue;
+import cn.katoumegumi.java.common.model.TripleEntity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,30 +11,13 @@ import java.util.Map;
  */
 public class ExistEntityInfo {
 
-    private final List<ExistEntityInfo> next;
+    private final Map<ReturnEntityId, TripleEntity<Object, Object[],ExistEntityInfo[]>> existMap;
 
-    private final Map<ReturnEntityId, KeyValue<Object, Object[]>> existMap;
-
-    public ExistEntityInfo(int length) {
-        this.next = new ArrayList<>(length);
+    public ExistEntityInfo() {
         this.existMap = new HashMap<>();
     }
 
-    public ExistEntityInfo getNext(int index) {
-        return next.get(index);
-    }
-
-    public ExistEntityInfo addNext(ExistEntityInfo existEntityInfo) {
-        next.add(existEntityInfo);
-        return this;
-    }
-
-    public int getNextSize() {
-        return next.size();
-    }
-
-    public Map<ReturnEntityId, KeyValue<Object, Object[]>> getExistMap() {
+    public Map<ReturnEntityId, TripleEntity<Object, Object[], ExistEntityInfo[]>> getExistMap() {
         return existMap;
     }
-
 }

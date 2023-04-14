@@ -5,6 +5,7 @@ import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.KeyValue;
+import cn.katoumegumi.java.common.model.TripleEntity;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.ValueTypeConstants;
@@ -598,7 +599,7 @@ public class SQLModelUtils {
 
             List<Object> valueList = new ArrayList<>();
 
-            ExistEntityInfo existEntityInfo = hasArray ? new ExistEntityInfo(mapperDictTree.getChildMap().size()) : null;
+            ExistEntityInfo existEntityInfo = hasArray ? new ExistEntityInfo() : null;
 
             Object value;
             while (resultSet.next()) {
@@ -616,7 +617,6 @@ public class SQLModelUtils {
             return new ArrayList<>(0);
         }
     }
-
 
     private Object createNeedMergeValue(WsResultSet resultSet, ExistEntityInfo parentExistEntityInfo, MapperDictTree mapperDictTree, List<int[][]> locationList, List<FieldColumnRelation> columnRelationList,boolean isArray) throws SQLException {
         if (parentExistEntityInfo == null) {
@@ -645,32 +645,38 @@ public class SQLModelUtils {
             return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
         }
         ReturnEntityId returnEntityId = new ReturnEntityId(ids);
-        Map<ReturnEntityId, KeyValue<Object, Object[]>> valueMap = parentExistEntityInfo.getExistMap();
-        KeyValue<Object, Object[]> keyValue = valueMap.get(returnEntityId);
+        Map<ReturnEntityId, TripleEntity<Object,Object[],ExistEntityInfo[]>> valueMap = parentExistEntityInfo.getExistMap();
+        TripleEntity<Object,Object[],ExistEntityInfo[]> tripleEntity = valueMap.get(returnEntityId);
         Object value;
-        boolean isNotExist = keyValue == null;
+        boolean isNotExist = tripleEntity == null;
         if (isNotExist) {
             value = WsBeanUtils.createObject(mapper.getClazz());
             fillObjectValue(value, ids, location[0], columnRelationList);
             fillObjectValue(value, resultSet, location[1], columnRelationList);
-            keyValue = new KeyValue<>(value, new Object[mapperDictTree.getChildMap().size()]);
-            valueMap.put(returnEntityId, keyValue);
+            if(mapperDictTree.getChildMap().size() == 0){
+                tripleEntity = new TripleEntity<>(value,null,null);
+            }else {
+                tripleEntity = new TripleEntity<>(value, new Object[mapperDictTree.getChildMap().size()],new ExistEntityInfo[mapperDictTree.getChildMap().size()]);
+
+            }
+            valueMap.put(returnEntityId, tripleEntity);
         } else {
-            value = keyValue.getKey();
+            value = tripleEntity.getKey();
         }
 
         Object subValue;
         ExistEntityInfo subExistEntityInfo;
-        Object[] cacheSubValue = keyValue.getValue();
+        Object[] cacheSubValue = tripleEntity.getValue1();
+        ExistEntityInfo[] subExistEntityInfoArray = tripleEntity.getValue2();
         for (int i = 0; i < mapperDictTree.getChildMap().size(); i++) {
             MapperDictTree subTree = mapperDictTree.getMapperDictTrees()[i];
             FieldJoinClass fieldJoinClass = mapperDictTree.getFieldJoinClasses()[i];
 
-            if (parentExistEntityInfo.getNextSize() > i) {
-                subExistEntityInfo = parentExistEntityInfo.getNext(i);
-            } else {
-                subExistEntityInfo = new ExistEntityInfo(subTree.getChildMap().size());
-                parentExistEntityInfo.addNext(subExistEntityInfo);
+            if(subExistEntityInfoArray[i] == null){
+                subExistEntityInfo = new ExistEntityInfo();
+                subExistEntityInfoArray[i] = subExistEntityInfo;
+            }else {
+                subExistEntityInfo = subExistEntityInfoArray[i];
             }
 
             if (cacheSubValue[i] == SqlCommonConstants.NULL_VALUE) {
