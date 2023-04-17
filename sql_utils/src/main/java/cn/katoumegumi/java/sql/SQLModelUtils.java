@@ -618,7 +618,7 @@ public class SQLModelUtils {
         }
     }
 
-    private Object createNeedMergeValue(WsResultSet resultSet, ExistEntityInfo parentExistEntityInfo, MapperDictTree mapperDictTree, List<int[][]> locationList, List<FieldColumnRelation> columnRelationList,boolean isArray) throws SQLException {
+    private static Object createNeedMergeValue(WsResultSet resultSet, ExistEntityInfo parentExistEntityInfo, MapperDictTree mapperDictTree, List<int[][]> locationList, List<FieldColumnRelation> columnRelationList,boolean isArray) throws SQLException {
         if (parentExistEntityInfo == null) {
             return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
         }
@@ -666,8 +666,8 @@ public class SQLModelUtils {
 
         Object subValue;
         ExistEntityInfo subExistEntityInfo;
-        Object[] cacheSubValue = tripleEntity.getValue1();
-        ExistEntityInfo[] subExistEntityInfoArray = tripleEntity.getValue2();
+        Object[] cacheSubValue = tripleEntity.getLeft();
+        ExistEntityInfo[] subExistEntityInfoArray = tripleEntity.getRight();
         for (int i = 0; i < mapperDictTree.getChildMap().size(); i++) {
             MapperDictTree subTree = mapperDictTree.getMapperDictTrees()[i];
             FieldJoinClass fieldJoinClass = mapperDictTree.getFieldJoinClasses()[i];
@@ -763,10 +763,7 @@ public class SQLModelUtils {
                 continue;
             }
             isAdd = true;
-            if (value instanceof byte[]) {
-                value = new String((byte[]) value);
-            }
-            WsFieldUtils.setValue(o, WsBeanUtils.objectToT(value, fieldColumnRelationTemp.getFieldClass()), fieldColumnRelationTemp.getField());
+            setValue(o,value,fieldColumnRelationTemp.getFieldClass(),fieldColumnRelationTemp.getField());
         }
         return isAdd;
     }
@@ -780,13 +777,39 @@ public class SQLModelUtils {
                 continue;
             }
             isAdd = true;
-            if (value instanceof byte[]) {
-                value = new String((byte[]) value);
-            }
-            WsFieldUtils.setValue(o, WsBeanUtils.objectToT(value, fieldColumnRelationTemp.getFieldClass()), fieldColumnRelationTemp.getField());
+            setValue(o,value,fieldColumnRelationTemp.getFieldClass(),fieldColumnRelationTemp.getField());
         }
         return isAdd;
     }
+
+    private static void setValue(Object target, Object source, Class<?> tClass, Field field){
+        if (source instanceof byte[]) {
+            source = new String((byte[]) source);
+        }
+        source = WsBeanUtils.objectToT(source,tClass);
+        if (tClass.isPrimitive()){
+            if (tClass == int.class) {
+                WsFieldUtils.setValue(target,((Integer)source).intValue(),field);
+            } else if (tClass == long.class) {
+                WsFieldUtils.setValue(target,((Long)source).longValue(),field);
+            } else if (tClass == double.class) {
+                WsFieldUtils.setValue(target,((Double)source).doubleValue(),field);
+            } else if (tClass == float.class) {
+                WsFieldUtils.setValue(target,((Float)source).floatValue(),field);
+            } else if (tClass == boolean.class) {
+                WsFieldUtils.setValue(target,((Boolean)source).booleanValue(),field);
+            } else if (tClass == byte.class) {
+                WsFieldUtils.setValue(target,((Byte)source).byteValue(),field);
+            } else if (tClass == short.class) {
+                WsFieldUtils.setValue(target,((Short)source).shortValue(),field);
+            } else if (tClass == char.class) {
+                WsFieldUtils.setValue(target,((Character)source).charValue(),field);
+            }
+        }else {
+            WsFieldUtils.setValue(target,source,field);
+        }
+    }
+
 
 
     /**

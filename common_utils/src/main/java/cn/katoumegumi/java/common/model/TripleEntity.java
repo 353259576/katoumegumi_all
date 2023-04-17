@@ -3,29 +3,29 @@ package cn.katoumegumi.java.common.model;
 /**
  * 三元组
  */
-public class TripleEntity <K,V1,V2>{
+public class TripleEntity <M, L, R>{
 
-    private final K key;
+    private final M key;
 
-    private final V1 value1;
+    private final L left;
 
-    private final V2 value2;
+    private final R right;
 
-    public TripleEntity(K key, V1 value1, V2 value2) {
+    public TripleEntity(M key, L left, R right) {
         this.key = key;
-        this.value1 = value1;
-        this.value2 = value2;
+        this.left = left;
+        this.right = right;
     }
 
-    public K getKey() {
+    public M getKey() {
         return key;
     }
 
-    public V1 getValue1() {
-        return value1;
+    public L getLeft() {
+        return left;
     }
 
-    public V2 getValue2() {
-        return value2;
+    public R getRight() {
+        return right;
     }
 }

@@ -94,9 +94,9 @@ public class Test {
                 }
         );
 
-        System.out.println("旧合成方法消耗的时间是：" + time);
+        System.out.println("新合成方法消耗的时间是：" + time);
 
-        /*time = WsDateUtils.getExecutionTime.apply(
+        time = WsDateUtils.getExecutionTime.apply(
                 ()->{
                     for (int i = 0; i < 10; i++){
                         dataSourceUtils.selectList2(
@@ -106,7 +106,7 @@ public class Test {
                     }
                 }
         );
-        System.out.println("新合成方法消耗的时间是：" + time);*/
+        System.out.println("旧合成方法消耗的时间是：" + time);
 
 
 
