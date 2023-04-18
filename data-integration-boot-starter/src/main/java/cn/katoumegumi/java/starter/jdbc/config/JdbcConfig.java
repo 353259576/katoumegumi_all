@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.starter.jdbc.config;
 
 import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnClass(value = DataSource.class)
 //@AutoConfigureAfter(value = DataSourceConfig.class)
 @EnableTransactionManagement(proxyTargetClass = true)

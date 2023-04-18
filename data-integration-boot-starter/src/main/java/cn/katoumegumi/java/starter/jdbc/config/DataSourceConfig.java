@@ -9,6 +9,7 @@ import cn.katoumegumi.java.starter.jdbc.properties.DruidDataSourceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnClass({DataSource.class})
 @ConditionalOnProperty(prefix = "megumi.datasource", value = "enable", havingValue = "true")
 @EnableConfigurationProperties(value = {DataSourcePropertiesList.class})
