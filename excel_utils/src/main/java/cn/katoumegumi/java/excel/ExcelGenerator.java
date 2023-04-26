@@ -1,12 +1,12 @@
 package cn.katoumegumi.java.excel;
 
-import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.common.WsStreamUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.*;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTMergeCell;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTMergeCells;
@@ -14,8 +14,11 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -43,6 +46,12 @@ public class ExcelGenerator<T> {
      * 表格标题样式
      */
     private ExcelColumnStyle excelColumnStyle;
+
+    private Map<CTWorksheet,Integer> mergeCellCountMap = new HashMap<>();
+
+    private static final Field SXSSFSHEET_SH_FIELD = WsFieldUtils.getFieldByName(SXSSFSheet.class,"_sh");
+
+    private static final Field XSSFSHEET_WORKSHEET_FIELD = WsFieldUtils.getFieldByName(XSSFSheet.class,"worksheet");
 
     public static <T> ExcelGenerator<T> create(List<T> tList) {
         ExcelGenerator<T> excelGenerator = new ExcelGenerator<T>();
@@ -127,7 +136,7 @@ public class ExcelGenerator<T> {
         try {
             workbook = new SXSSFWorkbook();
             Sheet sheet = workbook.createSheet();
-            CTWorksheet ctWorksheet = workbook.getXSSFWorkbook().getSheetAt(0).getCTWorksheet();
+            //CTWorksheet ctWorksheet = workbook.getXSSFWorkbook().getSheetAt(0).getCTWorksheet();
             int rowNum = 0;
             Row row = null;
             Cell cell = null;
@@ -135,7 +144,8 @@ public class ExcelGenerator<T> {
                 if(excelColumnPropertyList.size() > 1) {
                     CellRangeAddress cellAddresses = new CellRangeAddress(0, 0, 0, excelColumnPropertyList.size() - 1);
                     //sheet.addMergedRegion(cellAddresses);
-                    ExcelGenerator.addMergedRegion(ctWorksheet, cellAddresses);
+                    sheet.addMergedRegionUnsafe(cellAddresses);
+                    //ExcelGenerator.addMergedRegion(ctWorksheet, cellAddresses);
                 }
                 CellStyle cellStyle = workbook.createCellStyle();
                 cellStyle.setAlignment(HorizontalAlignment.CENTER);
@@ -161,8 +171,8 @@ public class ExcelGenerator<T> {
                 columnProperty = excelColumnPropertyList.get(i);
                 if (columnProperty.getColumnSize() > 1) {
                     CellRangeAddress addresses = new CellRangeAddress(rowNum, rowNum, columnNum, columnNum + columnProperty.getColumnSize() - 1);
-                    //sheet.addMergedRegion(addresses);
-                    ExcelGenerator.addMergedRegion(ctWorksheet,addresses);
+                    sheet.addMergedRegionUnsafe(addresses);
+                    //ExcelGenerator.addMergedRegion(ctWorksheet,addresses);
                 }
 
                 if (columnProperty.getExcelColumnStyle() != null) {
@@ -189,7 +199,7 @@ public class ExcelGenerator<T> {
                     cell = row.createCell(columnNum);
                     columnProperty = excelColumnPropertyList.get(i);
                     if (columnProperty.getExcelCellFill() != null) {
-                        ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum, rowNum, columnProperty.getColumnSize(), columnProperty.getColumnName(), cell, row, sheet,ctWorksheet, workbook);
+                        ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum, rowNum, columnProperty.getColumnSize(), columnProperty.getColumnName(), cell, row, sheet,null, workbook);
                         excelPointLocation.setGlobalValue(globalValue);
                         excelPointLocation.setRowValue(rowValue);
                         columnProperty.getExcelCellFill().fill(excelPointLocation, t);
@@ -210,20 +220,14 @@ public class ExcelGenerator<T> {
                 ExcelColumnProperty<T> excelColumnProperty = excelColumnPropertyList.get(i);
                 ExcelColumnEndFill columnEndFill = excelColumnProperty.getExcelColumnEndFill();
                 if (columnEndFill != null) {
-                    ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum, rowNum, excelColumnProperty.getColumnSize(), excelColumnProperty.getColumnName(), row.createCell(columnNum), row, sheet,ctWorksheet, workbook);
+                    ExcelPointLocation excelPointLocation = new ExcelPointLocation(columnNum, rowNum, excelColumnProperty.getColumnSize(), excelColumnProperty.getColumnName(), row.createCell(columnNum), row, sheet,null, workbook);
                     columnEndFill.fill(excelPointLocation);
                 }
                 columnNum += excelColumnProperty.getColumnSize();
             }
         }catch (InterruptedException e){
-            if(workbook != null){
-                WsStreamUtils.close(workbook);
-            }
+            WsStreamUtils.close(workbook);
             throw new RuntimeException(e);
-        }
-
-        if(workbook == null){
-            return new byte[0];
         }
 
         byte[] returnBytes = null;
@@ -239,25 +243,31 @@ public class ExcelGenerator<T> {
 
     /**
      * 合并单元格去除了验证
-     * @param worksheet
+     * @param sheet
      * @param region
      * @return
      */
-    public static int addMergedRegion(CTWorksheet worksheet,CellRangeAddress region) {
+    public void addMergedRegion(Sheet sheet,CellRangeAddress region) {
         if (region.getNumberOfCells() < 2) {
             throw new IllegalArgumentException("Merged region " + region.formatAsString() + " must contain 2 or more cells");
         }
-        CTMergeCells ctMergeCells = worksheet.isSetMergeCells() ? worksheet.getMergeCells() : worksheet.addNewMergeCells();
+        //sheet.addMergedRegionUnsafe()
+        XSSFSheet xssfSheet = null;
+        if (sheet instanceof SXSSFSheet){
+            xssfSheet = (XSSFSheet) WsFieldUtils.getValue(sheet,SXSSFSHEET_SH_FIELD);
+        }else if(sheet instanceof XSSFSheet){
+            xssfSheet = (XSSFSheet) sheet;
+        }
+        if(xssfSheet == null){
+            throw new RuntimeException("xssfSheet获取失败");
+        }
+        CTWorksheet worksheet = (CTWorksheet) WsFieldUtils.getValue(xssfSheet,XSSFSHEET_WORKSHEET_FIELD);
+        Integer count = mergeCellCountMap.getOrDefault(worksheet,0);
+        CTMergeCells ctMergeCells = count > 0 ? worksheet.getMergeCells() : worksheet.addNewMergeCells();
         CTMergeCell ctMergeCell = ctMergeCells.addNewMergeCell();
         ctMergeCell.setRef(region.formatAsString());
-        long count = ctMergeCells.getCount();
-        if (count == 0) {
-            count=ctMergeCells.sizeOfMergeCellArray();
-        } else {
-            count++;
-        }
-        ctMergeCells.setCount(count);
-        return Math.toIntExact(count-1);
+        mergeCellCountMap.put(worksheet,count + 1);
+        //return Math.toIntExact(count-1);
     }
 
 

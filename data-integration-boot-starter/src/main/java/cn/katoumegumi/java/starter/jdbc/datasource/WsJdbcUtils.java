@@ -218,9 +218,9 @@ public class WsJdbcUtils {
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
 
-        List finalList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
+        List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
 
-        return handleJdbcReturnValue(sql, finalList, sqlModelUtils);
+        return queryList(sql, parameterList, sqlModelUtils);
 
         //List list = handleJdbcReturnValue(sql, finalList);
 
@@ -228,11 +228,23 @@ public class WsJdbcUtils {
         //return sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
     }
 
-    private <T> List<T> handleJdbcReturnValue(String sql, List finalList, SQLModelUtils sqlModelUtils) {
-        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(finalList.toArray()), new ResultSetExtractor<List<T>>() {
+    private <T> List<T> queryList(String sql, List<Object> parameterList, SQLModelUtils sqlModelUtils) {
+        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), new ResultSetExtractor<List<T>>() {
             @Override
             public List<T> extractData(ResultSet rs) throws DataAccessException {
                 return sqlModelUtils.margeMap(new JdkResultSet(rs));
+            }
+        });
+    }
+
+    private <T> T querySingleColumnObject(String sql,List<Object> parameterList,Class<T> returnType){
+        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), new ResultSetExtractor<T>() {
+            @Override
+            public T extractData(ResultSet rs) throws SQLException, DataAccessException {
+                if(rs.next()){
+                    return WsBeanUtils.objectToT(rs.getObject(1),returnType);
+                }
+                return null;
             }
         });
     }
@@ -316,21 +328,24 @@ public class WsJdbcUtils {
     public <T> IPage<T> getTPage(MySearchList mySearchList) {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel());
-        //SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
         String countSql = selectSqlEntity.getCountSql();
         log.info(countSql);
-        List finalList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
-        //List list = handleJdbcReturnValue(sql, finalList);
-
-        List<T> tList = handleJdbcReturnValue(sql, finalList, sqlModelUtils);//sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
-        Long count = jdbcTemplate.queryForObject(countSql, finalList.toArray(), Long.class);
-        if (count == null) {
+        List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
+        Long count = querySingleColumnObject(countSql,parameterList,Long.class);
+        if(count == null){
             count = 0L;
         }
-        IPage<T> iPage = new Page<>();
         SqlLimit sqlLimit = mySearchList.getSqlLimit();
+        List<T> tList;
+        if(count > sqlLimit.getOffset()) {
+            tList = queryList(sql, parameterList, sqlModelUtils);
+        }else {
+            tList = new ArrayList<>(0);
+        }
+        IPage<T> iPage = new Page<>();
+
         iPage.setCurrent(sqlLimit.getCurrent());
         iPage.setSize(sqlLimit.getSize());
         iPage.setRecords(tList);
