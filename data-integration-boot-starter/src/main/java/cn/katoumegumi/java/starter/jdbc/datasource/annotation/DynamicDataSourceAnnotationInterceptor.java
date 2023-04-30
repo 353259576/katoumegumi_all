@@ -14,12 +14,12 @@ public class DynamicDataSourceAnnotationInterceptor implements MethodInterceptor
         DataBase dataBase = methodInvocation.getMethod().getAnnotation(DataBase.class);
         if (dataBase == null) {
             //log.info("使用默认数据库");
-            DynamicDataSourceHolder.setDataSource(DynamicDataSourceHolder.defaultDatasouce);
+            DynamicDataSourceHolder.setDataSource(DynamicDataSourceHolder.defaultDataSource);
         } else {
             if (DynamicDataSourceHolder.dataSourceNameSet.contains(dataBase.dataBaseName())) {
                 DynamicDataSourceHolder.setDataSource(dataBase.dataBaseName());
             } else {
-                DynamicDataSourceHolder.setDataSource(DynamicDataSourceHolder.defaultDatasouce);
+                DynamicDataSourceHolder.setDataSource(DynamicDataSourceHolder.defaultDataSource);
             }
         }
         Object object = methodInvocation.proceed();

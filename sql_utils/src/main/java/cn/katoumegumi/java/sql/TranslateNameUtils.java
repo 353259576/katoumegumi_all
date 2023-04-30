@@ -83,7 +83,7 @@ public class TranslateNameUtils {
     public String getParticular(String value) {
         TranslateNameUtils parent = this.parent;
         String returnValue = particularMap.get(value);
-        if (returnValue == null && parent != null) {
+        while (returnValue == null && parent != null) {
             returnValue = parent.particularMap.get(value);
             parent = parent.parent;
         }
@@ -339,7 +339,7 @@ public class TranslateNameUtils {
         } else {
             startIndex = 0;
             StringBuilder translateStringBuilder = new StringBuilder();
-            String replaceStr = null;
+            String replaceStr;
 
             for (int[] ints : locationList) {
                 if (ints[0] > startIndex) {

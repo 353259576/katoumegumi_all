@@ -6,7 +6,7 @@ import java.util.Set;
 public class DynamicDataSourceHolder {
 
     public static final ThreadLocal<String> THREAD_LOCAL = new ThreadLocal<String>();
-    public static String defaultDatasouce;
+    public static String defaultDataSource;
     public static Set<String> dataSourceNameSet = new HashSet<>();
 
     public static String getDataSource() {
@@ -14,7 +14,7 @@ public class DynamicDataSourceHolder {
 
         String datasource = THREAD_LOCAL.get();
         if (datasource == null) {
-            return defaultDatasouce;
+            return defaultDataSource;
         }
         return datasource;
     }

@@ -85,7 +85,7 @@ public class WsJdbcUtils {
 
 
     private PreparedStatementCreator createPreparedStatement(InsertSqlEntity insertSqlEntity) {
-        PreparedStatementCreator preparedStatementCreator = new PreparedStatementCreator() {
+        return new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                 PreparedStatement statement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS);
@@ -123,7 +123,6 @@ public class WsJdbcUtils {
                 return statement;
             }
         };
-        return preparedStatementCreator;
     }
 
     public <T> int update(T t) {
@@ -345,7 +344,6 @@ public class WsJdbcUtils {
             tList = new ArrayList<>(0);
         }
         IPage<T> iPage = new Page<>();
-
         iPage.setCurrent(sqlLimit.getCurrent());
         iPage.setSize(sqlLimit.getSize());
         iPage.setRecords(tList);

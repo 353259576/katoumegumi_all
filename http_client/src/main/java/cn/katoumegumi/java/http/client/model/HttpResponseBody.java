@@ -163,10 +163,10 @@ public class HttpResponseBody {
                 if ("gzip".equals(str.toLowerCase())) {
                     isGzip = true;
                     if (!(returnBytes == null || returnBytes.length == 0)) {
-                        this.returnBytes = uncompressByGZIP(this.returnBytes);
+                        this.returnBytes = unCompressByGZIP(this.returnBytes);
                     }
                     if (!(errorReturnBytes == null || errorReturnBytes.length == 0)) {
-                        this.errorReturnBytes = uncompressByGZIP(this.errorReturnBytes);
+                        this.errorReturnBytes = unCompressByGZIP(this.errorReturnBytes);
                     }
                 }
             }
@@ -175,7 +175,7 @@ public class HttpResponseBody {
     }
 
 
-    public byte[] uncompressByGZIP(byte[] bytes) {
+    public byte[] unCompressByGZIP(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return bytes;
         }

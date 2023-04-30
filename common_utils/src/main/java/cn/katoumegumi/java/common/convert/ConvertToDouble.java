@@ -29,6 +29,10 @@ public class ConvertToDouble implements ConvertBean<Double> {
         return WsStringUtils.notHasLength(s) ? null : Double.valueOf(s);
     }
 
+    public Double convertBean(String bean) {
+        return Double.parseDouble(bean);
+    }
+
     public Double convertBean(Date date) {
         return ConvertUtils.convert(date, Long.class).doubleValue();
     }
@@ -45,7 +49,9 @@ public class ConvertToDouble implements ConvertBean<Double> {
     public Double convert(Object bean) {
         if (bean instanceof Number) {
             return convertBean((Number) bean);
-        } else if (bean instanceof Boolean) {
+        }else if (bean instanceof String){
+            return convertBean((String) bean);
+        }else if (bean instanceof Boolean) {
             return convertBean((Boolean) bean);
         } else if (bean instanceof Date) {
             return convertBean((Date) bean);

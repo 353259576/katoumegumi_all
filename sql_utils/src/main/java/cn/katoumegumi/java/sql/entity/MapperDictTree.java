@@ -80,7 +80,7 @@ public class MapperDictTree {
     public boolean checkNeedMergeAndBuild() {
         boolean hasArray = false;
         if (this.getChildMap().size() == 0) {
-            return hasArray;
+            return false;
         }
         for (Map.Entry<Integer, MapperDictTree> integerMapperDictTreeEntry : this.getChildMap().entrySet()) {
             if (checkNeedMergeAndBuild(integerMapperDictTreeEntry.getValue())) {
@@ -94,7 +94,7 @@ public class MapperDictTree {
     private boolean checkNeedMergeAndBuild(MapperDictTree mapperDictTree) {
         boolean hasArray = false;
         if (mapperDictTree.getChildMap().size() == 0) {
-            return hasArray;
+            return false;
         }
         FieldColumnRelationMapper parentMapper = mapperDictTree.getCurrentMapperName().getMapper();
         FieldJoinClass fieldJoinClass;

@@ -49,7 +49,7 @@
         <!--<reactor.version>3.4.10</reactor.version>-->
         <hibernate.version>5.5.7.Final</hibernate.version>
         <seata.version>1.5.2</seata.version>
-        <mybatis.plus.version>3.5.2</mybatis.plus.version>
+        <mybatis.plus.version>3.5.3.1</mybatis.plus.version>
         <poi.version>5.2.1</poi.version>
         <lang3.vaersion>3.12.0</lang3.vaersion>
         <logback.version>1.2.11</logback.version>
@@ -112,19 +112,6 @@
                 <artifactId>HikariCP</artifactId>
                 <version>${hikariCP.version}</version>
             </dependency>
-
-
-            <!--<dependency>
-                <groupId>io.projectreactor</groupId>
-                <artifactId>reactor-core</artifactId>
-                <version>${reactor.version}</version>
-            </dependency>-->
-
-            <!--<dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>-->
 
 
             <dependency>

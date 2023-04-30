@@ -42,35 +42,8 @@ public class BaseDataSourceUtils {
             }
             resultSet = preparedStatement.executeQuery();
             return (List<T>) sqlModelUtils.margeMap(new JdkResultSet(resultSet));
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } finally {
-            WsStreamUtils.close(resultSet, preparedStatement, connection);
-        }
-        return null;
-    }
-
-    public <T> List<T> selectList2(MySearchList mySearchList) {
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        SelectSqlEntity entity = MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel());
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(entity.getSelectSql());
-            List<Object> objectList = WsListUtils.listToList(entity.getValueList(), SqlParameter::getValue);
-            for (int i = 0; i < objectList.size(); i++) {
-                Object o = objectList.get(i);
-                if (o instanceof Date) {
-                    o = WsBeanUtils.objectToT(o, Date.class);
-                }
-                preparedStatement.setObject(i + 1, o);
-            }
-            resultSet = preparedStatement.executeQuery();
-            return (List<T>) sqlModelUtils.oneLoopMargeMap(new JdkResultSet(resultSet));
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
         } finally {
             WsStreamUtils.close(resultSet, preparedStatement, connection);
         }

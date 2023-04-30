@@ -111,31 +111,31 @@ public class HttpUrlRelolver {
         Integer length = html.length();
         boolean isUrl = false;
         char[] chars = html.toCharArray();
-        StringBuffer stringBuffer = null;
+        StringBuilder stringBuffer = null;
         for (int i = 0; i < length; i++) {
             if (!isUrl) {
                 if (chars[i] == 'h') {
                     if ("https".equals(html.substring(i, i + 5))) {
                         if (chars[i + 5] == ':') {
                             isUrl = true;
-                            stringBuffer = new StringBuffer("https:");
+                            stringBuffer = new StringBuilder("https:");
                             i = i + 5;
                         }
                     } else if ("http:".equals(html.substring(i, i + 5))) {
                         isUrl = true;
-                        stringBuffer = new StringBuffer("http:");
+                        stringBuffer = new StringBuilder("http:");
                         i = i + 4;
                     }
                 }
                 if (chars[i] == '/') {
                     if (chars[i + 1] == '/') {
                         isUrl = true;
-                        stringBuffer = new StringBuffer("//");
+                        stringBuffer = new StringBuilder("//");
                         i = i + 1;
                     } else if (chars[i - 1] == '"') {
                         String strs[] = url.split("/");
                         String newUrl = strs[0] + "//" + strs[2];
-                        stringBuffer = new StringBuffer(newUrl + "/");
+                        stringBuffer = new StringBuilder(newUrl + "/");
                         isUrl = true;
                     }
                 }

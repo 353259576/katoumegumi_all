@@ -175,7 +175,7 @@ public class TableRelation {
     }
 
     public TableRelation condition(Consumer<MySearchList> searchList) {
-        MySearchList mySearchList = null;
+        MySearchList mySearchList;
         if (this.conditionSearchList == null) {
             mySearchList = MySearchList.create();
         } else {

@@ -3,6 +3,7 @@ package cn.katoumegumi.java.sql.test;
 import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsDateUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsUnsafeUtils;
 import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.SqlEquation;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
@@ -12,7 +13,6 @@ import cn.katoumegumi.java.sql.test.model.LUser;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
 import cn.katoumegumi.java.sql.test.model.UserDetailsRemake;
-import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.google.gson.Gson;
 
 import javax.sql.DataSource;
@@ -24,13 +24,42 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Test {
 
     public static void main(String[] args) {
-        /*DataSource dataSource = getDataSource();
+        test3();
+    }
+
+    public static void test3(){
+        long time;
+
+        time = WsDateUtils.getExecutionTime.apply(()->{
+            ArrayList<Integer> list = new ArrayList<>();
+            for (int i = 0; i < 10000000; i++){
+                list.add(i);
+            }
+        });
+        System.out.println("执行了"+time+"毫秒");
+        time = WsDateUtils.getExecutionTime.apply(()->{
+            List<Integer> list = new ArrayList<>();
+            for (int i = 0; i < 10000000; i++){
+                list.add(i);
+            }
+        });
+        System.out.println("执行了"+time+"毫秒");
+
+
+
+
+    }
+
+    public static void test2(){
+                /*DataSource dataSource = getDataSource();
         BaseDataSourceUtils dataSourceUtils = new BaseDataSourceUtils(dataSource);
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         WsJdbcUtils jdbcUtils = new WsJdbcUtils();
@@ -107,14 +136,7 @@ public class Test {
                 }
         );
         System.out.println("旧合成方法消耗的时间是：" + time);
-
-
-
-
-
-
     }
-
 
     public static void test() {
 

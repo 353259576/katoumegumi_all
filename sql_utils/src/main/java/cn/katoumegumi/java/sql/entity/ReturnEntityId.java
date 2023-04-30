@@ -21,21 +21,6 @@ public class ReturnEntityId {
         hashCode = Arrays.hashCode(idSigns);
     }
 
-    public ReturnEntityId(List<FieldColumnRelation> idList, ReturnEntity returnEntity) {
-        int length = idList.size();
-        Object[] valueList = returnEntity.getIdValueList();
-        ReturnEntity parentEntity = returnEntity.getParentReturnEntity();
-        if (parentEntity == null) {
-            idSigns = new Object[length];
-            System.arraycopy(valueList, 0, idSigns, 0, length);
-        } else {
-            idSigns = new Object[parentEntity.getReturnEntityId().getIdSigns().length + length];
-            System.arraycopy(parentEntity.getReturnEntityId().getIdSigns(), 0, idSigns, 0, parentEntity.getReturnEntityId().getIdSigns().length);
-            System.arraycopy(valueList, 0, idSigns, parentEntity.getReturnEntityId().getIdSigns().length, length);
-        }
-        hashCode = Arrays.hashCode(idSigns);
-    }
-
     @Override
     public int hashCode() {
         return hashCode;

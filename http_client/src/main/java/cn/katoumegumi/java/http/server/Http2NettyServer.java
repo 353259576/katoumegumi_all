@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.http.server;
 
-import cn.katoumegumi.java.http.server.initializer.Http2Initailzer;
+import cn.katoumegumi.java.http.server.initializer.Http2Initializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -38,7 +38,7 @@ public class Http2NettyServer {
         serverBootstrap.handler(new LoggingHandler(LogLevel.INFO));
         serverBootstrap.option(ChannelOption.SO_BACKLOG, 128);
         serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
-        serverBootstrap.childHandler(new Http2Initailzer());
+        serverBootstrap.childHandler(new Http2Initializer());
         try {
             Channel channel = serverBootstrap.bind(1996).sync().channel();
             channel.closeFuture().sync();

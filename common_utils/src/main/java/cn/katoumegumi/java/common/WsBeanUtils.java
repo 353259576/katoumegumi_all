@@ -81,7 +81,7 @@ public class WsBeanUtils {
                         }
                     } else {
                         Class<?> targetClass = WsFieldUtils.getClassTypeof(targetField);
-                        Object setValue = null;
+                        Object setValue;
                         Object collection = null;
                         if (targetField.getType().equals(List.class)
                                 || targetField.getType().equals(Collection.class)) {
@@ -1134,7 +1134,6 @@ public class WsBeanUtils {
         Field[] fields = WsFieldUtils.getFieldAll(o.getClass());
 
         Map<Object, Object> map = new HashMap<>();
-        assert fields != null;
         for (Field field : fields) {
             Object value = WsFieldUtils.getValue(o, field);
             if (value != null) {

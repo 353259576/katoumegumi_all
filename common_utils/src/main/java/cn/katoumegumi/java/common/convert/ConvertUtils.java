@@ -70,7 +70,7 @@ public class ConvertUtils {
         if (o == null) {
             return null;
         }
-        Class<?> c = null;
+        Class<?> c;
         if (tClass.isPrimitive()) {
             c = BaseTypeCommon.getWrapperClass(tClass);
         } else {

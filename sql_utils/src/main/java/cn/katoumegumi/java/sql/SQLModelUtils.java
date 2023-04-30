@@ -251,7 +251,7 @@ public class SQLModelUtils {
         for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             Field field = fieldColumnRelation.getField();
             AbstractSqlInterceptor sqlInterceptor = insertSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
-            Object o = null;
+            Object o;
             if (sqlInterceptor != null && sqlInterceptor.useCondition(analysisClassRelation(mainClass))) {
                 o = sqlInterceptor.insertFill();
             } else {
@@ -309,7 +309,7 @@ public class SQLModelUtils {
             Field field = fieldColumnRelation.getField();
 
             AbstractSqlInterceptor sqlInterceptor = insertSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
-            Object o = null;
+            Object o;
             if (sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper)) {
                 o = sqlInterceptor.insertFill();
             } else {
@@ -328,7 +328,7 @@ public class SQLModelUtils {
             for (FieldColumnRelation fieldColumnRelation : validField) {
                 Field field = fieldColumnRelation.getField();
                 AbstractSqlInterceptor sqlInterceptor = insertSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
-                Object o = null;
+                Object o;
                 if (sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper)) {
                     o = sqlInterceptor.insertFill();
                 } else {
@@ -368,7 +368,7 @@ public class SQLModelUtils {
         for (FieldColumnRelation fieldColumnRelation : columnList) {
 
             AbstractSqlInterceptor sqlInterceptor = updateSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
-            Object o = null;
+            Object o;
             if (sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper)) {
                 o = sqlInterceptor.updateFill();
             } else {
@@ -430,94 +430,6 @@ public class SQLModelUtils {
                 e.printStackTrace();
             }
             return (List<T>) tList;
-        }
-    }
-
-    /**
-     * 合并返回数据
-     *
-     * @param resultSet
-     * @param <T>
-     * @return
-     */
-    @Deprecated
-    public <T> List<T> oneLoopMargeMap(WsResultSet resultSet) {
-        try {
-            int classNum = translateNameUtils.locationMapperSize();
-            //ResultSetMetaData resultSetMetaData = null;
-
-            //resultSetMetaData = resultSet.getMetaData();
-            //length = resultSetMetaData.getColumnCount();
-            final int length = resultSet.getColumnCount();
-
-            if (length == 0) {
-                return new ArrayList<>(0);
-            }
-            FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
-            String rootPath = mainMapper.getNickName();
-
-
-            List<List<String>> columnNameListList = new ArrayList<>(length);
-            List<FieldColumnRelationMapper> mapperList = new ArrayList<>(length);
-            List<FieldColumnRelation> columnRelationList = new ArrayList<>(length);
-
-
-            String columnName = null;
-            for (int i = 0; i < length; i++) {
-                columnName = resultSet.getColumnLabel(i + 1);
-                List<String> nameList = WsStringUtils.split(columnName, '.');
-                nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
-                FieldColumnRelationMapper mapper = translateNameUtils.getLocalMapper(nameList.get(0));
-                FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByFieldName(nameList.get(1));
-                columnNameListList.add(nameList);
-                mapperList.add(mapper);
-                columnRelationList.add(fieldColumnRelation);
-            }
-
-            List<ReturnEntity> returnEntityList = new ArrayList<>();
-            Map<Class<?>, Map<ReturnEntityId, ReturnEntity>> idReturnEntityMap = new HashMap<>();
-
-            Map<String, ReturnEntity> returnEntityMap;
-            while (resultSet.next()) {
-                returnEntityMap = new HashMap<>(classNum);
-                Object value;
-                for (int i = 0; i < length; ++i) {
-                    value = resultSet.getObject(i + 1);
-                    List<String> nameList = columnNameListList.get(i);
-                    FieldColumnRelationMapper mapper = mapperList.get(i);
-                    FieldColumnRelation fieldColumnRelation = columnRelationList.get(i);
-                    ReturnEntity returnEntity = returnEntityMap.computeIfAbsent(nameList.get(0), columnTypeName -> {
-                        return new ReturnEntity(mapper);
-                    });
-
-                    if (fieldColumnRelation.isId()) {
-                        returnEntity.getIdValueList()[mapper.getLocation(fieldColumnRelation)] = value;
-                    } else {
-                        returnEntity.getColumnValueList()[mapper.getLocation(fieldColumnRelation)] = value;
-                    }
-                }
-                ReturnEntity returnEntity = returnEntityMap.get(rootPath);
-                if (returnEntity != null) {
-                    ReturnEntity mainEntity = ReturnEntityUtils.getReturnEntity(idReturnEntityMap, returnEntityMap, returnEntity, rootPath);
-                    if (returnEntity.equals(mainEntity)) {
-                        returnEntityList.add(mainEntity);
-                    }
-                }
-            }
-            if (returnEntityList.size() == 0) {
-                return new ArrayList<>(0);
-            }
-            List<Object> list = new ArrayList<>(returnEntityList.size());
-            for (ReturnEntity returnEntity : returnEntityList) {
-                list.add(returnEntity.getValue());
-            }
-
-            return (List<T>) list;
-
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return new ArrayList<>(0);
         }
     }
 
@@ -608,7 +520,6 @@ public class SQLModelUtils {
                     valueList.add(value);
                 }
             }
-
             return (List<T>) valueList;
 
 
@@ -808,87 +719,6 @@ public class SQLModelUtils {
         }else {
             WsFieldUtils.setValue(target,source,field);
         }
-    }
-
-
-
-    /**
-     * 合并返回数据
-     *
-     * @param mapList
-     * @param <T>
-     * @return
-     */
-    @Deprecated
-    public <T> List<T> oneLoopMargeMap(List<Map<Object, Object>> mapList) {
-        if (WsListUtils.isEmpty(mapList)) {
-            return new ArrayList<>(0);
-        }
-
-        FieldColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
-        String baseTableName = mainMapper.getNickName();
-
-        List<ReturnEntity> returnEntityList = new ArrayList<>(mapList.size());
-        List<List<String>> columnNameListList = new ArrayList<>();
-        List<FieldColumnRelationMapper> mapperList = new ArrayList<>(mapList.size());
-        List<FieldColumnRelation> columnRelationList = new ArrayList<>(mapList.size());
-        Map<Class<?>, Map<ReturnEntityId, ReturnEntity>> idReturnEntityMap = new HashMap<>(mapList.size());
-
-        Map<Object, Object> firstMap = mapList.get(0);
-        Set<Map.Entry<Object, Object>> entrySet = firstMap.entrySet();
-
-        for (Map.Entry<Object, Object> entry : entrySet) {
-            List<String> nameList = WsStringUtils.split((String) entry.getKey(), '.');
-            nameList.set(0, translateNameUtils.getParticular(nameList.get(0)));
-            FieldColumnRelationMapper mapper = translateNameUtils.getLocalMapper(nameList.get(0));
-            FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByFieldName(nameList.get(1));
-
-            columnNameListList.add(nameList);
-            mapperList.add(mapper);
-            columnRelationList.add(fieldColumnRelation);
-        }
-
-
-        Map<String, ReturnEntity> returnEntityMap;
-        for (Map<Object, Object> map : mapList) {
-            returnEntityMap = new HashMap<>();
-            entrySet = map.entrySet();
-            int i = 0;
-            for (Map.Entry<Object, Object> entry : entrySet) {
-                if (entry.getValue() == null) {
-                    ++i;
-                    continue;
-                }
-                List<String> nameList = columnNameListList.get(i);
-                FieldColumnRelationMapper mapper = mapperList.get(i);
-                FieldColumnRelation fieldColumnRelation = columnRelationList.get(i);
-                ReturnEntity returnEntity = returnEntityMap.computeIfAbsent(nameList.get(0), columnTypeName -> {
-                    return new ReturnEntity(mapper);
-                });
-
-                if (fieldColumnRelation.isId()) {
-                    returnEntity.getIdValueList()[mapper.getLocation(fieldColumnRelation)] = entry.getValue();
-                } else {
-                    returnEntity.getColumnValueList()[mapper.getLocation(fieldColumnRelation)] = entry.getValue();
-                }
-                ++i;
-            }
-            ReturnEntity returnEntity = returnEntityMap.get(baseTableName);
-            if (returnEntity != null) {
-                ReturnEntity mainEntity = ReturnEntityUtils.getReturnEntity(idReturnEntityMap, returnEntityMap, returnEntity, baseTableName);
-                //ReturnEntityUtils.packageReturnEntity(idReturnEntityMap, returnEntityMap, mainEntity, baseTableName);
-                if (returnEntity.equals(mainEntity)) {
-                    returnEntityList.add(mainEntity);
-                }
-            }
-        }
-
-        List<T> list = new ArrayList<>(returnEntityList.size());
-        for (ReturnEntity returnEntity : returnEntityList) {
-            list.add((T) returnEntity.getValue());
-        }
-
-        return list;
     }
 
     public TranslateNameUtils getTranslateNameUtils() {
@@ -1189,7 +1019,7 @@ public class SQLModelUtils {
             expressionConditionList = new ArrayList<>(searches.size());
         }
         for (MySearch search : searches) {
-            Object left = null;
+            Object left;
             SqlOperator operator = search.getOperator();
 
             Object right = null;

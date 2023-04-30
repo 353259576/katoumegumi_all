@@ -20,9 +20,9 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object object) throws Exception {
         FullHttpRequest fullHttpRequest = (FullHttpRequest) object;
         String uri = fullHttpRequest.uri();
-        String mehodName = fullHttpRequest.method().name();
+        String methodName = fullHttpRequest.method().name();
         log.info("请求连接为：{}", uri);
-        log.info("请求方式为：{}", mehodName);
+        log.info("请求方式为：{}", methodName);
         HttpHeaders httpHeaders = fullHttpRequest.headers();
         Iterator<Map.Entry<String, String>> iterator = httpHeaders.iteratorAsString();
         while (iterator.hasNext()) {

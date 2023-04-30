@@ -163,7 +163,7 @@ public class WsStringUtils {
         if (str == null) {
             return false;
         }
-        byte[] bytes = null;
+        byte[] bytes;
         try {
             bytes = str.getBytes(StandardCharsets.UTF_8);
         } catch (Exception e) {
@@ -190,7 +190,7 @@ public class WsStringUtils {
      */
     public static String stringTrim(String str) {
         if (str == null) {
-            return str;
+            return null;
         }
         byte[] bytes = str.getBytes();
         if (bytes.length == 0) {
@@ -252,7 +252,7 @@ public class WsStringUtils {
                     //i++;
                 } else {
                     List<String> strings = new ArrayList<>();
-                    String str = "";
+                    String str;
                     StringBuilder stringBuffer = new StringBuilder();
                     for (int j = 0; j < 2; j++) {
                         i++;
@@ -511,7 +511,7 @@ public class WsStringUtils {
         List<String> list = new ArrayList<>();
 
         int startIndex = 0;
-        int endIndex = 0;
+        int endIndex;
 
         for (int i = 0; i < cs.length; ++i) {
             if (cs[i] == c) {
@@ -678,7 +678,7 @@ public class WsStringUtils {
         }
         List<String> list = new ArrayList<>();
         int decimalismIndex = 0;
-        int cnNumberNameIndex = 0;
+        int cnNumberNameIndex;
         //是否需要增加w 0 不需要 1 需要 2 已增加
         int needAddW = 0;
         //是否需要添加0

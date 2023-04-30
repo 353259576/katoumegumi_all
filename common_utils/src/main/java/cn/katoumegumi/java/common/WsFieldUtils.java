@@ -76,7 +76,7 @@ public class WsFieldUtils {
      * @return
      */
     public static Method[] getObjectMethodByName(String methodName, Class<?> clazz) {
-        Method[] methods = null;
+        Method[] methods;
         Set<Method> methodSet = new HashSet<>();
         methods = clazz.getDeclaredMethods();
         Collections.addAll(methodSet, methods);
@@ -194,7 +194,7 @@ public class WsFieldUtils {
     }
 
     private static SerializedLambda getSerializedLambda(Object o){
-        SerializedLambda serializedLambda = null;
+        SerializedLambda serializedLambda;
         if((serializedLambda = getSerializedLambdaByReflect(o)) == null){
             serializedLambda = getSerializedLambdaByObjectStreamClass(o);
         }

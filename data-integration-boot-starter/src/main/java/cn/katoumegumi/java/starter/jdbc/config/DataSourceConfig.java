@@ -14,7 +14,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
@@ -56,7 +55,7 @@ public class DataSourceConfig {
         DataSource druidDataSource = factory.initDatasource(properties, dataSourcePropertiesList.isSeataEnable());
         map.put(properties.getAlias(), druidDataSource);
         dynamicDataSource.setDefaultTargetDataSource(druidDataSource);
-        DynamicDataSourceHolder.defaultDatasouce = properties.getAlias();
+        DynamicDataSourceHolder.defaultDataSource = properties.getAlias();
         DynamicDataSourceHolder.dataSourceNameSet.add(properties.getAlias());
         log.info("默认数据源：{}创建成功，数据源：{}", properties.getAlias(), druidDataSource);
         for (int i = 1, length = list.size(); i < length; i++) {

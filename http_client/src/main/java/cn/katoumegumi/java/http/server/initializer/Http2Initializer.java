@@ -19,7 +19,7 @@ import io.netty.util.ReferenceCountUtil;
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
 
-public class Http2Initailzer extends ChannelInitializer<SocketChannel> {
+public class Http2Initializer extends ChannelInitializer<SocketChannel> {
 
 
     public static SslContext sslContext;
