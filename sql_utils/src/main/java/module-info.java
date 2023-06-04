@@ -4,7 +4,6 @@ module cn.katoumegumi.java.sql.utils {
     requires cn.katoumegumi.java.common.utils;
     requires java.persistence;
     requires org.slf4j;
-    requires ch.qos.logback.core;
     requires com.baomidou.mybatis.plus.annotation;
     requires jakarta.persistence;
 

@@ -108,7 +108,7 @@ public class HttpUrlRelolver {
 
 
     public static void getUrlFromHtml(String html, String url) {
-        Integer length = html.length();
+        int length = html.length();
         boolean isUrl = false;
         char[] chars = html.toCharArray();
         StringBuilder stringBuffer = null;
@@ -133,7 +133,7 @@ public class HttpUrlRelolver {
                         stringBuffer = new StringBuilder("//");
                         i = i + 1;
                     } else if (chars[i - 1] == '"') {
-                        String strs[] = url.split("/");
+                        String[] strs = url.split("/");
                         String newUrl = strs[0] + "//" + strs[2];
                         stringBuffer = new StringBuilder(newUrl + "/");
                         isUrl = true;
@@ -161,7 +161,7 @@ public class HttpUrlRelolver {
 
 
     public static boolean isEnding(char c) {
-        boolean k = false;
+        boolean k;
         switch (c) {
             case '"':
                 k = true;

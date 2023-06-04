@@ -1,9 +1,6 @@
 package cn.katoumegumi.java.sql.entity;
 
-import cn.katoumegumi.java.sql.FieldColumnRelation;
-
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * 返回实体的id对象

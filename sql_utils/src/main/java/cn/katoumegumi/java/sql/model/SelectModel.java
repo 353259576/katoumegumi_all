@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.sql.model;
 
-import cn.katoumegumi.java.sql.entity.BaseTableColumn;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 
 import java.util.List;

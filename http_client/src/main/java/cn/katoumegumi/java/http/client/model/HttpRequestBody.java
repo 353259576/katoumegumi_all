@@ -63,7 +63,7 @@ public class HttpRequestBody {
             Map map = (Map) object;
             Set<Map.Entry> entries = map.entrySet();
             Iterator<Map.Entry> iterator = entries.iterator();
-            Map.Entry entry = null;
+            Map.Entry entry;
             String key;
             String value;
             while (iterator.hasNext()) {
@@ -83,7 +83,7 @@ public class HttpRequestBody {
             httpRequestBody.setStringHttpRequestBody((String) object);
         } else {
             Field[] fields = WsFieldUtils.getFieldAll(object.getClass());
-            String value = null;
+            String value;
             for (int i = 0; i < fields.length; i++) {
                 value = WsStringUtils.anyToString(WsFieldUtils.getValue(object, fields[i]));
                 if (value != null) {
@@ -188,7 +188,7 @@ public class HttpRequestBody {
     }*/
 
     public byte[] getByteHttpRequestBody() {
-        byte[] bytes = null;
+        byte[] bytes;
         if (WsStringUtils.isBlank(this.stringHttpRequestBody)) {
             switch (mediaType) {
                 case APPLICATION_FORM_URLENCODED:
@@ -298,8 +298,7 @@ public class HttpRequestBody {
             gzipOutputStream.close();
             byteArrayOutputStream.flush();
             byteArrayOutputStream.close();
-            byte[] newBytes = byteArrayOutputStream.toByteArray();
-            return newBytes;
+            return byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
             e.printStackTrace();
             return bytes;
@@ -335,7 +334,7 @@ public class HttpRequestBody {
 
     public HttpRequestBody setUrl(String url) {
         try {
-            URI uri = null;
+            URI uri;
             String[] strs = url.split("/");
             if (strs.length > 2) {
                 String newUrl = strs[0] + "//" + strs[2];

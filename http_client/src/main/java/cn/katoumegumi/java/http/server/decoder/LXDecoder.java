@@ -18,7 +18,7 @@ public class LXDecoder extends ByteToMessageDecoder {
         System.out.println((byte) c);
         byte b = 33;
         System.out.println((char) b);
-        byte bytes[] = new byte[4];
+        byte[] bytes = new byte[4];
         bytes[0] = 0;
         bytes[1] = 33;
         bytes[2] = 0;
@@ -42,7 +42,7 @@ public class LXDecoder extends ByteToMessageDecoder {
                 return;
             } else {
                 //读取长度
-                byte bytes[] = new byte[4];
+                byte[] bytes = new byte[4];
                 byteBuf.readBytes(bytes, 0, 4);
                 length = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
                 state = 1;

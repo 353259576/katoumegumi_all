@@ -33,9 +33,9 @@ public class InServerHandler extends ChannelInboundHandlerAdapter {
         try {
             //super.channelRead(ctx, msg);
             ByteBuf byteBuf = (ByteBuf) msg;
-            Integer start = byteBuf.readerIndex();
-            Integer end = byteBuf.readableBytes();
-            byte bytes[] = new byte[end - start];
+            int start = byteBuf.readerIndex();
+            int end = byteBuf.readableBytes();
+            byte[] bytes = new byte[end - start];
             byteBuf.readBytes(bytes, start, end);
             //System.out.println(new String(bytes));
             log.info("\r\n" + new String(bytes));

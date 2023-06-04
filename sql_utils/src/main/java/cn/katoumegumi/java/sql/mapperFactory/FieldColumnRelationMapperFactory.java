@@ -9,9 +9,7 @@ import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
 import cn.katoumegumi.java.sql.mapperFactory.strategys.*;
 import cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandle.*;
-import com.baomidou.mybatisplus.annotation.TableField;
 
-import javax.persistence.Table;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +52,7 @@ public class FieldColumnRelationMapperFactory {
     /**
      * 默认的mapper处理方式
      */
-    private static FieldColumnRelationMapperHandleStrategy defaultFieldColumnRelationMapperHandleStrategy;
+    private static final FieldColumnRelationMapperHandleStrategy defaultFieldColumnRelationMapperHandleStrategy;
 
     static {
         addFieldColumnRelationMapperHandleStrategy(

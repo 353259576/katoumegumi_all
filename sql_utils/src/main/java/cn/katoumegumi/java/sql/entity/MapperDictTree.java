@@ -56,13 +56,6 @@ public class MapperDictTree {
         return currentMapperName;
     }
 
-    /*public FieldColumnRelationMapper getCurrentMapper() {
-        return currentMapper;
-    }
-
-    public void setCurrentMapper(FieldColumnRelationMapper currentMapper) {
-        this.currentMapper = currentMapper;
-    }*/
 
     public Map<Integer, MapperDictTree> getChildMap() {
         return childMap;

@@ -15,9 +15,9 @@ import org.springframework.beans.factory.BeanFactoryAware;
 public class DynamicDataSourceAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
 
 
-    private Advice advice;
+    private final Advice advice;
 
-    private Pointcut pointcut;
+    private final Pointcut pointcut;
 
     public DynamicDataSourceAdvisor() {
         pointcut = buildPointcut();

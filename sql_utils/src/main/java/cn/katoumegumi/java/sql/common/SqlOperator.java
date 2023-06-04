@@ -1,12 +1,5 @@
 package cn.katoumegumi.java.sql.common;
 
-import cn.katoumegumi.java.sql.MySearch;
-import cn.katoumegumi.java.sql.SQLModelUtils;
-import cn.katoumegumi.java.sql.TranslateNameUtils;
-import cn.katoumegumi.java.sql.entity.SqlParameter;
-
-import java.util.List;
-
 /**
  * @author 10480
  */
@@ -107,5 +100,5 @@ public enum SqlOperator {
     /**
      * 等式
      */
-    EQUATION;
+    EQUATION
 }

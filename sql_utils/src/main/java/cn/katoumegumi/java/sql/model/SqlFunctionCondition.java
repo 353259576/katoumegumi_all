@@ -1,7 +1,5 @@
 package cn.katoumegumi.java.sql.model;
 
-import java.util.List;
-
 /**
  * sal方法
  */

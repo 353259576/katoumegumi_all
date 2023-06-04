@@ -153,7 +153,7 @@ public class SqlTableToBeanUtils {
 
 
     public static class Column {
-        private static Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
+        private static final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
 
         static {
             classMap.put("varchar", String.class);

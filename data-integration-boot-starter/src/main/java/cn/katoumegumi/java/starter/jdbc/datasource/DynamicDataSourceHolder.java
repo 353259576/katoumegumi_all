@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class DynamicDataSourceHolder {
 
-    public static final ThreadLocal<String> THREAD_LOCAL = new ThreadLocal<String>();
+    public static final ThreadLocal<String> THREAD_LOCAL = new ThreadLocal<>();
     public static String defaultDataSource;
     public static Set<String> dataSourceNameSet = new HashSet<>();
 

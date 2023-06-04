@@ -4,7 +4,6 @@ import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.entity.JdkResultSet;
 import cn.katoumegumi.java.sql.entity.SqlParameter;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
-import cn.katoumegumi.java.sql.model.SelectModel;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -16,7 +15,7 @@ import java.util.List;
 public class BaseDataSourceUtils {
 
 
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
     public BaseDataSourceUtils(DataSource dataSource) {
         this.dataSource = dataSource;

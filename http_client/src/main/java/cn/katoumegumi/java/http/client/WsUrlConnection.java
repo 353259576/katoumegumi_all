@@ -25,18 +25,18 @@ import java.util.List;
 import java.util.Map;
 
 public class WsUrlConnection {
-    private static char hrefList[] = new char[]{'h', 'r', 'e', 'f', '=', '"'};
-    private static char htmlList[] = new char[]{'"', 'h', 't', 't', 'p'};
-    private static char htmlList1[] = new char[]{'\'', 'h', 't', 't', 'p'};
-    private static char wwwList[] = new char[]{'w', 'w', 'w'};
-    private static String HTMLTYPE = "text/html";
-    private static String IMAGETYPE = "image";
-    private static String JSTYPE = "application/x-javascript";
-    private static String JSONTYPE = "application/json";
+    private static final char[] hrefList = new char[]{'h', 'r', 'e', 'f', '=', '"'};
+    private static final char[] htmlList = new char[]{'"', 'h', 't', 't', 'p'};
+    private static final char[] htmlList1 = new char[]{'\'', 'h', 't', 't', 'p'};
+    private static final char[] wwwList = new char[]{'w', 'w', 'w'};
+    private static final String HTMLTYPE = "text/html";
+    private static final String IMAGETYPE = "image";
+    private static final String JSTYPE = "application/x-javascript";
+    private static final String JSONTYPE = "application/json";
     //private static char dianList[] = new char[]{'"','/'};
-    private static List<char[]> list = new ArrayList<>();
+    private static final List<char[]> list = new ArrayList<>();
 
-    private static volatile String biaoshi = null;
+    private static final String biaoshi = null;
 
 
     public static void main(String[] args) {
@@ -122,7 +122,7 @@ public class WsUrlConnection {
         InputStream eInputStream = null;
         BufferedOutputStream bufferedOutputStream = null;
         OutputStream outputStream = null;
-        Integer resultCode = null;
+        Integer resultCode;
         String textType = null;
         FileInputStream fileInputStream = null;
         if (httpRequestBody == null) {
@@ -136,7 +136,7 @@ public class WsUrlConnection {
             HttpsURLConnection httpsURLConnection = (HttpsURLConnection) urlConnection;
             //SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
             SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-            TrustManager trustManager[] = {new X509TrustManager() {
+            TrustManager[] trustManager = {new X509TrustManager() {
                 //检查本地证书
                 @Override
                 public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
@@ -178,7 +178,7 @@ public class WsUrlConnection {
             }
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
             httpsURLConnection.setSSLSocketFactory(sslSocketFactory);
-            byte data[] = httpRequestBody.getByteHttpRequestBody();
+            byte[] data = httpRequestBody.getByteHttpRequestBody();
             if (data != null && data.length > 0) {
                 httpsURLConnection.setDoInput(true);
             }
@@ -201,7 +201,6 @@ public class WsUrlConnection {
                     bufferedOutputStream.write(data);
                     bufferedOutputStream.flush();
                     bufferedOutputStream.close();
-                    data = null;
                 }
             }
             resultCode = httpsURLConnection.getResponseCode();
@@ -250,7 +249,7 @@ public class WsUrlConnection {
         InputStream eInputStream = null;
         BufferedOutputStream bufferedOutputStream = null;
         OutputStream outputStream = null;
-        Integer resultCode = null;
+        Integer resultCode;
         String textType = null;
         if (httpRequestBody == null) {
             httpRequestBody = HttpRequestBody.createHttpRequestBody();
@@ -259,7 +258,7 @@ public class WsUrlConnection {
         try {
             URL url = new URL(httpRequestBody.getUrl());
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-            byte data[] = httpRequestBody.getByteHttpRequestBody();
+            byte[] data = httpRequestBody.getByteHttpRequestBody();
             if (data != null && data.length > 0) {
                 httpURLConnection.setDoInput(true);
             }
@@ -280,7 +279,6 @@ public class WsUrlConnection {
                     bufferedOutputStream.write(data);
                     bufferedOutputStream.flush();
                     bufferedOutputStream.close();
-                    data = null;
                 }
             }
             resultCode = httpURLConnection.getResponseCode();
@@ -327,8 +325,8 @@ public class WsUrlConnection {
         WritableByteChannel writableByteChannel = null;
         ReadableByteChannel readableByteChannel = null;
         ByteArrayOutputStream byteArrayOutputStream = null;
-        ByteBuffer byteBuffer = null;
-        byte bytes[] = null;
+        ByteBuffer byteBuffer;
+        byte[] bytes = null;
         try {
             byteArrayOutputStream = new ByteArrayOutputStream();
             readableByteChannel = Channels.newChannel(inputStream);
@@ -352,7 +350,6 @@ public class WsUrlConnection {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                writableByteChannel = null;
             }
             try {
                 if (readableByteChannel != null) {
@@ -361,7 +358,6 @@ public class WsUrlConnection {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                readableByteChannel = null;
             }
             try {
                 if (byteArrayOutputStream != null) {
@@ -372,7 +368,6 @@ public class WsUrlConnection {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                byteArrayOutputStream = null;
             }
             try {
                 if (inputStream != null) {
@@ -381,7 +376,6 @@ public class WsUrlConnection {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                inputStream = null;
             }
         }
         return bytes;
@@ -390,7 +384,7 @@ public class WsUrlConnection {
     public static OutputStream writeOutputsteam(InputStream inputStream, OutputStream outputStream) {
         WritableByteChannel writableByteChannel = null;
         ReadableByteChannel readableByteChannel = null;
-        ByteBuffer byteBuffer = null;
+        ByteBuffer byteBuffer;
         try {
             readableByteChannel = Channels.newChannel(inputStream);
             writableByteChannel = Channels.newChannel(outputStream);

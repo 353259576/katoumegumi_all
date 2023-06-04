@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
     private final Map<Integer, Entry<ChannelFuture, ChannelPromise>> streamidPromiseMap;
-    private AtomicInteger atomicInteger = new AtomicInteger(1);
+    private final AtomicInteger atomicInteger = new AtomicInteger(1);
 
     public HttpResponseHandler() {
         // Use a concurrent map because we add and iterate from the main thread (just for the purposes of the example),
@@ -61,7 +61,7 @@ public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpRes
      * @see HttpResponseHandler#awaitResponses(long, TimeUnit)
      */
     public Entry<ChannelFuture, ChannelPromise> put(int streamId, ChannelFuture writeFuture, ChannelPromise promise) {
-        return streamidPromiseMap.put(streamId, new SimpleEntry<ChannelFuture, ChannelPromise>(writeFuture, promise));
+        return streamidPromiseMap.put(streamId, new SimpleEntry<>(writeFuture, promise));
     }
 
     /**

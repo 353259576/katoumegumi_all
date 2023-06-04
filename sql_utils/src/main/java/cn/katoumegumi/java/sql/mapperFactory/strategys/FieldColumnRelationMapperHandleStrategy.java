@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.sql.mapperFactory.strategys;
 
-import cn.katoumegumi.java.common.model.KeyValue;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;

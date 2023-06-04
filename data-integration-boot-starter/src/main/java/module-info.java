@@ -1,5 +1,4 @@
 module cn.katoumegumi.java.data.integration.boot.starter {
-    requires java.compiler;
     requires java.sql;
     requires druid;
     requires seata.all;

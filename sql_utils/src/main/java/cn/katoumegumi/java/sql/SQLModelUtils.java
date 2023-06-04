@@ -119,8 +119,6 @@ public class SQLModelUtils {
                 }
                 translateNameUtils.setAbbreviation(joinTableName, relation.getAlias());
             }
-            tableName = null;
-            joinTableName = null;
 
         }
     }

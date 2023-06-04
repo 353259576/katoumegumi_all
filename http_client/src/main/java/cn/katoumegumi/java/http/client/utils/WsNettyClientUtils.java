@@ -29,7 +29,7 @@ public class WsNettyClientUtils {
         HttpRequest httpRequest = createHttpRequest(httpRequestBody, httpContent);
         ctx.write(httpRequest);
         ctx.write(httpContent);
-        ctx.write(LastHttpContent.EMPTY_LAST_CONTENT).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.write(LastHttpContent.EMPTY_LAST_CONTENT).addListener(new GenericFutureListener<>() {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
                 if (future.isSuccess()) {
@@ -48,7 +48,7 @@ public class WsNettyClientUtils {
         HttpContent httpContent = createHttpContent(httpRequestBody);
         HttpRequest httpRequest = createHttpRequest(httpRequestBody, httpContent);
         ctx.write(httpRequest);
-        ctx.write(httpContent).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.write(httpContent).addListener(new GenericFutureListener<>() {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
                 if (future.isSuccess()) {
@@ -56,7 +56,7 @@ public class WsNettyClientUtils {
             }
         });
         //ctx.write(LastHttpContent.EMPTY_LAST_CONTENT);
-        ctx.write(LastHttpContent.EMPTY_LAST_CONTENT).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.write(LastHttpContent.EMPTY_LAST_CONTENT).addListener(new GenericFutureListener<>() {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
                 if (future.isSuccess()) {
@@ -85,7 +85,7 @@ public class WsNettyClientUtils {
     public static HttpRequest setHttpHeaders(HttpRequest httpRequest, HttpRequestBody httpRequestBody, HttpContent httpContent) {
 
         URI uri = httpRequestBody.getUri();
-        String host = null;
+        String host;
         if (uri.getPort() <= 0) {
             host = uri.getHost();
         } else {
@@ -98,16 +98,13 @@ public class WsNettyClientUtils {
         httpRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, httpRequestBody.getMediaType().getValue());
         httpRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpContent.content().readableBytes());
         List<WsRequestProperty> list = httpRequestBody.getRequestProperty();
-        list.stream().forEach(wsRequestProperty -> {
-            httpRequest.headers().set(wsRequestProperty.getKey(), wsRequestProperty.getValue());
-        });
+        list.stream().forEach(wsRequestProperty -> httpRequest.headers().set(wsRequestProperty.getKey(), wsRequestProperty.getValue()));
         return httpRequest;
     }
 
     public static HttpContent createHttpContent(HttpRequestBody httpRequestBody) {
         ByteBuf byteBuf = WsNettyClientUtils.httpRequestToByteBuf(httpRequestBody);
-        HttpContent httpContent = new DefaultHttpContent(byteBuf);
-        return httpContent;
+        return new DefaultHttpContent(byteBuf);
     }
 
 
@@ -119,7 +116,7 @@ public class WsNettyClientUtils {
             e.printStackTrace();
         }
 
-        ByteBuf byteBuf = null;
+        ByteBuf byteBuf;
         if (bytes != null) {
             byteBuf = Unpooled.copiedBuffer(bytes);
         } else {

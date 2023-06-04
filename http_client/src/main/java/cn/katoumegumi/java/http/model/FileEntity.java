@@ -32,7 +32,6 @@ public class FileEntity extends BaseEntity {
         if (WsStringUtils.isNotBlank(fileName)) {
             List<String> strs = WsStringUtils.split(fileName, '.');
             if (strs.size() == 1) {
-                this.fileName = strs.get(0);
             } else {
                 this.fileType = strs.get(1);
             }

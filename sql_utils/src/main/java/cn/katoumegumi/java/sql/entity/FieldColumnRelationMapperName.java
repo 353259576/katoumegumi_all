@@ -3,7 +3,6 @@ package cn.katoumegumi.java.sql.entity;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 
-import java.util.List;
 import java.util.Map;
 
 /**

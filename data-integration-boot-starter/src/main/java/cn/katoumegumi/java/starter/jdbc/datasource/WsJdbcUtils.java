@@ -228,7 +228,7 @@ public class WsJdbcUtils {
     }
 
     private <T> List<T> queryList(String sql, List<Object> parameterList, SQLModelUtils sqlModelUtils) {
-        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), new ResultSetExtractor<List<T>>() {
+        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), new ResultSetExtractor<>() {
             @Override
             public List<T> extractData(ResultSet rs) throws DataAccessException {
                 return sqlModelUtils.margeMap(new JdkResultSet(rs));
@@ -237,11 +237,11 @@ public class WsJdbcUtils {
     }
 
     private <T> T querySingleColumnObject(String sql,List<Object> parameterList,Class<T> returnType){
-        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), new ResultSetExtractor<T>() {
+        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), new ResultSetExtractor<>() {
             @Override
             public T extractData(ResultSet rs) throws SQLException, DataAccessException {
-                if(rs.next()){
-                    return WsBeanUtils.objectToT(rs.getObject(1),returnType);
+                if (rs.next()) {
+                    return WsBeanUtils.objectToT(rs.getObject(1), returnType);
                 }
                 return null;
             }

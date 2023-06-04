@@ -22,7 +22,7 @@ public class WsSSLContext {
         SSLContext sslContext = null;
         try {
             sslContext = SSLContext.getInstance("TLSv1.2");
-            TrustManager trustManager[] = new TrustManager[]{new X509TrustManager() {
+            TrustManager[] trustManager = new TrustManager[]{new X509TrustManager() {
                 @Override
                 public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
 
@@ -39,7 +39,7 @@ public class WsSSLContext {
                 }
             }};
 
-            KeyManager keyManagers[] = null;
+            KeyManager[] keyManagers = null;
             if (certificateType != null) {
                 KeyManagerFactory keyManagerFactory = keyManagerFactory(url, password, certificateType);
                 keyManagers = keyManagerFactory.getKeyManagers();
@@ -105,8 +105,7 @@ public class WsSSLContext {
                 sslContextBuilder.keyStoreType("TLSv1.2");
                 sslContextBuilder.ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE);
                 sslContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE);
-                SslContext sslContext = sslContextBuilder.build();
-                return sslContext;
+                return sslContextBuilder.build();
                 /*SslContext sslContext = SslContextBuilder.forClient()
                         .sslProvider(provider)
                         .ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE)

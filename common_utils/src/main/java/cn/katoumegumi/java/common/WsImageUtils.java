@@ -85,8 +85,8 @@ public class WsImageUtils {
         try {
             int oldWidth = oldBufferedImage.getWidth();
             int oldHeight = oldBufferedImage.getHeight();
-            int newWidth = 0;
-            int newHeight = 0;
+            int newWidth;
+            int newHeight;
             if (multiple >= 0) {
                 newWidth = oldWidth * multiple;
                 newHeight = oldHeight * multiple;
@@ -134,7 +134,6 @@ public class WsImageUtils {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                inputStream = null;
             }
         }
         return bytes;
@@ -161,7 +160,6 @@ public class WsImageUtils {
                 outputStream.close();
             } catch (Exception e) {
                 e.printStackTrace();
-                outputStream = null;
             }
             //newBufferedImage.flush();
 
@@ -181,7 +179,7 @@ public class WsImageUtils {
                 if (directionNum == 0) {
                     return;
                 }
-                int i = 0;
+                int i;
                 for (i = 0; i < directionNum; i++) {
                     byte[] bytes = cropImage(bufferedImage, 0, i * directionValue, width, directionValue);
                     byteToFile(bytes, fileName + "-" + i, "jpg", path);
@@ -221,8 +219,7 @@ public class WsImageUtils {
         if (!file.exists()) {
             throw new FileNotFoundException("文件不存在");
         }
-        BufferedImage bufferedImage = ImageIO.read(file);
-        return bufferedImage;
+        return ImageIO.read(file);
     }
 
 
@@ -359,12 +356,11 @@ public class WsImageUtils {
      * @param fileType
      * @param filePath
      */
-    public static void byteToFile(byte bytes[], String fileName, String fileType, String filePath) {
+    public static void byteToFile(byte[] bytes, String fileName, String fileType, String filePath) {
         File fileFloder = new File(filePath);
         if (!fileFloder.exists()) {
             fileFloder.mkdirs();
         }
-        fileFloder = null;
         ///fileName = WsStringUtils.stringTrim(fileName);
         filePath = filePath + fileName + "." + fileType;
         File file = new File(filePath);
@@ -507,7 +503,7 @@ public class WsImageUtils {
         //当前的高度
         int currentHeight = font.getSize();
         //字体宽度
-        int charSize = 0;
+        int charSize;
         List<CharText> charTextList = new ArrayList<>();
         for (char c : chars) {
             charSize = fontMetrics.charWidth(c);
@@ -541,9 +537,7 @@ public class WsImageUtils {
         int finalPointY = pointY;
         returnLineList.forEach(lineText -> {
             lineText.setPointY(finalPointY + lineText.getPointY());
-            lineText.getCharTextList().forEach(charText -> {
-                charText.setPointY(lineText.getPointY());
-            });
+            lineText.getCharTextList().forEach(charText -> charText.setPointY(lineText.getPointY()));
         });
         return returnLineList;
 
@@ -663,9 +657,7 @@ public class WsImageUtils {
             } else {
                 throw new RuntimeException("不支持的类型");
             }
-            charTextList.forEach(charText -> {
-                charText.setPointX(this.pointX + charText.getPointX());
-            });
+            charTextList.forEach(charText -> charText.setPointX(this.pointX + charText.getPointX()));
             this.charTextList = charTextList;
         }
 

@@ -1,7 +1,6 @@
 package cn.katoumegumi.java.excel;
 
 import org.apache.poi.ss.usermodel.*;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheet;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
 /**
@@ -22,7 +21,7 @@ public class ExcelPointLocation {
 
     private final Sheet sheet;
 
-    private CTWorksheet ctWorksheet;
+    private final CTWorksheet ctWorksheet;
 
     private final Workbook workbook;
 

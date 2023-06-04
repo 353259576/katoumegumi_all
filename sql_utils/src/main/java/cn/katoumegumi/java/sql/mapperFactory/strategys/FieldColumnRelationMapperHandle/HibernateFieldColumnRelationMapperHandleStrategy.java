@@ -149,7 +149,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
             }
         }
 
-        fieldColumnRelationMapperFactory.putIncompleteMapper(clazz, fieldColumnRelationMapper);
+        FieldColumnRelationMapperFactory.putIncompleteMapper(clazz, fieldColumnRelationMapper);
 
         if (WsListUtils.isNotEmpty(joinClassFieldList)) {
             for (Field field : joinClassFieldList) {
@@ -157,8 +157,8 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
             }
         }
         fieldColumnRelationMapper.markSignLocation();
-        fieldColumnRelationMapperFactory.putMapper(clazz, fieldColumnRelationMapper);
-        fieldColumnRelationMapperFactory.removeIncompleteMapper(clazz);
+        FieldColumnRelationMapperFactory.putMapper(clazz, fieldColumnRelationMapper);
+        FieldColumnRelationMapperFactory.removeIncompleteMapper(clazz);
         return fieldColumnRelationMapper;
     }
 
@@ -202,7 +202,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
     public FieldJoinClass createFieldJoinClass(FieldColumnRelationMapper fieldColumnRelationMapper, Field field) {
         boolean isArray = WsFieldUtils.isArrayType(field);
         Class<?> joinClass = WsFieldUtils.getClassTypeof(field);
-        FieldColumnRelationMapper mapper = fieldColumnRelationMapperFactory.analysisClassRelation(joinClass, true);
+        FieldColumnRelationMapper mapper = FieldColumnRelationMapperFactory.analysisClassRelation(joinClass, true);
         FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
         fieldJoinClass.setNickName(field.getName());
         fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);

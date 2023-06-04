@@ -1,19 +1,13 @@
 package cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandle;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
 import cn.katoumegumi.java.sql.annotation.TableTemplate;
-import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.mapperFactory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandleStrategy;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class TableTemplateFieldColumnRelationMapperHandleStrategy implements FieldColumnRelationMapperHandleStrategy {

@@ -163,7 +163,7 @@ public class HttpUtils {
         if (WsListUtils.isEmpty(entityList)) {
             return null;
         }
-        ValueEntity valueEntity = null;
+        ValueEntity valueEntity;
         List<String> valueList = new ArrayList<>(entityList.size());
         for (BaseEntity entity : entityList) {
             if (entity instanceof ValueEntity) {

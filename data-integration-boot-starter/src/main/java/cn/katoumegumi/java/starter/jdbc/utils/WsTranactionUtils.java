@@ -7,7 +7,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 public class WsTranactionUtils {
 
-    private PlatformTransactionManager platformTransactionManager;
+    private final PlatformTransactionManager platformTransactionManager;
 
     public WsTranactionUtils(PlatformTransactionManager platformTransactionManager) {
         this.platformTransactionManager = platformTransactionManager;

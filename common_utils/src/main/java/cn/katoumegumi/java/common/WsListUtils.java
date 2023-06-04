@@ -148,9 +148,7 @@ public class WsListUtils {
         }
         for (T t : tList) {
             I i = function.apply(t);
-            List<T> list = map.computeIfAbsent(i, id -> {
-                return new ArrayList<>();
-            });
+            List<T> list = map.computeIfAbsent(i, id -> new ArrayList<>());
             list.add(t);
         }
         return map;
@@ -172,9 +170,7 @@ public class WsListUtils {
         }
         for (T t : tList) {
             I i = function.apply(t);
-            Set<T> set = map.computeIfAbsent(i, id -> {
-                return new HashSet<>();
-            });
+            Set<T> set = map.computeIfAbsent(i, id -> new HashSet<>());
             set.add(t);
         }
         return map;

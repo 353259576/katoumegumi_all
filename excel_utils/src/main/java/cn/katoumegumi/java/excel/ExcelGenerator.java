@@ -1,13 +1,11 @@
 package cn.katoumegumi.java.excel;
 
 import cn.katoumegumi.java.common.*;
-import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTMergeCell;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTMergeCells;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
@@ -47,14 +45,14 @@ public class ExcelGenerator<T> {
      */
     private ExcelColumnStyle excelColumnStyle;
 
-    private Map<CTWorksheet,Integer> mergeCellCountMap = new HashMap<>();
+    private final Map<CTWorksheet,Integer> mergeCellCountMap = new HashMap<>();
 
     private static final Field SXSSFSHEET_SH_FIELD = WsFieldUtils.getFieldByName(SXSSFSheet.class,"_sh");
 
     private static final Field XSSFSHEET_WORKSHEET_FIELD = WsFieldUtils.getFieldByName(XSSFSheet.class,"worksheet");
 
     public static <T> ExcelGenerator<T> create(List<T> tList) {
-        ExcelGenerator<T> excelGenerator = new ExcelGenerator<T>();
+        ExcelGenerator<T> excelGenerator = new ExcelGenerator<>();
         excelGenerator.setValueList(tList);
         return excelGenerator;
     }
@@ -138,8 +136,8 @@ public class ExcelGenerator<T> {
             Sheet sheet = workbook.createSheet();
             //CTWorksheet ctWorksheet = workbook.getXSSFWorkbook().getSheetAt(0).getCTWorksheet();
             int rowNum = 0;
-            Row row = null;
-            Cell cell = null;
+            Row row;
+            Cell cell;
             if (WsStringUtils.isNotBlank(title)) {
                 if(excelColumnPropertyList.size() > 1) {
                     CellRangeAddress cellAddresses = new CellRangeAddress(0, 0, 0, excelColumnPropertyList.size() - 1);
@@ -163,7 +161,7 @@ public class ExcelGenerator<T> {
             row = sheet.createRow(rowNum);
 
 
-            ExcelColumnProperty<T> columnProperty = null;
+            ExcelColumnProperty<T> columnProperty;
             int columnNum = 0;
             for (int i = 0; i < excelColumnPropertyList.size(); i++) {
                 checkThread(currentThread);
@@ -208,7 +206,6 @@ public class ExcelGenerator<T> {
                     }
                     columnNum += columnProperty.getColumnSize();
                 }
-                rowValue = null;
                 rowNum++;
             }
 

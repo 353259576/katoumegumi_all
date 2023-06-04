@@ -37,7 +37,7 @@ public class WsNettyClient {
     public static volatile EventLoopGroup workEventExecutors = new NioEventLoopGroup();
     public static AtomicInteger atomicInteger = new AtomicInteger(0);
     public static AtomicInteger atomicInteger1 = new AtomicInteger(0);
-    private static volatile ExecutorService executor = Executors.newFixedThreadPool(200);
+    private static final ExecutorService executor = Executors.newFixedThreadPool(200);
 
     public static void main(String[] args) {
         //UnsafeAllocator.create();
@@ -52,7 +52,7 @@ public class WsNettyClient {
             e.printStackTrace();
         }
         long startTime = System.currentTimeMillis();
-        String strs[] = new String[]{
+        String[] strs = new String[]{
                 "https://www.baidu.com",
                 "https://www.bilibili.com",
                 "http://www.baidu.com",
@@ -290,10 +290,10 @@ public class WsNettyClient {
                     bootstrap.channel(NioSocketChannel.class);
                     bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
                     bootstrap.handler(new LoggingHandler(LogLevel.DEBUG));
-                    ChannelFuture channelFuture = null;
+                    ChannelFuture channelFuture;
                     bootstrap.handler(new HttpInitializer(httpRequestBody, id));
                     channelFuture = bootstrap.connect(httpRequestBody.getUri().getHost(), httpRequestBody.getPort());
-                    channelFuture.channel().closeFuture().sync().addListener(new GenericFutureListener<Future<? super Void>>() {
+                    channelFuture.channel().closeFuture().sync().addListener(new GenericFutureListener<>() {
                         @Override
                         public void operationComplete(Future<? super Void> future) throws Exception {
                             if (future.isSuccess()) {

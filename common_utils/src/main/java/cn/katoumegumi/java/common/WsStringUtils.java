@@ -1,7 +1,6 @@
 package cn.katoumegumi.java.common;
 
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;

@@ -3,7 +3,6 @@ package cn.katoumegumi.java.sql.entity;
 import cn.katoumegumi.java.common.model.TripleEntity;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

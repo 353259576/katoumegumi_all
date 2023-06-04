@@ -2,8 +2,6 @@ package cn.katoumegumi.java.sql.model;
 
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 
-import java.util.List;
-
 /**
  * 表
  */

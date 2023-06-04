@@ -38,8 +38,7 @@ public class DruidDataSourceCreateFactory {
             log.info("加载数据源完成");
             if (enable) {
                 log.info("启动seata代理数据源");
-                DataSourceProxy proxy = new DataSourceProxy(druidDataSource);
-                return proxy;
+                return new DataSourceProxy(druidDataSource);
             }
             return druidDataSource;
         } catch (Exception e) {

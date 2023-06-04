@@ -261,7 +261,6 @@ public class HttpResponseBody {
     }
 
     public void setContentType(String contentType) {
-        contentType = contentType;
     }
 
     public String getCharSet() {

@@ -4,6 +4,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 /**
  * 系统基本信息
@@ -11,6 +12,16 @@ import java.util.Locale;
  * @author 星梦苍天
  */
 public class OSMessageUtils {
+
+    public static void main(String[] args) {
+        Logger logger = Logger.getLogger(OSMessageUtils.class.getName());
+        logger.info(getOSName());
+        logger.info(getJdkVersion());
+        logger.info(getOSType().getBaseName());
+        logger.info(getLocalIpv4());
+        logger.info(OSMessageUtils::getLocalIpv6);
+        logger.info(OSMessageUtils::getLocalMac);
+    }
 
     /**
      * 获取系统名称
@@ -34,11 +45,11 @@ public class OSMessageUtils {
         String osName = getOSName();
         OSType[] osTypes = OSType.values();
         for (OSType osType : osTypes) {
-            if (osName.indexOf(osType.getBaseName()) > -1) {
+            if (osName.contains(osType.getBaseName())) {
                 return osType;
             }
         }
-        return null;
+        throw new IllegalStateException("无法识别的系统类型：" + osName);
     }
 
     /**
@@ -119,16 +130,20 @@ public class OSMessageUtils {
         return null;
     }
 
-    public static enum OSType {
+    public static void getMemoryInfo(){
+        
+    }
+
+    public enum OSType {
         /**
          * 系统类型
          */
         WINDOWS("windows"),
         LINUX("linux"),
         MAC_OS("mac");
-        public final String baseName;
+        private final String baseName;
 
-        private OSType(String baseName) {
+        OSType(String baseName) {
             this.baseName = baseName;
         }
 

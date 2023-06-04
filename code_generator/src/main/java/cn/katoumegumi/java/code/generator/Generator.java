@@ -101,7 +101,7 @@ public class Generator {
 
     private Boolean enableSwagger = false;
 
-    private Boolean enableSpringDoc = true;
+    private final Boolean enableSpringDoc = true;
 
     private Boolean enableMybatisPlus = true;
 

@@ -65,7 +65,6 @@ public class DataSourceConfig {
                 map.put(properties.getAlias(), druidDataSource);
                 DynamicDataSourceHolder.dataSourceNameSet.add(properties.getAlias());
                 log.info("数据源：{}创建成功,数据源：{}", properties.getAlias(), druidDataSource);
-                druidDataSource = null;
             } else {
                 log.info("数据源：{}创建失败", properties.getAlias());
             }

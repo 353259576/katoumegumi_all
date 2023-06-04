@@ -22,8 +22,7 @@ public class ChannelTimeoutEntry implements Delayed {
 
     @Override
     public long getDelay(TimeUnit unit) {
-        long l = unit.convert(expirationTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-        return l;
+        return unit.convert(expirationTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
         //return createTime + expirationTime;
     }
 

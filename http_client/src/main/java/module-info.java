@@ -7,7 +7,6 @@ module cn.katoumegumi.java.http.client {
     requires io.netty.common;
     requires io.netty.handler;
     requires io.netty.transport;
-    requires io.netty.transport.rxtx;
     requires reactor.core;
     requires cn.katoumegumi.java.common.utils;
     requires org.slf4j;

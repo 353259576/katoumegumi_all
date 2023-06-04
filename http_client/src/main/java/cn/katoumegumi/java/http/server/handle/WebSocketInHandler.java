@@ -29,7 +29,7 @@ public class WebSocketInHandler extends SimpleChannelInboundHandler {
 
     private static volatile WebSocketServerHandshaker webSocketServerHandshaker;
 
-    private static volatile ExecutorService executorService = Executors.newCachedThreadPool();
+    private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
     static {
 
@@ -138,7 +138,7 @@ public class WebSocketInHandler extends SimpleChannelInboundHandler {
         ByteBuf byteBuf = fullHttpRequest.content();
         int start = byteBuf.readerIndex();
         int end = byteBuf.readableBytes();
-        byte bytes[] = new byte[end - start];
+        byte[] bytes = new byte[end - start];
         byteBuf.readBytes(bytes, start, end);
         log.info("HTTP传输的数据为：{}", new String(bytes));
         String str = "<html><head><title>Netty响应</title></head><body><div style=\"text-align:centre;\">当前时间为" + WsDateUtils.dateToString(new Date(), WsDateUtils.CNLONGTIMESTRING) + "</div></body></html>";
@@ -172,9 +172,7 @@ public class WebSocketInHandler extends SimpleChannelInboundHandler {
         String str = ((TextWebSocketFrame) webSocketFrame).text();
         //channelHandlerContext.writeAndFlush(new TextWebSocketFrame(str));
         channelHandlerContext.flush();
-        executorService.submit(() -> {
-            sendMsg(channelHandlerContext.channel().id().asLongText(), str);
-        });
+        executorService.submit(() -> sendMsg(channelHandlerContext.channel().id().asLongText(), str));
     }
 
 

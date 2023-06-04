@@ -8,7 +8,6 @@ import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
@@ -17,7 +16,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -166,8 +164,7 @@ public class Encryption {
             // 取得私钥
             PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(privateKeyStringByte);
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
-            ECPrivateKey priKey = (ECPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
-            return priKey;
+            return (ECPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -180,8 +177,7 @@ public class Encryption {
             // 取得公钥
             X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(privateKeyStringByte);
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
-            ECPublicKey ecPublicKey = (ECPublicKey) keyFactory.generatePublic(x509EncodedKeySpec);
-            return ecPublicKey;
+            return (ECPublicKey) keyFactory.generatePublic(x509EncodedKeySpec);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -285,8 +281,7 @@ public class Encryption {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGORITHM);
             X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey.getBytes()));
-            RSAPublicKey rsaPublicKey = (RSAPublicKey) keyFactory.generatePublic(x509EncodedKeySpec);
-            return rsaPublicKey;
+            return (RSAPublicKey) keyFactory.generatePublic(x509EncodedKeySpec);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -303,8 +298,7 @@ public class Encryption {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGORITHM);
             PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey.getBytes()));
-            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyFactory.generatePrivate(pkcs8EncodedKeySpec);
-            return rsaPrivateKey;
+            return (RSAPrivateKey) keyFactory.generatePrivate(pkcs8EncodedKeySpec);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -394,7 +388,7 @@ public class Encryption {
      * @return
      */
     private static byte[] rsaSplitCode(Cipher cipher, int opmode, byte[] dataBytes, int keySize) {
-        int maxBlock = 0;
+        int maxBlock;
         if (opmode == Cipher.DECRYPT_MODE) {
             maxBlock = keySize / 8;
         } else {
