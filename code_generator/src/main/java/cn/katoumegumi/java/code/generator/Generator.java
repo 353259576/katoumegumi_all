@@ -183,6 +183,7 @@ public class Generator {
         }
         Map<String, Object> map = new HashMap<>();
         map.put("type", this.type);
+        map.put("enableSearchVO",this.enableSearchVO);
         Template template = freeMarkerUtils.getTemplate("Service.ftl");
         create(exportPath + javaPath + packagePath, servicePath, table.getEntityName() + "Service.java", template, table, map);
     }
@@ -197,6 +198,7 @@ public class Generator {
         }
         Map<String, Object> map = new HashMap<>();
         map.put("type", this.type);
+        map.put("enableSearchVO",this.enableSearchVO);
         Template template = freeMarkerUtils.getTemplate("ServiceImpl.ftl");
         create(exportPath + javaPath + packagePath, serviceImplPath, table.getEntityName() + "ServiceImpl.java", template, table, map);
     }

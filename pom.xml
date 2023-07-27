@@ -13,7 +13,7 @@
         <module>sql_utils</module>
         <module>code_generator</module>
         <module>common_utils</module>
-        <module>http_client</module>
+        <!--<module>http_client</module>-->
         <module>excel_utils</module>
         <module>vertx-mysql-client-support</module>
     </modules>

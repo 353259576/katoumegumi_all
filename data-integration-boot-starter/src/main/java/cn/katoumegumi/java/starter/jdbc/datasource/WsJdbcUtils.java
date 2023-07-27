@@ -1,11 +1,10 @@
 package cn.katoumegumi.java.starter.jdbc.datasource;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.model.KeyValue;
 import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.JdkResultSet;
+import cn.katoumegumi.java.sql.entity.ReturnPage;
 import cn.katoumegumi.java.sql.entity.SqlLimit;
 import cn.katoumegumi.java.sql.entity.SqlParameter;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
@@ -14,11 +13,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ArgumentPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -39,6 +36,8 @@ public class WsJdbcUtils {
 
 
     private JdbcTemplate jdbcTemplate;
+
+    private static final int[] EMPTY_INT_ARRAY = new int[0];
 
 
     public <T> int insert(T t) {
@@ -85,43 +84,40 @@ public class WsJdbcUtils {
 
 
     private PreparedStatementCreator createPreparedStatement(InsertSqlEntity insertSqlEntity) {
-        return new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement statement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS);
-                Object o;
-                List<?> valueList = WsListUtils.listToList(insertSqlEntity.getValueList(), SqlParameter::getValue);
-                for (int i = 0; i < valueList.size(); i++) {
-                    o = valueList.get(i);
-                    if (o == null) {
-                        statement.setNull(i + 1, Types.NULL);
-                        continue;
-                    }
-                    if (o instanceof String) {
-                        statement.setString(i + 1, WsStringUtils.anyToString(o));
-                    } else if (o instanceof Integer || WsFieldUtils.classCompare(int.class, o.getClass())) {
-                        statement.setInt(i + 1, WsBeanUtils.objectToT(o, int.class));
-                    } else if (o instanceof Long || WsFieldUtils.classCompare(o.getClass(), long.class)) {
-                        statement.setLong(i + 1, WsBeanUtils.objectToT(o, long.class));
-                    } else if (o instanceof Short || WsFieldUtils.classCompare(o.getClass(), short.class)) {
-                        statement.setShort(i + 1, WsBeanUtils.objectToT(o, short.class));
-                    } else if (o instanceof Float || WsFieldUtils.classCompare(o.getClass(), Float.class)) {
-                        statement.setFloat(i + 1, WsBeanUtils.objectToT(o, float.class));
-                    } else if (o instanceof Double || WsFieldUtils.classCompare(o.getClass(), double.class)) {
-                        statement.setDouble(i + 1, WsBeanUtils.objectToT(o, double.class));
-                    } else if (o instanceof BigDecimal) {
-                        statement.setBigDecimal(i + 1, WsBeanUtils.objectToT(o, BigDecimal.class));
-                    } else if (o instanceof Date) {
-                        statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
-                    } else if (o instanceof LocalDate || o instanceof LocalDateTime) {
-                        statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
-                    }else {
-                        statement.setObject(i+1,o);
-                        //throw new RuntimeException("不支持的数据类型:" + o.getClass());
-                    }
+        return connection -> {
+            PreparedStatement statement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS);
+            Object o;
+            List<?> valueList = WsListUtils.listToList(insertSqlEntity.getValueList(), SqlParameter::getValue);
+            for (int i = 0; i < valueList.size(); i++) {
+                o = valueList.get(i);
+                if (o == null) {
+                    statement.setNull(i + 1, Types.NULL);
+                    continue;
                 }
-                return statement;
+                if (o instanceof String) {
+                    statement.setString(i + 1, WsStringUtils.anyToString(o));
+                } else if (o instanceof Integer || WsFieldUtils.classCompare(int.class, o.getClass())) {
+                    statement.setInt(i + 1, WsBeanUtils.objectToT(o, int.class));
+                } else if (o instanceof Long || WsFieldUtils.classCompare(o.getClass(), long.class)) {
+                    statement.setLong(i + 1, WsBeanUtils.objectToT(o, long.class));
+                } else if (o instanceof Short || WsFieldUtils.classCompare(o.getClass(), short.class)) {
+                    statement.setShort(i + 1, WsBeanUtils.objectToT(o, short.class));
+                } else if (o instanceof Float || WsFieldUtils.classCompare(o.getClass(), Float.class)) {
+                    statement.setFloat(i + 1, WsBeanUtils.objectToT(o, float.class));
+                } else if (o instanceof Double || WsFieldUtils.classCompare(o.getClass(), double.class)) {
+                    statement.setDouble(i + 1, WsBeanUtils.objectToT(o, double.class));
+                } else if (o instanceof BigDecimal) {
+                    statement.setBigDecimal(i + 1, WsBeanUtils.objectToT(o, BigDecimal.class));
+                } else if (o instanceof Date) {
+                    statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
+                } else if (o instanceof LocalDate || o instanceof LocalDateTime) {
+                    statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
+                }else {
+                    statement.setObject(i+1,o);
+                    //throw new RuntimeException("不支持的数据类型:" + o.getClass());
+                }
             }
+            return statement;
         };
     }
 
@@ -146,52 +142,66 @@ public class WsJdbcUtils {
             return 0;
         }
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        //UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
         UpdateSqlEntity updateSqlEntity = MysqlHandle.handleUpdate(sqlModelUtils.transferToUpdateModel());
         log.debug(updateSqlEntity.getUpdateSql());
         return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
     }
 
-    public void updateBatch(List<MySearchList> mySearchLists) {
+    public int[] updateBatch(List<MySearchList> mySearchLists) {
         if (WsListUtils.isEmpty(mySearchLists)) {
-            return;
+            return EMPTY_INT_ARRAY;
         }
-        Map<String, List<Object[]>> map = new HashMap<>();
+        int[] ans = new int[mySearchLists.size()];
+        Map<String, KeyValue<List<Object[]>,List<Integer>>> map = new HashMap<>();
+        int index = 0;
         for (MySearchList mySearchList : mySearchLists) {
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-            //UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(mySearchList);
             UpdateSqlEntity updateSqlEntity = MysqlHandle.handleUpdate(sqlModelUtils.transferToUpdateModel());
-            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new ArrayList<>());
-            objectList.add(WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
+            KeyValue<List<Object[]>,List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(),new ArrayList<>()));
+            keyValue.getKey().add(WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
+            keyValue.getValue().add(index++);
         }
-        map.forEach((sql, listValue) -> {
+        for (Map.Entry<String, KeyValue<List<Object[]>, List<Integer>>> stringKeyValueEntry : map.entrySet()) {
+            String sql = stringKeyValueEntry.getKey();
+            KeyValue<List<Object[]>,List<Integer>> keyValue = stringKeyValueEntry.getValue();
             log.debug(sql);
-            jdbcTemplate.batchUpdate(sql, listValue);
-        });
-    }
-
-    public <T> void updateBatchByT(List<T> tList) {
-        updateBatchByT(tList, false);
-    }
-
-    public <T> void updateBatchByT(List<T> tList, boolean isAll) {
-        if (WsListUtils.isEmpty(tList)) {
-            return;
+            int[] returnAns = jdbcTemplate.batchUpdate(sql, keyValue.getKey());
+            for (int i = 0; i < returnAns.length; i++){
+                ans[keyValue.getValue().get(i)] = returnAns[i];
+            }
         }
-        Map<String, List<Object[]>> map = new HashMap<>();
-        //List<String> sqlList = new ArrayList<>(tList.size());
-        //List<Object[]> list = new ArrayList<>();
+        return ans;
+    }
+
+    public <T> int[] updateBatchByT(List<T> tList) {
+        return updateBatchByT(tList, false);
+    }
+
+    public <T> int[] updateBatchByT(List<T> tList, boolean isAll) {
+        if (WsListUtils.isEmpty(tList)) {
+            return EMPTY_INT_ARRAY;
+        }
+        int[] ans = new int[tList.size()];
+        int index = 0;
+        Map<String, KeyValue<List<Object[]>,List<Integer>>> map = new HashMap<>();
         for (T t : tList) {
             MySearchList mySearchList = MySearchList.create(t.getClass());
             SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
             UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t, isAll);
-            List<Object[]> objectList = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new ArrayList<>());
-            objectList.add(WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
+            KeyValue<List<Object[]>,List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(),new ArrayList<>()));
+            keyValue.getKey().add(WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
+            keyValue.getValue().add(index++);
         }
-        map.forEach((sql, listValue) -> {
+        for (Map.Entry<String, KeyValue<List<Object[]>, List<Integer>>> stringKeyValueEntry : map.entrySet()) {
+            String sql = stringKeyValueEntry.getKey();
+            KeyValue<List<Object[]>,List<Integer>> keyValue = stringKeyValueEntry.getValue();
             log.debug(sql);
-            jdbcTemplate.batchUpdate(sql, listValue);
-        });
+            int[] returnAns = jdbcTemplate.batchUpdate(sql, keyValue.getKey());
+            for (int i = 0; i < returnAns.length; i++){
+                ans[keyValue.getValue().get(i)] = returnAns[i];
+            }
+        }
+        return ans;
     }
 
     public int delete(MySearchList mySearchList) {
@@ -213,66 +223,27 @@ public class WsJdbcUtils {
     public <T> List<T> getListT(MySearchList mySearchList) {
         SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
         SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel());
-        //SelectSqlEntity selectSqlEntity = sqlModelUtils.select();
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
-
         List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
-
         return queryList(sql, parameterList, sqlModelUtils);
-
-        //List list = handleJdbcReturnValue(sql, finalList);
-
-        //return sqlModelUtils.oneLoopMargeMap(list);
-        //return sqlModelUtils.loadingObject(sqlModelUtils.mergeMapList(sqlModelUtils.handleMap(list)));
     }
 
     private <T> List<T> queryList(String sql, List<Object> parameterList, SQLModelUtils sqlModelUtils) {
-        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), new ResultSetExtractor<>() {
-            @Override
-            public List<T> extractData(ResultSet rs) throws DataAccessException {
-                return sqlModelUtils.margeMap(new JdkResultSet(rs));
-            }
+        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), rs -> {
+            return sqlModelUtils.margeMap(new JdkResultSet(rs));
         });
     }
 
     private <T> T querySingleColumnObject(String sql,List<Object> parameterList,Class<T> returnType){
-        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), new ResultSetExtractor<>() {
-            @Override
-            public T extractData(ResultSet rs) throws SQLException, DataAccessException {
-                if (rs.next()) {
-                    return WsBeanUtils.objectToT(rs.getObject(1), returnType);
-                }
-                return null;
+        return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), rs -> {
+            if (rs.next()) {
+                return WsBeanUtils.objectToT(rs.getObject(1), returnType);
             }
+            return null;
         });
     }
 
-
-/*    private List handleJdbcReturnValue(String sql, List finalList) {
-
-        List<String> nameList = new ArrayList<>();
-
-        List list = jdbcTemplate.query(sql, finalList.toArray(), (resultSet, i) -> {
-            if (i < 1) {
-                int length = resultSet.getMetaData().getColumnCount();
-                for (int j = 0; j < length; j++) {
-                    nameList.add(resultSet.getMetaData().getColumnLabel(j + 1));
-                }
-            }
-            int length = nameList.size();
-            Map map = new HashMap((int) (length / 0.75));
-            //List<ReturnColumnEntity> valueList = new ArrayList<>(nameListLength);
-            for (int j = 0; j < length; ++j) {
-                //valueList.add(new ReturnColumnEntity(nameList.get(j),resultSet.getObject(j+1)));
-                map.put(nameList.get(j), resultSet.getObject(j + 1));
-
-            }
-            return map;
-            //return valueList;
-        });
-        return list;
-    }*/
 
     public <T> List<T> getListT(T t) {
         MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);

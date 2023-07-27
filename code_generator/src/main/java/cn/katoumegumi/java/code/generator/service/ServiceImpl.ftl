@@ -5,18 +5,19 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 <#if type == 0>
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
+<#if enableSearchVO == true>
+import ${packageName}${baseSearchVOName}.${table.entityName}SearchVO;
+</#if>
 </#if>
 import cn.katoumegumi.java.common.WsListUtils;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import ${packageName}${baseEntityName}.${table.entityName};
 import ${packageName}${baseServiceName}.${table.entityName}Service;
 import ${table.pkColumn.columnClass.getName()};
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 <#if type == 1>
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import ${packageName}${baseJavaMapperName}.${table.entityName}Mapper;
@@ -150,6 +151,14 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
         ${table.entityName} ${table.firstLowerEntityName} = new ${table.entityName}();
 </#if>
     }
+
+<#if type == 0 && enableSearchVO == true>
+    @Override
+    public MySearchList analysisSearchVo(${table.entityName}SearchVO searchVO){
+        MySearchList searchList = MySearchList.create(${table.entityName}.class);
+        return searchList;
+    }
+</#if>
 
     /**
     * 包装

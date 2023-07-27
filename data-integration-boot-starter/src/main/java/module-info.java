@@ -13,10 +13,7 @@ module cn.katoumegumi.java.data.integration.boot.starter {
     requires cn.katoumegumi.java.common.utils;
     requires cn.katoumegumi.java.sql.utils;
     requires org.slf4j;
-    //requires java.annotation;
     requires spring.core;
-    //requires mybatis.plus.core;
-    //requires mybatis.plus.extension;
     requires com.baomidou.mybatis.plus.core;
     requires com.baomidou.mybatis.plus.extension;
     requires spring.boot.autoconfigure;

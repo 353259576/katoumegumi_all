@@ -34,6 +34,9 @@ public class User implements Serializable {
     //@Column(name = "create_date")
     private LocalDateTime createDate;
 
+
+    private Boolean admin;
+
     //private User user;
 
 

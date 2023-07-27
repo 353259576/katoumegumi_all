@@ -27,9 +27,9 @@ public class JdbcConfig {
     @Bean
     @ConditionalOnClass(value = JdbcTemplate.class)
     public WsJdbcUtils wsJdbcUtils(JdbcTemplate jdbcTemplate) {
-        WsJdbcUtils wsJdbcUtils = new WsJdbcUtils();
-        wsJdbcUtils.setJdbcTemplate(jdbcTemplate);
-        return wsJdbcUtils;
+        WsJdbcUtils abstractWsJdbcUtils = new WsJdbcUtils();
+        abstractWsJdbcUtils.setJdbcTemplate(jdbcTemplate);
+        return abstractWsJdbcUtils;
     }
 
 

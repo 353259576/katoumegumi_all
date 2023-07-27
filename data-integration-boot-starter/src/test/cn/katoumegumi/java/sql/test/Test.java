@@ -20,7 +20,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
@@ -31,9 +35,34 @@ import java.util.List;
 
 public class Test {
 
-    public static void main(String[] args) {
-        test3();
+    public static void main(String[] args) throws NoSuchMethodException, IllegalAccessException {
+
+        User user = new User();
+
+        Method[] methods = User.class.getMethods();
+
+        List<Method> list = new ArrayList<>();
+        for (Method method : methods) {
+            String name = method.getName();
+            if (name.startsWith("set")){
+                list.add(method);
+            }else if (name.startsWith("get")){
+                list.add(method);
+            }else if (name.startsWith("is")){
+                list.add(method);
+            }else {
+                continue;
+            }
+        }
+        for (Method method : list) {
+            System.out.println(method.getName());
+        }
+
+
+        //test3();
     }
+
+
 
     public static void test3(){
         long time;
@@ -125,17 +154,6 @@ public class Test {
 
         System.out.println("新合成方法消耗的时间是：" + time);
 
-        time = WsDateUtils.getExecutionTime.apply(
-                ()->{
-                    for (int i = 0; i < 10; i++){
-                        dataSourceUtils.selectList2(
-                                MySearchList.create(User.class)
-                                        .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
-                        );
-                    }
-                }
-        );
-        System.out.println("旧合成方法消耗的时间是：" + time);
     }
 
     public static void test() {

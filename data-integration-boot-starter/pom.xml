@@ -48,10 +48,10 @@
             <artifactId>sql_utils</artifactId>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>cn.katoumegumi.java</groupId>
             <artifactId>http_client</artifactId>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.apache.commons</groupId>
