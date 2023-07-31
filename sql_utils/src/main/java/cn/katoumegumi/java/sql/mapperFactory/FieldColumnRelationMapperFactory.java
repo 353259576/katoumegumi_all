@@ -4,13 +4,14 @@ import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.model.BeanModel;
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
 import cn.katoumegumi.java.sql.mapperFactory.strategys.*;
 import cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandle.*;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -180,9 +181,9 @@ public class FieldColumnRelationMapperFactory {
         return getStrategyAndHandle(startIndex, strategy -> strategy.getTableName(clazz)).orElse(null);
     }
 
-    public boolean isIgnoreField(int startIndex, Field field) {
+    public boolean isIgnoreField(int startIndex, BeanPropertyModel beanProperty) {
         return getStrategyAndHandle(startIndex, strategy -> {
-            if (strategy.isIgnoreField(field)) {
+            if (strategy.isIgnoreField(beanProperty)) {
                 return Optional.of(Boolean.TRUE);
             } else {
                 return Optional.empty();
@@ -190,12 +191,12 @@ public class FieldColumnRelationMapperFactory {
         }).orElse(false);
     }
 
-    public FieldColumnRelation getColumnName(int startIndex, FieldColumnRelationMapper mainMapper, Field field) {
-        return getStrategyAndHandle(startIndex, strategy -> strategy.getColumnName(mainMapper, field)).orElse(null);
+    public FieldColumnRelation getColumnName(int startIndex, FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+        return getStrategyAndHandle(startIndex, strategy -> strategy.getColumnName(mainMapper, beanProperty)).orElse(null);
     }
 
-    public FieldJoinClass getJoinRelation(int startIndex, FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field) {
-        return getStrategyAndHandle(startIndex, strategy -> strategy.getJoinRelation(mainMapper, joinMapper, field)).orElse(null);
+    public FieldJoinClass getJoinRelation(int startIndex, FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+        return getStrategyAndHandle(startIndex, strategy -> strategy.getJoinRelation(mainMapper, joinMapper, beanProperty)).orElse(null);
     }
 
 
@@ -227,11 +228,26 @@ public class FieldColumnRelationMapperFactory {
         }
         FieldColumnRelationMapper fieldColumnRelationMapper = getTableName(startIndex, clazz);
 
-        Field[] fields = WsFieldUtils.getFieldAll(clazz);
-        List<Field> baseTypeFieldList = new ArrayList<>();
-        List<Field> joinClassFieldList = new ArrayList<>();
+        //Field[] fields = WsFieldUtils.getFieldAll(clazz);
 
-        for (Field field : fields) {
+        BeanModel beanModel = WsFieldUtils.createBeanModel(clazz);
+
+        List<BeanPropertyModel> baseTypeFieldList = new ArrayList<>();
+        List<BeanPropertyModel> joinClassFieldList = new ArrayList<>();
+
+        for (Map.Entry<String, BeanPropertyModel> entry : beanModel.getPropertyModelMap().entrySet()) {
+            BeanPropertyModel beanPropertyModel = entry.getValue();
+            if (isIgnoreField(startIndex, beanPropertyModel)) {
+                continue;
+            }
+            if (WsBeanUtils.isBaseType(beanPropertyModel.getPropertyClass())) {
+                baseTypeFieldList.add(beanPropertyModel);
+            } else {
+                joinClassFieldList.add(beanPropertyModel);
+            }
+        }
+
+        /*for (Field field : fields) {
             if (isIgnoreField(startIndex, field)) {
                 continue;
             }
@@ -240,14 +256,14 @@ public class FieldColumnRelationMapperFactory {
             } else {
                 joinClassFieldList.add(field);
             }
-        }
+        }*/
         if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
-            for (Field field : baseTypeFieldList) {
-                FieldColumnRelation fieldColumnRelation = getColumnName(startIndex, fieldColumnRelationMapper.getBaseTemplateMapper() == null ? fieldColumnRelationMapper : fieldColumnRelationMapper.getBaseTemplateMapper(), field);
+            for (BeanPropertyModel propertyModel : baseTypeFieldList) {
+                FieldColumnRelation fieldColumnRelation = getColumnName(startIndex, fieldColumnRelationMapper.getBaseTemplateMapper() == null ? fieldColumnRelationMapper : fieldColumnRelationMapper.getBaseTemplateMapper(), propertyModel);
                 if (fieldColumnRelation == null) {
                     continue;
                 }
-                fieldColumnRelationMapper.putFieldColumnRelationMap(field.getName(), fieldColumnRelation);
+                fieldColumnRelationMapper.putFieldColumnRelationMap(propertyModel.getPropertyName(), fieldColumnRelation);
                 if (fieldColumnRelation.isId()) {
                     fieldColumnRelationMapper.getIds().add(fieldColumnRelation);
                 } else {
@@ -259,10 +275,12 @@ public class FieldColumnRelationMapperFactory {
         putIncompleteMapper(clazz, fieldColumnRelationMapper);
 
         if (WsListUtils.isNotEmpty(joinClassFieldList)) {
-            for (Field field : joinClassFieldList) {
-                Class<?> joinClass = WsFieldUtils.getClassTypeof(field);
-                FieldColumnRelationMapper joinMapper = analysisClassRelation(joinClass, true);
-                FieldJoinClass fieldJoinClass = getJoinRelation(startIndex, fieldColumnRelationMapper, joinMapper, field);
+            for (BeanPropertyModel propertyModel : joinClassFieldList) {
+                if (propertyModel.getGenericClass() == null){
+                    continue;
+                }
+                FieldColumnRelationMapper joinMapper = analysisClassRelation(propertyModel.getGenericClass(), true);
+                FieldJoinClass fieldJoinClass = getJoinRelation(startIndex, fieldColumnRelationMapper, joinMapper, propertyModel);
                 if (fieldJoinClass == null) {
                     continue;
                 }

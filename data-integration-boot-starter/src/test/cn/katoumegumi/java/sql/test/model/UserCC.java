@@ -13,6 +13,7 @@ import java.util.List;
 @Table(name = "ws_user_CC")
 @TableName(value = "ws_user_cc")
 public class UserCC {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @TableId(type = IdType.AUTO)

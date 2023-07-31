@@ -1,6 +1,11 @@
 package cn.katoumegumi.java.common;
 
+import cn.katoumegumi.java.common.model.BeanModel;
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
+
 import java.io.ObjectStreamClass;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.SerializedLambda;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
@@ -51,20 +56,34 @@ public class WsFieldUtils {
     }
 
     public static List<Field> getFieldList(Class<?> clazz) {
-        Set<String> fieldNameSet = new HashSet<>();
-        List<Field> fieldList = new ArrayList<>();
+        Map<String,Field> fieldMap = getFieldMap(clazz);
+        List<Field> fieldList = new ArrayList<>(fieldMap.size());
+        for (Field field : fieldMap.values()) {
+            if (Modifier.isStatic(field.getModifiers())){
+                continue;
+            }
+            fieldList.add(field);
+        }
+        return fieldList;
+    }
+
+    /**
+     * 获取所有field
+     * @param clazz
+     * @return
+     */
+    public static Map<String,Field> getFieldMap(Class<?> clazz) {
+        Map<String,Field> fieldNameAndFeildMap = new LinkedHashMap<>();
         for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
             Field[] fields = clazz.getDeclaredFields();
             for (Field value : fields) {
-                if (!Modifier.isStatic(value.getModifiers())) {
-                    if (!fieldNameSet.contains(value.getName())) {
-                        fieldNameSet.add(value.getName());
-                        fieldList.add(value);
-                    }
+                String name = value.getName();
+                if (!fieldNameAndFeildMap.containsKey(name)){
+                    fieldNameAndFeildMap.put(name,value);
                 }
             }
         }
-        return fieldList;
+        return fieldNameAndFeildMap;
     }
 
 
@@ -299,26 +318,32 @@ public class WsFieldUtils {
     public static <T> Class<?> getClassTypeof(Field field) {
         Class<?> tClass = field.getType();
         if (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class)) {
-            String listClassName = field.getGenericType().getTypeName();
-            int start = listClassName.indexOf("<") + 1;
-            if (start == 0) {
-                return null;
-            }
-            int end = listClassName.lastIndexOf(">");
-            if (end == -1) {
-                return null;
-            }
-            String className = listClassName.substring(start, end);
-            try {
-                return Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-                return null;
-            }
+            return getGenericsType(field.getGenericType());
         } else {
             return tClass;
         }
+    }
 
+    public static Class<?> getGenericsType(Type type){
+        if (type == null){
+            return null;
+        }
+        String listClassName = type.getTypeName();
+        int start = listClassName.indexOf("<") + 1;
+        if (start == 0) {
+            return null;
+        }
+        int end = listClassName.lastIndexOf(">");
+        if (end == -1) {
+            return null;
+        }
+        String className = listClassName.substring(start, end);
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -328,9 +353,11 @@ public class WsFieldUtils {
      * @return
      */
     public static boolean isArrayType(Field field) {
-        Class<?> tClass = field.getType();
-        return (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class));
+        return isArrayType(field.getType());
+    }
 
+    public static boolean isArrayType(Class<?> tClass) {
+        return (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class));
     }
 
     /**
@@ -575,6 +602,77 @@ public class WsFieldUtils {
                 Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
             ((AccessibleObject) field).setAccessible(true);
         }
+    }
+
+    /**
+     * 创建javaBean模型
+     * @param bClass
+     * @return
+     */
+    public static BeanModel createBeanModel(Class<?> bClass){
+
+        Map<String,Field> fieldMap = WsFieldUtils.getFieldMap(bClass);
+
+        Method[] methods = bClass.getMethods();
+        Map<String, Object[]> beanPropertyMap = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Field> stringFieldEntry : fieldMap.entrySet()) {
+            if (Modifier.isStatic(stringFieldEntry.getValue().getModifiers())){
+                continue;
+            }
+            Object[] objects = new Object[3];
+            objects[0] = stringFieldEntry.getValue();
+            beanPropertyMap.put(stringFieldEntry.getKey(),objects);
+        }
+
+        for (Method method : methods) {
+            if (Modifier.isStatic(method.getModifiers())){
+                continue;
+            }
+            String name = method.getName();
+            if (name.startsWith(METHOD_NAME_SET)){
+                if (name.length() == 3 || method.getParameterCount() != 1){
+                    continue;
+                }
+                name = WsStringUtils.firstCharToLowerCase(name.substring(3));
+                Object[] objects = beanPropertyMap.computeIfAbsent(name, n->new Object[3]);
+                objects[2] = method;
+            }else if (name.startsWith(METHOD_NAME_GET)){
+                if (name.length() == 3 || method.getParameterCount() != 0){
+                    continue;
+                }
+                name = WsStringUtils.firstCharToLowerCase(name.substring(3));
+                Object[] objects = beanPropertyMap.computeIfAbsent(name, n->new Object[3]);
+                objects[1] = method;
+            }else if (name.startsWith(METHOD_NAME_IS)){
+                if (name.length() == 2 || method.getParameterCount() != 0){
+                    continue;
+                }
+                name = WsStringUtils.firstCharToLowerCase(name.substring(2));
+                Object[] objects = beanPropertyMap.computeIfAbsent(name, n->new Object[3]);
+                objects[1] = method;
+            }
+        }
+
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        BeanModel beanModel = new BeanModel(bClass);
+        Map<String, BeanPropertyModel> beanPropertyModelMap = beanModel.getPropertyModelMap();
+        for (Map.Entry<String, Object[]> stringEntry : beanPropertyMap.entrySet()) {
+            Object[] objects = stringEntry.getValue();
+            if (objects[1] == null || (objects[0] == null && objects[2] == null)){
+                continue;
+            }
+            try {
+                Method getMethod = (Method) objects[1];
+                MethodHandle getMethodHandle = lookup.unreflect(getMethod);
+                Method setMethod = objects[2] == null ? null :  (Method) objects[2];
+                MethodHandle setMethodHandle = objects[2] == null ? null : lookup.unreflect(setMethod);
+                beanPropertyModelMap.put(stringEntry.getKey(),new BeanPropertyModel(stringEntry.getKey(),(Field) objects[0],getMethod,getMethodHandle,setMethod,setMethodHandle));
+            }catch (IllegalAccessException e){
+                throw new RuntimeException(e);
+            }
+        }
+        return beanModel;
     }
 }
 

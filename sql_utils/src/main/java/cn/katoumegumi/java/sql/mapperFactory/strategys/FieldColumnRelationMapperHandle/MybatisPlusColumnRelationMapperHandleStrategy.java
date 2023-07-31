@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandle;
 
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
@@ -53,8 +54,8 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
     }
 
     @Override
-    public boolean isIgnoreField(Field field) {
-        TableField tableField = field.getAnnotation(TableField.class);
+    public boolean isIgnoreField(BeanPropertyModel beanPropertyModel) {
+        TableField tableField = beanPropertyModel.getAnnotation(TableField.class);
         if (tableField == null) {
             return false;
         }
@@ -62,27 +63,27 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
     }
 
     @Override
-    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, Field field) {
-        TableId tableId = field.getAnnotation(TableId.class);
+    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+        TableId tableId = beanProperty.getAnnotation(TableId.class);
         String columnName;
         if (tableId != null) {
             columnName = tableId.value();
         } else {
-            TableField tableField = field.getAnnotation(TableField.class);
+            TableField tableField = beanProperty.getAnnotation(TableField.class);
             if (tableField == null) {
                 return Optional.empty();
             }
             columnName = tableField.value();
         }
         if (WsStringUtils.isBlank(columnName)) {
-            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(field.getName());
+            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
         }
-        return Optional.of(new FieldColumnRelation(tableId != null, field.getName(), field, columnName, field.getType()));
+        return Optional.of(new FieldColumnRelation(tableId != null, columnName, beanProperty));
 
     }
 
     @Override
-    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field) {
+    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
         return Optional.empty();
     }
 }

@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandle;
 
 import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
@@ -48,20 +49,20 @@ public class DefaultFieldColumnRelationMapperHandleStrategy implements FieldColu
     }
 
     @Override
-    public boolean isIgnoreField(Field field) {
-        return DEFAULT_IGNORE_FIELD.contains(field.getType());
+    public boolean isIgnoreField(BeanPropertyModel beanPropertyModel) {
+        return DEFAULT_IGNORE_FIELD.contains(beanPropertyModel.getGenericClass()==null?beanPropertyModel.getPropertyClass():beanPropertyModel.getGenericClass());
     }
 
     @Override
-    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, Field field) {
-        return Optional.of(new FieldColumnRelation(false, field.getName(), field, fieldColumnRelationMapperFactory.getChangeColumnName(field.getName()), field.getType()));
+    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+        return Optional.of(new FieldColumnRelation(false, fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName()), beanProperty));
     }
 
     @Override
-    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field) {
-        boolean isArray = WsFieldUtils.isArrayType(field);
-        FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinMapper.getClazz(), field);
-        fieldJoinClass.setNickName(field.getName());
+    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+        boolean isArray = WsFieldUtils.isArrayType(beanProperty.getPropertyClass());
+        FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinMapper.getClazz(), beanProperty);
+        fieldJoinClass.setNickName(beanProperty.getPropertyName());
         fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
         return Optional.of(fieldJoinClass);
     }

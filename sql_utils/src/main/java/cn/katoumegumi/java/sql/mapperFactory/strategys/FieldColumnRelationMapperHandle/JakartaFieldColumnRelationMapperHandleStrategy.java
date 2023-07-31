@@ -2,6 +2,7 @@ package cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMappe
 
 import cn.katoumegumi.java.common.WsFieldUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
@@ -53,30 +54,30 @@ public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColu
     }
 
     @Override
-    public boolean isIgnoreField(Field field) {
-        Transient t = field.getAnnotation(Transient.class);
+    public boolean isIgnoreField(BeanPropertyModel beanPropertyModel) {
+        Transient t = beanPropertyModel.getAnnotation(Transient.class);
         return t != null;
     }
 
     @Override
-    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, Field field) {
-        Id id = field.getAnnotation(Id.class);
-        Column column = field.getAnnotation(Column.class);
+    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+        Id id = beanProperty.getAnnotation(Id.class);
+        Column column = beanProperty.getAnnotation(Column.class);
         if (id == null && column == null) {
             return Optional.empty();
         }
         String columnName;
         if (column == null || WsStringUtils.isBlank(column.name())) {
-            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(field.getName());
+            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
         } else {
             columnName = column.name();
         }
-        return Optional.of(new FieldColumnRelation(id != null, field.getName(), field, columnName, field.getType()));
+        return Optional.of(new FieldColumnRelation(id != null,  columnName, beanProperty));
     }
 
     @Override
-    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field) {
-        JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+        JoinColumn joinColumn = beanProperty.getAnnotation(JoinColumn.class);
         if (joinColumn == null) {
             return Optional.empty();
         }
@@ -88,10 +89,10 @@ public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColu
         if (WsStringUtils.isBlank(referenced)) {
             referenced = joinMapper.getIds().get(0).getColumnName();
         }
-        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-        boolean isArray = WsFieldUtils.isArrayType(field);
-        FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinMapper.getClazz(), field);
-        fieldJoinClass.setNickName(field.getName());
+        OneToMany oneToMany = beanProperty.getAnnotation(OneToMany.class);
+        boolean isArray = WsFieldUtils.isArrayType(beanProperty.getPropertyClass());
+        FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinMapper.getClazz(), beanProperty);
+        fieldJoinClass.setNickName(beanProperty.getPropertyName());
         fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
         if (oneToMany == null) {
             fieldJoinClass.setJoinColumn(name);

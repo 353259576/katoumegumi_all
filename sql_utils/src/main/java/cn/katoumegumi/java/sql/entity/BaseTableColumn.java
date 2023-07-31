@@ -1,10 +1,9 @@
 package cn.katoumegumi.java.sql.entity;
 
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.SQLModelUtils;
 import cn.katoumegumi.java.sql.model.TableColumn;
-
-import java.lang.reflect.Field;
 
 /**
  * 基本表列
@@ -57,8 +56,8 @@ public class BaseTableColumn implements TableColumn {
     }
 
     @Override
-    public Field getField() {
-        return fieldColumnRelation.getField();
+    public BeanPropertyModel getBeanProperty() {
+        return fieldColumnRelation.getBeanProperty();
     }
 
     public String getTableName() {
@@ -80,8 +79,8 @@ public class BaseTableColumn implements TableColumn {
     }
 
     @Override
-    public String getFieldName() {
-        return fieldColumnRelation.getFieldName();
+    public String getBeanPropertyName() {
+        return fieldColumnRelation.getBeanProperty().getPropertyName();
     }
 
     @Override
@@ -95,6 +94,6 @@ public class BaseTableColumn implements TableColumn {
      * @return
      */
     public String getColumnValue() {
-        return createColumnName(getTableAlias(), getColumnName()) + " " + createColumnNickName(getTableAlias(), getFieldName());
+        return createColumnName(getTableAlias(), getColumnName()) + " " + createColumnNickName(getTableAlias(), getBeanPropertyName());
     }
 }

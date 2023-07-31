@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.sql;
 
 
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
+
 import java.lang.reflect.Field;
 import java.util.Objects;
 
@@ -17,22 +19,26 @@ public class FieldColumnRelation {
     /**
      * 实体字段名称
      */
-    private final String fieldName;
+    /*private final String fieldName;
     private final Field field;
+    private final Class<?> fieldClass;*/
+    private final BeanPropertyModel beanProperty;
 
     /**
      * 对应数据库列名
      */
     private final String columnName;
-    private final Class<?> fieldClass;
 
 
-    public FieldColumnRelation(boolean id, String fieldName, Field field, String columnName, Class<?> fieldClass) {
+
+    public FieldColumnRelation(boolean id,  String columnName, BeanPropertyModel beanPropertyModel) {
         this.id = id;
-        this.fieldName = fieldName;
+        /*this.fieldName = fieldName;
         this.field = field;
+        this.fieldClass = fieldClass;*/
         this.columnName = columnName;
-        this.fieldClass = fieldClass;
+        this.beanProperty = beanPropertyModel;
+
     }
 
     public boolean isId() {
@@ -40,44 +46,11 @@ public class FieldColumnRelation {
     }
 
 
-    public String getFieldName() {
-        return fieldName;
-    }
-
-
-    public Field getField() {
-        this.field.setAccessible(true);
-        return field;
-    }
-
-
     public String getColumnName() {
         return columnName;
     }
 
-
-    public Class<?> getFieldClass() {
-        return fieldClass;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        FieldColumnRelation that = (FieldColumnRelation) o;
-        return id == that.id &&
-                Objects.equals(fieldName, that.fieldName) &&
-                Objects.equals(field, that.field) &&
-                Objects.equals(columnName, that.columnName) &&
-                Objects.equals(fieldClass, that.fieldClass);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, fieldName, field, columnName, fieldClass);
+    public BeanPropertyModel getBeanProperty() {
+        return beanProperty;
     }
 }

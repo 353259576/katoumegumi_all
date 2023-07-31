@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.sql;
 
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 
 import java.lang.reflect.Field;
@@ -20,7 +21,9 @@ public class FieldJoinClass {
     private final Class<?> joinClass;
 
 
-    private final Field field;
+    //private final Field field;
+
+    private final BeanPropertyModel beanProperty;
 
     /**
      * 主表实体名称
@@ -53,10 +56,11 @@ public class FieldJoinClass {
     private MySearchList conditionSearchList;
 
 
-    public FieldJoinClass(boolean isArray, Class<?> joinClass, Field field) {
+    public FieldJoinClass(boolean isArray, Class<?> joinClass, BeanPropertyModel beanPropertyModel) {
         this.isArray = isArray;
         this.joinClass = joinClass;
-        this.field = field;
+        this.beanProperty = beanPropertyModel;
+        //this.field = field;
     }
 
 
@@ -108,9 +112,8 @@ public class FieldJoinClass {
         this.anotherJoinColumn = anotherJoinColumn;
     }
 
-    public Field getField() {
-        field.setAccessible(true);
-        return field;
+    public BeanPropertyModel getBeanProperty() {
+        return beanProperty;
     }
 
     public MySearchList getConditionSearchList() {

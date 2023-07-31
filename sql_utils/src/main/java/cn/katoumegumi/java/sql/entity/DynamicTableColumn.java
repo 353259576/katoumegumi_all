@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.sql.entity;
 
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.model.Condition;
 import cn.katoumegumi.java.sql.model.TableColumn;
@@ -41,8 +42,8 @@ public class DynamicTableColumn implements TableColumn {
     }
 
     @Override
-    public Field getField() {
-        return originalTableColumn.getField();
+    public BeanPropertyModel getBeanProperty() {
+        return originalTableColumn.getBeanProperty();
     }
 
     @Override
@@ -56,8 +57,8 @@ public class DynamicTableColumn implements TableColumn {
     }
 
     @Override
-    public String getFieldName() {
-        return originalTableColumn.getFieldName();
+    public String getBeanPropertyName() {
+        return originalTableColumn.getBeanPropertyName();
     }
 
     @Override

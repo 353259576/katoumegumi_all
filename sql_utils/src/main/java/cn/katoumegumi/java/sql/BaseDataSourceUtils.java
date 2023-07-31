@@ -68,7 +68,7 @@ public class BaseDataSourceUtils {
                 int count = resultSet.getMetaData().getColumnCount();
                 if (resultSet.next()) {
                     for (int i = 0; i < count && i < idList.size(); i++) {
-                        WsFieldUtils.setValue(t, WsBeanUtils.objectToT(resultSet.getObject(i + 1), idList.get(i).getFieldClass()), idList.get(i).getField());
+                        WsFieldUtils.setValue(t, WsBeanUtils.objectToT(resultSet.getObject(i + 1), idList.get(i).getBeanProperty().getPropertyClass()), idList.get(i).getBeanProperty().getField());
                     }
                 }
             }

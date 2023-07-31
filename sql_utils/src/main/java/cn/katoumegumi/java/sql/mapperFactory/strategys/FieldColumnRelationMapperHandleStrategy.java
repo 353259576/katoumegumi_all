@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.sql.mapperFactory.strategys;
 
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
@@ -39,7 +40,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
      * @param field
      * @return
      */
-    boolean isIgnoreField(Field field);
+    boolean isIgnoreField(BeanPropertyModel beanProperty);
 
     /**
      * 获取列名称
@@ -48,7 +49,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
      * @param field
      * @return
      */
-    Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, Field field);
+    Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty);
 
     /**
      * 获取关联列对应关系
@@ -58,7 +59,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
      * @param field
      * @return key为主表列表 value为关联表列
      */
-    Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field);
+    Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty);
 
     /**
      * 处理当前数据

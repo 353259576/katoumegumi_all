@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.starter.jdbc.datasource;
 
 import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.common.model.KeyValue;
 import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.JdkResultSet;
@@ -283,7 +284,7 @@ public class WsJdbcUtils {
         for (int i = 0; i < ids.size(); i++) {
             FieldColumnRelation relation = ids.get(i);
             Object value = objects[i];
-            mySearchList.eq(relation.getFieldName(), value);
+            mySearchList.eq(relation.getBeanProperty().getPropertyName(), value);
         }
         return getTOne(mySearchList);
     }
@@ -338,13 +339,14 @@ public class WsJdbcUtils {
         FieldColumnRelationMapper fieldColumnRelationMapper = SQLModelUtils.getFieldColumnRelationMapper(t.getClass());
         List<FieldColumnRelation> fieldColumnRelations = fieldColumnRelationMapper.getIds();
         FieldColumnRelation relation = fieldColumnRelations.get(0);
-        Object o = WsFieldUtils.getValue(t,relation.getField());
+        BeanPropertyModel beanPropertyModel = relation.getBeanProperty();
+        Object o = beanPropertyModel.getValue(t);
         if(o == null){
             return insert(t);
         }else {
             MySearchList mySearchList = MySearchList.create(t.getClass());
-            mySearchList.singleColumnName(relation.getFieldName());
-            mySearchList.eq(relation.getFieldName(),o);
+            mySearchList.singleColumnName(beanPropertyModel.getPropertyName());
+            mySearchList.eq(beanPropertyModel.getPropertyName(),o);
             Object oldIndex = getTOne(mySearchList);
             if(oldIndex == null){
                 return insert(t);
@@ -376,7 +378,8 @@ public class WsJdbcUtils {
             }
             isUseArray[index] = true;
             FieldColumnRelation fieldColumnRelation = idList.get(index);
-            WsFieldUtils.setValue(t,WsBeanUtils.objectToT(value,fieldColumnRelation.getFieldClass()),fieldColumnRelation.getField());
+            fieldColumnRelation.getBeanProperty()
+                            .setValue(t,WsBeanUtils.objectToT(value,fieldColumnRelation.getBeanProperty().getPropertyClass()));
         });
 
         if(WsListUtils.isNotEmpty(unUseColumnNameList)){
@@ -386,7 +389,7 @@ public class WsJdbcUtils {
                     if(!isUseArray[idIndex]){
                         isUseArray[idIndex] = false;
                         FieldColumnRelation fieldColumnRelation = idList.get(idIndex);
-                        WsFieldUtils.setValue(t,WsBeanUtils.objectToT(value,fieldColumnRelation.getFieldClass()),fieldColumnRelation.getField());
+                        fieldColumnRelation.getBeanProperty().setValue(t,WsBeanUtils.objectToT(value,fieldColumnRelation.getBeanProperty().getPropertyClass()));
                         idIndex++;
                         break;
                     }

@@ -58,7 +58,7 @@ public class MysqlHandle {
                 chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
             }
             columnSql.append(SqlCommonConstants.SPACE)
-                    .append(SQLModelUtils.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getFieldName()))
+                    .append(SQLModelUtils.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()))
                     .append(SqlCommonConstants.COMMA);
         }
         TableColumn tableColumn = selectModel.getSelect().get(columnSize - 1);
@@ -72,7 +72,7 @@ public class MysqlHandle {
             chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
         }
         columnSql.append(SqlCommonConstants.SPACE)
-                .append(SQLModelUtils.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getFieldName()));
+                .append(SQLModelUtils.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()));
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
         tableAndJoinTableSql.append(SqlCommonConstants.FROM)

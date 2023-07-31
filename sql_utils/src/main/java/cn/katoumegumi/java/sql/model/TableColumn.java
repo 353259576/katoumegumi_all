@@ -1,8 +1,7 @@
 package cn.katoumegumi.java.sql.model;
 
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
-
-import java.lang.reflect.Field;
 
 public interface TableColumn {
 
@@ -18,7 +17,7 @@ public interface TableColumn {
      *
      * @return
      */
-    Field getField();
+    BeanPropertyModel getBeanProperty();
 
     /**
      * 表的相对路径
@@ -39,7 +38,7 @@ public interface TableColumn {
      *
      * @return
      */
-    String getFieldName();
+    String getBeanPropertyName();
 
     FieldColumnRelation getFieldColumnRelation();
 

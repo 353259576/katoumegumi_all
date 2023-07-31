@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.sql.mapperFactory.strategys.FieldColumnRelationMapperHandle;
 
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.FieldColumnRelation;
 import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.FieldJoinClass;
@@ -44,22 +45,22 @@ public class TableTemplateFieldColumnRelationMapperHandleStrategy implements Fie
     }
 
     @Override
-    public boolean isIgnoreField(Field field) {
+    public boolean isIgnoreField(BeanPropertyModel beanPropertyModel) {
         return false;
     }
 
     @Override
-    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, Field field) {
-        FieldColumnRelation templateRelation = mainMapper.containsFieldColumnRelationByFieldName(field.getName());
+    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+        FieldColumnRelation templateRelation = mainMapper.containsFieldColumnRelationByFieldName(beanProperty.getPropertyName());
         if (templateRelation == null) {
             return Optional.empty();
         }
-        FieldColumnRelation relation = new FieldColumnRelation(templateRelation.isId(), field.getName(), field, templateRelation.getColumnName(), field.getType());
+        FieldColumnRelation relation = new FieldColumnRelation(templateRelation.isId(), templateRelation.getColumnName(),beanProperty);
         return Optional.of(relation);
     }
 
     @Override
-    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, Field field) {
+    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
         return Optional.empty();
     }
 }

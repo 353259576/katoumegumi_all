@@ -1,9 +1,7 @@
 package cn.katoumegumi.java.sql.test;
 
-import cn.katoumegumi.java.common.SFunction;
-import cn.katoumegumi.java.common.WsDateUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
-import cn.katoumegumi.java.common.WsUnsafeUtils;
+import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.SqlEquation;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
@@ -13,7 +11,9 @@ import cn.katoumegumi.java.sql.test.model.LUser;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
 import cn.katoumegumi.java.sql.test.model.UserDetailsRemake;
+import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
 import com.google.gson.Gson;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
@@ -28,38 +28,103 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class Test {
 
     public static void main(String[] args) throws NoSuchMethodException, IllegalAccessException {
 
-        User user = new User();
+        /*User user = new User();
+
+
+        Map<String,Field> fieldMap = WsFieldUtils.getFieldMap(User.class);
 
         Method[] methods = User.class.getMethods();
+        Map<String, Object[]> beanPropertyMap = new LinkedHashMap<>();
 
-        List<Method> list = new ArrayList<>();
-        for (Method method : methods) {
-            String name = method.getName();
-            if (name.startsWith("set")){
-                list.add(method);
-            }else if (name.startsWith("get")){
-                list.add(method);
-            }else if (name.startsWith("is")){
-                list.add(method);
-            }else {
+        for (Map.Entry<String, Field> stringFieldEntry : fieldMap.entrySet()) {
+            if (Modifier.isStatic(stringFieldEntry.getValue().getModifiers())){
                 continue;
             }
+            Object[] objects = new Object[3];
+            objects[0] = stringFieldEntry.getValue();
+            beanPropertyMap.put(stringFieldEntry.getKey(),objects);
         }
-        for (Method method : list) {
-            System.out.println(method.getName());
+
+        for (Method method : methods) {
+            if (Modifier.isStatic(method.getModifiers())){
+                continue;
+            }
+            String name = method.getName();
+            if (name.startsWith("set")){
+                if (name.length() == 3 || method.getParameterCount() != 1){
+                    continue;
+                }
+                name = WsStringUtils.firstCharToLowerCase(name.substring(3));
+                Object[] objects = beanPropertyMap.computeIfAbsent(name, n->new Object[3]);
+                objects[2] = method;
+            }else if (name.startsWith("get")){
+                if (name.length() == 3 || method.getParameterCount() != 0){
+                    continue;
+                }
+                name = WsStringUtils.firstCharToLowerCase(name.substring(3));
+                Object[] objects = beanPropertyMap.computeIfAbsent(name, n->new Object[3]);
+                objects[1] = method;
+            }else if (name.startsWith("is")){
+                if (name.length() == 2 || method.getParameterCount() != 0){
+                    continue;
+                }
+                name = WsStringUtils.firstCharToLowerCase(name.substring(2));
+                Object[] objects = beanPropertyMap.computeIfAbsent(name, n->new Object[3]);
+                objects[1] = method;
+            }
         }
+
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        Map<String,BeanPropertyModel> beanPropertyModelMap = new LinkedHashMap<>(beanPropertyMap.size());
+        for (Map.Entry<String, Object[]> stringEntry : beanPropertyMap.entrySet()) {
+            Object[] objects = stringEntry.getValue();
+            if (objects[1] == null || (objects[0] == null && objects[2] == null)){
+                continue;
+            }
+            Method getMethod = (Method) objects[1];
+            MethodHandle getMethodHandle = lookup.unreflect(getMethod);
+            Method setMethod = objects[2] == null ? null :  (Method) objects[2];
+            MethodHandle setMethodHandle = objects[2] == null ? null : lookup.unreflect(setMethod);
+            beanPropertyModelMap.put(stringEntry.getKey(),new BeanPropertyModel(stringEntry.getKey(),(Field) objects[0],getMethod,getMethodHandle,setMethod,setMethodHandle));
+        }
+
+        System.out.println(beanPropertyModelMap.size());*/
 
 
         //test3();
+
+        /*DataSource dataSource = getDataSource();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        WsJdbcUtils jdbcUtils = new WsJdbcUtils();
+        jdbcUtils.setJdbcTemplate(jdbcTemplate);
+        for (int i = 0; i < 10; i++){
+            User user = new User()
+                    .setName("你好世界"+i)
+                    .setPassword(i + "")
+                    .setCreateDate(LocalDateTime.now());
+            jdbcUtils.insert(user);
+            for (int k = 0; k < 10; k++){
+                UserDetails userDetails = new UserDetails()
+                        .setUserId(user.getId())
+                        .setSex(((k & 1) == 0)+"")
+                        .setNickName("你好——世界"+i);
+                jdbcUtils.insert(userDetails);
+                for (int j = 0; j < 10; j++){
+                    UserDetailsRemake userDetailsRemake = new UserDetailsRemake()
+                            .setUserDetailsId(userDetails.getId())
+                            .setRemake("这个是备注"+j);
+                    jdbcUtils.insert(userDetailsRemake);
+                }
+            }
+        }*/
+        test2();
     }
 
 
@@ -144,7 +209,7 @@ public class Test {
         time = WsDateUtils.getExecutionTime.apply(
                 ()->{
                     for (int i = 0; i < 10; i++){
-                        dataSourceUtils.selectList(
+                        List<User> userList = dataSourceUtils.selectList(
                                 MySearchList.create(User.class)
                                         .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
                         );
@@ -278,7 +343,7 @@ public class Test {
 
 
     public static DataSource getDataSource(){
-        String url = "jdbc:mysql://localhost:3306/wslx?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true";
+        String url = "jdbc:mysql://192.168.149.5:3306/wslx?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true";
         String userName = "root";
         String password = "199645";
         String driverClassName = "com.mysql.cj.jdbc.Driver";
