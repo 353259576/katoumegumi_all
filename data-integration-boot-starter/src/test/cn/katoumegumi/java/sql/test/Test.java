@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql.test;
 
 import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.entity.SqlEquation;
@@ -124,7 +125,16 @@ public class Test {
                 }
             }
         }*/
-        test2();
+        //test2();
+
+        BeanModel beanModel = WsFieldUtils.createBeanModel(User.class);
+        System.out.println(beanModel.toString());
+        SQLModelUtils sqlModelUtils = new SQLModelUtils(MySearchList.create(User.class)
+                .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
+                .gtep("u",User::getName,"u",User::getName));
+        SelectModel selectModel = sqlModelUtils.transferToSelectModel();
+        SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(selectModel);
+        System.out.println(selectSqlEntity.getSelectSql());
     }
 
 

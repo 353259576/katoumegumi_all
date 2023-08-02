@@ -121,11 +121,11 @@ public class FieldColumnRelationMapperFactory {
             if (k) {
                 fieldColumnRelationMapper = MAPPER_MAP.get(clazz);
                 if (fieldColumnRelationMapper == null) {
-                    throw new RuntimeException("解析失败");
+                    throw new RuntimeException("解析失败,无法解析：" + clazz);
                 }
                 return fieldColumnRelationMapper;
             } else {
-                throw new RuntimeException("解析超时");
+                throw new RuntimeException("解析超时,无法解析：" + clazz);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -246,17 +246,6 @@ public class FieldColumnRelationMapperFactory {
                 joinClassFieldList.add(beanPropertyModel);
             }
         }
-
-        /*for (Field field : fields) {
-            if (isIgnoreField(startIndex, field)) {
-                continue;
-            }
-            if (WsBeanUtils.isBaseType(field.getType())) {
-                baseTypeFieldList.add(field);
-            } else {
-                joinClassFieldList.add(field);
-            }
-        }*/
         if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
             for (BeanPropertyModel propertyModel : baseTypeFieldList) {
                 FieldColumnRelation fieldColumnRelation = getColumnName(startIndex, fieldColumnRelationMapper.getBaseTemplateMapper() == null ? fieldColumnRelationMapper : fieldColumnRelationMapper.getBaseTemplateMapper(), propertyModel);
@@ -276,15 +265,25 @@ public class FieldColumnRelationMapperFactory {
 
         if (WsListUtils.isNotEmpty(joinClassFieldList)) {
             for (BeanPropertyModel propertyModel : joinClassFieldList) {
-                if (propertyModel.getGenericClass() == null){
+                Class<?> joinClass;
+                if (WsFieldUtils.isArrayType(propertyModel.getPropertyClass())){
+                    joinClass = propertyModel.getGenericClass();
+                }else {
+                    joinClass = propertyModel.getPropertyClass();
+                }
+                if (joinClass == null){
                     continue;
                 }
-                FieldColumnRelationMapper joinMapper = analysisClassRelation(propertyModel.getGenericClass(), true);
-                FieldJoinClass fieldJoinClass = getJoinRelation(startIndex, fieldColumnRelationMapper, joinMapper, propertyModel);
-                if (fieldJoinClass == null) {
-                    continue;
+                try {
+                    FieldColumnRelationMapper joinMapper = analysisClassRelation(joinClass, true);
+                    FieldJoinClass fieldJoinClass = getJoinRelation(startIndex, fieldColumnRelationMapper, joinMapper, propertyModel);
+                    if (fieldJoinClass == null) {
+                        continue;
+                    }
+                    fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
+                }catch (RuntimeException e){
+                    e.printStackTrace();
                 }
-                fieldColumnRelationMapper.getFieldJoinClasses().add(fieldJoinClass);
             }
         }
         fieldColumnRelationMapper.markSignLocation();

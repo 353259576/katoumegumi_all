@@ -15,9 +15,10 @@ import ${packageName}${baseEntityName}.${table.entityName};
 import ${packageName}${baseServiceName}.${table.entityName}Service;
 import ${table.pkColumn.columnClass.getName()};
 import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 <#if type == 1>
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import ${packageName}${baseJavaMapperName}.${table.entityName}Mapper;
@@ -136,6 +137,22 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
         wrapper${table.entityName}(Collections.singletonList(${table.firstLowerEntityName}));
         return ${table.firstLowerEntityName};
 </#if>
+    }
+
+    @Override
+    public List<${table.entityName}> queryListByIds(Collection<${table.pkColumn.columnClass.getSimpleName()}> ids){
+        if(CollectionUtils.isEmpty(ids)){
+            return Collections.emptyList();
+        }
+    <#if type ==0>
+        MySearchList searchList = MySearchList.create(${table.entityName}.class).in("${table.pkColumn.beanFieldName}",ids);
+        List<${table.entityName}> list = queryList(searchList);
+    </#if>
+    <#if type == 1>
+        Wrapper<${table.entityName}> wrapper = Wrappers.query(${table.entityName}.class).in("${table.pkColumn.beanFieldName}",ids);
+        List<${table.entityName}> list = queryList(wrapper);
+    </#if>
+        return list;
     }
 
     /**

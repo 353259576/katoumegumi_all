@@ -820,7 +820,7 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.GTP, getColumnName(valueTableName, value));
     }
 
-    public MySearchList gtp(String tableName, SFunction<?, ?> columnFieldName, String valueTableName, SFunction<?, ?> value) {
+    public <T,K> MySearchList gtp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.GTP, getColumnName(valueTableName, value));
     }
 
@@ -865,7 +865,7 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.GTEP, getColumnName(valueTableName, value));
     }
 
-    public MySearchList gtep(String tableName, SFunction<?, ?> columnFieldName, String valueTableName, SFunction<?, ?> value) {
+    public <T,K> MySearchList gtep(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.GTEP, getColumnName(valueTableName, value));
     }
 
@@ -910,7 +910,7 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LTP, getColumnName(valueTableName, value));
     }
 
-    public MySearchList ltp(String tableName, SFunction<?, ?> columnFieldName, String valueTableName, SFunction<?, ?> value) {
+    public <T,K> MySearchList ltp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LTP, getColumnName(valueTableName, value));
     }
 
@@ -955,7 +955,7 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LTEP, getColumnName(valueTableName, value));
     }
 
-    public MySearchList ltep(String tableName, SFunction<?, ?> columnFieldName, String valueTableName, SFunction<?, ?> value) {
+    public <T,K> MySearchList ltep(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LTEP, getColumnName(valueTableName, value));
     }
 

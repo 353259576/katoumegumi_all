@@ -2,6 +2,7 @@ package cn.katoumegumi.java.common;
 
 import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
+import cn.katoumegumi.java.common.model.GenericsTypeModel;
 
 import java.io.ObjectStreamClass;
 import java.lang.invoke.MethodHandle;
@@ -328,22 +329,71 @@ public class WsFieldUtils {
         if (type == null){
             return null;
         }
-        String listClassName = type.getTypeName();
-        int start = listClassName.indexOf("<") + 1;
-        if (start == 0) {
+        GenericsTypeModel genericsTypeModel = getGenericsType(type.getTypeName());
+        if (genericsTypeModel.getGenericsTypeModelList() == null || genericsTypeModel.getGenericsTypeModelList().size() != 1){
             return null;
         }
-        int end = listClassName.lastIndexOf(">");
-        if (end == -1) {
-            return null;
-        }
-        String className = listClassName.substring(start, end);
+        String className = genericsTypeModel.getGenericsTypeModelList().get(0).getClassName();
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static GenericsTypeModel getGenericsType(String typeName){
+        return getGenericsType(typeName,new int[]{0,typeName.length()}).get(0);
+    }
+
+    private static List<GenericsTypeModel> getGenericsType(String typeName,int[] startAndEnd){
+        StringBuilder sb = new StringBuilder();
+        List<GenericsTypeModel> list = new ArrayList<>();
+        GenericsTypeModel genericsTypeModel = new GenericsTypeModel();
+        ignoreBeginBlank(startAndEnd,typeName,sb);
+        int statIndex = startAndEnd[0];
+        int endIndex = startAndEnd[1];
+        for (; statIndex < endIndex; statIndex++){
+            char c = typeName.charAt(statIndex);
+            if (c == '<'){
+
+                startAndEnd[0] = statIndex + 1;
+                genericsTypeModel.setGenericsTypeModelList(getGenericsType(typeName,startAndEnd));
+                statIndex = startAndEnd[0] - 1;
+            }else if (c == '>'){
+                statIndex++;
+                break;
+            }else if (c == ','){
+                genericsTypeModel.setClassName(sb.toString());
+                list.add(genericsTypeModel);
+                sb = new StringBuilder();
+                genericsTypeModel = new GenericsTypeModel();
+                startAndEnd[0] = statIndex + 1;
+                ignoreBeginBlank(startAndEnd,typeName,sb);
+                statIndex = startAndEnd[0] - 1;
+            }else {
+                sb.append(c);
+            }
+        }
+        startAndEnd[0] = statIndex;
+        genericsTypeModel.setClassName(sb.toString());
+        list.add(genericsTypeModel);
+        return list;
+    }
+
+    private static void ignoreBeginBlank(int[] startAndEnd,String typeName,StringBuilder stringBuilder){
+        int statIndex = startAndEnd[0];
+        int endIndex = startAndEnd[1];
+        for (;statIndex < endIndex;statIndex++){
+            char c = typeName.charAt(statIndex);
+            if (c == ' '){
+                continue;
+            }
+            stringBuilder.append(c);
+            statIndex++;
+            break;
+        }
+        startAndEnd[0] = statIndex;
     }
 
     /**

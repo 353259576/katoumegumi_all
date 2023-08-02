@@ -101,7 +101,7 @@ public class ${table.entityName}Controller {
 </#if>
     public IPage<${table.entityName}> get${table.entityName}Page(Page<?> page,<#if enableSearchVO == true>${table.entityName}SearchVO searchVO</#if>){
 <#if type == 0>
-        MySearchList searchList = getMySearchList(searchVO);
+        MySearchList searchList = ${table.firstLowerEntityName}Service.analysisSearchVo(searchVO);
         searchList.setSqlLimit(sqlLimit -> sqlLimit.setCurrent(page.getCurrent()).setSize(page.getSize()));
         IPage<${table.entityName}> iPage = ${table.firstLowerEntityName}Service.queryPage(searchList);
 </#if>
@@ -109,7 +109,7 @@ public class ${table.entityName}Controller {
         Wrapper<${table.entityName}> wrapper = getWrapper(searchVO);
         IPage<${table.entityName}> iPage = ${table.firstLowerEntityName}Service.queryPage(page,wrapper);
 </#if>
-        return null;
+        return iPage;
     }
 
     /**
@@ -124,14 +124,38 @@ public class ${table.entityName}Controller {
 </#if>
     public List<${table.entityName}> get${table.entityName}List(<#if enableSearchVO == true>${table.entityName}SearchVO searchVO</#if>){
 <#if type ==0>
-        MySearchList searchList = getMySearchList(searchVO);
+        MySearchList searchList = ${table.firstLowerEntityName}Service.analysisSearchVo(searchVO);
         List<${table.entityName}> list = ${table.firstLowerEntityName}Service.queryList(searchList);
 </#if>
 <#if type == 1>
         Wrapper<${table.entityName}> wrapper = getWrapper(searchVO);
         List<${table.entityName}> list = ${table.firstLowerEntityName}Service.queryList(wrapper);
 </#if>
-        return null;
+        return list;
+    }
+
+
+
+    /**
+    * 通过id查询${table.tableRemark}
+    */
+    @GetMapping(value = "getById/{${table.pkColumn.beanFieldName}}")
+    <#if enableSwagger == true>
+    @ApiOperation("通过id查询${table.tableRemark}")
+    </#if>
+    <#if enableSpringDoc == true>
+    @Operation(description = "通过id查询${table.tableRemark}", summary = "通过id查询${table.tableRemark}")
+    </#if>
+    public ${table.entityName} get${table.entityName}ById(@PathVariable ${table.pkColumn.columnClass.getSimpleName()} ${table.pkColumn.beanFieldName}){
+    <#if type ==0>
+        MySearchList searchList = MySearchList.create(${table.entityName}.class).eq("${table.pkColumn.beanFieldName}",${table.pkColumn.beanFieldName});
+        ${table.entityName} ${table.firstLowerEntityName} = ${table.firstLowerEntityName}Service.queryEntity(searchList);
+    </#if>
+    <#if type == 1>
+        Wrapper<${table.entityName}> wrapper = Wrappers.query(${table.entityName}.class).eq("${table.pkColumn.beanFieldName}",${table.pkColumn.beanFieldName});
+        ${table.entityName} ${table.firstLowerEntityName} = ${table.firstLowerEntityName}Service.queryEntity(wrapper);
+    </#if>
+        return ${table.firstLowerEntityName};
     }
 
     /**
@@ -149,12 +173,12 @@ public class ${table.entityName}Controller {
         return null;
     }
 
-<#if type == 0>
+<#--<#if type == 0>
     private MySearchList getMySearchList(<#if enableSearchVO == true>${table.entityName}SearchVO searchVO</#if>) {
         MySearchList searchList = MySearchList.create(${table.entityName}.class);
         return searchList;
     }
-</#if>
+</#if>-->
 <#if type == 1>
     private Wrapper<${table.entityName}> getWrapper(<#if enableSearchVO == true>${table.entityName}SearchVO searchVO</#if>) {
         Wrapper<${table.entityName}> wrapper = Wrappers.lambdaUpdate(${table.entityName}.class);

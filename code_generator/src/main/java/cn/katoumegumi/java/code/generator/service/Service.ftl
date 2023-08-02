@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import ${packageName}${baseEntityName}.${table.entityName};
 import ${table.pkColumn.columnClass.getName()};
-import java.util.List;
+import java.util.*;
 <#if type == 0>
 import cn.katoumegumi.java.sql.MySearchList;
 <#if enableSearchVO == true>
@@ -47,6 +47,11 @@ public interface ${table.entityName}Service<#if type == 2> extends IService<${ta
     * 单条查询
     */
     ${table.entityName} queryEntity(<#if type == 0>MySearchList searchList</#if><#if type == 1>Wrapper<${table.entityName}> wrapper</#if>);
+
+    /**
+    * 列表查询
+    */
+    List<${table.entityName}> queryListByIds(Collection<${table.pkColumn.columnClass.getSimpleName()}> ids);
 
     /**
     * 删除

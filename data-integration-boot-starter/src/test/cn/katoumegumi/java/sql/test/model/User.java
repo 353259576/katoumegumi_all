@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.sql.test.model;
 
+import cn.katoumegumi.java.common.model.KeyValue;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -40,9 +41,7 @@ public class User implements Serializable {
     private List<UserDetails> userDetails;
     //private UserDetails userDetails;
 
-
-    //private int[] ints = new int[]{1,2,3};
-
+    private List<KeyValue<String,? extends UserDetails>> keyValueList;
 
     public Long getId() {
         return id;
@@ -89,12 +88,12 @@ public class User implements Serializable {
         return this;
     }
 
-    /*public UserDetails getUserDetails() {
-        return userDetails;
+    public List<KeyValue<String, ? extends UserDetails>> getKeyValueList() {
+        return keyValueList;
     }
 
-    public User setUserDetails(UserDetails userDetails) {
-        this.userDetails = userDetails;
+    public User setKeyValueList(List<KeyValue<String, ? extends UserDetails>> keyValueList) {
+        this.keyValueList = keyValueList;
         return this;
-    }*/
+    }
 }
