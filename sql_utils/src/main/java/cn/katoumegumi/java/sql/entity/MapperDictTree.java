@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.entity;
 
-import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
-import cn.katoumegumi.java.sql.FieldJoinClass;
+import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
+import cn.katoumegumi.java.sql.mapper.model.FieldJoinClass;
 
 import java.util.HashMap;
 import java.util.Map;

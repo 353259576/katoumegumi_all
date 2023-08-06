@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.entity;
 
 import cn.katoumegumi.java.common.WsStringUtils;
-import cn.katoumegumi.java.sql.FieldColumnRelationMapper;
+import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
 
 import java.util.Map;
 

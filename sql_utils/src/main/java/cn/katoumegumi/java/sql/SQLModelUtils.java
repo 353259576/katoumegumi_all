@@ -10,13 +10,27 @@ import cn.katoumegumi.java.common.model.TripleEntity;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.ValueTypeConstants;
-import cn.katoumegumi.java.sql.entity.*;
-import cn.katoumegumi.java.sql.mapperFactory.FieldColumnRelationMapperFactory;
-import cn.katoumegumi.java.sql.model.*;
+import cn.katoumegumi.java.sql.entity.ExistEntityInfo;
+import cn.katoumegumi.java.sql.entity.FieldColumnRelationMapperName;
+import cn.katoumegumi.java.sql.entity.MapperDictTree;
+import cn.katoumegumi.java.sql.entity.ReturnEntityId;
+import cn.katoumegumi.java.sql.handle.model.InsertSqlEntity;
+import cn.katoumegumi.java.sql.handle.model.SqlParameter;
+import cn.katoumegumi.java.sql.handle.model.UpdateSqlEntity;
+import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
+import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
+import cn.katoumegumi.java.sql.mapper.model.FieldJoinClass;
+import cn.katoumegumi.java.sql.model.component.*;
+import cn.katoumegumi.java.sql.model.condition.*;
+import cn.katoumegumi.java.sql.model.result.DeleteModel;
+import cn.katoumegumi.java.sql.model.result.SelectModel;
+import cn.katoumegumi.java.sql.model.result.TableModel;
+import cn.katoumegumi.java.sql.model.result.UpdateModel;
+import cn.katoumegumi.java.sql.resultSet.WsResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -42,16 +56,6 @@ public class SQLModelUtils {
 
 
     /**
-     * 已经使用过的表关联关系
-     */
-    private final Set<TableRelation> usedTableRelation = new HashSet<>();
-
-    /**
-     * 记录where所需要的值
-     */
-    private final List<SqlParameter> baseWhereValueList = new ArrayList<>();
-
-    /**
      * 表面和列名转换
      */
     private final TranslateNameUtils translateNameUtils;
@@ -70,7 +74,6 @@ public class SQLModelUtils {
     /**
      * 缓存的sqlEntity
      */
-    private SqlEntity cacheSqlEntity;
     private SelectModel cacheSelectModel;
 
     public SQLModelUtils(MySearchList mySearchList) {
@@ -232,18 +235,6 @@ public class SQLModelUtils {
                 validList.add(fieldColumnRelation);
                 valueList.add(new SqlParameter(o));
             }
-            /*Field field = fieldColumnRelation.getField();
-            try {
-                Object o = field.get(t);
-                if (o != null) {
-                    columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
-                    placeholderList.add(SqlCommonConstants.PLACEHOLDER);
-                    validList.add(fieldColumnRelation);
-                    valueList.add(new SqlParameter(o));
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }*/
         }
 
 
@@ -262,21 +253,6 @@ public class SQLModelUtils {
                 validList.add(fieldColumnRelation);
                 valueList.add(new SqlParameter(o));
             }
-
-            /*Field field = fieldColumnRelation.getField();
-            AbstractSqlInterceptor sqlInterceptor = insertSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
-            Object o;
-            if (sqlInterceptor != null && sqlInterceptor.useCondition(analysisClassRelation(mainClass))) {
-                o = sqlInterceptor.insertFill();
-            } else {
-                o = WsFieldUtils.getValue(t, field);
-            }
-            if (o != null) {
-                columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
-                placeholderList.add(SqlCommonConstants.PLACEHOLDER);
-                validList.add(fieldColumnRelation);
-                valueList.add(new SqlParameter(o));
-            }*/
         }
 
         String insertSql = SqlCommonConstants.INSERT_INTO + guardKeyword(fieldColumnRelationMapper.getTableName()) + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(columnNameList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS + SqlCommonConstants.VALUE + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(placeholderList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS;
@@ -314,16 +290,6 @@ public class SQLModelUtils {
             columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
             placeholderList.add(SqlCommonConstants.PLACEHOLDER);
             valueList.add(new SqlParameter(o));
-            /*Field field = fieldColumnRelation.getField();
-            try {
-                Object o = field.get(tList.get(0));
-                validField.add(fieldColumnRelation);
-                columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
-                placeholderList.add(SqlCommonConstants.PLACEHOLDER);
-                valueList.add(new SqlParameter(o));
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }*/
         }
         for (FieldColumnRelation fieldColumnRelation : fieldColumnRelationList) {
             BeanPropertyModel beanPropertyModel = fieldColumnRelation.getBeanProperty();
@@ -338,19 +304,6 @@ public class SQLModelUtils {
             columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
             placeholderList.add(SqlCommonConstants.PLACEHOLDER);
             valueList.add(new SqlParameter(o));
-            /*Field field = fieldColumnRelation.getField();
-
-            AbstractSqlInterceptor sqlInterceptor = insertSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
-            Object o;
-            if (sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper)) {
-                o = sqlInterceptor.insertFill();
-            } else {
-                o = WsFieldUtils.getValue(tList.get(0), field);
-            }
-            validField.add(fieldColumnRelation);
-            columnNameList.add(guardKeyword(fieldColumnRelation.getColumnName()));
-            placeholderList.add(SqlCommonConstants.PLACEHOLDER);
-            valueList.add(new SqlParameter(o));*/
         }
         String placeholderSql = SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(placeholderList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS;
         placeholderList = new ArrayList<>();
@@ -367,15 +320,6 @@ public class SQLModelUtils {
                     o = beanPropertyModel.getValue(tList.get(i));
                 }
                 valueList.add(new SqlParameter(o));
-                /*Field field = fieldColumnRelation.getField();
-                AbstractSqlInterceptor sqlInterceptor = insertSqlInterceptorMap.get(fieldColumnRelation.getFieldName());
-                Object o;
-                if (sqlInterceptor != null && sqlInterceptor.useCondition(fieldColumnRelationMapper)) {
-                    o = sqlInterceptor.insertFill();
-                } else {
-                    o = WsFieldUtils.getValue(tList.get(i), field);
-                }
-                valueList.add(new SqlParameter(o));*/
             }
             placeholderList.add(placeholderSql);
         }
@@ -456,7 +400,7 @@ public class SQLModelUtils {
             return oneLoopMargeMap2(resultSet);
         } else {
             List<Object> tList = new ArrayList<>();
-            TableColumn tableColumn = this.cacheSelectModel == null ? cacheSqlEntity.getColumnList().get(0) : this.cacheSelectModel.getSelect().get(0);
+            TableColumn tableColumn = this.cacheSelectModel.getSelect().get(0);
             try {
                 while (resultSet.next()) {
                     Object o = WsBeanUtils.objectToT(resultSet.getObject(1), tableColumn.getBeanProperty().getPropertyClass());
@@ -465,7 +409,7 @@ public class SQLModelUtils {
                     }
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
             return (List<T>) tList;
         }

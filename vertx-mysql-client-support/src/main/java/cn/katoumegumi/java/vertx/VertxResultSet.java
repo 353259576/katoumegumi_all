@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.vertx;
 
-import cn.katoumegumi.java.sql.entity.WsResultSet;
+import cn.katoumegumi.java.sql.resultSet.WsResultSet;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.sql.ResultSet;
 

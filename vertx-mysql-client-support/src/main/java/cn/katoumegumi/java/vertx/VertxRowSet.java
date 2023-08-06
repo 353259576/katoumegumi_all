@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.vertx;
 
-import cn.katoumegumi.java.sql.entity.WsResultSet;
+import cn.katoumegumi.java.sql.resultSet.WsResultSet;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.RowSet;
@@ -27,7 +27,7 @@ public class VertxRowSet implements WsResultSet {
      * @return
      */
     @Override
-    public int getColumnCount() throws SQLException {
+    public int getColumnCount() {
         return columnNames.size();
     }
 
@@ -38,7 +38,7 @@ public class VertxRowSet implements WsResultSet {
      * @return
      */
     @Override
-    public String getColumnLabel(int columnIndex) throws SQLException {
+    public String getColumnLabel(int columnIndex) {
         return columnNames.get(columnIndex - 1);
     }
 
@@ -48,7 +48,7 @@ public class VertxRowSet implements WsResultSet {
      * @return
      */
     @Override
-    public boolean next() throws SQLException {
+    public boolean next() {
         if(rowRowIterator.hasNext()){
             cacheRow = rowRowIterator.next();
             return true;
@@ -64,7 +64,7 @@ public class VertxRowSet implements WsResultSet {
      * @return
      */
     @Override
-    public Object getObject(int index) throws SQLException {
+    public Object getObject(int index) {
         return cacheRow.getValue(index - 1);
     }
 }

@@ -3,8 +3,8 @@ package cn.katoumegumi.java.sql;
 import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.TableJoinType;
-import cn.katoumegumi.java.sql.entity.SqlEquation;
-import cn.katoumegumi.java.sql.entity.SqlLimit;
+import cn.katoumegumi.java.sql.model.component.SqlEquation;
+import cn.katoumegumi.java.sql.model.component.SqlLimit;
 
 import java.util.ArrayList;
 import java.util.Arrays;

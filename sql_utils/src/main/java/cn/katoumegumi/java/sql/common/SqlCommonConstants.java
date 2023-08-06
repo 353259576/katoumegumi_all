@@ -1,7 +1,5 @@
 package cn.katoumegumi.java.sql.common;
 
-import cn.katoumegumi.java.sql.entity.NullValue;
-
 public interface SqlCommonConstants {
 
     String PLACEHOLDER = "?";

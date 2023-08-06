@@ -2,7 +2,9 @@ package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
-import cn.katoumegumi.java.sql.entity.BaseTableColumn;
+import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
+import cn.katoumegumi.java.sql.model.component.BaseTableColumn;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;

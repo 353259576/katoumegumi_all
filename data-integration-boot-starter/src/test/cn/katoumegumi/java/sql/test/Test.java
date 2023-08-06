@@ -2,34 +2,19 @@ package cn.katoumegumi.java.sql.test;
 
 import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.common.model.BeanModel;
-import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.*;
-import cn.katoumegumi.java.sql.entity.SqlEquation;
+import cn.katoumegumi.java.sql.model.component.SqlEquation;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
-import cn.katoumegumi.java.sql.model.SelectModel;
-import cn.katoumegumi.java.sql.model.UpdateModel;
-import cn.katoumegumi.java.sql.test.model.LUser;
+import cn.katoumegumi.java.sql.handle.model.DeleteSqlEntity;
+import cn.katoumegumi.java.sql.handle.model.SelectSqlEntity;
+import cn.katoumegumi.java.sql.handle.model.UpdateSqlEntity;
+import cn.katoumegumi.java.sql.model.result.SelectModel;
+import cn.katoumegumi.java.sql.model.result.UpdateModel;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
-import cn.katoumegumi.java.sql.test.model.UserDetailsRemake;
-import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
 import com.google.gson.Gson;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class Test {
@@ -130,6 +115,7 @@ public class Test {
         BeanModel beanModel = WsFieldUtils.createBeanModel(User.class);
         System.out.println(beanModel.toString());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(MySearchList.create(User.class)
+                .setAlias("u")
                 .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
                 .gtep("u",User::getName,"u",User::getName));
         SelectModel selectModel = sqlModelUtils.transferToSelectModel();

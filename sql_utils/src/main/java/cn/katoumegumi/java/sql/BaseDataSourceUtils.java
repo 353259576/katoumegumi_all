@@ -1,9 +1,15 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.common.*;
-import cn.katoumegumi.java.sql.entity.JdkResultSet;
-import cn.katoumegumi.java.sql.entity.SqlParameter;
+import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsListUtils;
+import cn.katoumegumi.java.common.WsStreamUtils;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
+import cn.katoumegumi.java.sql.handle.model.InsertSqlEntity;
+import cn.katoumegumi.java.sql.handle.model.SelectSqlEntity;
+import cn.katoumegumi.java.sql.handle.model.SqlParameter;
+import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
+import cn.katoumegumi.java.sql.resultSet.strategys.JdkResultSet;
 
 import javax.sql.DataSource;
 import java.sql.*;

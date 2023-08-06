@@ -2,18 +2,19 @@ package cn.katoumegumi.java.sql.handle;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.sql.DeleteSqlEntity;
 import cn.katoumegumi.java.sql.SQLModelUtils;
-import cn.katoumegumi.java.sql.SelectSqlEntity;
-import cn.katoumegumi.java.sql.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.ValueTypeConstants;
-import cn.katoumegumi.java.sql.entity.BaseTableColumn;
-import cn.katoumegumi.java.sql.entity.DynamicTableColumn;
-import cn.katoumegumi.java.sql.entity.SqlEquation;
-import cn.katoumegumi.java.sql.entity.SqlParameter;
-import cn.katoumegumi.java.sql.model.*;
+import cn.katoumegumi.java.sql.handle.model.DeleteSqlEntity;
+import cn.katoumegumi.java.sql.handle.model.SelectSqlEntity;
+import cn.katoumegumi.java.sql.handle.model.SqlParameter;
+import cn.katoumegumi.java.sql.handle.model.UpdateSqlEntity;
+import cn.katoumegumi.java.sql.model.component.*;
+import cn.katoumegumi.java.sql.model.condition.*;
+import cn.katoumegumi.java.sql.model.result.DeleteModel;
+import cn.katoumegumi.java.sql.model.result.SelectModel;
+import cn.katoumegumi.java.sql.model.result.UpdateModel;
 
 import java.util.ArrayList;
 import java.util.Collection;

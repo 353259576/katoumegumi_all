@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.sql;
 
+import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
+
 /**
  * sql拦截器
  *
