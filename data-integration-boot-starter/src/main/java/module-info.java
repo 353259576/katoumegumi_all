@@ -1,7 +1,7 @@
 module cn.katoumegumi.java.data.integration.boot.starter {
     requires java.sql;
     requires druid;
-    requires seata.all;
+    //requires seata.all;
     requires spring.aop;
     requires spring.beans;
     //requires spring.boot;

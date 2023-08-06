@@ -47,8 +47,8 @@
         <netty.version>4.1.90.Final</netty.version>
         <zxing.version>3.4.1</zxing.version>
         <!--<reactor.version>3.4.10</reactor.version>-->
-        <hibernate.version>5.5.7.Final</hibernate.version>
-        <seata.version>1.5.2</seata.version>
+        <!--<hibernate.version>5.5.7.Final</hibernate.version>-->
+        <!--<seata.version>1.5.2</seata.version>-->
         <mybatis.plus.version>3.5.3.1</mybatis.plus.version>
         <poi.version>5.2.1</poi.version>
         <lang3.vaersion>3.12.0</lang3.vaersion>
@@ -58,6 +58,7 @@
         <freemarker.version>2.3.30</freemarker.version>
         <vertx.version>4.4.1</vertx.version>
         <persistence-api.version>2.2</persistence-api.version>
+        <druid.version>1.2.18</druid.version>
     </properties>
 
 
@@ -114,12 +115,12 @@
             </dependency>
 
 
-            <dependency>
+            <!--<dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-all</artifactId>
                 <version>${seata.version}</version>
             </dependency>
-
+-->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
@@ -173,7 +174,15 @@
                 <artifactId>jakarta.persistence-api</artifactId>
                 <version>3.1.0</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
         </dependencies>
+
+
 
     </dependencyManagement>
 

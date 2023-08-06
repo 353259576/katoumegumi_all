@@ -37,10 +37,10 @@
         </dependency>
 
 
-        <dependency>
+        <!--<dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-all</artifactId>
-        </dependency>
+        </dependency>-->
 
 
         <dependency>
@@ -72,6 +72,11 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
         </dependency>
     </dependencies>
 

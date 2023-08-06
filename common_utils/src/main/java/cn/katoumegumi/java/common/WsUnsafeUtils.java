@@ -8,6 +8,9 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
+/**
+ * 反射获取unsafe方法
+ */
 public class WsUnsafeUtils {
 
     private static final Logger log = Logger.getLogger(WsUnsafeUtils.class.getName());
