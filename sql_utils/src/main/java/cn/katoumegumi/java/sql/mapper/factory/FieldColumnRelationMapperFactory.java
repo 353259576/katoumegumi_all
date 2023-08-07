@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.mapper.factory;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.BeanModel;
@@ -231,9 +231,9 @@ public class FieldColumnRelationMapperFactory {
         }
         FieldColumnRelationMapper fieldColumnRelationMapper = getTableName(startIndex, clazz);
 
-        //Field[] fields = WsFieldUtils.getFieldAll(clazz);
+        //Field[] fields = WsReflectUtils.getFieldAll(clazz);
 
-        BeanModel beanModel = WsFieldUtils.createBeanModel(clazz);
+        BeanModel beanModel = WsReflectUtils.createBeanModel(clazz);
 
         List<BeanPropertyModel> baseTypeFieldList = new ArrayList<>();
         List<BeanPropertyModel> joinClassFieldList = new ArrayList<>();
@@ -269,7 +269,7 @@ public class FieldColumnRelationMapperFactory {
         if (WsListUtils.isNotEmpty(joinClassFieldList)) {
             for (BeanPropertyModel propertyModel : joinClassFieldList) {
                 Class<?> joinClass;
-                if (WsFieldUtils.isArrayType(propertyModel.getPropertyClass())){
+                if (WsReflectUtils.isArrayType(propertyModel.getPropertyClass())){
                     joinClass = propertyModel.getGenericClass();
                 }else {
                     joinClass = propertyModel.getPropertyClass();

@@ -24,7 +24,7 @@ public class Test {
         /*User user = new User();
 
 
-        Map<String,Field> fieldMap = WsFieldUtils.getFieldMap(User.class);
+        Map<String,Field> fieldMap = WsReflectUtils.getFieldMap(User.class);
 
         Method[] methods = User.class.getMethods();
         Map<String, Object[]> beanPropertyMap = new LinkedHashMap<>();
@@ -112,7 +112,7 @@ public class Test {
         }*/
         //test2();
 
-        BeanModel beanModel = WsFieldUtils.createBeanModel(User.class);
+        BeanModel beanModel = WsReflectUtils.createBeanModel(User.class);
         System.out.println(beanModel.toString());
         SQLModelUtils sqlModelUtils = new SQLModelUtils(MySearchList.create(User.class)
                 .setAlias("u")

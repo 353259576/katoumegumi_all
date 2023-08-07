@@ -1,7 +1,6 @@
 package cn.katoumegumi.java.common.model;
 
-import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
@@ -49,7 +48,7 @@ public class BeanPropertyModel {
             propertyType = this.getMethod.getGenericReturnType();
         }
         if (propertyType != null){
-            genericClass = WsFieldUtils.getGenericsType(propertyType);
+            genericClass = WsReflectUtils.getGenericsType(propertyType);
         }else {
             genericClass = null;
         }
@@ -126,24 +125,24 @@ public class BeanPropertyModel {
         }else if (this.field != null){
             if (this.propertyClass.isPrimitive()){
                 if (this.propertyClass == int.class) {
-                    return WsFieldUtils.setValue(o,((Integer)value).intValue(),field);
+                    return WsReflectUtils.setValue(o,((Integer)value).intValue(),field);
                 } else if (this.propertyClass == long.class) {
-                    return WsFieldUtils.setValue(o,((Long)value).longValue(),field);
+                    return WsReflectUtils.setValue(o,((Long)value).longValue(),field);
                 } else if (this.propertyClass == double.class) {
-                    return WsFieldUtils.setValue(o,((Double)value).doubleValue(),field);
+                    return WsReflectUtils.setValue(o,((Double)value).doubleValue(),field);
                 } else if (this.propertyClass == float.class) {
-                    return WsFieldUtils.setValue(o,((Float)value).floatValue(),field);
+                    return WsReflectUtils.setValue(o,((Float)value).floatValue(),field);
                 } else if (this.propertyClass == boolean.class) {
-                    return WsFieldUtils.setValue(o,((Boolean)value).booleanValue(),field);
+                    return WsReflectUtils.setValue(o,((Boolean)value).booleanValue(),field);
                 } else if (this.propertyClass == byte.class) {
-                    return WsFieldUtils.setValue(o,((Byte)value).byteValue(),field);
+                    return WsReflectUtils.setValue(o,((Byte)value).byteValue(),field);
                 } else if (this.propertyClass == short.class) {
-                    return WsFieldUtils.setValue(o,((Short)value).shortValue(),field);
+                    return WsReflectUtils.setValue(o,((Short)value).shortValue(),field);
                 } else if (this.propertyClass == char.class) {
-                    return WsFieldUtils.setValue(o,((Character)value).charValue(),field);
+                    return WsReflectUtils.setValue(o,((Character)value).charValue(),field);
                 }
             }else {
-                return WsFieldUtils.setValue(o,value,this.field);
+                return WsReflectUtils.setValue(o,value,this.field);
             }
         }
         return false;
@@ -157,7 +156,7 @@ public class BeanPropertyModel {
                 throw new RuntimeException(e);
             }
         }else if (this.field != null){
-            return (T)WsFieldUtils.getValue(o,this.field);
+            return (T) WsReflectUtils.getValue(o,this.field);
         }
         return null;
     }

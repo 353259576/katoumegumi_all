@@ -47,9 +47,9 @@ public class ExcelGenerator<T> {
 
     private final Map<CTWorksheet,Integer> mergeCellCountMap = new HashMap<>();
 
-    private static final Field SXSSFSHEET_SH_FIELD = WsFieldUtils.getFieldByName(SXSSFSheet.class,"_sh");
+    private static final Field SXSSFSHEET_SH_FIELD = WsReflectUtils.getFieldByName(SXSSFSheet.class,"_sh");
 
-    private static final Field XSSFSHEET_WORKSHEET_FIELD = WsFieldUtils.getFieldByName(XSSFSheet.class,"worksheet");
+    private static final Field XSSFSHEET_WORKSHEET_FIELD = WsReflectUtils.getFieldByName(XSSFSheet.class,"worksheet");
 
     public static <T> ExcelGenerator<T> create(List<T> tList) {
         ExcelGenerator<T> excelGenerator = new ExcelGenerator<>();
@@ -251,14 +251,14 @@ public class ExcelGenerator<T> {
         //sheet.addMergedRegionUnsafe()
         XSSFSheet xssfSheet = null;
         if (sheet instanceof SXSSFSheet){
-            xssfSheet = (XSSFSheet) WsFieldUtils.getValue(sheet,SXSSFSHEET_SH_FIELD);
+            xssfSheet = (XSSFSheet) WsReflectUtils.getValue(sheet,SXSSFSHEET_SH_FIELD);
         }else if(sheet instanceof XSSFSheet){
             xssfSheet = (XSSFSheet) sheet;
         }
         if(xssfSheet == null){
             throw new RuntimeException("xssfSheet获取失败");
         }
-        CTWorksheet worksheet = (CTWorksheet) WsFieldUtils.getValue(xssfSheet,XSSFSHEET_WORKSHEET_FIELD);
+        CTWorksheet worksheet = (CTWorksheet) WsReflectUtils.getValue(xssfSheet,XSSFSHEET_WORKSHEET_FIELD);
         Integer count = mergeCellCountMap.getOrDefault(worksheet,0);
         CTMergeCells ctMergeCells = count > 0 ? worksheet.getMergeCells() : worksheet.addNewMergeCells();
         CTMergeCell ctMergeCell = ctMergeCells.addNewMergeCell();

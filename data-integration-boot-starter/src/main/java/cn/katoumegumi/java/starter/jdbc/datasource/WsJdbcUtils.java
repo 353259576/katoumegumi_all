@@ -102,15 +102,15 @@ public class WsJdbcUtils {
                 }
                 if (o instanceof String) {
                     statement.setString(i + 1, WsStringUtils.anyToString(o));
-                } else if (o instanceof Integer || WsFieldUtils.classCompare(int.class, o.getClass())) {
+                } else if (o instanceof Integer || WsReflectUtils.classCompare(int.class, o.getClass())) {
                     statement.setInt(i + 1, WsBeanUtils.objectToT(o, int.class));
-                } else if (o instanceof Long || WsFieldUtils.classCompare(o.getClass(), long.class)) {
+                } else if (o instanceof Long || WsReflectUtils.classCompare(o.getClass(), long.class)) {
                     statement.setLong(i + 1, WsBeanUtils.objectToT(o, long.class));
-                } else if (o instanceof Short || WsFieldUtils.classCompare(o.getClass(), short.class)) {
+                } else if (o instanceof Short || WsReflectUtils.classCompare(o.getClass(), short.class)) {
                     statement.setShort(i + 1, WsBeanUtils.objectToT(o, short.class));
-                } else if (o instanceof Float || WsFieldUtils.classCompare(o.getClass(), Float.class)) {
+                } else if (o instanceof Float || WsReflectUtils.classCompare(o.getClass(), Float.class)) {
                     statement.setFloat(i + 1, WsBeanUtils.objectToT(o, float.class));
-                } else if (o instanceof Double || WsFieldUtils.classCompare(o.getClass(), double.class)) {
+                } else if (o instanceof Double || WsReflectUtils.classCompare(o.getClass(), double.class)) {
                     statement.setDouble(i + 1, WsBeanUtils.objectToT(o, double.class));
                 } else if (o instanceof BigDecimal) {
                     statement.setBigDecimal(i + 1, WsBeanUtils.objectToT(o, BigDecimal.class));

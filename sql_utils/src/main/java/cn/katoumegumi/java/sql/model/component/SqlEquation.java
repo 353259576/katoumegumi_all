@@ -2,7 +2,7 @@ package cn.katoumegumi.java.sql.model.component;
 
 import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.common.NullValue;
@@ -56,7 +56,7 @@ public class SqlEquation {
 
     public <T> SqlEquation column(SFunction<T, ?> columnFunction) {
         typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
-        valueList.add(WsFieldUtils.getFieldName(columnFunction));
+        valueList.add(WsReflectUtils.getFieldName(columnFunction));
         return this;
     }
 
@@ -65,7 +65,7 @@ public class SqlEquation {
             return column(columnFunction);
         }
         typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
-        valueList.add(tableName + "." + WsFieldUtils.getFieldName(columnFunction));
+        valueList.add(tableName + "." + WsReflectUtils.getFieldName(columnFunction));
         return this;
     }
 

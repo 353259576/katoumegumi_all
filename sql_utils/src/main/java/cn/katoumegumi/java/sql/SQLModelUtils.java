@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
@@ -584,7 +584,7 @@ public class SQLModelUtils {
                         list.add(subValue);
                         cacheSubValue[i] = list;
                         fieldJoinClass.getBeanProperty().setValue(value,list);
-                        //WsFieldUtils.setValue(value, list, fieldJoinClass.getField());
+                        //WsReflectUtils.setValue(value, list, fieldJoinClass.getField());
                     }
                 } else {
                     if (subValue == null) {
@@ -592,7 +592,7 @@ public class SQLModelUtils {
                     } else {
                         cacheSubValue[i] = subValue;
                         fieldJoinClass.getBeanProperty().setValue(value,subValue);
-                        //WsFieldUtils.setValue(value, subValue, fieldJoinClass.getField());
+                        //WsReflectUtils.setValue(value, subValue, fieldJoinClass.getField());
                     }
                 }
             } else {
@@ -1021,7 +1021,7 @@ public class SQLModelUtils {
                     MultiExpressionCondition multiExpressionCondition = new MultiExpressionCondition(5);
                     multiExpressionCondition.add(baseTableColumn)
                             .add(SqlEquation.Symbol.EQUAL);
-                    if (WsFieldUtils.classCompare(baseTableColumn.getBeanProperty().getPropertyClass(), Number.class)) {
+                    if (WsReflectUtils.classCompare(baseTableColumn.getBeanProperty().getPropertyClass(), Number.class)) {
                         multiExpressionCondition.add(new SqlFunctionCondition("IFNULL", baseTableColumn, 0));
                     } else {
                         multiExpressionCondition.add(baseTableColumn);

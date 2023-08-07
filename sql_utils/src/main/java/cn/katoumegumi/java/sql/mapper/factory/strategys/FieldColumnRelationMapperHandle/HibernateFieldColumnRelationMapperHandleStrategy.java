@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandle;
 
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.common.TableJoinType;
@@ -90,7 +90,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
             referenced = joinMapper.getIds().get(0).getColumnName();
         }
         OneToMany oneToMany = beanProperty.getAnnotation(OneToMany.class);
-        boolean isArray = WsFieldUtils.isArrayType(beanProperty.getPropertyClass());
+        boolean isArray = WsReflectUtils.isArrayType(beanProperty.getPropertyClass());
         FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinMapper.getClazz(), beanProperty);
         fieldJoinClass.setNickName(beanProperty.getPropertyName());
         fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
@@ -115,7 +115,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //            tableName = table.name();
 //        }
 //        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz);
-//        Field[] fields = WsFieldUtils.getFieldAll(clazz);
+//        Field[] fields = WsReflectUtils.getFieldAll(clazz);
 //
 //        List<Field> baseTypeFieldList = new ArrayList<>();
 //        List<Field> joinClassFieldList = new ArrayList<>();
@@ -193,8 +193,8 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //    }
 //
 //    public FieldJoinClass createFieldJoinClass(FieldColumnRelationMapper fieldColumnRelationMapper, Field field) {
-//        boolean isArray = WsFieldUtils.isArrayType(field);
-//        Class<?> joinClass = WsFieldUtils.getClassTypeof(field);
+//        boolean isArray = WsReflectUtils.isArrayType(field);
+//        Class<?> joinClass = WsReflectUtils.getClassTypeof(field);
 //        FieldColumnRelationMapper mapper = FieldColumnRelationMapperFactory.analysisClassRelation(joinClass, true);
 //        FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
 //        fieldJoinClass.setNickName(field.getName());

@@ -13,7 +13,10 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class WsFieldUtils {
+/**
+ * 反射工具类
+ */
+public class WsReflectUtils {
 
     private static final String METHOD_NAME_GET = "get";
 
@@ -27,7 +30,7 @@ public class WsFieldUtils {
 
     private static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
 
-    private static final Field WRITE_REPLACE_METHOD_FIELD = WsFieldUtils.getFieldByName(ObjectStreamClass.class, "writeReplaceMethod");
+    private static final Field WRITE_REPLACE_METHOD_FIELD = WsReflectUtils.getFieldByName(ObjectStreamClass.class, "writeReplaceMethod");
 
     public static Field getFieldForObject(String name, Object object) {
         Class<?> clazz = object.getClass();
@@ -232,7 +235,7 @@ public class WsFieldUtils {
             for (; ; ) {
                 Class<?> repCl;
                 desc = ObjectStreamClass.lookup(cl);
-                Method method = (Method) WsFieldUtils.getValue(desc, WRITE_REPLACE_METHOD_FIELD);
+                Method method = (Method) WsReflectUtils.getValue(desc, WRITE_REPLACE_METHOD_FIELD);
                 if (method == null ||
                         (obj = method.invoke(obj, (Object[]) null)) == null ||
                         obj instanceof SerializedLambda ||
@@ -318,7 +321,7 @@ public class WsFieldUtils {
      */
     public static <T> Class<?> getClassTypeof(Field field) {
         Class<?> tClass = field.getType();
-        if (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class)) {
+        if (tClass.isArray() || WsReflectUtils.classCompare(tClass, Collection.class)) {
             return getGenericsType(field.getGenericType());
         } else {
             return tClass;
@@ -407,7 +410,7 @@ public class WsFieldUtils {
     }
 
     public static boolean isArrayType(Class<?> tClass) {
-        return (tClass.isArray() || WsFieldUtils.classCompare(tClass, Collection.class));
+        return (tClass.isArray() || WsReflectUtils.classCompare(tClass, Collection.class));
     }
 
     /**
@@ -661,7 +664,7 @@ public class WsFieldUtils {
      */
     public static BeanModel createBeanModel(Class<?> bClass){
 
-        Map<String,Field> fieldMap = WsFieldUtils.getFieldMap(bClass);
+        Map<String,Field> fieldMap = WsReflectUtils.getFieldMap(bClass);
 
         Method[] methods = bClass.getMethods();
         Map<String, Object[]> beanPropertyMap = new LinkedHashMap<>();

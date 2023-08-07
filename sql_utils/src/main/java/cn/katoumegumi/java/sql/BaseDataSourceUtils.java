@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStreamUtils;
 import cn.katoumegumi.java.sql.handle.MysqlHandle;
@@ -74,7 +74,7 @@ public class BaseDataSourceUtils {
                 int count = resultSet.getMetaData().getColumnCount();
                 if (resultSet.next()) {
                     for (int i = 0; i < count && i < idList.size(); i++) {
-                        WsFieldUtils.setValue(t, WsBeanUtils.objectToT(resultSet.getObject(i + 1), idList.get(i).getBeanProperty().getPropertyClass()), idList.get(i).getBeanProperty().getField());
+                        WsReflectUtils.setValue(t, WsBeanUtils.objectToT(resultSet.getObject(i + 1), idList.get(i).getBeanProperty().getPropertyClass()), idList.get(i).getBeanProperty().getField());
                     }
                 }
             }

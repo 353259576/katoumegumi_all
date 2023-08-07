@@ -74,11 +74,11 @@ public class MySearchList {
      * @return
      */
     private static String getColumnName(String tableName, SupplierFunc<?> columnName) {
-        return getColumnName(tableName, WsFieldUtils.getFieldName(columnName));
+        return getColumnName(tableName, WsReflectUtils.getFieldName(columnName));
     }
 
     private static String getColumnName(String tableName, SFunction<?, ?> columnName) {
-        return getColumnName(tableName, WsFieldUtils.getFieldName(columnName));
+        return getColumnName(tableName, WsReflectUtils.getFieldName(columnName));
     }
 
     private static String getColumnName(String tableName, String columnName) {
@@ -174,7 +174,7 @@ public class MySearchList {
 
     public MySearchList add(String fieldName, SqlOperator operator, Object value) {
         if (value instanceof SupplierFunc) {
-            value = WsFieldUtils.getFieldName((SupplierFunc<?>) value);
+            value = WsReflectUtils.getFieldName((SupplierFunc<?>) value);
         }
         checkValue(fieldName, operator, value);
         if (operator.equals(SqlOperator.SORT)) {
@@ -1372,15 +1372,15 @@ public class MySearchList {
 
     public <T> MySearchList singleColumnName(String tableName, SFunction<T, ?> fieldName) {
         if (WsStringUtils.isBlank(tableName)) {
-            this.singleColumnName(WsFieldUtils.getFieldName(fieldName));
+            this.singleColumnName(WsReflectUtils.getFieldName(fieldName));
         } else {
-            this.singleColumnName(tableName + '.' + WsFieldUtils.getFieldName(fieldName));
+            this.singleColumnName(tableName + '.' + WsReflectUtils.getFieldName(fieldName));
         }
         return this;
     }
 
     public <T> MySearchList singleColumnName(SFunction<T, ?> fieldName) {
-        this.singleColumnName(WsFieldUtils.getFieldName(fieldName));
+        this.singleColumnName(WsReflectUtils.getFieldName(fieldName));
         return this;
     }
 

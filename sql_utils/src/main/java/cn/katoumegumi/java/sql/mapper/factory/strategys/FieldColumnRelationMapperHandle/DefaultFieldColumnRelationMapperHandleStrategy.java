@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandle;
 
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
@@ -59,7 +59,7 @@ public class DefaultFieldColumnRelationMapperHandleStrategy implements FieldColu
 
     @Override
     public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
-        boolean isArray = WsFieldUtils.isArrayType(beanProperty.getPropertyClass());
+        boolean isArray = WsReflectUtils.isArrayType(beanProperty.getPropertyClass());
         FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinMapper.getClazz(), beanProperty);
         fieldJoinClass.setNickName(beanProperty.getPropertyName());
         fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);

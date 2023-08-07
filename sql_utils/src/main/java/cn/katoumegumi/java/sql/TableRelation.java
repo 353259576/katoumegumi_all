@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.SFunction;
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 
@@ -111,15 +111,15 @@ public class TableRelation {
     }
 
     public <T> TableRelation setJoinTableNickName(SFunction<T, ?> joinTableNickName) {
-        this.joinTableNickName = WsFieldUtils.getFieldName(joinTableNickName);
+        this.joinTableNickName = WsReflectUtils.getFieldName(joinTableNickName);
         return this;
     }
 
     public <T> TableRelation setJoinTableNickName(String parentTableNickName, SFunction<T, ?> joinTableNickName) {
         if (WsStringUtils.isBlank(parentTableNickName)) {
-            this.joinTableNickName = WsFieldUtils.getFieldName(joinTableNickName);
+            this.joinTableNickName = WsReflectUtils.getFieldName(joinTableNickName);
         } else {
-            this.joinTableNickName = parentTableNickName + '.' + WsFieldUtils.getFieldName(joinTableNickName);
+            this.joinTableNickName = parentTableNickName + '.' + WsReflectUtils.getFieldName(joinTableNickName);
         }
         return this;
     }
@@ -141,8 +141,8 @@ public class TableRelation {
 
 
     public <T, R> TableRelation on(SFunction<T, ?> tableColumn, SFunction<R, ?> joinTableColumn) {
-        this.tableColumn = WsFieldUtils.getFieldName(tableColumn);
-        this.joinTableColumn = WsFieldUtils.getFieldName(joinTableColumn);
+        this.tableColumn = WsReflectUtils.getFieldName(tableColumn);
+        this.joinTableColumn = WsReflectUtils.getFieldName(joinTableColumn);
         return this;
     }
 

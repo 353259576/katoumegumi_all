@@ -1,15 +1,10 @@
 package cn.katoumegumi.java.common;
 
 import cn.katoumegumi.java.common.convert.ConvertUtils;
-import cn.katoumegumi.java.common.model.KeyValue;
 
 import java.io.*;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -43,8 +38,8 @@ public class WsBeanUtils {
         if (isBaseType(o.getClass())) {
             return objectToT(o, tClass);
         }
-        Field[] sourceFields = WsFieldUtils.getFieldAll(o.getClass());
-        Field[] targetFields = WsFieldUtils.getFieldAll(tClass);
+        Field[] sourceFields = WsReflectUtils.getFieldAll(o.getClass());
+        Field[] targetFields = WsReflectUtils.getFieldAll(tClass);
         if (WsListUtils.isEmpty(sourceFields) || WsListUtils.isEmpty(targetFields)) {
             return null;
         }
@@ -70,21 +65,21 @@ public class WsBeanUtils {
             }
             sourceField = sourceFields[i];
             if (isBaseType(sourceField.getType()) && isBaseType(targetField.getType())) {
-                sourceValue = WsFieldUtils.getValue(o, sourceField);
+                sourceValue = WsReflectUtils.getValue(o, sourceField);
                 if (sourceValue != null) {
-                    WsFieldUtils.setValue(
+                    WsReflectUtils.setValue(
                             target, WsBeanUtils.objectToT(sourceValue, targetField.getType()), targetField);
                 }
             } else if (isArray(sourceField.getType()) && isArray(targetField.getType())) {
-                Object value = WsFieldUtils.getValue(o, sourceField);
+                Object value = WsReflectUtils.getValue(o, sourceField);
                 if (value != null) {
                     if (targetField.getType().isArray()) {
                         Object setValue = convertToArray(value, targetField.getType().getComponentType());
                         if (setValue != null) {
-                            WsFieldUtils.setValue(target, setValue, targetField);
+                            WsReflectUtils.setValue(target, setValue, targetField);
                         }
                     } else {
-                        Class<?> targetClass = WsFieldUtils.getClassTypeof(targetField);
+                        Class<?> targetClass = WsReflectUtils.getClassTypeof(targetField);
                         Object setValue;
                         Object collection = null;
                         if (targetField.getType().equals(List.class)
@@ -99,7 +94,7 @@ public class WsBeanUtils {
                         }
                         setValue = convertToList(value, (Collection) collection, targetClass);
                         if (setValue != null) {
-                            WsFieldUtils.setValue(target, setValue, targetField);
+                            WsReflectUtils.setValue(target, setValue, targetField);
                         }
                     }
                 }
@@ -107,10 +102,10 @@ public class WsBeanUtils {
                 continue;
             } else if (isArray(targetField.getType())) {
                 continue;
-            } else if (WsFieldUtils.classCompare(sourceField.getType(), targetField.getType())) {
-                sourceValue = WsFieldUtils.getValue(o, sourceField);
+            } else if (WsReflectUtils.classCompare(sourceField.getType(), targetField.getType())) {
+                sourceValue = WsReflectUtils.getValue(o, sourceField);
                 if (sourceValue != null) {
-                    WsFieldUtils.setValue(target, objectToT(sourceValue, targetField.getType()), targetField);
+                    WsReflectUtils.setValue(target, objectToT(sourceValue, targetField.getType()), targetField);
                 }
             } else {
                 continue;
@@ -313,7 +308,7 @@ public class WsBeanUtils {
     }
 
     public static boolean isArray(Class<?> clazz) {
-        return clazz.isArray() || WsFieldUtils.classCompare(clazz, Collection.class);
+        return clazz.isArray() || WsReflectUtils.classCompare(clazz, Collection.class);
     }
 
     public static <T> T createObject(Class<T> clazz) {
@@ -1057,11 +1052,11 @@ public class WsBeanUtils {
         if (t instanceof Map) {
             return (Map<Object, Object>) t;
         }
-        Field[] fields = WsFieldUtils.getFieldAll(t.getClass());
+        Field[] fields = WsReflectUtils.getFieldAll(t.getClass());
 
         Map<Object, Object> map = new HashMap<>();
         for (Field field : fields) {
-            Object value = WsFieldUtils.getValue(t, field);
+            Object value = WsReflectUtils.getValue(t, field);
             if (value != null) {
                 String name = field.getName();
 
@@ -1135,11 +1130,11 @@ public class WsBeanUtils {
             throw new RuntimeException("格式错误");
         }
 
-        Field[] fields = WsFieldUtils.getFieldAll(o.getClass());
+        Field[] fields = WsReflectUtils.getFieldAll(o.getClass());
 
         Map<Object, Object> map = new HashMap<>();
         for (Field field : fields) {
-            Object value = WsFieldUtils.getValue(o, field);
+            Object value = WsReflectUtils.getValue(o, field);
             if (value != null) {
                 String name = field.getName();
                 if (WsBeanUtils.isBaseType(value.getClass())) {

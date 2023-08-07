@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.model.component;
 
 import cn.katoumegumi.java.common.SFunction;
-import cn.katoumegumi.java.common.WsFieldUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 
@@ -17,9 +17,9 @@ public class SqlFunction {
 
     private static final BiFunction<String, SFunction<?, ?>, String> columnNameBiFunction = ((s, sFunction) -> {
         if (WsStringUtils.isBlank(s)) {
-            return WsFieldUtils.getFieldName(sFunction);
+            return WsReflectUtils.getFieldName(sFunction);
         } else {
-            return s + '.' + WsFieldUtils.getFieldName(sFunction);
+            return s + '.' + WsReflectUtils.getFieldName(sFunction);
         }
     });
 
