@@ -40,7 +40,7 @@ public class WsBeanUtils {
         }
         Field[] sourceFields = WsReflectUtils.getFieldAll(o.getClass());
         Field[] targetFields = WsReflectUtils.getFieldAll(tClass);
-        if (WsListUtils.isEmpty(sourceFields) || WsListUtils.isEmpty(targetFields)) {
+        if (WsCollectionUtils.isEmpty(sourceFields) || WsCollectionUtils.isEmpty(targetFields)) {
             return null;
         }
         Map<String, Field> targetNameAndFieldMap = new HashMap<>(targetFields.length);

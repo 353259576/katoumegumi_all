@@ -3,8 +3,8 @@ package cn.katoumegumi.java.sql.test;
 import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.sql.*;
+import cn.katoumegumi.java.sql.handle.MysqlHandler;
 import cn.katoumegumi.java.sql.model.component.SqlEquation;
-import cn.katoumegumi.java.sql.handle.MysqlHandle;
 import cn.katoumegumi.java.sql.handle.model.DeleteSqlEntity;
 import cn.katoumegumi.java.sql.handle.model.SelectSqlEntity;
 import cn.katoumegumi.java.sql.handle.model.UpdateSqlEntity;
@@ -114,12 +114,12 @@ public class Test {
 
         BeanModel beanModel = WsReflectUtils.createBeanModel(User.class);
         System.out.println(beanModel.toString());
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(MySearchList.create(User.class)
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(MySearchList.create(User.class)
                 .setAlias("u")
                 .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
                 .gtep("u",User::getName,"u",User::getName));
-        SelectModel selectModel = sqlModelUtils.transferToSelectModel();
-        SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(selectModel);
+        SelectModel selectModel = sqlModelFactory.createSelectModel();
+        SelectSqlEntity selectSqlEntity = MysqlHandler.handleSelect(selectModel);
         System.out.println(selectSqlEntity.getSelectSql());
     }
 
@@ -191,8 +191,8 @@ public class Test {
 //        ).eq(LUser::getName,1)
 //                .eq(LUser::getName,1)
 //        ;
-//        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-//        System.out.println(MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel()).getSelectSql());
+//        SQLModelFactory sqlModelUtils = new SQLModelFactory(mySearchList);
+//        System.out.println(MysqlHandler.handleSelect(sqlModelUtils.transferToSelectModel()).getSelectSql());
         DataSource dataSource = getDataSource();
         BaseDataSourceUtils dataSourceUtils = new BaseDataSourceUtils(dataSource);
         /*List<User> list = dataSourceUtils.selectList(
@@ -220,7 +220,7 @@ public class Test {
     public static void test() {
 
 
-        SQLModelUtils.addSqlInterceptor(new AbstractSqlInterceptor() {
+        SQLModelFactory.addSqlInterceptor(new AbstractSqlInterceptor() {
             @Override
             public String fieldName() {
                 return "name";
@@ -280,9 +280,9 @@ public class Test {
         mySearchList.sort("rand()","desc");
 
         MySearchList deleteSearchList = MySearchList.create(User.class).eq(User::getId,1);
-        SQLModelUtils deleteModelUtils = new SQLModelUtils(deleteSearchList);
+        SQLModelFactory deleteModelUtils = new SQLModelFactory(deleteSearchList);
 
-        DeleteSqlEntity deleteSqlEntity = MysqlHandle.handleDelete(deleteModelUtils.transferToDeleteModel());
+        DeleteSqlEntity deleteSqlEntity = MysqlHandler.handleDelete(deleteModelUtils.createDeleteModel());
         System.out.println(deleteSqlEntity.getDeleteSql());
         System.out.println(new Gson().toJson(deleteSqlEntity.getValueList()));
 
@@ -295,27 +295,27 @@ public class Test {
                 .multiply(User::getPassword,1)
                 .divide(User::getPassword,1)
                 .eq(User::getId,1);
-        UpdateModel updateModel = new SQLModelUtils(updateSearchList).transferToUpdateModel();
-        UpdateSqlEntity updateSqlEntity = MysqlHandle.handleUpdate(updateModel);
+        UpdateModel updateModel = new SQLModelFactory(updateSearchList).createUpdateModel();
+        UpdateSqlEntity updateSqlEntity = MysqlHandler.handleUpdate(updateModel);
         System.out.println(updateSqlEntity.getUpdateSql());
         System.out.println(new Gson().toJson(updateSqlEntity.getValueList()));
 
         Long date = WsDateUtils.getExecutionTime.apply(()->{
             for (int i = 0; i < 1; i++){
-                SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-                SelectModel selectModel = sqlModelUtils.transferToSelectModel();
-                SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(selectModel);
+                SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+                SelectModel selectModel = sqlModelFactory.createSelectModel();
+                SelectSqlEntity selectSqlEntity = MysqlHandler.handleSelect(selectModel);
                 System.out.println(selectSqlEntity.getSelectSql());
                 System.out.println(selectSqlEntity.getCountSql());
                 System.out.println(new Gson().toJson(selectSqlEntity.getValueList()));
-                //System.out.println(sqlModelUtils.select().getSelectSql());
+                //System.out.println(sqlModelFactory.select().getSelectSql());
 
             }
         });
         System.out.println(date);
-        /*SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
+        /*SQLModelFactory sqlModelUtils = new SQLModelFactory(mySearchList);
         SelectModel selectModel = sqlModelUtils.transferToSelectModel();
-        SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(selectModel);
+        SelectSqlEntity selectSqlEntity = MysqlHandler.handleSelect(selectModel);
         System.out.println(selectSqlEntity.getSelectSql());
         System.out.println(new Gson().toJson(selectSqlEntity.getValueList()));
         System.out.println(sqlModelUtils.select().getSelectSql());*/
@@ -323,7 +323,7 @@ public class Test {
 
         System.out.println(
                 new Gson().toJson(
-                        MysqlHandle.handleSelect(new SQLModelUtils(
+                        MysqlHandler.handleSelect(new SQLModelFactory(
                                 MySearchList.create(User.class)
                                         .eq(User::getName,1)
                                         .isNull(User::getName)
@@ -331,7 +331,7 @@ public class Test {
                                         .exists(" name = 1",null)
                                         .sql(" name = ?",Arrays.asList((Object) null))
                                         .exists(" name = ?",Arrays.asList((Object) null))
-                        ).transferToSelectModel())
+                        ).createSelectModel())
                 )
 
         );

@@ -141,7 +141,7 @@ public class MySearchList {
                 if (!(WsBeanUtils.isArray(value.getClass()) || value instanceof MySearchList)) {
                     throw new RuntimeException(fieldName + "类型不支持，当前的类型是：" + value.getClass());
                 }
-                if (WsListUtils.isEmpty(value)) {
+                if (WsCollectionUtils.isEmpty(value)) {
                     throw new RuntimeException("数组为空");
                 }
                 break;
@@ -150,7 +150,7 @@ public class MySearchList {
                 if (!WsBeanUtils.isArray(value.getClass())) {
                     throw new RuntimeException(fieldName + "的参数必须是数组类型，当前的类型是：" + value.getClass());
                 }
-                if (WsListUtils.isEmpty(value)) {
+                if (WsCollectionUtils.isEmpty(value)) {
                     throw new RuntimeException("数组为空");
                 }
                 break;
@@ -1131,7 +1131,7 @@ public class MySearchList {
         for (Consumer<MySearchList> consumer : consumers) {
             MySearchList mySearchList = MySearchList.create();
             consumer.accept(mySearchList);
-            if (WsListUtils.isNotEmpty(mySearchList.getAll()) || WsListUtils.isNotEmpty(mySearchList.getAnds()) || WsListUtils.isNotEmpty(mySearchList.getOrs())) {
+            if (WsCollectionUtils.isNotEmpty(mySearchList.getAll()) || WsCollectionUtils.isNotEmpty(mySearchList.getAnds()) || WsCollectionUtils.isNotEmpty(mySearchList.getOrs())) {
                 ands.add(mySearchList);
             }
         }
@@ -1144,7 +1144,7 @@ public class MySearchList {
         for (Consumer<MySearchList> consumer : consumers) {
             MySearchList mySearchList = MySearchList.create();
             consumer.accept(mySearchList);
-            if (WsListUtils.isNotEmpty(mySearchList.getAll()) || WsListUtils.isNotEmpty(mySearchList.getAnds()) || WsListUtils.isNotEmpty(mySearchList.getOrs())) {
+            if (WsCollectionUtils.isNotEmpty(mySearchList.getAll()) || WsCollectionUtils.isNotEmpty(mySearchList.getAnds()) || WsCollectionUtils.isNotEmpty(mySearchList.getOrs())) {
                 ors.add(mySearchList);
             }
         }

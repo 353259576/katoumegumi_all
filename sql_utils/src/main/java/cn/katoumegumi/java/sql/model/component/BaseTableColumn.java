@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.model.component;
 
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
-import cn.katoumegumi.java.sql.SQLModelUtils;
+import cn.katoumegumi.java.sql.SQLModelFactory;
 import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
 
 /**
@@ -35,7 +35,7 @@ public class BaseTableColumn implements TableColumn {
      * @return
      */
     private static String createColumnName(String tableNickName, String columnName) {
-        return SQLModelUtils.guardKeyword(tableNickName) + '.' + SQLModelUtils.guardKeyword(columnName);
+        return SQLModelFactory.guardKeyword(tableNickName) + '.' + SQLModelFactory.guardKeyword(columnName);
     }
 
     /**
@@ -46,7 +46,7 @@ public class BaseTableColumn implements TableColumn {
      * @return
      */
     private static String createColumnNickName(String tableNickName, String columnName) {
-        return SQLModelUtils.guardKeyword(tableNickName + '.' + columnName);
+        return SQLModelFactory.guardKeyword(tableNickName + '.' + columnName);
     }
 
     @Override

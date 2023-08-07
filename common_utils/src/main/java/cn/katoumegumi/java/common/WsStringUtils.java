@@ -42,7 +42,7 @@ public class WsStringUtils {
         if (strings == null) {
             return "";
         }
-        if (strings.size() == 0) {
+        if (strings.isEmpty()) {
             return "";
         }
         StringBuilder stringBuffer = new StringBuilder();
@@ -89,7 +89,7 @@ public class WsStringUtils {
     }
 
     public static boolean notHasLength(final String str) {
-        return str == null || str.length() == 0;
+        return str == null || str.isEmpty();
     }
 
     /**
@@ -103,7 +103,7 @@ public class WsStringUtils {
             return false;
         }
         char[] chars = str.toCharArray();
-        if (str.length() == 0) {
+        if (str.isEmpty()) {
             return false;
         }
         boolean isHave = false;
@@ -530,19 +530,6 @@ public class WsStringUtils {
         } else {
             list.add(new String(Arrays.copyOfRange(cs, startIndex, endIndex)));
         }
-
-        /*StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < cs.length; ++i) {
-            if (cs[i] != c) {
-                sb.append(cs[i]);
-            } else {
-                list.add(sb.toString());
-                sb = new StringBuilder();
-            }
-        }
-        if (sb.length() > 0) {
-            list.add(sb.toString());
-        }*/
         return list;
     }
 
@@ -718,7 +705,7 @@ public class WsStringUtils {
             }
         }
         Collections.reverse(list);
-        return list.stream().collect(Collectors.joining());
+        return String.join("", list);
     }
 
 }

@@ -1,8 +1,8 @@
 package cn.katoumegumi.java.sql.handle;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsListUtils;
-import cn.katoumegumi.java.sql.SQLModelUtils;
+import cn.katoumegumi.java.common.WsCollectionUtils;
+import cn.katoumegumi.java.sql.SQLModelFactory;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.ValueTypeConstants;
@@ -21,21 +21,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MysqlHandle {
+public class MysqlHandler {
 
-    /**
-     * 条件为空
-     */
-    private static final SqlStringAndParameters EMPTY_SQL_STRING_AND_PARAMETERS = new SqlStringAndParameters(null, null, 0, ValueTypeConstants.NULL_TYPE);
 
-    /**
-     * null值
-     */
-    private static final SqlStringAndParameters NULL_VALUE_SQL_STRING_AND_PARAMETERS = new SqlStringAndParameters(null, null, 1, ValueTypeConstants.NULL_VALUE_MODEL);
 
     /**
      * 处理select语句
-     *
      * @param selectModel
      * @return
      */
@@ -51,41 +42,41 @@ public class MysqlHandle {
             TableColumn tableColumn = selectModel.getSelect().get(i);
             if (tableColumn instanceof BaseTableColumn) {
                 BaseTableColumn columnBase = (BaseTableColumn) tableColumn;
-                columnSql.append(SQLModelUtils.guardKeyword(columnBase.getTableAlias()))
+                columnSql.append(SQLModelFactory.guardKeyword(columnBase.getTableAlias()))
                         .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
-                        .append(SQLModelUtils.guardKeyword(columnBase.getColumnName()));
+                        .append(SQLModelFactory.guardKeyword(columnBase.getColumnName()));
             } else if (tableColumn instanceof DynamicTableColumn) {
                 DynamicTableColumn dynamicTableColumn = (DynamicTableColumn) tableColumn;
                 chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
             }
             columnSql.append(SqlCommonConstants.SPACE)
-                    .append(SQLModelUtils.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()))
+                    .append(SQLModelFactory.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()))
                     .append(SqlCommonConstants.COMMA);
         }
         TableColumn tableColumn = selectModel.getSelect().get(columnSize - 1);
         if (tableColumn instanceof BaseTableColumn) {
             BaseTableColumn columnBase = (BaseTableColumn) tableColumn;
-            columnSql.append(SQLModelUtils.guardKeyword(columnBase.getTableAlias()))
+            columnSql.append(SQLModelFactory.guardKeyword(columnBase.getTableAlias()))
                     .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
-                    .append(SQLModelUtils.guardKeyword(columnBase.getColumnName()));
+                    .append(SQLModelFactory.guardKeyword(columnBase.getColumnName()));
         } else if (tableColumn instanceof DynamicTableColumn) {
             DynamicTableColumn dynamicTableColumn = (DynamicTableColumn) tableColumn;
             chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
         }
         columnSql.append(SqlCommonConstants.SPACE)
-                .append(SQLModelUtils.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()));
+                .append(SQLModelFactory.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()));
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
         tableAndJoinTableSql.append(SqlCommonConstants.FROM)
-                .append(SQLModelUtils.guardKeyword(selectModel.getFrom().getTable().getTableName()))
+                .append(SQLModelFactory.guardKeyword(selectModel.getFrom().getTable().getTableName()))
                 .append(SqlCommonConstants.SPACE)
-                .append(SQLModelUtils.guardKeyword(selectModel.getFrom().getAlias()));
-        if (WsListUtils.isNotEmpty(selectModel.getJoinList())) {
+                .append(SQLModelFactory.guardKeyword(selectModel.getFrom().getAlias()));
+        if (WsCollectionUtils.isNotEmpty(selectModel.getJoinList())) {
             for (JoinTableModel joinTableModel : selectModel.getJoinList()) {
                 tableAndJoinTableSql.append(joinTableModel.getJoinType().getValue())
-                        .append(SQLModelUtils.guardKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
+                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
                         .append(SqlCommonConstants.SPACE)
-                        .append(SQLModelUtils.guardKeyword(joinTableModel.getJoinTable().getAlias()))
+                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getAlias()))
                         .append(SqlCommonConstants.ON);
                 handleRelation(joinTableModel.getOn(), tableAndJoinTableSql, valueList, false);
             }
@@ -100,7 +91,7 @@ public class MysqlHandle {
 
         //处理order by条件
         StringBuilder orderBySql = new StringBuilder();
-        if (WsListUtils.isNotEmpty(selectModel.getOrderBy())) {
+        if (WsCollectionUtils.isNotEmpty(selectModel.getOrderBy())) {
             orderBySql.append(SqlCommonConstants.ORDER_BY);
             int orderByModelSize = selectModel.getOrderBy().size() - 1;
             OrderByCondition orderByCondition;
@@ -111,9 +102,9 @@ public class MysqlHandle {
                 if (entity == null) {
                     orderBySql.append(orderByCondition.getSql().getSql());
                 } else {
-                    orderBySql.append(SQLModelUtils.guardKeyword(entity.getTableAlias()))
+                    orderBySql.append(SQLModelFactory.guardKeyword(entity.getTableAlias()))
                             .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
-                            .append(SQLModelUtils.guardKeyword(entity.getColumnName()));
+                            .append(SQLModelFactory.guardKeyword(entity.getColumnName()));
                 }
                 orderBySql.append(SqlCommonConstants.SPACE)
                         .append(orderByCondition.getType())
@@ -125,9 +116,9 @@ public class MysqlHandle {
             if (entity == null) {
                 orderBySql.append(orderByCondition.getSql().getSql());
             } else {
-                orderBySql.append(SQLModelUtils.guardKeyword(entity.getTableAlias()))
+                orderBySql.append(SQLModelFactory.guardKeyword(entity.getTableAlias()))
                         .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
-                        .append(SQLModelUtils.guardKeyword(entity.getColumnName()));
+                        .append(SQLModelFactory.guardKeyword(entity.getColumnName()));
             }
             orderBySql.append(SqlCommonConstants.SPACE)
                     .append(orderByCondition.getType());
@@ -165,20 +156,20 @@ public class MysqlHandle {
     public static DeleteSqlEntity handleDelete(DeleteModel deleteModel) {
         List<SqlParameter> valueList = new ArrayList<>();
 
-        String mainTableAlias = SQLModelUtils.guardKeyword(deleteModel.getFrom().getAlias());
+        String mainTableAlias = SQLModelFactory.guardKeyword(deleteModel.getFrom().getAlias());
 
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
         tableAndJoinTableSql.append(SqlCommonConstants.FROM)
-                .append(SQLModelUtils.guardKeyword(deleteModel.getFrom().getTable().getTableName()))
+                .append(SQLModelFactory.guardKeyword(deleteModel.getFrom().getTable().getTableName()))
                 .append(SqlCommonConstants.SPACE)
                 .append(mainTableAlias);
-        if (WsListUtils.isNotEmpty(deleteModel.getJoinList())) {
+        if (WsCollectionUtils.isNotEmpty(deleteModel.getJoinList())) {
             for (JoinTableModel joinTableModel : deleteModel.getJoinList()) {
                 tableAndJoinTableSql.append(joinTableModel.getJoinType().getValue())
-                        .append(SQLModelUtils.guardKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
+                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
                         .append(SqlCommonConstants.SPACE)
-                        .append(SQLModelUtils.guardKeyword(joinTableModel.getJoinTable().getAlias()))
+                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getAlias()))
                         .append(SqlCommonConstants.ON);
                 handleRelation(joinTableModel.getOn(), tableAndJoinTableSql, valueList, false);
             }
@@ -203,15 +194,15 @@ public class MysqlHandle {
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
         tableAndJoinTableSql
-                .append(SQLModelUtils.guardKeyword(updateModel.getFrom().getTable().getTableName()))
+                .append(SQLModelFactory.guardKeyword(updateModel.getFrom().getTable().getTableName()))
                 .append(SqlCommonConstants.SPACE)
-                .append(SQLModelUtils.guardKeyword(updateModel.getFrom().getAlias()));
-        if (WsListUtils.isNotEmpty(updateModel.getJoinList())) {
+                .append(SQLModelFactory.guardKeyword(updateModel.getFrom().getAlias()));
+        if (WsCollectionUtils.isNotEmpty(updateModel.getJoinList())) {
             for (JoinTableModel joinTableModel : updateModel.getJoinList()) {
                 tableAndJoinTableSql.append(joinTableModel.getJoinType().getValue())
-                        .append(SQLModelUtils.guardKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
+                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
                         .append(SqlCommonConstants.SPACE)
-                        .append(SQLModelUtils.guardKeyword(joinTableModel.getJoinTable().getAlias()))
+                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getAlias()))
                         .append(SqlCommonConstants.ON);
                 handleRelation(joinTableModel.getOn(), tableAndJoinTableSql, valueList, false);
             }
@@ -247,7 +238,7 @@ public class MysqlHandle {
 
 
     private static void handleRelation(RelationCondition relationCondition, StringBuilder sql, List<SqlParameter> valueList, boolean needBrackets) {
-        if (WsListUtils.isEmpty(relationCondition.getConditionList())) {
+        if (WsCollectionUtils.isEmpty(relationCondition.getConditionList())) {
             return;
         }
         int conditionSize = relationCondition.getConditionList().size();
@@ -436,9 +427,9 @@ public class MysqlHandle {
     private static SqlStringAndParameters handleExpressionConditionValue(int type, Object value) {
         switch (type) {
             case ValueTypeConstants.NULL_TYPE:
-                return EMPTY_SQL_STRING_AND_PARAMETERS;
+                return SqlCommonConstants.EMPTY_SQL_STRING_AND_PARAMETERS;
             case ValueTypeConstants.NULL_VALUE_MODEL:
-                return NULL_VALUE_SQL_STRING_AND_PARAMETERS;
+                return SqlCommonConstants.NULL_VALUE_SQL_STRING_AND_PARAMETERS;
             case ValueTypeConstants.BASE_VALUE_TYPE:
                 return new SqlStringAndParameters(null, value, 1, ValueTypeConstants.BASE_VALUE_TYPE);
             case ValueTypeConstants.COLLECTION_TYPE:
@@ -446,12 +437,12 @@ public class MysqlHandle {
             case ValueTypeConstants.ARRAY_TYPE:
                 return new SqlStringAndParameters(null, value, ((Object[]) value).length, ValueTypeConstants.ARRAY_TYPE);
             case ValueTypeConstants.SELECT_MODEL_TYPE:
-                SelectSqlEntity entity = MysqlHandle.handleSelect((SelectModel) value);
+                SelectSqlEntity entity = MysqlHandler.handleSelect((SelectModel) value);
                 return new SqlStringAndParameters(entity.getSelectSql(), entity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList()), entity.getValueList().size());
             case ValueTypeConstants.COLUMN_NAME_TYPE:
                 BaseTableColumn baseTableColumn = (BaseTableColumn) value;
                 return new SqlStringAndParameters(
-                        SQLModelUtils.guardKeyword(baseTableColumn.getTableAlias()) + SqlCommonConstants.SQL_COMMON_DELIMITER + SQLModelUtils.guardKeyword(baseTableColumn.getColumnName()),
+                        SQLModelFactory.guardKeyword(baseTableColumn.getTableAlias()) + SqlCommonConstants.SQL_COMMON_DELIMITER + SQLModelFactory.guardKeyword(baseTableColumn.getColumnName()),
                         null,
                         0
                 );
@@ -544,7 +535,7 @@ public class MysqlHandle {
                 break;
             case ValueTypeConstants.COLLECTION_TYPE:
                 Collection<?> collection = (Collection<?>) sqlStringAndParameters.getValue();
-                if (WsListUtils.isNotEmpty(collection)) {
+                if (WsCollectionUtils.isNotEmpty(collection)) {
                     for (Object o : collection) {
                         valueList.add(new SqlParameter(null, o));
                     }
@@ -552,7 +543,7 @@ public class MysqlHandle {
                 break;
             case ValueTypeConstants.ARRAY_TYPE:
                 Object[] objects = (Object[]) sqlStringAndParameters.getValue();
-                if (WsListUtils.isNotEmpty(objects)) {
+                if (WsCollectionUtils.isNotEmpty(objects)) {
                     for (Object o : objects) {
                         valueList.add(new SqlParameter(null, o));
                     }
@@ -573,7 +564,7 @@ public class MysqlHandle {
      */
     private static String createPlaceholder(int placeholderSize, String placeholderStr, String separator) {
         if (placeholderSize == 0) {
-            return "";
+            return SqlCommonConstants.EMPTY_STRING;
         }
         if (placeholderSize == 1) {
             return placeholderStr;

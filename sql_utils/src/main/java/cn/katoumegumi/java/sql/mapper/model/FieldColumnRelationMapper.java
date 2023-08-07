@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql.mapper.model;
 
-import cn.katoumegumi.java.common.WsListUtils;
+import cn.katoumegumi.java.common.WsCollectionUtils;
 
 import java.util.*;
 
@@ -156,7 +156,7 @@ public class FieldColumnRelationMapper {
         for (int i = 0; i < fieldColumnRelations.size(); i++) {
             locationMap.put(fieldColumnRelations.get(i), i);
         }
-        if (WsListUtils.isNotEmpty(fieldJoinClasses)) {
+        if (WsCollectionUtils.isNotEmpty(fieldJoinClasses)) {
             for (int i = 0; i < fieldJoinClasses.size(); i++) {
                 locationMap.put(fieldJoinClasses.get(i), i);
             }

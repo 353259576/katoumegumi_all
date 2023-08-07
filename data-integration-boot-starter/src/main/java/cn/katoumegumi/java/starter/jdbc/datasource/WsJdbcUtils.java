@@ -4,6 +4,7 @@ import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.common.model.KeyValue;
 import cn.katoumegumi.java.sql.*;
+import cn.katoumegumi.java.sql.handle.MysqlHandler;
 import cn.katoumegumi.java.sql.handle.model.DeleteSqlEntity;
 import cn.katoumegumi.java.sql.handle.model.InsertSqlEntity;
 import cn.katoumegumi.java.sql.handle.model.SelectSqlEntity;
@@ -13,7 +14,6 @@ import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.resultSet.strategys.JdkResultSet;
 import cn.katoumegumi.java.sql.model.component.SqlLimit;
 import cn.katoumegumi.java.sql.handle.model.SqlParameter;
-import cn.katoumegumi.java.sql.handle.MysqlHandle;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -51,13 +51,13 @@ public class WsJdbcUtils {
             throw new IllegalArgumentException("need insert Object is null");
         }
         MySearchList mySearchList = MySearchList.create(t.getClass());
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSql(t);
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+        InsertSqlEntity insertSqlEntity = sqlModelFactory.createInsertSqlEntity(t);
         log.debug(insertSqlEntity.getInsertSql());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         Map<String, Object> keyMap = keyHolder.getKeys();
-        if (WsListUtils.isNotEmpty(keyMap)) {
+        if (WsCollectionUtils.isNotEmpty(keyMap)) {
             List<FieldColumnRelation> idList = insertSqlEntity.getIdList();
             boolean[] isUseArray = new boolean[idList.size()];
             Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
@@ -67,17 +67,17 @@ public class WsJdbcUtils {
     }
 
     public <T> int insert(List<T> tList) {
-        if (WsListUtils.isEmpty(tList)) {
+        if (WsCollectionUtils.isEmpty(tList)) {
             return 0;
         }
         MySearchList mySearchList = MySearchList.create(tList.get(0).getClass());
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        InsertSqlEntity insertSqlEntity = sqlModelUtils.insertSqlBatch(tList);
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+        InsertSqlEntity insertSqlEntity = sqlModelFactory.createInsertSqlEntity(tList);
         log.debug(insertSqlEntity.getInsertSql());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         List<Map<String, Object>> keyMapList = keyHolder.getKeyList();
-        if(WsListUtils.isNotEmpty(keyMapList)){
+        if(WsCollectionUtils.isNotEmpty(keyMapList)){
             List<FieldColumnRelation> idList = insertSqlEntity.getIdList();
             boolean[] isUseArray = new boolean[idList.size()];
             Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
@@ -93,7 +93,7 @@ public class WsJdbcUtils {
         return connection -> {
             PreparedStatement statement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS);
             Object o;
-            List<?> valueList = WsListUtils.listToList(insertSqlEntity.getValueList(), SqlParameter::getValue);
+            List<?> valueList = WsCollectionUtils.listToList(insertSqlEntity.getValueList(), SqlParameter::getValue);
             for (int i = 0; i < valueList.size(); i++) {
                 o = valueList.get(i);
                 if (o == null) {
@@ -136,35 +136,35 @@ public class WsJdbcUtils {
             return 0;
         }
         MySearchList mySearchList = MySearchList.create(t.getClass());
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t, isAll);
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+        UpdateSqlEntity updateSqlEntity = sqlModelFactory.createUpdateSqlEntity(t, isAll);
         log.debug(updateSqlEntity.getUpdateSql());
 
-        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
+        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
     }
 
     public int update(MySearchList mySearchList) {
         if (mySearchList == null) {
             return 0;
         }
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        UpdateSqlEntity updateSqlEntity = MysqlHandle.handleUpdate(sqlModelUtils.transferToUpdateModel());
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+        UpdateSqlEntity updateSqlEntity = MysqlHandler.handleUpdate(sqlModelFactory.createUpdateModel());
         log.debug(updateSqlEntity.getUpdateSql());
-        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
+        return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
     }
 
     public int[] updateBatch(List<MySearchList> mySearchLists) {
-        if (WsListUtils.isEmpty(mySearchLists)) {
+        if (WsCollectionUtils.isEmpty(mySearchLists)) {
             return EMPTY_INT_ARRAY;
         }
         int[] ans = new int[mySearchLists.size()];
         Map<String, KeyValue<List<Object[]>,List<Integer>>> map = new HashMap<>();
         int index = 0;
         for (MySearchList mySearchList : mySearchLists) {
-            SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-            UpdateSqlEntity updateSqlEntity = MysqlHandle.handleUpdate(sqlModelUtils.transferToUpdateModel());
+            SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+            UpdateSqlEntity updateSqlEntity = MysqlHandler.handleUpdate(sqlModelFactory.createUpdateModel());
             KeyValue<List<Object[]>,List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(),new ArrayList<>()));
-            keyValue.getKey().add(WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
+            keyValue.getKey().add(WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
             keyValue.getValue().add(index++);
         }
         for (Map.Entry<String, KeyValue<List<Object[]>, List<Integer>>> stringKeyValueEntry : map.entrySet()) {
@@ -184,7 +184,7 @@ public class WsJdbcUtils {
     }
 
     public <T> int[] updateBatchByT(List<T> tList, boolean isAll) {
-        if (WsListUtils.isEmpty(tList)) {
+        if (WsCollectionUtils.isEmpty(tList)) {
             return EMPTY_INT_ARRAY;
         }
         int[] ans = new int[tList.size()];
@@ -192,10 +192,10 @@ public class WsJdbcUtils {
         Map<String, KeyValue<List<Object[]>,List<Integer>>> map = new HashMap<>();
         for (T t : tList) {
             MySearchList mySearchList = MySearchList.create(t.getClass());
-            SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-            UpdateSqlEntity updateSqlEntity = sqlModelUtils.update(t, isAll);
+            SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+            UpdateSqlEntity updateSqlEntity = sqlModelFactory.createUpdateSqlEntity(t, isAll);
             KeyValue<List<Object[]>,List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(),new ArrayList<>()));
-            keyValue.getKey().add(WsListUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
+            keyValue.getKey().add(WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
             keyValue.getValue().add(index++);
         }
         for (Map.Entry<String, KeyValue<List<Object[]>, List<Integer>>> stringKeyValueEntry : map.entrySet()) {
@@ -211,11 +211,11 @@ public class WsJdbcUtils {
     }
 
     public int delete(MySearchList mySearchList) {
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        //DeleteSqlEntity deleteSqlEntity = sqlModelUtils.delete();
-        DeleteSqlEntity deleteSqlEntity = MysqlHandle.handleDelete(sqlModelUtils.transferToDeleteModel());
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+        //DeleteSqlEntity deleteSqlEntity = sqlModelFactory.delete();
+        DeleteSqlEntity deleteSqlEntity = MysqlHandler.handleDelete(sqlModelFactory.createDeleteModel());
         log.debug(deleteSqlEntity.getDeleteSql());
-        return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(), WsListUtils.listToArray(deleteSqlEntity.getValueList(), SqlParameter::getValue));
+        return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(), WsCollectionUtils.listToArray(deleteSqlEntity.getValueList(), SqlParameter::getValue));
     }
 
 
@@ -227,17 +227,17 @@ public class WsJdbcUtils {
      * @return
      */
     public <T> List<T> getListT(MySearchList mySearchList) {
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel());
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+        SelectSqlEntity selectSqlEntity = MysqlHandler.handleSelect(sqlModelFactory.createSelectModel());
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
         List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
-        return queryList(sql, parameterList, sqlModelUtils);
+        return queryList(sql, parameterList, sqlModelFactory);
     }
 
-    private <T> List<T> queryList(String sql, List<Object> parameterList, SQLModelUtils sqlModelUtils) {
+    private <T> List<T> queryList(String sql, List<Object> parameterList, SQLModelFactory sqlModelFactory) {
         return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), rs -> {
-            return sqlModelUtils.margeMap(new JdkResultSet(rs));
+            return sqlModelFactory.margeMap(new JdkResultSet(rs));
         });
     }
 
@@ -252,7 +252,7 @@ public class WsJdbcUtils {
 
 
     public <T> List<T> getListT(T t) {
-        MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);
+        MySearchList mySearchList = SQLModelFactory.objectToMySearchList(t);
         return getListT(mySearchList);
     }
 
@@ -265,7 +265,7 @@ public class WsJdbcUtils {
      */
     public <T> T getTOne(MySearchList mySearchList) {
         List<T> tList = getListT(mySearchList);
-        if (WsListUtils.isNotEmpty(tList)) {
+        if (WsCollectionUtils.isNotEmpty(tList)) {
             if (tList.size() > 1) {
                 log.warn("本次查询数据大于一条但是仅显示一条。");
             }
@@ -275,7 +275,7 @@ public class WsJdbcUtils {
     }
 
     public <T> T getTOne(T t) {
-        MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);
+        MySearchList mySearchList = SQLModelFactory.objectToMySearchList(t);
         return getTOne(mySearchList);
     }
 
@@ -302,8 +302,8 @@ public class WsJdbcUtils {
      * @return
      */
     public <T> IPage<T> getTPage(MySearchList mySearchList) {
-        SQLModelUtils sqlModelUtils = new SQLModelUtils(mySearchList);
-        SelectSqlEntity selectSqlEntity = MysqlHandle.handleSelect(sqlModelUtils.transferToSelectModel());
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+        SelectSqlEntity selectSqlEntity = MysqlHandler.handleSelect(sqlModelFactory.createSelectModel());
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
         String countSql = selectSqlEntity.getCountSql();
@@ -316,7 +316,7 @@ public class WsJdbcUtils {
         SqlLimit sqlLimit = mySearchList.getSqlLimit();
         List<T> tList;
         if(count > sqlLimit.getOffset()) {
-            tList = queryList(sql, parameterList, sqlModelUtils);
+            tList = queryList(sql, parameterList, sqlModelFactory);
         }else {
             tList = new ArrayList<>(0);
         }
@@ -329,7 +329,7 @@ public class WsJdbcUtils {
     }
 
     public <T> IPage<T> getTPage(T t, IPage<?> page) {
-        MySearchList mySearchList = SQLModelUtils.objectToMySearchList(t);
+        MySearchList mySearchList = SQLModelFactory.objectToMySearchList(t);
         mySearchList.setSqlLimit(sqlLimit -> sqlLimit.setCurrent(page.getCurrent()).setSize(page.getSize()));
         return getTPage(mySearchList);
     }
@@ -341,7 +341,7 @@ public class WsJdbcUtils {
      * @return
      */
     public <T> Integer saveOrUpdate(T t){
-        FieldColumnRelationMapper fieldColumnRelationMapper = SQLModelUtils.getFieldColumnRelationMapper(t.getClass());
+        FieldColumnRelationMapper fieldColumnRelationMapper = SQLModelFactory.getFieldColumnRelationMapper(t.getClass());
         List<FieldColumnRelation> fieldColumnRelations = fieldColumnRelationMapper.getIds();
         FieldColumnRelation relation = fieldColumnRelations.get(0);
         BeanPropertyModel beanPropertyModel = relation.getBeanProperty();
@@ -387,7 +387,7 @@ public class WsJdbcUtils {
                             .setValue(t,WsBeanUtils.objectToT(value,fieldColumnRelation.getBeanProperty().getPropertyClass()));
         });
 
-        if(WsListUtils.isNotEmpty(unUseColumnNameList)){
+        if(WsCollectionUtils.isNotEmpty(unUseColumnNameList)){
             for (int idIndex = 0,unUseIndex = 0; idIndex < isUseArray.length && unUseIndex < unUseColumnNameList.size();unUseIndex++){
                 Object value = keyMap.get(unUseColumnNameList.get(unUseIndex));
                 while (idIndex < isUseArray.length){

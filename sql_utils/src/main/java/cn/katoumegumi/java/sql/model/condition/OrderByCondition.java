@@ -40,7 +40,7 @@ public class OrderByCondition implements Condition {
 
     /*@Override
     public SqlStringAndParameters toSqlString() {
-        String sql = SQLModelUtils.guardKeyword(column.getAlias()) + SqlCommon.SQL_COMMON_DELIMITER + SQLModelUtils.guardKeyword(column.getColumnName()) + SqlCommon.SPACE + type;
+        String sql = SQLModelFactory.guardKeyword(column.getAlias()) + SqlCommon.SQL_COMMON_DELIMITER + SQLModelFactory.guardKeyword(column.getColumnName()) + SqlCommon.SPACE + type;
         return new SqlStringAndParameters(sql,null);
     }*/
 }

@@ -140,7 +140,7 @@ public class WsReflectUtils {
         if (parent.isInterface()) {
             if (child.isInterface()) {
                 Class<?>[] cs = child.getInterfaces();
-                if (WsListUtils.isEmpty(cs)) {
+                if (WsCollectionUtils.isEmpty(cs)) {
                     return false;
                 }
                 for (Class<?> clazz : cs) {
@@ -152,7 +152,7 @@ public class WsReflectUtils {
                     return true;
                 } else {
                     Class<?>[] cs = child.getInterfaces();
-                    if (WsListUtils.isEmpty(cs)) {
+                    if (WsCollectionUtils.isEmpty(cs)) {
                         return false;
                     }
                     for (Class<?> clazz : cs) {

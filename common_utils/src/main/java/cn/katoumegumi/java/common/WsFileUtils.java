@@ -45,7 +45,7 @@ public class WsFileUtils {
             return null;
         }
         File[] files = file.listFiles();
-        return WsListUtils.arrayToList(files);
+        return WsCollectionUtils.arrayToList(files);
     }
 
     /**

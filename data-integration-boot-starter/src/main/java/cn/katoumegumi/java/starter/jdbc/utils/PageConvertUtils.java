@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.starter.jdbc.utils;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsListUtils;
+import cn.katoumegumi.java.common.WsCollectionUtils;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.BeanUtils;
@@ -20,7 +20,7 @@ public class PageConvertUtils {
         tPage.setCurrent(pPage.getCurrent());
         tPage.setSize(pPage.getSize());
         tPage.setTotal(pPage.getTotal());
-        if (WsListUtils.isNotEmpty(pPage.getRecords())) {
+        if (WsCollectionUtils.isNotEmpty(pPage.getRecords())) {
             List<P> pList = pPage.getRecords();
             List<T> tList = new ArrayList<>(pList.size());
             for (P p : pList) {

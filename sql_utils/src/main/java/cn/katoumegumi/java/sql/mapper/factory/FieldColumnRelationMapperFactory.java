@@ -1,8 +1,8 @@
 package cn.katoumegumi.java.sql.mapper.factory;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsCollectionUtils;
 import cn.katoumegumi.java.common.WsReflectUtils;
-import cn.katoumegumi.java.common.WsListUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
@@ -249,7 +249,7 @@ public class FieldColumnRelationMapperFactory {
                 joinClassFieldList.add(beanPropertyModel);
             }
         }
-        if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
+        if (WsCollectionUtils.isNotEmpty(baseTypeFieldList)) {
             for (BeanPropertyModel propertyModel : baseTypeFieldList) {
                 FieldColumnRelation fieldColumnRelation = getColumnName(startIndex, fieldColumnRelationMapper.getBaseTemplateMapper() == null ? fieldColumnRelationMapper : fieldColumnRelationMapper.getBaseTemplateMapper(), propertyModel);
                 if (fieldColumnRelation == null) {
@@ -266,7 +266,7 @@ public class FieldColumnRelationMapperFactory {
 
         putIncompleteMapper(clazz, fieldColumnRelationMapper);
 
-        if (WsListUtils.isNotEmpty(joinClassFieldList)) {
+        if (WsCollectionUtils.isNotEmpty(joinClassFieldList)) {
             for (BeanPropertyModel propertyModel : joinClassFieldList) {
                 Class<?> joinClass;
                 if (WsReflectUtils.isArrayType(propertyModel.getPropertyClass())){

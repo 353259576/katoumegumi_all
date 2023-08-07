@@ -76,7 +76,7 @@ public class OSMessageUtils {
                     int num = b & 0xff;
                     stringList.add(Integer.toHexString(num));
                 }
-                if (WsListUtils.isEmpty(stringList)) {
+                if (WsCollectionUtils.isEmpty(stringList)) {
                     return null;
                 }
                 return String.join("-", stringList).toUpperCase(Locale.ROOT);

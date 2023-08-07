@@ -7,7 +7,7 @@ import java.util.function.Function;
 /**
  * @author ws
  */
-public class WsListUtils {
+public class WsCollectionUtils {
 
 
     /**
@@ -16,8 +16,8 @@ public class WsListUtils {
      * @param collection 集合
      * @return 布尔
      */
-    public static boolean isEmpty(Collection collection) {
-        return (collection == null || collection.size() == 0);
+    public static <T> boolean isEmpty(Collection<T> collection) {
+        return (collection == null || collection.isEmpty());
     }
 
     /**
@@ -36,7 +36,7 @@ public class WsListUtils {
      * @param map map
      * @return 布尔
      */
-    public static boolean isEmpty(Map map) {
+    public static <K,V> boolean isEmpty(Map<K,V> map) {
         return (map == null || map.isEmpty());
     }
 
@@ -51,9 +51,9 @@ public class WsListUtils {
             return true;
         }
         if (obj instanceof Collection) {
-            return ((Collection<?>) obj).size() == 0;
+            return ((Collection<?>) obj).isEmpty();
         } else if (obj instanceof Map) {
-            return ((Map<?, ?>) obj).size() == 0;
+            return ((Map<?, ?>) obj).isEmpty();
         } else {
             if (obj.getClass().isArray()) {
                 if (BaseTypeCommon.verifyArray(obj.getClass())) {
@@ -73,7 +73,7 @@ public class WsListUtils {
      * @param collection 集合
      * @return 布尔
      */
-    public static boolean isNotEmpty(Collection collection) {
+    public static <T> boolean isNotEmpty(Collection<T> collection) {
         return !isEmpty(collection);
     }
 
@@ -83,7 +83,7 @@ public class WsListUtils {
      * @param map 集合
      * @return 布尔
      */
-    public static boolean isNotEmpty(Map map) {
+    public static <K,V> boolean isNotEmpty(Map<K,V> map) {
         return !isEmpty(map);
     }
 

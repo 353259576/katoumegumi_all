@@ -9,7 +9,7 @@ import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
 import ${packageName}${baseSearchVOName}.${table.entityName}SearchVO;
 </#if>
 </#if>
-import cn.katoumegumi.java.common.WsListUtils;
+import cn.katoumegumi.java.common.WsCollectionUtils;
 import org.springframework.transaction.annotation.Transactional;
 import ${packageName}${baseEntityName}.${table.entityName};
 import ${packageName}${baseServiceName}.${table.entityName}Service;

@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.sql.common;
 
+import cn.katoumegumi.java.sql.model.component.SqlStringAndParameters;
+
 public interface SqlCommonConstants {
 
     String PLACEHOLDER = "?";
@@ -99,5 +101,17 @@ public interface SqlCommonConstants {
      * 表示空值
      */
     NullValue NULL_VALUE = new NullValue();
+
+    String EMPTY_STRING = "";
+
+    /**
+     * 条件为空
+     */
+    SqlStringAndParameters EMPTY_SQL_STRING_AND_PARAMETERS = new SqlStringAndParameters(null, null, 0, ValueTypeConstants.NULL_TYPE);
+
+    /**
+     * null值
+     */
+    SqlStringAndParameters NULL_VALUE_SQL_STRING_AND_PARAMETERS = new SqlStringAndParameters(null, null, 1, ValueTypeConstants.NULL_VALUE_MODEL);
 
 }

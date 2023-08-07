@@ -126,7 +126,7 @@ public class ExcelGenerator<T> {
     }
 
     public byte[] build() {
-        if (WsListUtils.isEmpty(excelColumnPropertyList)) {
+        if (WsCollectionUtils.isEmpty(excelColumnPropertyList)) {
             throw new RuntimeException("行配置为空");
         }
         Thread currentThread = Thread.currentThread();

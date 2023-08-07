@@ -130,7 +130,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //                joinClassFieldList.add(field);
 //            }
 //        }
-//        if (WsListUtils.isNotEmpty(baseTypeFieldList)) {
+//        if (WsCollectionUtils.isNotEmpty(baseTypeFieldList)) {
 //            for (Field field : baseTypeFieldList) {
 //                FieldColumnRelation fieldColumnRelation = createFieldColumnRelation(field);
 //                fieldColumnRelationMapper.putFieldColumnRelationMap(field.getName(), fieldColumnRelation);
@@ -144,7 +144,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //
 //        FieldColumnRelationMapperFactory.putIncompleteMapper(clazz, fieldColumnRelationMapper);
 //
-//        if (WsListUtils.isNotEmpty(joinClassFieldList)) {
+//        if (WsCollectionUtils.isNotEmpty(joinClassFieldList)) {
 //            for (Field field : joinClassFieldList) {
 //                fieldColumnRelationMapper.getFieldJoinClasses().add(createFieldJoinClass(fieldColumnRelationMapper, field));
 //            }
@@ -161,7 +161,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //        String columnName = null;
 //        boolean getId = false;
 //        boolean getColumn = false;
-//        if (WsListUtils.isNotEmpty(annotations)) {
+//        if (WsCollectionUtils.isNotEmpty(annotations)) {
 //            for (Annotation annotation : annotations) {
 //                if (!getColumn) {
 //                    if (annotation instanceof Column) {

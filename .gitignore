@@ -16,3 +16,4 @@ work
 test/logs
 yarn.lock
 .flattened-pom.xml
+.fleet
