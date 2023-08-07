@@ -4,10 +4,10 @@ import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsCollectionUtils;
 import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsStreamUtils;
-import cn.katoumegumi.java.sql.handle.MysqlHandler;
-import cn.katoumegumi.java.sql.handle.model.InsertSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.SelectSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.SqlParameter;
+import cn.katoumegumi.java.sql.handler.SqlEntityFactory;
+import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.SqlParameter;
 import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
 import cn.katoumegumi.java.sql.resultSet.strategys.JdkResultSet;
 
@@ -30,7 +30,7 @@ public class BaseDataSourceUtils {
 
     public <T> List<T> selectList(MySearchList mySearchList) {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        SelectSqlEntity entity = MysqlHandler.handleSelect(sqlModelFactory.createSelectModel());
+        SelectSqlEntity entity = SqlEntityFactory.createSelectSqlEntity(sqlModelFactory.createSelectModel());
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;

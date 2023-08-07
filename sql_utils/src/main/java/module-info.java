@@ -11,14 +11,15 @@ module cn.katoumegumi.java.sql.utils {
     exports cn.katoumegumi.java.sql.common;
     exports cn.katoumegumi.java.sql.entity;
     exports cn.katoumegumi.java.sql.annotation;
-    exports cn.katoumegumi.java.sql.handle;
+    exports cn.katoumegumi.java.sql.handler;
     exports cn.katoumegumi.java.sql.resultSet;
     exports cn.katoumegumi.java.sql.resultSet.strategys;
     exports cn.katoumegumi.java.sql.page;
-    exports cn.katoumegumi.java.sql.handle.model;
+    exports cn.katoumegumi.java.sql.handler.model;
     exports cn.katoumegumi.java.sql.mapper.factory;
     exports cn.katoumegumi.java.sql.mapper.model;
     exports cn.katoumegumi.java.sql.model.result;
     exports cn.katoumegumi.java.sql.model.component;
     exports cn.katoumegumi.java.sql.model.condition;
+    exports cn.katoumegumi.java.sql.mapper.factory.strategys;
 }

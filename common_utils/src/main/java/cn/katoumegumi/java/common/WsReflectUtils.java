@@ -165,7 +165,7 @@ public class WsReflectUtils {
             if (child.isInterface()) {
                 return false;
             } else {
-                Class parentClazz = child.getSuperclass();
+                Class<?> parentClazz = child.getSuperclass();
                 return classCompare(parentClazz, parent);
             }
         }
@@ -719,7 +719,7 @@ public class WsReflectUtils {
                 Method getMethod = (Method) objects[1];
                 MethodHandle getMethodHandle = lookup.unreflect(getMethod);
                 Method setMethod = objects[2] == null ? null :  (Method) objects[2];
-                MethodHandle setMethodHandle = objects[2] == null ? null : lookup.unreflect(setMethod);
+                MethodHandle setMethodHandle = setMethod == null ? null : lookup.unreflect(setMethod);
                 beanPropertyModelMap.put(stringEntry.getKey(),new BeanPropertyModel(stringEntry.getKey(),(Field) objects[0],getMethod,getMethodHandle,setMethod,setMethodHandle));
             }catch (IllegalAccessException e){
                 throw new RuntimeException(e);

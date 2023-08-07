@@ -31,8 +31,11 @@ public class DataSourceConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceConfig.class);
 
-    @Autowired
-    private DataSourcePropertiesList dataSourcePropertiesList;
+    private final DataSourcePropertiesList dataSourcePropertiesList;
+
+    public DataSourceConfig(DataSourcePropertiesList dataSourcePropertiesList) {
+        this.dataSourcePropertiesList = dataSourcePropertiesList;
+    }
 
     @Primary
     @Bean(name = "dataSource")
@@ -49,7 +52,7 @@ public class DataSourceConfig {
     public DynamicDataSource defaultDataSource() {
         DruidDataSourceCreateFactory factory = new DruidDataSourceCreateFactory();
         DynamicDataSource dynamicDataSource = new DynamicDataSource();
-        Map map = new HashMap<>();
+        Map<Object,Object> map = new HashMap<>();
         List<DruidDataSourceProperties> list = dataSourcePropertiesList.getDruids();
         DruidDataSourceProperties properties = list.get(0);
         DataSource druidDataSource = factory.initDatasource(properties, dataSourcePropertiesList.isSeataEnable());

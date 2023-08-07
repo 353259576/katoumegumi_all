@@ -14,9 +14,9 @@ import cn.katoumegumi.java.sql.entity.ExistEntityInfo;
 import cn.katoumegumi.java.sql.entity.FieldColumnRelationMapperName;
 import cn.katoumegumi.java.sql.entity.MapperDictTree;
 import cn.katoumegumi.java.sql.entity.ReturnEntityId;
-import cn.katoumegumi.java.sql.handle.model.InsertSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.SqlParameter;
-import cn.katoumegumi.java.sql.handle.model.UpdateSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.SqlParameter;
+import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
@@ -216,7 +216,6 @@ public class SQLModelFactory {
      * @return
      */
     public <T> InsertSqlEntity createInsertSqlEntity(T t) {
-        InsertSqlEntity entity = new InsertSqlEntity();
         FieldColumnRelationMapper fieldColumnRelationMapper = analysisClassRelation(mainClass);
         List<FieldColumnRelation> fieldColumnRelationList = fieldColumnRelationMapper.getFieldColumnRelations();
         List<FieldColumnRelation> validList = new ArrayList<>();
@@ -256,7 +255,8 @@ public class SQLModelFactory {
         }
 
         String insertSql = SqlCommonConstants.INSERT_INTO + guardKeyword(fieldColumnRelationMapper.getTableName()) + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(columnNameList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS + SqlCommonConstants.VALUE + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(placeholderList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS;
-        entity.setInsertSql(insertSql);
+        InsertSqlEntity entity = new InsertSqlEntity(insertSql);
+        //entity.setInsertSql(insertSql);
         entity.setUsedField(validList);
         entity.setIdList(fieldColumnRelationMapper.getIds());
         entity.setValueList(valueList);
@@ -323,9 +323,10 @@ public class SQLModelFactory {
             }
             placeholderList.add(placeholderSql);
         }
-        InsertSqlEntity insertSqlEntity = new InsertSqlEntity();
+
         String insertSql = SqlCommonConstants.INSERT_INTO + guardKeyword(fieldColumnRelationMapper.getTableName()) + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(columnNameList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS + SqlCommonConstants.VALUE + WsStringUtils.jointListString(placeholderList, ",");
-        insertSqlEntity.setInsertSql(insertSql);
+        InsertSqlEntity insertSqlEntity = new InsertSqlEntity(insertSql);
+        //insertSqlEntity.setInsertSql(insertSql);
         insertSqlEntity.setUsedField(validField);
         insertSqlEntity.setIdList(fieldColumnRelationMapper.getIds());
         insertSqlEntity.setValueList(valueList);
@@ -519,7 +520,7 @@ public class SQLModelFactory {
             return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
         }
         FieldColumnRelationMapper mapper = mapperDictTree.getCurrentMapperName().getMapper();
-        if (mapper.getIds().size() == 0) {
+        if (mapper.getIds().isEmpty()) {
             //没有id数据不能合并
             return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
         }
@@ -546,7 +547,7 @@ public class SQLModelFactory {
             value = WsBeanUtils.createObject(mapper.getClazz());
             fillObjectValue(value, ids, location[0], columnRelationList);
             fillObjectValue(value, resultSet, location[1], columnRelationList);
-            if(mapperDictTree.getChildMap().size() == 0){
+            if(mapperDictTree.getChildMap().isEmpty()){
                 tripleEntity = new TripleEntity<>(value,null,null);
             }else {
                 tripleEntity = new TripleEntity<>(value, new Object[mapperDictTree.getChildMap().size()],new ExistEntityInfo[mapperDictTree.getChildMap().size()]);

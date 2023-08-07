@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BeanPropertyModel {
@@ -35,8 +36,8 @@ public class BeanPropertyModel {
         this.getMethod = getMethod;
         this.getMethodHandle = getMethodHandle.asType(getMethodHandle.type().generic());
         this.setMethod = setMethod;
-        this.setMethodHandle = setMethodHandle.asType(setMethodHandle.type().generic());
-        Type propertyType = null;
+        this.setMethodHandle = setMethodHandle == null?null:setMethodHandle.asType(setMethodHandle.type().generic());
+        Type propertyType;
         if (this.field != null){
             this.propertyClass = this.field.getType();
             propertyType = this.field.getGenericType();
@@ -96,19 +97,13 @@ public class BeanPropertyModel {
     public List<Annotation> getAnnotations(){
         List<Annotation> list = new ArrayList<>();
         if (this.field != null){
-            for (Annotation annotation : this.field.getAnnotations()) {
-                list.add(annotation);
-            }
+            list.addAll(Arrays.asList(this.field.getAnnotations()));
         }
         if (this.getMethod != null){
-            for (Annotation annotation : this.getMethod.getAnnotations()) {
-                list.add(annotation);
-            }
+            list.addAll(Arrays.asList(this.getMethod.getAnnotations()));
         }
         if (this.setMethod != null){
-            for (Annotation annotation : this.setMethod.getAnnotations()) {
-                list.add(annotation);
-            }
+            list.addAll(Arrays.asList(this.setMethod.getAnnotations()));
         }
         return list;
     }

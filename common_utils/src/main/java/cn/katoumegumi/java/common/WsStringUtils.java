@@ -669,8 +669,8 @@ public class WsStringUtils {
         int needAddW = 0;
         //是否需要添加0
         int needAddZ = 0;
-        for (int i = 0; i < cLength; i++) {
-            cnNumberNameIndex = numChars[i] - 48;
+        for (char numChar : numChars) {
+            cnNumberNameIndex = numChar - 48;
             //当数字为0时
             if (cnNumberNameIndex == 0) {
                 if (decimalismIndex == 8) {

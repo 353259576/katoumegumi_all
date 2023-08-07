@@ -20,7 +20,7 @@ public class ConvertToCharacter implements ConvertBean<Character> {
     }
 
     public Character convertBean(String bean) {
-        if (bean.length() == 0) {
+        if (bean.isEmpty()) {
             return null;
         } else {
             return bean.charAt(0);

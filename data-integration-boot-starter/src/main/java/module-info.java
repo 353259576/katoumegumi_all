@@ -22,4 +22,5 @@ module cn.katoumegumi.java.data.integration.boot.starter {
     exports cn.katoumegumi.java.starter.jdbc.config;
     exports cn.katoumegumi.java.starter.jdbc.datasource;
     exports cn.katoumegumi.java.starter.jdbc.properties;
+    exports cn.katoumegumi.java.starter.jdbc.datasource.annotation;
 }

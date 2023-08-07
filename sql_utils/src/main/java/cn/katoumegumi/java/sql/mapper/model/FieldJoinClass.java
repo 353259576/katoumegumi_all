@@ -20,8 +20,6 @@ public class FieldJoinClass {
     private final Class<?> joinClass;
 
 
-    //private final Field field;
-
     private final BeanPropertyModel beanProperty;
 
     /**

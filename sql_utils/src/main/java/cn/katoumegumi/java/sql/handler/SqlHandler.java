@@ -1,8 +1,8 @@
-package cn.katoumegumi.java.sql.handle;
+package cn.katoumegumi.java.sql.handler;
 
-import cn.katoumegumi.java.sql.handle.model.DeleteSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.SelectSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.UpdateSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.DeleteSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.model.result.DeleteModel;
 import cn.katoumegumi.java.sql.model.result.SelectModel;
 import cn.katoumegumi.java.sql.model.result.UpdateModel;

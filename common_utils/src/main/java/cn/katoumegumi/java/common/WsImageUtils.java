@@ -133,7 +133,6 @@ public class WsImageUtils {
                 inputStream.close();
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
             }
         }
         return bytes;

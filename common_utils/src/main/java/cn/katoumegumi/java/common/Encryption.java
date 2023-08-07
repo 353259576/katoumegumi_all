@@ -431,9 +431,9 @@ public class Encryption {
      */
     private static String byteHexToString(byte[] bytes) {
         StringBuilder stringBuffer = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            stringBuffer.append(HEX_DIGITS[(bytes[i] >> 4) & 0x0f]);
-            stringBuffer.append(HEX_DIGITS[bytes[i] & 0x0f]);
+        for (byte aByte : bytes) {
+            stringBuffer.append(HEX_DIGITS[(aByte >> 4) & 0x0f]);
+            stringBuffer.append(HEX_DIGITS[aByte & 0x0f]);
         }
         return stringBuffer.toString();
     }

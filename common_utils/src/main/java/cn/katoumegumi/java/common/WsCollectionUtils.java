@@ -9,6 +9,7 @@ import java.util.function.Function;
  */
 public class WsCollectionUtils {
 
+    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
     /**
      * 判断是不是为空
@@ -261,31 +262,35 @@ public class WsCollectionUtils {
     /**
      * 合并两个数组成一个新的数组
      *
-     * @param list1
-     * @param list2
+     * @param array1
+     * @param array2
      * @param <T>
      * @return
      */
-    public static <T> T[] mergeList(T[] list1, T[] list2) {
-        if (list1 == null || list2 == null || list1.length == 0 || list2.length == 0) {
-            if (!(list1 == null || list1.length == 0)) {
-                return list1;
-            }
-            if (!(list2 == null || list2.length == 0)) {
-                return list2;
-            }
+    public static <T> T[] mergeList(T[] array1, T[] array2) {
+        int l1 = array1 == null?0:array1.length;
+        int l2 = array2 == null?0:array2.length;
+        int l = l1 + l2;
+        if (l == 0){
+            return (T[]) EMPTY_OBJECT_ARRAY;
         }
-        T[] list = (T[]) new Object[list1.length + list2.length];
+        if (l1 == 0){
+            return array2;
+        }
+        if (l2 == 0){
+            return array1;
+        }
+        T[] array = (T[]) new Object[l];
         int k = 0;
-        for (int i = 0; i < list1.length; i++) {
-            list[k] = list1[i];
+        for (T t : array1) {
+            array[k] = t;
             k++;
         }
-        for (int i = 0; i < list2.length; i++) {
-            list[k] = list2[i];
+        for (T t : array2) {
+            array[k] = t;
             k++;
         }
-        return list;
+        return array;
     }
 
     /**

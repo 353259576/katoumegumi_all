@@ -5,11 +5,11 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-public class WsTranactionUtils {
+public class WsTransactionUtils {
 
     private final PlatformTransactionManager platformTransactionManager;
 
-    public WsTranactionUtils(PlatformTransactionManager platformTransactionManager) {
+    public WsTransactionUtils(PlatformTransactionManager platformTransactionManager) {
         this.platformTransactionManager = platformTransactionManager;
     }
 

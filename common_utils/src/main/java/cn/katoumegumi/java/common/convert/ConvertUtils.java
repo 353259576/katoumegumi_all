@@ -2,6 +2,9 @@ package cn.katoumegumi.java.common.convert;
 
 import cn.katoumegumi.java.common.BaseTypeCommon;
 import cn.katoumegumi.java.common.WsBeanUtils;
+import cn.katoumegumi.java.common.WsCollectionUtils;
+import cn.katoumegumi.java.common.WsReflectUtils;
+import cn.katoumegumi.java.common.model.GenericsTypeModel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,15 +12,14 @@ import java.util.Map;
 public class ConvertUtils {
 
     private static Class<?> getClass(Class<?> c) {
-        String className = c.getGenericInterfaces()[0].getTypeName();
-        int start = className.indexOf("<");
-        int end = className.lastIndexOf(">");
-        if (start > -1 && end > -1) {
-            try {
-                return Class.forName(className.substring(start + 1, end));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+        GenericsTypeModel genericsTypeModel = WsReflectUtils.getGenericsType(c.getGenericInterfaces()[0].getTypeName());
+        if (WsCollectionUtils.isEmpty(genericsTypeModel.getGenericsTypeModelList())){
+            return null;
+        }
+        try {
+            return Class.forName(genericsTypeModel.getGenericsTypeModelList().get(0).getClassName());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
         return null;
     }

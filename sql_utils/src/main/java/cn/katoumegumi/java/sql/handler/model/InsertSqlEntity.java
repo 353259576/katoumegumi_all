@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.sql.handle.model;
+package cn.katoumegumi.java.sql.handler.model;
 
 import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
 
@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class InsertSqlEntity {
 
-    private String insertSql;
+    private final String insertSql;
 
     private List<FieldColumnRelation> usedField;
 
@@ -17,13 +17,17 @@ public class InsertSqlEntity {
 
     private List<SqlParameter> valueList;
 
+    public InsertSqlEntity(String insertSql) {
+        this.insertSql = insertSql;
+    }
+
     public String getInsertSql() {
         return insertSql;
     }
 
-    public void setInsertSql(String insertSql) {
+    /*public void setInsertSql(String insertSql) {
         this.insertSql = insertSql;
-    }
+    }*/
 
     public List<SqlParameter> getValueList() {
         return valueList;

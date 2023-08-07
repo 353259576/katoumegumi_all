@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.sql.handle.model;
+package cn.katoumegumi.java.sql.handler.model;
 
 import java.util.List;
 import java.util.Map;

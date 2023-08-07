@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.sql.handle;
+package cn.katoumegumi.java.sql.handler;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsCollectionUtils;
@@ -6,10 +6,10 @@ import cn.katoumegumi.java.sql.SQLModelFactory;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.ValueTypeConstants;
-import cn.katoumegumi.java.sql.handle.model.DeleteSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.SelectSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.SqlParameter;
-import cn.katoumegumi.java.sql.handle.model.UpdateSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.DeleteSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.SqlParameter;
+import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.model.component.*;
 import cn.katoumegumi.java.sql.model.condition.*;
 import cn.katoumegumi.java.sql.model.result.DeleteModel;
@@ -21,18 +21,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MysqlHandler {
+public class MysqlSqlHandler implements SqlHandler{
 
-
-
-    /**
-     * 处理select语句
-     * @param selectModel
-     * @return
-     */
-    public static SelectSqlEntity handleSelect(SelectModel selectModel) {
-
-
+    @Override
+    public SelectSqlEntity select(SelectModel selectModel) {
         List<SqlParameter> valueList = new ArrayList<>();
 
         //处理column
@@ -152,8 +144,8 @@ public class MysqlHandler {
         return entity;
     }
 
-
-    public static DeleteSqlEntity handleDelete(DeleteModel deleteModel) {
+    @Override
+    public DeleteSqlEntity delete(DeleteModel deleteModel) {
         List<SqlParameter> valueList = new ArrayList<>();
 
         String mainTableAlias = SQLModelFactory.guardKeyword(deleteModel.getFrom().getAlias());
@@ -189,7 +181,8 @@ public class MysqlHandler {
         return new DeleteSqlEntity(sql, valueList);
     }
 
-    public static UpdateSqlEntity handleUpdate(UpdateModel updateModel) {
+    @Override
+    public UpdateSqlEntity update(UpdateModel updateModel) {
         List<SqlParameter> valueList = new ArrayList<>();
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
@@ -437,7 +430,7 @@ public class MysqlHandler {
             case ValueTypeConstants.ARRAY_TYPE:
                 return new SqlStringAndParameters(null, value, ((Object[]) value).length, ValueTypeConstants.ARRAY_TYPE);
             case ValueTypeConstants.SELECT_MODEL_TYPE:
-                SelectSqlEntity entity = MysqlHandler.handleSelect((SelectModel) value);
+                SelectSqlEntity entity = SqlEntityFactory.createSelectSqlEntity((SelectModel) value);
                 return new SqlStringAndParameters(entity.getSelectSql(), entity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList()), entity.getValueList().size());
             case ValueTypeConstants.COLUMN_NAME_TYPE:
                 BaseTableColumn baseTableColumn = (BaseTableColumn) value;
@@ -577,11 +570,5 @@ public class MysqlHandler {
         stringBuilder.append(placeholderStr);
         return stringBuilder.toString();
     }
-
-
-    private static void handleUpdateCondition(List<Condition> conditionList) {
-
-    }
-
 
 }

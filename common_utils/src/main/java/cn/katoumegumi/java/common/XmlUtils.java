@@ -139,7 +139,8 @@ public class XmlUtils {
                 int nlLength = nl.getLength();
                 if (nlLength == 0) {
                     continue;
-                } else if (nlLength == 1) {
+                }
+                if (nlLength == 1) {
                     Node childNode = nl.item(0);
                     if (childNode.getNodeType() == Node.TEXT_NODE) {
                         map.put(e.getNodeName(), childNode.getNodeValue());
@@ -164,7 +165,7 @@ public class XmlUtils {
 
             }
         }
-        if (map.size() > 0) {
+        if (!map.isEmpty()) {
             return map;
         } else {
             return null;

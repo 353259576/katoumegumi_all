@@ -4,16 +4,16 @@ import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.common.model.KeyValue;
 import cn.katoumegumi.java.sql.*;
-import cn.katoumegumi.java.sql.handle.MysqlHandler;
-import cn.katoumegumi.java.sql.handle.model.DeleteSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.InsertSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.SelectSqlEntity;
-import cn.katoumegumi.java.sql.handle.model.UpdateSqlEntity;
+import cn.katoumegumi.java.sql.handler.SqlEntityFactory;
+import cn.katoumegumi.java.sql.handler.model.DeleteSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
+import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.resultSet.strategys.JdkResultSet;
 import cn.katoumegumi.java.sql.model.component.SqlLimit;
-import cn.katoumegumi.java.sql.handle.model.SqlParameter;
+import cn.katoumegumi.java.sql.handler.model.SqlParameter;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -148,7 +148,7 @@ public class WsJdbcUtils {
             return 0;
         }
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        UpdateSqlEntity updateSqlEntity = MysqlHandler.handleUpdate(sqlModelFactory.createUpdateModel());
+        UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel());
         log.debug(updateSqlEntity.getUpdateSql());
         return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
     }
@@ -162,7 +162,7 @@ public class WsJdbcUtils {
         int index = 0;
         for (MySearchList mySearchList : mySearchLists) {
             SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-            UpdateSqlEntity updateSqlEntity = MysqlHandler.handleUpdate(sqlModelFactory.createUpdateModel());
+            UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel());
             KeyValue<List<Object[]>,List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(),new ArrayList<>()));
             keyValue.getKey().add(WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
             keyValue.getValue().add(index++);
@@ -213,7 +213,7 @@ public class WsJdbcUtils {
     public int delete(MySearchList mySearchList) {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         //DeleteSqlEntity deleteSqlEntity = sqlModelFactory.delete();
-        DeleteSqlEntity deleteSqlEntity = MysqlHandler.handleDelete(sqlModelFactory.createDeleteModel());
+        DeleteSqlEntity deleteSqlEntity = SqlEntityFactory.createDeleteSqlEntity(sqlModelFactory.createDeleteModel());
         log.debug(deleteSqlEntity.getDeleteSql());
         return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(), WsCollectionUtils.listToArray(deleteSqlEntity.getValueList(), SqlParameter::getValue));
     }
@@ -228,7 +228,7 @@ public class WsJdbcUtils {
      */
     public <T> List<T> getListT(MySearchList mySearchList) {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        SelectSqlEntity selectSqlEntity = MysqlHandler.handleSelect(sqlModelFactory.createSelectModel());
+        SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(sqlModelFactory.createSelectModel());
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
         List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
@@ -303,7 +303,7 @@ public class WsJdbcUtils {
      */
     public <T> IPage<T> getTPage(MySearchList mySearchList) {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        SelectSqlEntity selectSqlEntity = MysqlHandler.handleSelect(sqlModelFactory.createSelectModel());
+        SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(sqlModelFactory.createSelectModel());
         String sql = selectSqlEntity.getSelectSql();
         log.debug(sql);
         String countSql = selectSqlEntity.getCountSql();

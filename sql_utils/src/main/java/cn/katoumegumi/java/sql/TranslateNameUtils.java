@@ -336,7 +336,7 @@ public class TranslateNameUtils {
                 locationList.add(new int[]{startIndex, i});
             }
         }
-        if (locationList.size() == 0) {
+        if (locationList.isEmpty()) {
             return searchSql;
         } else {
             startIndex = 0;
