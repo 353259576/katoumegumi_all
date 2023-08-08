@@ -77,7 +77,7 @@ public class ConvertUtils {
         if (convertBean == null) {
             return WsBeanUtils.convertBean(o, tClass);
         } else {
-            return (T) convertBean.convert(o);
+            return convertBean.convert(o);
         }
     }
 

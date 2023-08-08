@@ -33,7 +33,7 @@ public class VertxResultSet implements WsResultSet {
      * @return
      */
     @Override
-    public int getColumnCount() throws SQLException {
+    public int getColumnCount() {
         return columnNames.size();
     }
 
@@ -44,7 +44,7 @@ public class VertxResultSet implements WsResultSet {
      * @return
      */
     @Override
-    public String getColumnLabel(int columnIndex) throws SQLException {
+    public String getColumnLabel(int columnIndex) {
         return columnNames.get(columnIndex - 1);
     }
 
@@ -54,7 +54,7 @@ public class VertxResultSet implements WsResultSet {
      * @return
      */
     @Override
-    public boolean next() throws SQLException {
+    public boolean next() {
         this.index = this.index + 1;
         if (index < size){
             cacheJsonArray = results.get(index);
@@ -72,7 +72,7 @@ public class VertxResultSet implements WsResultSet {
      * @return
      */
     @Override
-    public Object getObject(int index) throws SQLException {
+    public Object getObject(int index) {
         return cacheJsonArray.getValue(index - 1);
     }
 }

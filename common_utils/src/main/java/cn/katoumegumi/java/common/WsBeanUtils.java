@@ -98,17 +98,18 @@ public class WsBeanUtils {
                         }
                     }
                 }
-            } else if (isArray(sourceField.getType())) {
                 continue;
-            } else if (isArray(targetField.getType())) {
+            }
+
+            if (isArray(sourceField.getType()) || isArray(targetField.getType())) {
                 continue;
-            } else if (WsReflectUtils.classCompare(sourceField.getType(), targetField.getType())) {
+            }
+
+            if (WsReflectUtils.classCompare(sourceField.getType(), targetField.getType())) {
                 sourceValue = WsReflectUtils.getValue(o, sourceField);
                 if (sourceValue != null) {
                     WsReflectUtils.setValue(target, objectToT(sourceValue, targetField.getType()), targetField);
                 }
-            } else {
-                continue;
             }
         }
         return target;
@@ -124,7 +125,7 @@ public class WsBeanUtils {
     public static <T extends Serializable> T cloneBean(T object) {
         try {
             byte[] bytes = serializeObject(object);
-            return (T) deSerializeObject(bytes);
+            return deSerializeObject(bytes);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -436,7 +437,7 @@ public class WsBeanUtils {
                 }
             } else {
                 if (o.getClass().equals(tClass)) {
-                    return (T[]) o;
+                    return o;
                 } else {
                     Object[] objects = (Object[]) o;
                     return objectArrayToTArray(tClass, objects);

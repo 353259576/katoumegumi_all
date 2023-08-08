@@ -46,7 +46,7 @@ public class BaseDataSourceUtils {
                 preparedStatement.setObject(i + 1, o);
             }
             resultSet = preparedStatement.executeQuery();
-            return (List<T>) sqlModelFactory.convertResult(new JdkResultSet(resultSet));
+            return sqlModelFactory.convertResult(new JdkResultSet(resultSet));
         } catch (SQLException exception) {
             exception.printStackTrace();
         } finally {

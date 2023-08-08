@@ -555,11 +555,7 @@ public class WsStringUtils {
      * @return
      */
     public static boolean isChinese(char c) {
-        if (c >= 19968 && c <= 40869) {
-            return true;
-        } else {
-            return false;
-        }
+        return c >= 19968 && c <= 40869;
     }
 
     /**

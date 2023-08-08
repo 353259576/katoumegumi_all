@@ -7,7 +7,7 @@ public class DynamicDataSourceHolder {
 
     public static final ThreadLocal<String> THREAD_LOCAL = new ThreadLocal<>();
     public static String defaultDataSource;
-    public static Set<String> dataSourceNameSet = new HashSet<>();
+    public static final Set<String> dataSourceNameSet = new HashSet<>();
 
     public static String getDataSource() {
 
