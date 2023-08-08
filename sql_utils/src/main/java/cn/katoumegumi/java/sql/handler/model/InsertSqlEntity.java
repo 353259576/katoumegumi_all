@@ -25,10 +25,6 @@ public class InsertSqlEntity {
         return insertSql;
     }
 
-    /*public void setInsertSql(String insertSql) {
-        this.insertSql = insertSql;
-    }*/
-
     public List<SqlParameter> getValueList() {
         return valueList;
     }

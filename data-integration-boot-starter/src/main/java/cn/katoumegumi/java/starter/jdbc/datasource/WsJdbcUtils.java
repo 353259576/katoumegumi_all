@@ -237,7 +237,7 @@ public class WsJdbcUtils {
 
     private <T> List<T> queryList(String sql, List<Object> parameterList, SQLModelFactory sqlModelFactory) {
         return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), rs -> {
-            return sqlModelFactory.margeMap(new JdkResultSet(rs));
+            return sqlModelFactory.convertResult(new JdkResultSet(rs));
         });
     }
 

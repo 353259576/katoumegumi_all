@@ -23,10 +23,7 @@ import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
 import cn.katoumegumi.java.sql.mapper.model.FieldJoinClass;
 import cn.katoumegumi.java.sql.model.component.*;
 import cn.katoumegumi.java.sql.model.condition.*;
-import cn.katoumegumi.java.sql.model.result.DeleteModel;
-import cn.katoumegumi.java.sql.model.result.SelectModel;
-import cn.katoumegumi.java.sql.model.result.TableModel;
-import cn.katoumegumi.java.sql.model.result.UpdateModel;
+import cn.katoumegumi.java.sql.model.result.*;
 import cn.katoumegumi.java.sql.resultSet.WsResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -396,9 +393,9 @@ public class SQLModelFactory {
      * @param <T>
      * @return
      */
-    public <T> List<T> margeMap(WsResultSet resultSet) {
+    public <T> List<T> convertResult(WsResultSet resultSet) {
         if (WsCollectionUtils.isEmpty(mySearchList.getColumnNameList())) {
-            return oneLoopMargeMap2(resultSet);
+            return convertMultiResult(resultSet);
         } else {
             List<Object> tList = new ArrayList<>();
             TableColumn tableColumn = this.cacheSelectModel.getSelect().get(0);
@@ -417,7 +414,7 @@ public class SQLModelFactory {
     }
 
 
-    public <T> List<T> oneLoopMargeMap2(WsResultSet resultSet) {
+    private  <T> List<T> convertMultiResult(WsResultSet resultSet) {
         try {
             final int length = resultSet.getColumnCount();
             if (length == 0) {
@@ -755,6 +752,25 @@ public class SQLModelFactory {
         List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, null, true, true);
         RelationCondition where = handleWhere(rootPath, mainMapper, this.mySearchList);
         return new DeleteModel(from, joinTableModelList, where);
+    }
+
+    /**
+     * 生成InsertModel
+     * @return
+     */
+    public InsertModel createInsertModel(){
+        final FieldColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
+        final String rootPath = mainMapper.getNickName();
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
+        List<TableColumn> idList = new ArrayList<>(mainMapper.getIds().size());
+        List<TableColumn> tableColumnList = new ArrayList<>(mainMapper.getFieldColumnRelations().size());
+        for (FieldColumnRelation id : mainMapper.getIds()) {
+            idList.add(translateNameUtils.createColumnBaseEntity(id, mainMapper, rootPath));
+        }
+        for (FieldColumnRelation fieldColumnRelation : mainMapper.getFieldColumnRelations()) {
+            tableColumnList.add(translateNameUtils.createColumnBaseEntity(fieldColumnRelation,mainMapper,rootPath));
+        }
+        return new InsertModel(from,idList,tableColumnList);
     }
 
     /**
