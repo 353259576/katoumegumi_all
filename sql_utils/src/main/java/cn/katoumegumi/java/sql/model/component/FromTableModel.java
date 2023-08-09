@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql.model.component;
 
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 import cn.katoumegumi.java.sql.model.result.TableModel;
 
 /**
@@ -8,7 +8,7 @@ import cn.katoumegumi.java.sql.model.result.TableModel;
  */
 public class FromTableModel extends TableModel {
 
-    public FromTableModel(FieldColumnRelationMapper table, String alias) {
+    public FromTableModel(PropertyColumnRelationMapper table, String alias) {
         super(table, alias);
     }
 }

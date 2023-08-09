@@ -1,9 +1,9 @@
 package cn.katoumegumi.java.sql.mapper.factory.strategys;
 
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
-import cn.katoumegumi.java.sql.mapper.model.FieldJoinClass;
+import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 
 import java.util.Optional;
 
@@ -31,7 +31,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
      * @param clazz
      * @return
      */
-    Optional<FieldColumnRelationMapper> getTableName(Class<?> clazz);
+    Optional<PropertyColumnRelationMapper> getTableName(Class<?> clazz);
 
     /**
      * 是否需要过滤
@@ -48,7 +48,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
      * @param beanProperty
      * @return
      */
-    Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty);
+    Optional<PropertyColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty);
 
     /**
      * 获取关联列对应关系
@@ -58,7 +58,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
      * @param beanProperty
      * @return key为主表列表 value为关联表列
      */
-    Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty);
+    Optional<ObjectPropertyJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty);
 
 //    /**
 //     * 处理当前数据
@@ -66,7 +66,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
 //     * @param allowIncomplete
 //     * @return
 //     */
-//    FieldColumnRelationMapper analysisClassRelation(Class<?> clazz, boolean allowIncomplete);
+//    PropertyColumnRelationMapper analysisClassRelation(Class<?> clazz, boolean allowIncomplete);
 
 
 }

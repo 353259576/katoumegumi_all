@@ -2,7 +2,7 @@ package cn.katoumegumi.java.sql.model.component;
 
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.SQLModelFactory;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
 
 /**
  * 基本表列
@@ -17,11 +17,11 @@ public class BaseTableColumn implements TableColumn {
 
     private final String tableAlias;
 
-    private final FieldColumnRelation fieldColumnRelation;
+    private final PropertyColumnRelation propertyColumnRelation;
 
 
-    public BaseTableColumn(FieldColumnRelation relation, String tableName, String tablePath, String tableAlias) {
-        this.fieldColumnRelation = relation;
+    public BaseTableColumn(PropertyColumnRelation relation, String tableName, String tablePath, String tableAlias) {
+        this.propertyColumnRelation = relation;
         this.tableName = tableName;
         this.tablePath = tablePath;
         this.tableAlias = tableAlias;
@@ -51,12 +51,12 @@ public class BaseTableColumn implements TableColumn {
 
     @Override
     public boolean isId() {
-        return fieldColumnRelation.isId();
+        return propertyColumnRelation.isId();
     }
 
     @Override
     public BeanPropertyModel getBeanProperty() {
-        return fieldColumnRelation.getBeanProperty();
+        return propertyColumnRelation.getBeanProperty();
     }
 
     public String getTableName() {
@@ -74,17 +74,17 @@ public class BaseTableColumn implements TableColumn {
     }
 
     public String getColumnName() {
-        return fieldColumnRelation.getColumnName();
+        return propertyColumnRelation.getColumnName();
     }
 
     @Override
     public String getBeanPropertyName() {
-        return fieldColumnRelation.getBeanProperty().getPropertyName();
+        return propertyColumnRelation.getBeanProperty().getPropertyName();
     }
 
     @Override
-    public FieldColumnRelation getFieldColumnRelation() {
-        return fieldColumnRelation;
+    public PropertyColumnRelation getFieldColumnRelation() {
+        return propertyColumnRelation;
     }
 
     /**

@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.entity;
 
 import cn.katoumegumi.java.common.WsStringUtils;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ public class FieldColumnRelationMapperName {
 
     private final int index;
 
-    private final FieldColumnRelationMapper mapper;
+    private final PropertyColumnRelationMapper mapper;
 
     /**
      * 简称
@@ -34,7 +34,7 @@ public class FieldColumnRelationMapperName {
      */
     private final int[] completeNameSplitSignNameList;
 
-    public FieldColumnRelationMapperName(int index, String abbreviation, String completeName,FieldColumnRelationMapper mapper) {
+    public FieldColumnRelationMapperName(int index, String abbreviation, String completeName, PropertyColumnRelationMapper mapper) {
         this.index = index;
         this.abbreviation = abbreviation;
         this.completeName = completeName;
@@ -79,7 +79,7 @@ public class FieldColumnRelationMapperName {
         return index;
     }
 
-    public FieldColumnRelationMapper getMapper() {
+    public PropertyColumnRelationMapper getMapper() {
         return mapper;
     }
 }

@@ -7,7 +7,7 @@ import cn.katoumegumi.java.common.model.BeanPropertyModel;
  * @author ws
  * 对象参数与数据库列名对应关系
  */
-public class FieldColumnRelation {
+public class PropertyColumnRelation {
     /**
      * 是否为id
      */
@@ -25,7 +25,7 @@ public class FieldColumnRelation {
 
 
 
-    public FieldColumnRelation(boolean id,  String columnName, BeanPropertyModel beanPropertyModel) {
+    public PropertyColumnRelation(boolean id, String columnName, BeanPropertyModel beanPropertyModel) {
         this.id = id;
         this.columnName = columnName;
         this.beanProperty = beanPropertyModel;

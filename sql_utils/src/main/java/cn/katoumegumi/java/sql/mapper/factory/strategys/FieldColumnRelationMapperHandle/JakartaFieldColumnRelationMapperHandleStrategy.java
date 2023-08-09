@@ -6,9 +6,9 @@ import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandleStrategy;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
-import cn.katoumegumi.java.sql.mapper.model.FieldJoinClass;
+import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 import jakarta.persistence.*;
 
 import java.util.Optional;
@@ -38,7 +38,7 @@ public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColu
     }
 
     @Override
-    public Optional<FieldColumnRelationMapper> getTableName(Class<?> clazz) {
+    public Optional<PropertyColumnRelationMapper> getTableName(Class<?> clazz) {
         Table table = clazz.getAnnotation(Table.class);
         if (table == null) {
             return Optional.empty();
@@ -49,7 +49,7 @@ public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColu
         } else {
             tableName = table.name();
         }
-        return Optional.of(new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz));
+        return Optional.of(new PropertyColumnRelationMapper(clazz.getSimpleName(), tableName, clazz));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColu
     }
 
     @Override
-    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
         Id id = beanProperty.getAnnotation(Id.class);
         Column column = beanProperty.getAnnotation(Column.class);
         if (id == null && column == null) {
@@ -71,11 +71,11 @@ public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColu
         } else {
             columnName = column.name();
         }
-        return Optional.of(new FieldColumnRelation(id != null,  columnName, beanProperty));
+        return Optional.of(new PropertyColumnRelation(id != null,  columnName, beanProperty));
     }
 
     @Override
-    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+    public Optional<ObjectPropertyJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
         JoinColumn joinColumn = beanProperty.getAnnotation(JoinColumn.class);
         if (joinColumn == null) {
             return Optional.empty();
@@ -90,17 +90,17 @@ public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColu
         }
         OneToMany oneToMany = beanProperty.getAnnotation(OneToMany.class);
         boolean isArray = WsReflectUtils.isArrayType(beanProperty.getPropertyClass());
-        FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinMapper.getClazz(), beanProperty);
-        fieldJoinClass.setNickName(beanProperty.getPropertyName());
-        fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
+        ObjectPropertyJoinRelation objectPropertyJoinRelation = new ObjectPropertyJoinRelation(isArray, joinMapper.getClazz(), beanProperty);
+        objectPropertyJoinRelation.setNickName(beanProperty.getPropertyName());
+        objectPropertyJoinRelation.setJoinType(TableJoinType.LEFT_JOIN);
         if (oneToMany == null) {
-            fieldJoinClass.setJoinColumn(name);
-            fieldJoinClass.setAnotherJoinColumn(referenced);
-            return Optional.of(fieldJoinClass);
+            objectPropertyJoinRelation.setJoinColumn(name);
+            objectPropertyJoinRelation.setAnotherJoinColumn(referenced);
+            return Optional.of(objectPropertyJoinRelation);
         } else {
-            fieldJoinClass.setJoinColumn(referenced);
-            fieldJoinClass.setAnotherJoinColumn(name);
-            return Optional.of(fieldJoinClass);
+            objectPropertyJoinRelation.setJoinColumn(referenced);
+            objectPropertyJoinRelation.setAnotherJoinColumn(name);
+            return Optional.of(objectPropertyJoinRelation);
         }
     }
 }

@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.model.component;
 
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
 
 public interface TableColumn {
 
@@ -40,6 +40,6 @@ public interface TableColumn {
      */
     String getBeanPropertyName();
 
-    FieldColumnRelation getFieldColumnRelation();
+    PropertyColumnRelation getFieldColumnRelation();
 
 }

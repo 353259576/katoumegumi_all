@@ -1,7 +1,5 @@
 package cn.katoumegumi.java.sql.handler.model;
 
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
-
 import java.util.List;
 
 /***

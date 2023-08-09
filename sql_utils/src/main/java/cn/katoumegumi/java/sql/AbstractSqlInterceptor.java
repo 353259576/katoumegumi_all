@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql;
 
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 
 /**
  * sql拦截器
@@ -40,10 +40,10 @@ public interface AbstractSqlInterceptor {
     /**
      * 使用条件
      *
-     * @param fieldColumnRelationMapper
+     * @param propertyColumnRelationMapper
      * @return
      */
-    default boolean useCondition(FieldColumnRelationMapper fieldColumnRelationMapper) {
+    default boolean useCondition(PropertyColumnRelationMapper propertyColumnRelationMapper) {
         return true;
     }
 

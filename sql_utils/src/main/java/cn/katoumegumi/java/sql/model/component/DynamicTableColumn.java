@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.model.component;
 
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
 import cn.katoumegumi.java.sql.model.condition.Condition;
 
 /**
@@ -59,7 +59,7 @@ public class DynamicTableColumn implements TableColumn {
     }
 
     @Override
-    public FieldColumnRelation getFieldColumnRelation() {
+    public PropertyColumnRelation getFieldColumnRelation() {
         return originalTableColumn.getFieldColumnRelation();
     }
 }

@@ -4,9 +4,9 @@ import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandleStrategy;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
-import cn.katoumegumi.java.sql.mapper.model.FieldJoinClass;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
+import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -38,7 +38,7 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
     }
 
     @Override
-    public Optional<FieldColumnRelationMapper> getTableName(Class<?> clazz) {
+    public Optional<PropertyColumnRelationMapper> getTableName(Class<?> clazz) {
         TableName table = clazz.getAnnotation(TableName.class);
         if (table == null) {
             return Optional.empty();
@@ -49,7 +49,7 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
         } else {
             tableName = table.value();
         }
-        return Optional.of(new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz));
+        return Optional.of(new PropertyColumnRelationMapper(clazz.getSimpleName(), tableName, clazz));
     }
 
     @Override
@@ -62,7 +62,7 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
     }
 
     @Override
-    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
         TableId tableId = beanProperty.getAnnotation(TableId.class);
         String columnName;
         if (tableId != null) {
@@ -77,12 +77,12 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
         if (WsStringUtils.isBlank(columnName)) {
             columnName = fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
         }
-        return Optional.of(new FieldColumnRelation(tableId != null, columnName, beanProperty));
+        return Optional.of(new PropertyColumnRelation(tableId != null, columnName, beanProperty));
 
     }
 
     @Override
-    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+    public Optional<ObjectPropertyJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
         return Optional.empty();
     }
 }

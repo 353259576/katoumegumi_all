@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql.handler.model;
 
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
 
 import java.util.List;
 
@@ -11,9 +11,9 @@ public class InsertSqlEntity {
 
     private final String insertSql;
 
-    private List<FieldColumnRelation> usedField;
+    private List<PropertyColumnRelation> usedField;
 
-    private List<FieldColumnRelation> idList;
+    private List<PropertyColumnRelation> idList;
 
     private List<SqlParameter> valueList;
 
@@ -33,19 +33,19 @@ public class InsertSqlEntity {
         this.valueList = valueList;
     }
 
-    public List<FieldColumnRelation> getIdList() {
+    public List<PropertyColumnRelation> getIdList() {
         return idList;
     }
 
-    public void setIdList(List<FieldColumnRelation> idList) {
+    public void setIdList(List<PropertyColumnRelation> idList) {
         this.idList = idList;
     }
 
-    public List<FieldColumnRelation> getUsedField() {
+    public List<PropertyColumnRelation> getUsedField() {
         return usedField;
     }
 
-    public void setUsedField(List<FieldColumnRelation> usedField) {
+    public void setUsedField(List<PropertyColumnRelation> usedField) {
         this.usedField = usedField;
     }
 }

@@ -2,8 +2,8 @@ package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 import cn.katoumegumi.java.sql.model.component.BaseTableColumn;
 
 import java.util.*;
@@ -38,7 +38,7 @@ public class TranslateNameUtils {
     /**
      * 本地对象与表的对应关系
      */
-    private final Map<String, FieldColumnRelationMapper> localMapperMap;
+    private final Map<String, PropertyColumnRelationMapper> localMapperMap;
 
     //private final Map<String,ColumnBaseEntity> columnBaseEntityCacheMap = new HashMap<>();
 
@@ -186,9 +186,9 @@ public class TranslateNameUtils {
      * @param locationName
      * @return
      */
-    public FieldColumnRelationMapper getLocalMapper(String locationName) {
+    public PropertyColumnRelationMapper getLocalMapper(String locationName) {
         TranslateNameUtils parent = this.parent;
-        FieldColumnRelationMapper mapper = localMapperMap.get(locationName);
+        PropertyColumnRelationMapper mapper = localMapperMap.get(locationName);
         while (mapper == null && parent != null) {
             mapper = parent.localMapperMap.get(locationName);
             parent = parent.parent;
@@ -203,7 +203,7 @@ public class TranslateNameUtils {
      * @param locationName
      * @param mapper
      */
-    public void addLocalMapper(String locationName, FieldColumnRelationMapper mapper) {
+    public void addLocalMapper(String locationName, PropertyColumnRelationMapper mapper) {
         localMapperMap.put(locationName, mapper);
     }
 
@@ -295,8 +295,8 @@ public class TranslateNameUtils {
     }
 
 
-    public BaseTableColumn createColumnBaseEntity(final FieldColumnRelation fieldColumnRelation, final FieldColumnRelationMapper mapper, final String path) {
-        return new BaseTableColumn(fieldColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
+    public BaseTableColumn createColumnBaseEntity(final PropertyColumnRelation propertyColumnRelation, final PropertyColumnRelationMapper mapper, final String path) {
+        return new BaseTableColumn(propertyColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
     }
 
     public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final int type) {
@@ -304,15 +304,15 @@ public class TranslateNameUtils {
     }
 
     public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final String abbreviation, final int type) {
-        FieldColumnRelationMapper mapper = getLocalMapper(path);
+        PropertyColumnRelationMapper mapper = getLocalMapper(path);
         if (mapper == null) {
             throw new NullPointerException("can not find mapper by path:" + path);
         }
         if (type == 2) {
             mapper = mapper.getBaseTemplateMapper() == null ? mapper : mapper.getBaseTemplateMapper();
         }
-        FieldColumnRelation fieldColumnRelation = mapper.getFieldColumnRelationByFieldName(fieldName);
-        return new BaseTableColumn(fieldColumnRelation, mapper.getTableName(), path, abbreviation);
+        PropertyColumnRelation propertyColumnRelation = mapper.getFieldColumnRelationByFieldName(fieldName);
+        return new BaseTableColumn(propertyColumnRelation, mapper.getTableName(), path, abbreviation);
     }
 
 

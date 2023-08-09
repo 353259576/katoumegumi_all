@@ -247,10 +247,10 @@ public interface AbstractSqlInterceptor {
     /**
      * 使用条件
      *
-     * @param fieldColumnRelationMapper
+     * @param propertyColumnRelationMapper
      * @return
      */
-    default boolean useCondition(FieldColumnRelationMapper fieldColumnRelationMapper) {
+    default boolean useCondition(FieldColumnRelationMapper propertyColumnRelationMapper) {
         return true;
     }
 

@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.entity;
 
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
-import cn.katoumegumi.java.sql.mapper.model.FieldJoinClass;
+import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,13 +14,13 @@ public class MapperDictTree {
 
     private FieldColumnRelationMapperName currentMapperName;
 
-    //private FieldColumnRelationMapper currentMapper;
+    //private PropertyColumnRelationMapper currentMapper;
 
     private Map<Integer, MapperDictTree> childMap;
 
     private MapperDictTree[] mapperDictTrees;
 
-    private FieldJoinClass[] fieldJoinClasses;
+    private ObjectPropertyJoinRelation[] objectPropertyJoinRelations;
 
 
     public MapperDictTree() {
@@ -89,17 +89,17 @@ public class MapperDictTree {
         if (mapperDictTree.getChildMap().isEmpty()) {
             return false;
         }
-        FieldColumnRelationMapper parentMapper = mapperDictTree.getCurrentMapperName().getMapper();
-        FieldJoinClass fieldJoinClass;
-        mapperDictTree.fieldJoinClasses = new FieldJoinClass[mapperDictTree.getChildMap().size()];
+        PropertyColumnRelationMapper parentMapper = mapperDictTree.getCurrentMapperName().getMapper();
+        ObjectPropertyJoinRelation objectPropertyJoinRelation;
+        mapperDictTree.objectPropertyJoinRelations = new ObjectPropertyJoinRelation[mapperDictTree.getChildMap().size()];
         mapperDictTree.mapperDictTrees = new MapperDictTree[mapperDictTree.getChildMap().size()];
         int index = 0;
         for (Map.Entry<Integer, MapperDictTree> integerMapperDictTreeEntry : mapperDictTree.getChildMap().entrySet()) {
-            fieldJoinClass = parentMapper.getFieldJoinClassByFieldName(integerMapperDictTreeEntry.getValue().getCurrentMapperName().getCompleteNameSplitNameList()[integerMapperDictTreeEntry.getValue().depth]);
-            mapperDictTree.fieldJoinClasses[index] = fieldJoinClass;
+            objectPropertyJoinRelation = parentMapper.getFieldJoinClassByFieldName(integerMapperDictTreeEntry.getValue().getCurrentMapperName().getCompleteNameSplitNameList()[integerMapperDictTreeEntry.getValue().depth]);
+            mapperDictTree.objectPropertyJoinRelations[index] = objectPropertyJoinRelation;
             mapperDictTree.mapperDictTrees[index] = integerMapperDictTreeEntry.getValue();
             index++;
-            if (fieldJoinClass != null && fieldJoinClass.isArray()) {
+            if (objectPropertyJoinRelation != null && objectPropertyJoinRelation.isArray()) {
                 hasArray = true;
             }
             if (checkNeedMergeAndBuild(integerMapperDictTreeEntry.getValue())) {
@@ -114,8 +114,8 @@ public class MapperDictTree {
         return mapperDictTrees;
     }
 
-    public FieldJoinClass[] getFieldJoinClasses() {
-        return fieldJoinClasses;
+    public ObjectPropertyJoinRelation[] getFieldJoinClasses() {
+        return objectPropertyJoinRelations;
     }
 
     public boolean isHasArray() {

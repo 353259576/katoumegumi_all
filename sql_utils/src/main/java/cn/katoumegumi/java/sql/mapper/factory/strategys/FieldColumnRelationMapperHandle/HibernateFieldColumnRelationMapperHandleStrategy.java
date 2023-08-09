@@ -6,9 +6,9 @@ import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandleStrategy;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelation;
-import cn.katoumegumi.java.sql.mapper.model.FieldColumnRelationMapper;
-import cn.katoumegumi.java.sql.mapper.model.FieldJoinClass;
+import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 
 import javax.persistence.*;
 import java.util.Optional;
@@ -38,7 +38,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
     }
 
     @Override
-    public Optional<FieldColumnRelationMapper> getTableName(Class<?> clazz) {
+    public Optional<PropertyColumnRelationMapper> getTableName(Class<?> clazz) {
         Table table = clazz.getAnnotation(Table.class);
         if (table == null) {
             return Optional.empty();
@@ -50,7 +50,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
             tableName = table.name();
         }
 
-        return Optional.of(new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz));
+        return Optional.of(new PropertyColumnRelationMapper(clazz.getSimpleName(), tableName, clazz));
     }
 
     @Override
@@ -60,7 +60,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
     }
 
     @Override
-    public Optional<FieldColumnRelation> getColumnName(FieldColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
         Id id = beanProperty.getAnnotation(Id.class);
         Column column = beanProperty.getAnnotation(Column.class);
         if (id == null && column == null) {
@@ -72,11 +72,11 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
         } else {
             columnName = column.name();
         }
-        return Optional.of(new FieldColumnRelation(id != null, columnName, beanProperty));
+        return Optional.of(new PropertyColumnRelation(id != null, columnName, beanProperty));
     }
 
     @Override
-    public Optional<FieldJoinClass> getJoinRelation(FieldColumnRelationMapper mainMapper, FieldColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+    public Optional<ObjectPropertyJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
         JoinColumn joinColumn = beanProperty.getAnnotation(JoinColumn.class);
         if (joinColumn == null) {
             return Optional.empty();
@@ -91,22 +91,22 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
         }
         OneToMany oneToMany = beanProperty.getAnnotation(OneToMany.class);
         boolean isArray = WsReflectUtils.isArrayType(beanProperty.getPropertyClass());
-        FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinMapper.getClazz(), beanProperty);
-        fieldJoinClass.setNickName(beanProperty.getPropertyName());
-        fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
+        ObjectPropertyJoinRelation objectPropertyJoinRelation = new ObjectPropertyJoinRelation(isArray, joinMapper.getClazz(), beanProperty);
+        objectPropertyJoinRelation.setNickName(beanProperty.getPropertyName());
+        objectPropertyJoinRelation.setJoinType(TableJoinType.LEFT_JOIN);
         if (oneToMany == null) {
-            fieldJoinClass.setJoinColumn(name);
-            fieldJoinClass.setAnotherJoinColumn(referenced);
-            return Optional.of(fieldJoinClass);
+            objectPropertyJoinRelation.setJoinColumn(name);
+            objectPropertyJoinRelation.setAnotherJoinColumn(referenced);
+            return Optional.of(objectPropertyJoinRelation);
         } else {
-            fieldJoinClass.setJoinColumn(referenced);
-            fieldJoinClass.setAnotherJoinColumn(name);
-            return Optional.of(fieldJoinClass);
+            objectPropertyJoinRelation.setJoinColumn(referenced);
+            objectPropertyJoinRelation.setAnotherJoinColumn(name);
+            return Optional.of(objectPropertyJoinRelation);
         }
     }
 
     //@Override
-//    public FieldColumnRelationMapper analysisClassRelation(Class<?> clazz, boolean allowIncomplete) {
+//    public PropertyColumnRelationMapper analysisClassRelation(Class<?> clazz, boolean allowIncomplete) {
 //        Table table = clazz.getAnnotation(Table.class);
 //        String tableName;
 //        if (WsStringUtils.isBlank(table.name())) {
@@ -114,7 +114,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //        } else {
 //            tableName = table.name();
 //        }
-//        FieldColumnRelationMapper fieldColumnRelationMapper = new FieldColumnRelationMapper(clazz.getSimpleName(), tableName, clazz);
+//        PropertyColumnRelationMapper fieldColumnRelationMapper = new PropertyColumnRelationMapper(clazz.getSimpleName(), tableName, clazz);
 //        Field[] fields = WsReflectUtils.getFieldAll(clazz);
 //
 //        List<Field> baseTypeFieldList = new ArrayList<>();
@@ -132,7 +132,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //        }
 //        if (WsCollectionUtils.isNotEmpty(baseTypeFieldList)) {
 //            for (Field field : baseTypeFieldList) {
-//                FieldColumnRelation fieldColumnRelation = createFieldColumnRelation(field);
+//                PropertyColumnRelation fieldColumnRelation = createFieldColumnRelation(field);
 //                fieldColumnRelationMapper.putFieldColumnRelationMap(field.getName(), fieldColumnRelation);
 //                if (fieldColumnRelation.isId()) {
 //                    fieldColumnRelationMapper.getIds().add(fieldColumnRelation);
@@ -155,7 +155,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //        return fieldColumnRelationMapper;
 //    }
 
-//    public FieldColumnRelation createFieldColumnRelation(Field field) {
+//    public PropertyColumnRelation createFieldColumnRelation(Field field) {
 //        Annotation[] annotations = field.getAnnotations();
 //        boolean isId = false;
 //        String columnName = null;
@@ -189,14 +189,14 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //        if (WsStringUtils.isBlank(columnName)) {
 //            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(field.getName());
 //        }
-//        return new FieldColumnRelation(isId, field.getName(), field, columnName, field.getType());
+//        return new PropertyColumnRelation(isId, field.getName(), field, columnName, field.getType());
 //    }
 //
-//    public FieldJoinClass createFieldJoinClass(FieldColumnRelationMapper fieldColumnRelationMapper, Field field) {
+//    public ObjectPropertyJoinRelation createFieldJoinClass(PropertyColumnRelationMapper fieldColumnRelationMapper, Field field) {
 //        boolean isArray = WsReflectUtils.isArrayType(field);
 //        Class<?> joinClass = WsReflectUtils.getClassTypeof(field);
-//        FieldColumnRelationMapper mapper = FieldColumnRelationMapperFactory.analysisClassRelation(joinClass, true);
-//        FieldJoinClass fieldJoinClass = new FieldJoinClass(isArray, joinClass, field);
+//        PropertyColumnRelationMapper mapper = FieldColumnRelationMapperFactory.analysisClassRelation(joinClass, true);
+//        ObjectPropertyJoinRelation fieldJoinClass = new ObjectPropertyJoinRelation(isArray, joinClass, field);
 //        fieldJoinClass.setNickName(field.getName());
 //        fieldJoinClass.setJoinType(TableJoinType.LEFT_JOIN);
 //        JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);

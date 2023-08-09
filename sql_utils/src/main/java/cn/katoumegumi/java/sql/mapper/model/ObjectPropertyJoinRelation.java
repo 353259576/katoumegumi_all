@@ -5,9 +5,10 @@ import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 
 /**
+ * 对象属性关联关系
  * @author ws
  */
-public class FieldJoinClass {
+public class ObjectPropertyJoinRelation {
 
     /**
      * 是否是数组
@@ -53,7 +54,7 @@ public class FieldJoinClass {
     private MySearchList conditionSearchList;
 
 
-    public FieldJoinClass(boolean isArray, Class<?> joinClass, BeanPropertyModel beanPropertyModel) {
+    public ObjectPropertyJoinRelation(boolean isArray, Class<?> joinClass, BeanPropertyModel beanPropertyModel) {
         this.isArray = isArray;
         this.joinClass = joinClass;
         this.beanProperty = beanPropertyModel;
@@ -117,7 +118,7 @@ public class FieldJoinClass {
         return conditionSearchList;
     }
 
-    public FieldJoinClass setConditionSearchList(MySearchList conditionSearchList) {
+    public ObjectPropertyJoinRelation setConditionSearchList(MySearchList conditionSearchList) {
         this.conditionSearchList = conditionSearchList;
         return this;
     }
