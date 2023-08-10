@@ -9,7 +9,7 @@ import cn.katoumegumi.java.sql.handler.model.DeleteSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
-import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 import cn.katoumegumi.java.sql.resultSet.strategys.JdkResultSet;
 import cn.katoumegumi.java.sql.model.component.SqlLimit;
@@ -58,7 +58,7 @@ public class WsJdbcUtils {
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         Map<String, Object> keyMap = keyHolder.getKeys();
         if (WsCollectionUtils.isNotEmpty(keyMap)) {
-            List<PropertyColumnRelation> idList = insertSqlEntity.getIdList();
+            List<PropertyBaseColumnRelation> idList = insertSqlEntity.getIdList();
             boolean[] isUseArray = new boolean[idList.size()];
             Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
             setGeneratedKey(t,keyMap,idList,isUseArray,fieldNameAndIndexMap);
@@ -78,7 +78,7 @@ public class WsJdbcUtils {
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         List<Map<String, Object>> keyMapList = keyHolder.getKeyList();
         if(WsCollectionUtils.isNotEmpty(keyMapList)){
-            List<PropertyColumnRelation> idList = insertSqlEntity.getIdList();
+            List<PropertyBaseColumnRelation> idList = insertSqlEntity.getIdList();
             boolean[] isUseArray = new boolean[idList.size()];
             Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
             for (int i = 0; i < keyMapList.size(); i++){
@@ -281,13 +281,13 @@ public class WsJdbcUtils {
 
     public <T> T getOne(Class<T> tClass, Object... objects) {
         PropertyColumnRelationMapper mapper = FieldColumnRelationMapperFactory.analysisClassRelation(tClass);
-        List<PropertyColumnRelation> ids = mapper.getIds();
+        List<PropertyBaseColumnRelation> ids = mapper.getIds();
         if (ids.size() != objects.length) {
             throw new RuntimeException("主键信息需要填写完整");
         }
         MySearchList mySearchList = MySearchList.create(tClass);
         for (int i = 0; i < ids.size(); i++) {
-            PropertyColumnRelation relation = ids.get(i);
+            PropertyBaseColumnRelation relation = ids.get(i);
             Object value = objects[i];
             mySearchList.eq(relation.getBeanProperty().getPropertyName(), value);
         }
@@ -342,8 +342,8 @@ public class WsJdbcUtils {
      */
     public <T> Integer saveOrUpdate(T t){
         PropertyColumnRelationMapper propertyColumnRelationMapper = SQLModelFactory.getFieldColumnRelationMapper(t.getClass());
-        List<PropertyColumnRelation> propertyColumnRelations = propertyColumnRelationMapper.getIds();
-        PropertyColumnRelation relation = propertyColumnRelations.get(0);
+        List<PropertyBaseColumnRelation> propertyBaseColumnRelations = propertyColumnRelationMapper.getIds();
+        PropertyBaseColumnRelation relation = propertyBaseColumnRelations.get(0);
         BeanPropertyModel beanPropertyModel = relation.getBeanProperty();
         Object o = beanPropertyModel.getValue(t);
         if(o == null){
@@ -369,7 +369,7 @@ public class WsJdbcUtils {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private <T> void setGeneratedKey(T t, Map<String,Object> keyMap, List<PropertyColumnRelation> idList, boolean[] isUseArray, Map<String, Integer> fieldNameAndIndexMap){
+    private <T> void setGeneratedKey(T t, Map<String,Object> keyMap, List<PropertyBaseColumnRelation> idList, boolean[] isUseArray, Map<String, Integer> fieldNameAndIndexMap){
         for (int i = 0; i < idList.size(); i++){
             isUseArray[i] = false;
             fieldNameAndIndexMap.put(idList.get(i).getColumnName(),i);
@@ -382,9 +382,9 @@ public class WsJdbcUtils {
                 return;
             }
             isUseArray[index] = true;
-            PropertyColumnRelation propertyColumnRelation = idList.get(index);
-            propertyColumnRelation.getBeanProperty()
-                            .setValue(t,WsBeanUtils.objectToT(value, propertyColumnRelation.getBeanProperty().getPropertyClass()));
+            PropertyBaseColumnRelation propertyBaseColumnRelation = idList.get(index);
+            propertyBaseColumnRelation.getBeanProperty()
+                            .setValue(t,WsBeanUtils.objectToT(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
         });
 
         if(WsCollectionUtils.isNotEmpty(unUseColumnNameList)){
@@ -393,8 +393,8 @@ public class WsJdbcUtils {
                 while (idIndex < isUseArray.length){
                     if(!isUseArray[idIndex]){
                         isUseArray[idIndex] = false;
-                        PropertyColumnRelation propertyColumnRelation = idList.get(idIndex);
-                        propertyColumnRelation.getBeanProperty().setValue(t,WsBeanUtils.objectToT(value, propertyColumnRelation.getBeanProperty().getPropertyClass()));
+                        PropertyBaseColumnRelation propertyBaseColumnRelation = idList.get(idIndex);
+                        propertyBaseColumnRelation.getBeanProperty().setValue(t,WsBeanUtils.objectToT(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
                         idIndex++;
                         break;
                     }

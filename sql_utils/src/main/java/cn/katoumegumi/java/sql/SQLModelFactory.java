@@ -18,8 +18,8 @@ import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SqlParameter;
 import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
-import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
-import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyObjectColumnJoinRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 import cn.katoumegumi.java.sql.model.component.*;
 import cn.katoumegumi.java.sql.model.condition.*;
@@ -151,11 +151,11 @@ public class SQLModelFactory {
      */
     public static MySearchList objectToMySearchList(Object o) {
         PropertyColumnRelationMapper mapper = analysisClassRelation(o.getClass());
-        List<PropertyColumnRelation> ids = mapper.getIds();
-        List<PropertyColumnRelation> columns = mapper.getFieldColumnRelations();
+        List<PropertyBaseColumnRelation> ids = mapper.getIds();
+        List<PropertyBaseColumnRelation> columns = mapper.getFieldColumnRelations();
         MySearchList mySearchList = MySearchList.create(o.getClass());
         if (WsCollectionUtils.isNotEmpty(ids)) {
-            for (PropertyColumnRelation relation : ids) {
+            for (PropertyBaseColumnRelation relation : ids) {
                 if (WsBeanUtils.isBaseType(relation.getBeanProperty().getPropertyClass())) {
                     Object value = relation.getBeanProperty().getValue(o);
                     if (value != null){
@@ -165,7 +165,7 @@ public class SQLModelFactory {
             }
         }
         if (WsCollectionUtils.isNotEmpty(columns)) {
-            for (PropertyColumnRelation relation : columns) {
+            for (PropertyBaseColumnRelation relation : columns) {
                 if (WsBeanUtils.isBaseType(relation.getBeanProperty().getPropertyClass())) {
                     Object value = relation.getBeanProperty().getValue(o);
                     if (value != null){
@@ -214,28 +214,28 @@ public class SQLModelFactory {
      */
     public <T> InsertSqlEntity createInsertSqlEntity(T t) {
         PropertyColumnRelationMapper propertyColumnRelationMapper = analysisClassRelation(mainClass);
-        List<PropertyColumnRelation> propertyColumnRelationList = propertyColumnRelationMapper.getFieldColumnRelations();
-        List<PropertyColumnRelation> validList = new ArrayList<>();
+        List<PropertyBaseColumnRelation> propertyBaseColumnRelationList = propertyColumnRelationMapper.getFieldColumnRelations();
+        List<PropertyBaseColumnRelation> validList = new ArrayList<>();
         List<SqlParameter> valueList = new ArrayList<>();
         List<String> columnNameList = new ArrayList<>();
         List<String> placeholderList = new ArrayList<>();
 
-        List<PropertyColumnRelation> idList = propertyColumnRelationMapper.getIds();
+        List<PropertyBaseColumnRelation> idList = propertyColumnRelationMapper.getIds();
 
-        for (PropertyColumnRelation propertyColumnRelation : idList) {
-            BeanPropertyModel beanPropertyModel = propertyColumnRelation.getBeanProperty();
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : idList) {
+            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
             Object o = beanPropertyModel.getValue(t);
             if (o != null) {
-                columnNameList.add(guardKeyword(propertyColumnRelation.getColumnName()));
+                columnNameList.add(guardKeyword(propertyBaseColumnRelation.getColumnName()));
                 placeholderList.add(SqlCommonConstants.PLACEHOLDER);
-                validList.add(propertyColumnRelation);
+                validList.add(propertyBaseColumnRelation);
                 valueList.add(new SqlParameter(o));
             }
         }
 
 
-        for (PropertyColumnRelation propertyColumnRelation : propertyColumnRelationList) {
-            BeanPropertyModel beanPropertyModel = propertyColumnRelation.getBeanProperty();
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
+            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
             Object o;
             AbstractSqlInterceptor sqlInterceptor = INSERT_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
             if (sqlInterceptor != null && sqlInterceptor.useCondition(analysisClassRelation(mainClass))) {
@@ -244,9 +244,9 @@ public class SQLModelFactory {
                 o = beanPropertyModel.getValue(t);
             }
             if (o != null) {
-                columnNameList.add(guardKeyword(propertyColumnRelation.getColumnName()));
+                columnNameList.add(guardKeyword(propertyBaseColumnRelation.getColumnName()));
                 placeholderList.add(SqlCommonConstants.PLACEHOLDER);
-                validList.add(propertyColumnRelation);
+                validList.add(propertyBaseColumnRelation);
                 valueList.add(new SqlParameter(o));
             }
         }
@@ -272,24 +272,24 @@ public class SQLModelFactory {
             throw new NullPointerException("The list cannot be empty");
         }
         PropertyColumnRelationMapper propertyColumnRelationMapper = analysisClassRelation(tList.get(0).getClass());
-        List<PropertyColumnRelation> propertyColumnRelationList = propertyColumnRelationMapper.getFieldColumnRelations();
-        List<PropertyColumnRelation> validField = new ArrayList<>();
+        List<PropertyBaseColumnRelation> propertyBaseColumnRelationList = propertyColumnRelationMapper.getFieldColumnRelations();
+        List<PropertyBaseColumnRelation> validField = new ArrayList<>();
         List<String> columnNameList = new ArrayList<>();
         List<String> placeholderList = new ArrayList<>();
         List<SqlParameter> valueList = new ArrayList<>();
 
 
-        List<PropertyColumnRelation> idList = propertyColumnRelationMapper.getIds();
-        for (PropertyColumnRelation propertyColumnRelation : idList) {
-            BeanPropertyModel beanPropertyModel = propertyColumnRelation.getBeanProperty();
+        List<PropertyBaseColumnRelation> idList = propertyColumnRelationMapper.getIds();
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : idList) {
+            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
             Object o = beanPropertyModel.getValue(tList.get(0));
-            validField.add(propertyColumnRelation);
-            columnNameList.add(guardKeyword(propertyColumnRelation.getColumnName()));
+            validField.add(propertyBaseColumnRelation);
+            columnNameList.add(guardKeyword(propertyBaseColumnRelation.getColumnName()));
             placeholderList.add(SqlCommonConstants.PLACEHOLDER);
             valueList.add(new SqlParameter(o));
         }
-        for (PropertyColumnRelation propertyColumnRelation : propertyColumnRelationList) {
-            BeanPropertyModel beanPropertyModel = propertyColumnRelation.getBeanProperty();
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
+            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
             AbstractSqlInterceptor sqlInterceptor = INSERT_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
             Object o;
             if (sqlInterceptor != null && sqlInterceptor.useCondition(propertyColumnRelationMapper)) {
@@ -297,8 +297,8 @@ public class SQLModelFactory {
             } else {
                 o = beanPropertyModel.getValue(tList.get(0));
             }
-            validField.add(propertyColumnRelation);
-            columnNameList.add(guardKeyword(propertyColumnRelation.getColumnName()));
+            validField.add(propertyBaseColumnRelation);
+            columnNameList.add(guardKeyword(propertyBaseColumnRelation.getColumnName()));
             placeholderList.add(SqlCommonConstants.PLACEHOLDER);
             valueList.add(new SqlParameter(o));
         }
@@ -307,8 +307,8 @@ public class SQLModelFactory {
         placeholderList.add(placeholderSql);
         int size = tList.size();
         for (int i = 1; i < size; i++) {
-            for (PropertyColumnRelation propertyColumnRelation : validField) {
-                BeanPropertyModel beanPropertyModel = propertyColumnRelation.getBeanProperty();
+            for (PropertyBaseColumnRelation propertyBaseColumnRelation : validField) {
+                BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
                 AbstractSqlInterceptor sqlInterceptor = INSERT_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
                 Object o;
                 if (sqlInterceptor != null && sqlInterceptor.useCondition(propertyColumnRelationMapper)) {
@@ -339,13 +339,13 @@ public class SQLModelFactory {
      */
     public <T> UpdateSqlEntity createUpdateSqlEntity(T t, boolean isAll) {
         PropertyColumnRelationMapper propertyColumnRelationMapper = analysisClassRelation(t.getClass());
-        List<PropertyColumnRelation> idList = propertyColumnRelationMapper.getIds();
-        List<PropertyColumnRelation> columnList = propertyColumnRelationMapper.getFieldColumnRelations();
+        List<PropertyBaseColumnRelation> idList = propertyColumnRelationMapper.getIds();
+        List<PropertyBaseColumnRelation> columnList = propertyColumnRelationMapper.getFieldColumnRelations();
         List<String> columnStrList = new ArrayList<>();
         List<String> idStrList = new ArrayList<>();
         List<SqlParameter> valueList = new ArrayList<>();
-        for (PropertyColumnRelation propertyColumnRelation : columnList) {
-            BeanPropertyModel beanPropertyModel = propertyColumnRelation.getBeanProperty();
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : columnList) {
+            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
             AbstractSqlInterceptor sqlInterceptor = UPDATE_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
             Object o;
             if (sqlInterceptor != null && sqlInterceptor.useCondition(propertyColumnRelationMapper)) {
@@ -354,16 +354,16 @@ public class SQLModelFactory {
                 o = beanPropertyModel.getValue(t);
             }
             if (isAll || o != null) {
-                String str = guardKeyword(propertyColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
+                String str = guardKeyword(propertyBaseColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
                 columnStrList.add(str);
                 valueList.add(new SqlParameter(o));
             }
         }
-        for (PropertyColumnRelation propertyColumnRelation : idList) {
-            BeanPropertyModel beanPropertyModel = propertyColumnRelation.getBeanProperty();
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : idList) {
+            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
             Object o = beanPropertyModel.getValue(t);
             if (o != null) {
-                String str = guardKeyword(propertyColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
+                String str = guardKeyword(propertyBaseColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
                 idStrList.add(str);
                 valueList.add(new SqlParameter(o));
             }
@@ -418,14 +418,14 @@ public class SQLModelFactory {
             String rootPath = mainMapper.getNickName();
 
 
-            List<PropertyColumnRelation> columnRelationList = new ArrayList<>(length);
+            List<PropertyBaseColumnRelation> columnRelationList = new ArrayList<>(length);
             List<int[][]> localtionList = new ArrayList<>();
             Map<String, FieldColumnRelationMapperName> abbreviationAndMapperNameMap = new HashMap<>();
             String columnNameTemp;
             List<String> nameListTemp;
             String mapperName;
             PropertyColumnRelationMapper mapperTemp;
-            PropertyColumnRelation propertyColumnRelationTemp;
+            PropertyBaseColumnRelation propertyBaseColumnRelationTemp;
             FieldColumnRelationMapperName fieldColumnRelationMapperNameTemp;
             //0是id的坐标 1是非id坐标
             int[][] locationListTemp;
@@ -460,13 +460,13 @@ public class SQLModelFactory {
                 }
 
                 //填写位置数组
-                propertyColumnRelationTemp = mapperTemp.getFieldColumnRelationByFieldName(nameListTemp.get(1));
-                if (propertyColumnRelationTemp.isId()) {
-                    locationListTemp[0][mapperTemp.getLocation(propertyColumnRelationTemp)] = i;
+                propertyBaseColumnRelationTemp = mapperTemp.getFieldColumnRelationByFieldName(nameListTemp.get(1));
+                if (propertyBaseColumnRelationTemp.isId()) {
+                    locationListTemp[0][mapperTemp.getLocation(propertyBaseColumnRelationTemp)] = i;
                 } else {
-                    locationListTemp[1][mapperTemp.getLocation(propertyColumnRelationTemp)] = i;
+                    locationListTemp[1][mapperTemp.getLocation(propertyBaseColumnRelationTemp)] = i;
                 }
-                columnRelationList.add(propertyColumnRelationTemp);
+                columnRelationList.add(propertyBaseColumnRelationTemp);
             }
 
             MapperDictTree mapperDictTree = new MapperDictTree();
@@ -501,7 +501,7 @@ public class SQLModelFactory {
         }
     }
 
-    private static Object createNeedMergeValue(WsResultSet resultSet, ExistEntityInfo parentExistEntityInfo, MapperDictTree mapperDictTree, List<int[][]> locationList, List<PropertyColumnRelation> columnRelationList, boolean isArray) throws SQLException {
+    private static Object createNeedMergeValue(WsResultSet resultSet, ExistEntityInfo parentExistEntityInfo, MapperDictTree mapperDictTree, List<int[][]> locationList, List<PropertyBaseColumnRelation> columnRelationList, boolean isArray) throws SQLException {
         if (parentExistEntityInfo == null) {
             return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
         }
@@ -553,7 +553,7 @@ public class SQLModelFactory {
         ExistEntityInfo[] subExistEntityInfoArray = tripleEntity.getRight();
         for (int i = 0; i < mapperDictTree.getChildMap().size(); i++) {
             MapperDictTree subTree = mapperDictTree.getMapperDictTrees()[i];
-            ObjectPropertyJoinRelation objectPropertyJoinRelation = mapperDictTree.getFieldJoinClasses()[i];
+            PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = mapperDictTree.getFieldJoinClasses()[i];
 
             if(subExistEntityInfoArray[i] == null){
                 subExistEntityInfo = new ExistEntityInfo();
@@ -568,25 +568,25 @@ public class SQLModelFactory {
             subValue = createNeedMergeValue(resultSet, subExistEntityInfo, subTree, locationList, columnRelationList,mapperDictTree.isHasArray());
             if (cacheSubValue[i] == null) {
                 //第一次获取值
-                if (objectPropertyJoinRelation.isArray()) {
+                if (propertyObjectColumnJoinRelation.isArray()) {
                     if (subValue != null) {
                         List<Object> list = new ArrayList<>();
                         list.add(subValue);
                         cacheSubValue[i] = list;
-                        objectPropertyJoinRelation.getBeanProperty().setValue(value,list);
-                        //WsReflectUtils.setValue(value, list, objectPropertyJoinRelation.getField());
+                        propertyObjectColumnJoinRelation.getBeanProperty().setValue(value,list);
+                        //WsReflectUtils.setValue(value, list, propertyObjectColumnJoinRelation.getField());
                     }
                 } else {
                     if (subValue == null) {
                         cacheSubValue[i] = SqlCommonConstants.NULL_VALUE;
                     } else {
                         cacheSubValue[i] = subValue;
-                        objectPropertyJoinRelation.getBeanProperty().setValue(value,subValue);
-                        //WsReflectUtils.setValue(value, subValue, objectPropertyJoinRelation.getField());
+                        propertyObjectColumnJoinRelation.getBeanProperty().setValue(value,subValue);
+                        //WsReflectUtils.setValue(value, subValue, propertyObjectColumnJoinRelation.getField());
                     }
                 }
             } else {
-                if (objectPropertyJoinRelation.isArray() && subValue != null) {
+                if (propertyObjectColumnJoinRelation.isArray() && subValue != null) {
                     List<Object> list = (List<Object>) cacheSubValue[i];
                     list.add(subValue);
                 }
@@ -610,7 +610,7 @@ public class SQLModelFactory {
      * @return
      * @throws SQLException
      */
-    private static Object createValue(WsResultSet resultSet, MapperDictTree mapperDictTree, List<int[][]> locationList, List<PropertyColumnRelation> columnRelationList) throws SQLException {
+    private static Object createValue(WsResultSet resultSet, MapperDictTree mapperDictTree, List<int[][]> locationList, List<PropertyBaseColumnRelation> columnRelationList) throws SQLException {
         PropertyColumnRelationMapper mapper = mapperDictTree.getCurrentMapperName().getMapper();
         FieldColumnRelationMapperName mapperName = mapperDictTree.getCurrentMapperName();
         int[][] location = locationList.get(mapperName.getIndex());
@@ -618,16 +618,16 @@ public class SQLModelFactory {
         boolean isNotNull = fillObjectValue(value, resultSet, location[0], columnRelationList) | fillObjectValue(value, resultSet, location[1], columnRelationList);
         for (int i = 0; i < mapperDictTree.getChildMap().size(); i++) {
 
-            ObjectPropertyJoinRelation objectPropertyJoinRelation = mapperDictTree.getFieldJoinClasses()[i];
+            PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = mapperDictTree.getFieldJoinClasses()[i];
             Object joinValue = createValue(resultSet, mapperDictTree.getMapperDictTrees()[i], locationList, columnRelationList);
             if (joinValue != null) {
                 isNotNull = true;
-                if (objectPropertyJoinRelation.isArray()) {
+                if (propertyObjectColumnJoinRelation.isArray()) {
                     List<Object> list = new ArrayList<>(1);
                     list.add(joinValue);
-                    objectPropertyJoinRelation.getBeanProperty().setValue(value,list);
+                    propertyObjectColumnJoinRelation.getBeanProperty().setValue(value,list);
                 } else {
-                    objectPropertyJoinRelation.getBeanProperty().setValue(value,joinValue);
+                    propertyObjectColumnJoinRelation.getBeanProperty().setValue(value,joinValue);
                 }
             }
 
@@ -639,30 +639,30 @@ public class SQLModelFactory {
         return null;
     }
 
-    private static boolean fillObjectValue(Object o, Object[] values, int[] location, List<PropertyColumnRelation> columnRelationList) {
+    private static boolean fillObjectValue(Object o, Object[] values, int[] location, List<PropertyBaseColumnRelation> columnRelationList) {
         boolean isAdd = false;
         for (int i = 0; i < location.length; i++) {
-            PropertyColumnRelation propertyColumnRelationTemp = columnRelationList.get(location[i]);
+            PropertyBaseColumnRelation propertyBaseColumnRelationTemp = columnRelationList.get(location[i]);
             Object value = values[i];
             if (value == null) {
                 continue;
             }
             isAdd = true;
-            setValue(o,value, propertyColumnRelationTemp.getBeanProperty());
+            setValue(o,value, propertyBaseColumnRelationTemp.getBeanProperty());
         }
         return isAdd;
     }
 
-    private static boolean fillObjectValue(Object o, WsResultSet resultSet, int[] location, List<PropertyColumnRelation> columnRelationList) throws SQLException {
+    private static boolean fillObjectValue(Object o, WsResultSet resultSet, int[] location, List<PropertyBaseColumnRelation> columnRelationList) throws SQLException {
         boolean isAdd = false;
         for (int j : location) {
-            PropertyColumnRelation propertyColumnRelationTemp = columnRelationList.get(j);
+            PropertyBaseColumnRelation propertyBaseColumnRelationTemp = columnRelationList.get(j);
             Object value = resultSet.getObject(j + 1);
             if (value == null) {
                 continue;
             }
             isAdd = true;
-            setValue(o,value, propertyColumnRelationTemp.getBeanProperty());
+            setValue(o,value, propertyBaseColumnRelationTemp.getBeanProperty());
         }
         return isAdd;
     }
@@ -756,11 +756,11 @@ public class SQLModelFactory {
         TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
         List<TableColumn> idList = new ArrayList<>(mainMapper.getIds().size());
         List<TableColumn> tableColumnList = new ArrayList<>(mainMapper.getFieldColumnRelations().size());
-        for (PropertyColumnRelation id : mainMapper.getIds()) {
+        for (PropertyBaseColumnRelation id : mainMapper.getIds()) {
             idList.add(translateNameUtils.createColumnBaseEntity(id, mainMapper, rootPath));
         }
-        for (PropertyColumnRelation propertyColumnRelation : mainMapper.getFieldColumnRelations()) {
-            tableColumnList.add(translateNameUtils.createColumnBaseEntity(propertyColumnRelation,mainMapper,rootPath));
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : mainMapper.getFieldColumnRelations()) {
+            tableColumnList.add(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation,mainMapper,rootPath));
         }
         return new InsertModel(from,idList,tableColumnList);
     }
@@ -823,9 +823,9 @@ public class SQLModelFactory {
                     tableRelationMap.put(translateNameUtils.getCurrentAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath, tableRelation.getTableNickName())) + SqlCommonConstants.KEY_COMMON_DELIMITER + translateNameUtils.getAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath, tableRelation.getJoinTableNickName())), tableRelation);
                 }
             }
-            final Queue<KeyValue<String, ObjectPropertyJoinRelation>> queue = new ArrayDeque<>();
-            for (ObjectPropertyJoinRelation objectPropertyJoinRelation : mainMapper.getFieldJoinClasses()) {
-                queue.add(new KeyValue<>(rootPath, objectPropertyJoinRelation));
+            final Queue<KeyValue<String, PropertyObjectColumnJoinRelation>> queue = new ArrayDeque<>();
+            for (PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation : mainMapper.getFieldJoinClasses()) {
+                queue.add(new KeyValue<>(rootPath, propertyObjectColumnJoinRelation));
             }
 
             if (!appointQueryColumn) {
@@ -833,10 +833,10 @@ public class SQLModelFactory {
             }
 
             while (!queue.isEmpty()) {
-                KeyValue<String, ObjectPropertyJoinRelation> keyValue = queue.poll();
-                ObjectPropertyJoinRelation objectPropertyJoinRelation = keyValue.getValue();
+                KeyValue<String, PropertyObjectColumnJoinRelation> keyValue = queue.poll();
+                PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = keyValue.getValue();
                 String path = keyValue.getKey();
-                String joinPath = path + SqlCommonConstants.PATH_COMMON_DELIMITER + objectPropertyJoinRelation.getNickName();
+                String joinPath = path + SqlCommonConstants.PATH_COMMON_DELIMITER + propertyObjectColumnJoinRelation.getJoinEntityPropertyName();
                 String tableAlias = translateNameUtils.getCurrentAbbreviation(path);
                 String joinTableAlias = translateNameUtils.getCurrentAbbreviation(joinPath);
                 String key = tableAlias + SqlCommonConstants.KEY_COMMON_DELIMITER + joinTableAlias;
@@ -845,7 +845,7 @@ public class SQLModelFactory {
                 PropertyColumnRelationMapper joinMapper = null;
                 if (tableRelation != null) {
                     checkChild = true;
-                    joinMapper = analysisClassRelation(objectPropertyJoinRelation.getJoinClass());
+                    joinMapper = analysisClassRelation(propertyObjectColumnJoinRelation.getJoinEntityClass());
                     translateNameUtils.addLocalMapper(joinPath, joinMapper);
                     List<Condition> selectInterceptorConditionList = getWhereConditionSqlInterceptorConditionList(joinPath, joinMapper);
                     List<Condition> conditionModelList = new ArrayList<>((tableRelation.getConditionSearchList() == null ? 1 : 1 + tableRelation.getConditionSearchList().getAll().size()) + selectInterceptorConditionList.size());
@@ -856,24 +856,24 @@ public class SQLModelFactory {
                     JoinTableModel joinTableModel = new JoinTableModel(new TableModel(translateNameUtils.getLocalMapper(path), tableAlias), new TableModel(joinMapper, joinTableAlias), tableRelation.getJoinType(), new RelationCondition(conditionModelList, SqlOperator.AND));
                     joinTableModelList.add(joinTableModel);
                     usedRelationMap.put(tableRelation, joinTableModel);
-                } else if (WsStringUtils.isNotBlank(objectPropertyJoinRelation.getAnotherJoinColumn())) {
+                } else if (WsStringUtils.isNotBlank(propertyObjectColumnJoinRelation.getJoinTableColumnName())) {
                     checkChild = true;
-                    joinMapper = analysisClassRelation(objectPropertyJoinRelation.getJoinClass());
+                    joinMapper = analysisClassRelation(propertyObjectColumnJoinRelation.getJoinEntityClass());
                     PropertyColumnRelationMapper mapper = translateNameUtils.getLocalMapper(path);
                     translateNameUtils.addLocalMapper(joinPath, joinMapper);
                     List<Condition> selectInterceptorConditionList = getWhereConditionSqlInterceptorConditionList(joinPath, joinMapper);
                     List<Condition> conditionModelList = new ArrayList<>(1 + selectInterceptorConditionList.size());
-                    conditionModelList.add(new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(mapper.getFieldColumnRelationByColumn(objectPropertyJoinRelation.getJoinColumn()).getBeanProperty().getPropertyName(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(joinMapper.getFieldColumnRelationByColumn(objectPropertyJoinRelation.getAnotherJoinColumn()).getBeanProperty().getPropertyName(), joinPath, 2)));
+                    conditionModelList.add(new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(mapper.getFieldColumnRelationByColumn(propertyObjectColumnJoinRelation.getMainTableColumnName()).getBeanProperty().getPropertyName(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(joinMapper.getFieldColumnRelationByColumn(propertyObjectColumnJoinRelation.getJoinTableColumnName()).getBeanProperty().getPropertyName(), joinPath, 2)));
                     if (WsCollectionUtils.isNotEmpty(selectInterceptorConditionList)) {
                         conditionModelList.addAll(selectInterceptorConditionList);
                     }
-                    joinTableModelList.add(new JoinTableModel(new TableModel(translateNameUtils.getLocalMapper(path), tableAlias), new TableModel(joinMapper, joinTableAlias), objectPropertyJoinRelation.getJoinType(), new RelationCondition(conditionModelList, SqlOperator.AND)));
+                    joinTableModelList.add(new JoinTableModel(new TableModel(translateNameUtils.getLocalMapper(path), tableAlias), new TableModel(joinMapper, joinTableAlias), propertyObjectColumnJoinRelation.getJoinType(), new RelationCondition(conditionModelList, SqlOperator.AND)));
                 }
                 if (checkChild) {
                     if (!appointQueryColumn) {
                         addQueryColumnList(joinMapper, joinPath, queryColumnList);
                     }
-                    for (ObjectPropertyJoinRelation join : joinMapper.getFieldJoinClasses()) {
+                    for (PropertyObjectColumnJoinRelation join : joinMapper.getFieldJoinClasses()) {
                         queue.add(new KeyValue<>(joinPath, join));
                     }
                 }
@@ -885,7 +885,7 @@ public class SQLModelFactory {
             if (joinTableModel == null) {
                 String path = tableRelation.getTableNickName() == null ? rootPath : rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableRelation.getTableNickName();
                 String joinPath = tableRelation.getJoinTableNickName() == null ? rootPath : rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableRelation.getJoinTableNickName();
-                PropertyColumnRelationMapper joinMapper = analysisClassRelation(tableRelation.getJoinTableClass());
+                PropertyColumnRelationMapper joinMapper = analysisClassRelation(tableRelation.getJoinEntityClass());
                 translateNameUtils.addLocalMapper(joinPath, joinMapper);
                 PropertyColumnRelationMapper mapper = tableRelation.getTableNickName() == null ? mainMapper : translateNameUtils.getLocalMapper(path);
                 List<Condition> conditionModelList = new ArrayList<>();
@@ -944,13 +944,13 @@ public class SQLModelFactory {
      */
     private void addQueryColumnList(final PropertyColumnRelationMapper mapper, final String path, final List<TableColumn> queryColumnList) {
         if (WsCollectionUtils.isNotEmpty(mapper.getIds())) {
-            for (PropertyColumnRelation propertyColumnRelation : mapper.getIds()) {
-                queryColumnList.add(translateNameUtils.createColumnBaseEntity(propertyColumnRelation, mapper, path));
+            for (PropertyBaseColumnRelation propertyBaseColumnRelation : mapper.getIds()) {
+                queryColumnList.add(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation, mapper, path));
             }
         }
         if (WsCollectionUtils.isNotEmpty(mapper.getFieldColumnRelations())) {
-            for (PropertyColumnRelation propertyColumnRelation : mapper.getFieldColumnRelations()) {
-                queryColumnList.add(translateNameUtils.createColumnBaseEntity(propertyColumnRelation, mapper, path));
+            for (PropertyBaseColumnRelation propertyBaseColumnRelation : mapper.getFieldColumnRelations()) {
+                queryColumnList.add(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation, mapper, path));
             }
         }
     }
@@ -1184,19 +1184,19 @@ public class SQLModelFactory {
 
     public void fillWhereConditionSqlInterceptorConditionList(List<Condition> conditionList,
                                                               String path, PropertyColumnRelationMapper mapper,
-                                                              List<PropertyColumnRelation> propertyColumnRelationList) {
-        if (WsCollectionUtils.isEmpty(propertyColumnRelationList)) {
+                                                              List<PropertyBaseColumnRelation> propertyBaseColumnRelationList) {
+        if (WsCollectionUtils.isEmpty(propertyBaseColumnRelationList)) {
             return;
         }
-        for (PropertyColumnRelation propertyColumnRelation : propertyColumnRelationList) {
-            AbstractSqlInterceptor interceptor = SELECT_SQL_INTERCEPTOR_MAP.get(propertyColumnRelation.getBeanProperty().getPropertyName());
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
+            AbstractSqlInterceptor interceptor = SELECT_SQL_INTERCEPTOR_MAP.get(propertyBaseColumnRelation.getBeanProperty().getPropertyName());
             if (interceptor != null && interceptor.useCondition(mapper)) {
                 Object fillValue = interceptor.selectFill();
                 if (fillValue == null) {
                     fillValue = SqlCommonConstants.NULL_VALUE;
                 }
                 conditionList.add(
-                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(propertyColumnRelation.getBeanProperty().getPropertyName(), path, 2), SqlEquation.Symbol.EQUAL, fillValue)
+                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation.getBeanProperty().getPropertyName(), path, 2), SqlEquation.Symbol.EQUAL, fillValue)
                 );
             }
         }
@@ -1204,19 +1204,19 @@ public class SQLModelFactory {
 
     public void fillUpdateConditionSqlInterceptorConditionList(List<Condition> conditionList,
                                                                String path, PropertyColumnRelationMapper mapper,
-                                                               List<PropertyColumnRelation> propertyColumnRelationList) {
-        if (WsCollectionUtils.isEmpty(propertyColumnRelationList)) {
+                                                               List<PropertyBaseColumnRelation> propertyBaseColumnRelationList) {
+        if (WsCollectionUtils.isEmpty(propertyBaseColumnRelationList)) {
             return;
         }
-        for (PropertyColumnRelation propertyColumnRelation : propertyColumnRelationList) {
-            AbstractSqlInterceptor interceptor = UPDATE_SQL_INTERCEPTOR_MAP.get(propertyColumnRelation.getBeanProperty().getPropertyName());
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
+            AbstractSqlInterceptor interceptor = UPDATE_SQL_INTERCEPTOR_MAP.get(propertyBaseColumnRelation.getBeanProperty().getPropertyName());
             if (interceptor != null && interceptor.useCondition(mapper)) {
                 Object fillValue = interceptor.updateFill();
                 if (fillValue == null) {
                     fillValue = SqlCommonConstants.NULL_VALUE;
                 }
                 conditionList.add(
-                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(propertyColumnRelation.getBeanProperty().getPropertyName(), path, 2), SqlEquation.Symbol.EQUAL, fillValue)
+                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation.getBeanProperty().getPropertyName(), path, 2), SqlEquation.Symbol.EQUAL, fillValue)
                 );
             }
         }

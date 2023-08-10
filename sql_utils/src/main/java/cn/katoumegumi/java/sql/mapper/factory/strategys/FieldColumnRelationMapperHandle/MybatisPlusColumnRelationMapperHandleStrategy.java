@@ -4,9 +4,9 @@ import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandleStrategy;
-import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
-import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyObjectColumnJoinRelation;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -62,7 +62,7 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
     }
 
     @Override
-    public Optional<PropertyColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
         TableId tableId = beanProperty.getAnnotation(TableId.class);
         String columnName;
         if (tableId != null) {
@@ -77,12 +77,12 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
         if (WsStringUtils.isBlank(columnName)) {
             columnName = fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
         }
-        return Optional.of(new PropertyColumnRelation(tableId != null, columnName, beanProperty));
+        return Optional.of(new PropertyBaseColumnRelation(tableId != null, columnName, beanProperty));
 
     }
 
     @Override
-    public Optional<ObjectPropertyJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
         return Optional.empty();
     }
 }

@@ -2,7 +2,7 @@ package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
-import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 import cn.katoumegumi.java.sql.model.component.BaseTableColumn;
 
@@ -295,8 +295,8 @@ public class TranslateNameUtils {
     }
 
 
-    public BaseTableColumn createColumnBaseEntity(final PropertyColumnRelation propertyColumnRelation, final PropertyColumnRelationMapper mapper, final String path) {
-        return new BaseTableColumn(propertyColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
+    public BaseTableColumn createColumnBaseEntity(final PropertyBaseColumnRelation propertyBaseColumnRelation, final PropertyColumnRelationMapper mapper, final String path) {
+        return new BaseTableColumn(propertyBaseColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
     }
 
     public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final int type) {
@@ -311,8 +311,8 @@ public class TranslateNameUtils {
         if (type == 2) {
             mapper = mapper.getBaseTemplateMapper() == null ? mapper : mapper.getBaseTemplateMapper();
         }
-        PropertyColumnRelation propertyColumnRelation = mapper.getFieldColumnRelationByFieldName(fieldName);
-        return new BaseTableColumn(propertyColumnRelation, mapper.getTableName(), path, abbreviation);
+        PropertyBaseColumnRelation propertyBaseColumnRelation = mapper.getFieldColumnRelationByFieldName(fieldName);
+        return new BaseTableColumn(propertyBaseColumnRelation, mapper.getTableName(), path, abbreviation);
     }
 
 

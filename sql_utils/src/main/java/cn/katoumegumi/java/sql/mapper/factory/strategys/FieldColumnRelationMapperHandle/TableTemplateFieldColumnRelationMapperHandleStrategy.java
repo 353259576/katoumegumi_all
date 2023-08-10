@@ -4,8 +4,8 @@ import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.annotation.TableTemplate;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandleStrategy;
-import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
-import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyObjectColumnJoinRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 
 import java.util.Optional;
@@ -49,17 +49,17 @@ public class TableTemplateFieldColumnRelationMapperHandleStrategy implements Fie
     }
 
     @Override
-    public Optional<PropertyColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
-        PropertyColumnRelation templateRelation = mainMapper.containsFieldColumnRelationByFieldName(beanProperty.getPropertyName());
+    public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+        PropertyBaseColumnRelation templateRelation = mainMapper.containsFieldColumnRelationByFieldName(beanProperty.getPropertyName());
         if (templateRelation == null) {
             return Optional.empty();
         }
-        PropertyColumnRelation relation = new PropertyColumnRelation(templateRelation.isId(), templateRelation.getColumnName(),beanProperty);
+        PropertyBaseColumnRelation relation = new PropertyBaseColumnRelation(templateRelation.isId(), templateRelation.getColumnName(),beanProperty);
         return Optional.of(relation);
     }
 
     @Override
-    public Optional<ObjectPropertyJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
         return Optional.empty();
     }
 }

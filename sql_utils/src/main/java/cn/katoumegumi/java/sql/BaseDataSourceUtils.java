@@ -8,7 +8,7 @@ import cn.katoumegumi.java.sql.handler.SqlEntityFactory;
 import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SqlParameter;
-import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.resultSet.strategys.JdkResultSet;
 
 import javax.sql.DataSource;
@@ -69,7 +69,7 @@ public class BaseDataSourceUtils {
             }
             int updateRow = preparedStatement.executeUpdate();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            List<PropertyColumnRelation> idList = insertSqlEntity.getIdList();
+            List<PropertyBaseColumnRelation> idList = insertSqlEntity.getIdList();
             if (WsCollectionUtils.isNotEmpty(idList) && resultSet != null) {
                 int count = resultSet.getMetaData().getColumnCount();
                 if (resultSet.next()) {

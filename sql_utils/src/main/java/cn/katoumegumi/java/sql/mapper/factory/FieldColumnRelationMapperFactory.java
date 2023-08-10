@@ -8,8 +8,8 @@ import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandle.*;
 import cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandleStrategy;
-import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
-import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyObjectColumnJoinRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 
 import java.util.ArrayList;
@@ -194,11 +194,11 @@ public class FieldColumnRelationMapperFactory {
         }).orElse(false);
     }
 
-    public PropertyColumnRelation getColumnName(int startIndex, PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+    public PropertyBaseColumnRelation getColumnName(int startIndex, PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
         return getStrategyAndHandle(startIndex, strategy -> strategy.getColumnName(mainMapper, beanProperty)).orElse(null);
     }
 
-    public ObjectPropertyJoinRelation getJoinRelation(int startIndex, PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+    public PropertyObjectColumnJoinRelation getJoinRelation(int startIndex, PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
         return getStrategyAndHandle(startIndex, strategy -> strategy.getJoinRelation(mainMapper, joinMapper, beanProperty)).orElse(null);
     }
 
@@ -251,15 +251,15 @@ public class FieldColumnRelationMapperFactory {
         }
         if (WsCollectionUtils.isNotEmpty(baseTypeFieldList)) {
             for (BeanPropertyModel propertyModel : baseTypeFieldList) {
-                PropertyColumnRelation propertyColumnRelation = getColumnName(startIndex, propertyColumnRelationMapper.getBaseTemplateMapper() == null ? propertyColumnRelationMapper : propertyColumnRelationMapper.getBaseTemplateMapper(), propertyModel);
-                if (propertyColumnRelation == null) {
+                PropertyBaseColumnRelation propertyBaseColumnRelation = getColumnName(startIndex, propertyColumnRelationMapper.getBaseTemplateMapper() == null ? propertyColumnRelationMapper : propertyColumnRelationMapper.getBaseTemplateMapper(), propertyModel);
+                if (propertyBaseColumnRelation == null) {
                     continue;
                 }
-                propertyColumnRelationMapper.putFieldColumnRelationMap(propertyModel.getPropertyName(), propertyColumnRelation);
-                if (propertyColumnRelation.isId()) {
-                    propertyColumnRelationMapper.getIds().add(propertyColumnRelation);
+                propertyColumnRelationMapper.putFieldColumnRelationMap(propertyModel.getPropertyName(), propertyBaseColumnRelation);
+                if (propertyBaseColumnRelation.isId()) {
+                    propertyColumnRelationMapper.getIds().add(propertyBaseColumnRelation);
                 } else {
-                    propertyColumnRelationMapper.getFieldColumnRelations().add(propertyColumnRelation);
+                    propertyColumnRelationMapper.getFieldColumnRelations().add(propertyBaseColumnRelation);
                 }
             }
         }
@@ -268,22 +268,17 @@ public class FieldColumnRelationMapperFactory {
 
         if (WsCollectionUtils.isNotEmpty(joinClassFieldList)) {
             for (BeanPropertyModel propertyModel : joinClassFieldList) {
-                Class<?> joinClass;
-                if (WsReflectUtils.isArrayType(propertyModel.getPropertyClass())){
-                    joinClass = propertyModel.getGenericClass();
-                }else {
-                    joinClass = propertyModel.getPropertyClass();
-                }
+                Class<?> joinClass = WsReflectUtils.isArrayType(propertyModel.getPropertyClass())?propertyModel.getGenericClass():propertyModel.getPropertyClass();
                 if (joinClass == null){
                     continue;
                 }
                 try {
                     PropertyColumnRelationMapper joinMapper = analysisClassRelation(joinClass, true);
-                    ObjectPropertyJoinRelation objectPropertyJoinRelation = getJoinRelation(startIndex, propertyColumnRelationMapper, joinMapper, propertyModel);
-                    if (objectPropertyJoinRelation == null) {
+                    PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = getJoinRelation(startIndex, propertyColumnRelationMapper, joinMapper, propertyModel);
+                    if (propertyObjectColumnJoinRelation == null) {
                         continue;
                     }
-                    propertyColumnRelationMapper.getFieldJoinClasses().add(objectPropertyJoinRelation);
+                    propertyColumnRelationMapper.getFieldJoinClasses().add(propertyObjectColumnJoinRelation);
                 }catch (RuntimeException e){
                     log.info("解析"+ joinClass +"失败:"+e.getMessage());
                 }

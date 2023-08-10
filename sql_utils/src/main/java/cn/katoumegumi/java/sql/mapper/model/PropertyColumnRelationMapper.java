@@ -5,15 +5,15 @@ import cn.katoumegumi.java.common.WsCollectionUtils;
 import java.util.*;
 
 /**
+ * 属性与列的关系
  * @author ws
- * 对象数据库列名关系集合
  */
 public class PropertyColumnRelationMapper {
 
     /**
      * 实体名称
      */
-    private final String nickName;
+    private final String entityName;
 
     /**
      * 表名
@@ -23,23 +23,24 @@ public class PropertyColumnRelationMapper {
     /**
      * 表对应实体的class
      */
-    private final Class<?> clazz;
+    private final Class<?> entityClass;
 
     /**
      * id
      */
-    private final List<PropertyColumnRelation> ids = new ArrayList<>();
+    private final List<PropertyBaseColumnRelation> ids = new ArrayList<>();
 
     /**
      * 非Id
      */
-    private final List<PropertyColumnRelation> propertyColumnRelations = new ArrayList<>();
+    private final List<PropertyBaseColumnRelation> propertyBaseColumnRelations = new ArrayList<>();
 
     /**
      * 关联对象
      */
-    private final List<ObjectPropertyJoinRelation> objectPropertyJoinRelations = new ArrayList<>();
-    private final Map<String, PropertyColumnRelation> propertyColumnRelationMap = new HashMap<>();
+    private final List<PropertyObjectColumnJoinRelation> propertyObjectColumnJoinRelations = new ArrayList<>();
+
+    private final Map<String, PropertyBaseColumnRelation> propertyColumnRelationMap = new HashMap<>();
 
     /**
      * 位置
@@ -51,61 +52,61 @@ public class PropertyColumnRelationMapper {
      */
     private final PropertyColumnRelationMapper baseTemplateMapper;
 
-    public PropertyColumnRelationMapper(String nickName, String tableName, Class<?> clazz) {
-        this.nickName = nickName;
+    public PropertyColumnRelationMapper(String entityName, String tableName, Class<?> entityClass) {
+        this.entityName = entityName;
         this.tableName = tableName;
-        this.clazz = clazz;
+        this.entityClass = entityClass;
         this.baseTemplateMapper = null;
     }
 
-    public PropertyColumnRelationMapper(String nickName, String tableName, Class<?> clazz, PropertyColumnRelationMapper mapper) {
-        this.nickName = nickName;
+    public PropertyColumnRelationMapper(String entityName, String tableName, Class<?> entityClass, PropertyColumnRelationMapper mapper) {
+        this.entityName = entityName;
         this.tableName = tableName;
-        this.clazz = clazz;
+        this.entityClass = entityClass;
         this.baseTemplateMapper = mapper;
     }
 
 
-    public PropertyColumnRelation getFieldColumnRelationByColumn(String column) {
-        for (PropertyColumnRelation propertyColumnRelation : ids) {
-            if (propertyColumnRelation.getColumnName().equals(column)) {
-                return propertyColumnRelation;
+    public PropertyBaseColumnRelation getFieldColumnRelationByColumn(String column) {
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : ids) {
+            if (propertyBaseColumnRelation.getColumnName().equals(column)) {
+                return propertyBaseColumnRelation;
             }
         }
-        for (PropertyColumnRelation propertyColumnRelation : propertyColumnRelations) {
-            if (propertyColumnRelation.getColumnName().equals(column)) {
-                return propertyColumnRelation;
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelations) {
+            if (propertyBaseColumnRelation.getColumnName().equals(column)) {
+                return propertyBaseColumnRelation;
             }
         }
         return null;
     }
 
-    public PropertyColumnRelation getFieldColumnRelationByFieldName(String fieldName) {
-        PropertyColumnRelation propertyColumnRelation = propertyColumnRelationMap.get(fieldName);
-        if (propertyColumnRelation == null) {
+    public PropertyBaseColumnRelation getFieldColumnRelationByFieldName(String fieldName) {
+        PropertyBaseColumnRelation propertyBaseColumnRelation = propertyColumnRelationMap.get(fieldName);
+        if (propertyBaseColumnRelation == null) {
             throw new IllegalArgumentException("未发现对象含有属性：" + fieldName);
         }
-        return propertyColumnRelation;
+        return propertyBaseColumnRelation;
     }
 
-    public PropertyColumnRelation containsFieldColumnRelationByFieldName(String fieldName) {
+    public PropertyBaseColumnRelation containsFieldColumnRelationByFieldName(String fieldName) {
         return propertyColumnRelationMap.get(fieldName);
     }
 
 
-    public ObjectPropertyJoinRelation getFieldJoinClassByColumn(String column) {
-        for (ObjectPropertyJoinRelation objectPropertyJoinRelation : objectPropertyJoinRelations) {
-            if (objectPropertyJoinRelation.getAnotherJoinColumn().equals(column)) {
-                return objectPropertyJoinRelation;
+    public PropertyObjectColumnJoinRelation getFieldJoinClassByColumn(String column) {
+        for (PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation : propertyObjectColumnJoinRelations) {
+            if (propertyObjectColumnJoinRelation.getJoinTableColumnName().equals(column)) {
+                return propertyObjectColumnJoinRelation;
             }
         }
         return null;
     }
 
-    public ObjectPropertyJoinRelation getFieldJoinClassByFieldName(String fieldName) {
-        for (ObjectPropertyJoinRelation objectPropertyJoinRelation : objectPropertyJoinRelations) {
-            if (objectPropertyJoinRelation.getNickName().equals(fieldName)) {
-                return objectPropertyJoinRelation;
+    public PropertyObjectColumnJoinRelation getFieldJoinClassByFieldName(String fieldName) {
+        for (PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation : propertyObjectColumnJoinRelations) {
+            if (propertyObjectColumnJoinRelation.getJoinEntityPropertyName().equals(fieldName)) {
+                return propertyObjectColumnJoinRelation;
             }
         }
         return null;
@@ -113,7 +114,7 @@ public class PropertyColumnRelationMapper {
 
 
     public String getNickName() {
-        return nickName;
+        return entityName;
     }
 
     public String getTableName() {
@@ -122,30 +123,30 @@ public class PropertyColumnRelationMapper {
 
 
     public Class<?> getClazz() {
-        return clazz;
+        return entityClass;
     }
 
-    public List<PropertyColumnRelation> getIds() {
+    public List<PropertyBaseColumnRelation> getIds() {
         return ids;
     }
 
 
-    public List<PropertyColumnRelation> getFieldColumnRelations() {
-        return propertyColumnRelations;
+    public List<PropertyBaseColumnRelation> getFieldColumnRelations() {
+        return propertyBaseColumnRelations;
     }
 
 
-    public List<ObjectPropertyJoinRelation> getFieldJoinClasses() {
-        return objectPropertyJoinRelations;
+    public List<PropertyObjectColumnJoinRelation> getFieldJoinClasses() {
+        return propertyObjectColumnJoinRelations;
     }
 
 
-    /*public Map<String, PropertyColumnRelation> getFieldColumnRelationMap() {
+    /*public Map<String, PropertyBaseColumnRelation> getFieldColumnRelationMap() {
         return fieldColumnRelationMap;
     }*/
 
-    public PropertyColumnRelation putFieldColumnRelationMap(String key, PropertyColumnRelation propertyColumnRelation) {
-        return this.propertyColumnRelationMap.put(key, propertyColumnRelation);
+    public PropertyBaseColumnRelation putFieldColumnRelationMap(String key, PropertyBaseColumnRelation propertyBaseColumnRelation) {
+        return this.propertyColumnRelationMap.put(key, propertyBaseColumnRelation);
     }
 
 
@@ -153,12 +154,12 @@ public class PropertyColumnRelationMapper {
         for (int i = 0; i < ids.size(); i++) {
             locationMap.put(ids.get(i), i);
         }
-        for (int i = 0; i < propertyColumnRelations.size(); i++) {
-            locationMap.put(propertyColumnRelations.get(i), i);
+        for (int i = 0; i < propertyBaseColumnRelations.size(); i++) {
+            locationMap.put(propertyBaseColumnRelations.get(i), i);
         }
-        if (WsCollectionUtils.isNotEmpty(objectPropertyJoinRelations)) {
-            for (int i = 0; i < objectPropertyJoinRelations.size(); i++) {
-                locationMap.put(objectPropertyJoinRelations.get(i), i);
+        if (WsCollectionUtils.isNotEmpty(propertyObjectColumnJoinRelations)) {
+            for (int i = 0; i < propertyObjectColumnJoinRelations.size(); i++) {
+                locationMap.put(propertyObjectColumnJoinRelations.get(i), i);
             }
         }
 
@@ -170,7 +171,7 @@ public class PropertyColumnRelationMapper {
 
     @Override
     public String toString() {
-        return nickName + "_" + tableName;
+        return entityName + "_" + tableName;
     }
 
     @Override
@@ -182,12 +183,12 @@ public class PropertyColumnRelationMapper {
             return false;
         }
         PropertyColumnRelationMapper that = (PropertyColumnRelationMapper) o;
-        return Objects.equals(nickName, that.nickName) && Objects.equals(tableName, that.tableName) && Objects.equals(clazz, that.clazz);
+        return Objects.equals(entityName, that.entityName) && Objects.equals(tableName, that.tableName) && Objects.equals(entityClass, that.entityClass);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nickName, tableName, clazz);
+        return Objects.hash(entityName, tableName, entityClass);
     }
 
     public PropertyColumnRelationMapper getBaseTemplateMapper() {

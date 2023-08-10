@@ -24,26 +24,27 @@ public class TableRelation {
     /**
      * 关联表实体类型
      */
-    private Class<?> joinTableClass;
+    private Class<?> joinEntityClass;
 
     /**
      * 主表实体路径名称
+     * 可以使用alias
      */
-    private String tableNickName;
+    private String mainEntityPath;
     /**
      * 主表实体字段名称
      */
-    private String tableColumn;
+    private String mainEntityPropertyName;
 
     /**
      * 关联表实体路径
      */
-    private String joinTableNickName;
+    private String joinEntityPath;
 
     /**
      * 关联表实体字段名称
      */
-    private String joinTableColumn;
+    private String joinEntityPropertyName;
 
     /**
      * 关联关系额外附加条件
@@ -73,76 +74,76 @@ public class TableRelation {
         return this;
     }
 
-    public Class<?> getJoinTableClass() {
-        return joinTableClass;
+    public Class<?> getJoinEntityClass() {
+        return joinEntityClass;
     }
 
-    public TableRelation setJoinTableClass(Class<?> joinTableClass) {
-        this.joinTableClass = joinTableClass;
+    public TableRelation setJoinEntityClass(Class<?> joinEntityClass) {
+        this.joinEntityClass = joinEntityClass;
         return this;
     }
 
     public String getTableNickName() {
-        return tableNickName;
+        return mainEntityPath;
     }
 
-    public TableRelation setTableNickName(String tableNickName) {
-        this.tableNickName = tableNickName;
+    public TableRelation setTableNickName(String mainEntityPath) {
+        this.mainEntityPath = mainEntityPath;
         return this;
     }
 
     public String getTableColumn() {
-        return tableColumn;
+        return mainEntityPropertyName;
     }
 
-    public TableRelation setTableColumn(String tableColumn) {
-        this.tableColumn = tableColumn;
+    public TableRelation setTableColumn(String mainEntityPropertyName) {
+        this.mainEntityPropertyName = mainEntityPropertyName;
         return this;
     }
 
 
     public String getJoinTableNickName() {
-        return joinTableNickName;
+        return joinEntityPath;
     }
 
-    public TableRelation setJoinTableNickName(String joinTableNickName) {
-        this.joinTableNickName = joinTableNickName;
+    public TableRelation setJoinTableNickName(String joinEntityPath) {
+        this.joinEntityPath = joinEntityPath;
         return this;
     }
 
-    public <T> TableRelation setJoinTableNickName(SFunction<T, ?> joinTableNickName) {
-        this.joinTableNickName = WsReflectUtils.getFieldName(joinTableNickName);
+    public <T> TableRelation setJoinTableNickName(SFunction<T, ?> joinEntityPath) {
+        this.joinEntityPath = WsReflectUtils.getFieldName(joinEntityPath);
         return this;
     }
 
-    public <T> TableRelation setJoinTableNickName(String parentTableNickName, SFunction<T, ?> joinTableNickName) {
-        if (WsStringUtils.isBlank(parentTableNickName)) {
-            this.joinTableNickName = WsReflectUtils.getFieldName(joinTableNickName);
+    public <T> TableRelation setJoinTableNickName(String mainEntityPath, SFunction<T, ?> joinEntityPath) {
+        if (WsStringUtils.isBlank(mainEntityPath)) {
+            this.joinEntityPath = WsReflectUtils.getFieldName(joinEntityPath);
         } else {
-            this.joinTableNickName = parentTableNickName + '.' + WsReflectUtils.getFieldName(joinTableNickName);
+            this.joinEntityPath = mainEntityPath + '.' + WsReflectUtils.getFieldName(joinEntityPath);
         }
         return this;
     }
 
     public String getJoinTableColumn() {
-        return joinTableColumn;
+        return joinEntityPropertyName;
     }
 
-    public TableRelation setJoinTableColumn(String joinTableColumn) {
-        this.joinTableColumn = joinTableColumn;
+    public TableRelation setJoinTableColumn(String joinEntityPropertyName) {
+        this.joinEntityPropertyName = joinEntityPropertyName;
         return this;
     }
 
-    public TableRelation on(String tableColumn, String joinTableColumn) {
-        this.tableColumn = tableColumn;
-        this.joinTableColumn = joinTableColumn;
+    public TableRelation on(String mainEntityPropertyName, String joinEntityPropertyName) {
+        this.mainEntityPropertyName = mainEntityPropertyName;
+        this.joinEntityPropertyName = joinEntityPropertyName;
         return this;
     }
 
 
-    public <T, R> TableRelation on(SFunction<T, ?> tableColumn, SFunction<R, ?> joinTableColumn) {
-        this.tableColumn = WsReflectUtils.getFieldName(tableColumn);
-        this.joinTableColumn = WsReflectUtils.getFieldName(joinTableColumn);
+    public <T, R> TableRelation on(SFunction<T, ?> mainEntityPropertyName, SFunction<R, ?> joinEntityPropertyName) {
+        this.mainEntityPropertyName = WsReflectUtils.getFieldName(mainEntityPropertyName);
+        this.joinEntityPropertyName = WsReflectUtils.getFieldName(joinEntityPropertyName);
         return this;
     }
 

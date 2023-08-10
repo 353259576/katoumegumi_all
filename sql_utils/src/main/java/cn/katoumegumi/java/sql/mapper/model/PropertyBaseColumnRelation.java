@@ -4,10 +4,10 @@ package cn.katoumegumi.java.sql.mapper.model;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 
 /**
+ * 属性与基本列关系
  * @author ws
- * 对象参数与数据库列名对应关系
  */
-public class PropertyColumnRelation {
+public class PropertyBaseColumnRelation {
     /**
      * 是否为id
      */
@@ -25,7 +25,7 @@ public class PropertyColumnRelation {
 
 
 
-    public PropertyColumnRelation(boolean id, String columnName, BeanPropertyModel beanPropertyModel) {
+    public PropertyBaseColumnRelation(boolean id, String columnName, BeanPropertyModel beanPropertyModel) {
         this.id = id;
         this.columnName = columnName;
         this.beanProperty = beanPropertyModel;

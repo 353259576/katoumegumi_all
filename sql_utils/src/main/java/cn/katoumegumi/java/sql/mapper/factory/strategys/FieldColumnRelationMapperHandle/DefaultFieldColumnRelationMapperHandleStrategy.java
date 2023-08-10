@@ -1,13 +1,12 @@
 package cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandle;
 
-import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMapperHandleStrategy;
-import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
-import cn.katoumegumi.java.sql.mapper.model.ObjectPropertyJoinRelation;
+import cn.katoumegumi.java.sql.mapper.model.PropertyObjectColumnJoinRelation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -53,16 +52,15 @@ public class DefaultFieldColumnRelationMapperHandleStrategy implements FieldColu
     }
 
     @Override
-    public Optional<PropertyColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
-        return Optional.of(new PropertyColumnRelation(false, fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName()), beanProperty));
+    public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+        return Optional.of(new PropertyBaseColumnRelation(false, fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName()), beanProperty));
     }
 
     @Override
-    public Optional<ObjectPropertyJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
-        boolean isArray = WsReflectUtils.isArrayType(beanProperty.getPropertyClass());
-        ObjectPropertyJoinRelation objectPropertyJoinRelation = new ObjectPropertyJoinRelation(isArray, joinMapper.getClazz(), beanProperty);
-        objectPropertyJoinRelation.setNickName(beanProperty.getPropertyName());
-        objectPropertyJoinRelation.setJoinType(TableJoinType.LEFT_JOIN);
-        return Optional.of(objectPropertyJoinRelation);
+    public Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+        PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = new PropertyObjectColumnJoinRelation(beanProperty);
+        propertyObjectColumnJoinRelation.setJoinEntityPropertyName(beanProperty.getPropertyName());
+        propertyObjectColumnJoinRelation.setJoinType(TableJoinType.LEFT_JOIN);
+        return Optional.of(propertyObjectColumnJoinRelation);
     }
 }
