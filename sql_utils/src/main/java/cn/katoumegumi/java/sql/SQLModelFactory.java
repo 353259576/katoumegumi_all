@@ -16,7 +16,6 @@ import cn.katoumegumi.java.sql.entity.MapperDictTree;
 import cn.katoumegumi.java.sql.entity.ReturnEntityId;
 import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SqlParameter;
-import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyObjectColumnJoinRelation;
@@ -330,53 +329,6 @@ public class SQLModelFactory {
         return insertSqlEntity;
     }
 
-//    /**
-//     * 生成update sql语句
-//     *
-//     * @param t
-//     * @param <T>
-//     * @return
-//     */
-//    public <T> UpdateSqlEntity createUpdateSqlEntity(T t, boolean isAll) {
-//        PropertyColumnRelationMapper propertyColumnRelationMapper = analysisClassRelation(t.getClass());
-//        List<PropertyBaseColumnRelation> idList = propertyColumnRelationMapper.getIds();
-//        List<PropertyBaseColumnRelation> columnList = propertyColumnRelationMapper.getFieldColumnRelations();
-//        List<String> columnStrList = new ArrayList<>();
-//        List<String> idStrList = new ArrayList<>();
-//        List<SqlParameter> valueList = new ArrayList<>();
-//        for (PropertyBaseColumnRelation propertyBaseColumnRelation : columnList) {
-//            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
-//            AbstractSqlInterceptor sqlInterceptor = UPDATE_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
-//            Object o;
-//            if (sqlInterceptor != null && sqlInterceptor.useCondition(propertyColumnRelationMapper)) {
-//                o = sqlInterceptor.updateFill();
-//            } else {
-//                o = beanPropertyModel.getValue(t);
-//            }
-//            if (isAll || o != null) {
-//                String str = guardKeyword(propertyBaseColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
-//                columnStrList.add(str);
-//                valueList.add(new SqlParameter(o));
-//            }
-//        }
-//        for (PropertyBaseColumnRelation propertyBaseColumnRelation : idList) {
-//            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
-//            Object o = beanPropertyModel.getValue(t);
-//            if (o != null) {
-//                String str = guardKeyword(propertyBaseColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
-//                idStrList.add(str);
-//                valueList.add(new SqlParameter(o));
-//            }
-//        }
-//        if (idStrList.isEmpty()) {
-//            throw new NullPointerException("primary key is null");
-//        }
-//        String updateSql = SqlCommonConstants.UPDATE + guardKeyword(propertyColumnRelationMapper.getTableName()) + SqlCommonConstants.SET + WsStringUtils.jointListString(columnStrList, SqlCommonConstants.COMMA) + SqlCommonConstants.WHERE + WsStringUtils.jointListString(idStrList, SqlCommonConstants.SQL_AND);
-//        UpdateSqlEntity updateSqlEntity = new UpdateSqlEntity();
-//        updateSqlEntity.setUpdateSql(updateSql);
-//        updateSqlEntity.setValueList(valueList);
-//        return updateSqlEntity;
-//    }
 
     /**
      * 合并返回数据
