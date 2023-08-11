@@ -330,53 +330,53 @@ public class SQLModelFactory {
         return insertSqlEntity;
     }
 
-    /**
-     * 生成update sql语句
-     *
-     * @param t
-     * @param <T>
-     * @return
-     */
-    public <T> UpdateSqlEntity createUpdateSqlEntity(T t, boolean isAll) {
-        PropertyColumnRelationMapper propertyColumnRelationMapper = analysisClassRelation(t.getClass());
-        List<PropertyBaseColumnRelation> idList = propertyColumnRelationMapper.getIds();
-        List<PropertyBaseColumnRelation> columnList = propertyColumnRelationMapper.getFieldColumnRelations();
-        List<String> columnStrList = new ArrayList<>();
-        List<String> idStrList = new ArrayList<>();
-        List<SqlParameter> valueList = new ArrayList<>();
-        for (PropertyBaseColumnRelation propertyBaseColumnRelation : columnList) {
-            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
-            AbstractSqlInterceptor sqlInterceptor = UPDATE_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
-            Object o;
-            if (sqlInterceptor != null && sqlInterceptor.useCondition(propertyColumnRelationMapper)) {
-                o = sqlInterceptor.updateFill();
-            } else {
-                o = beanPropertyModel.getValue(t);
-            }
-            if (isAll || o != null) {
-                String str = guardKeyword(propertyBaseColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
-                columnStrList.add(str);
-                valueList.add(new SqlParameter(o));
-            }
-        }
-        for (PropertyBaseColumnRelation propertyBaseColumnRelation : idList) {
-            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
-            Object o = beanPropertyModel.getValue(t);
-            if (o != null) {
-                String str = guardKeyword(propertyBaseColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
-                idStrList.add(str);
-                valueList.add(new SqlParameter(o));
-            }
-        }
-        if (idStrList.isEmpty()) {
-            throw new NullPointerException("primary key is null");
-        }
-        String updateSql = SqlCommonConstants.UPDATE + guardKeyword(propertyColumnRelationMapper.getTableName()) + SqlCommonConstants.SET + WsStringUtils.jointListString(columnStrList, SqlCommonConstants.COMMA) + SqlCommonConstants.WHERE + WsStringUtils.jointListString(idStrList, SqlCommonConstants.SQL_AND);
-        UpdateSqlEntity updateSqlEntity = new UpdateSqlEntity();
-        updateSqlEntity.setUpdateSql(updateSql);
-        updateSqlEntity.setValueList(valueList);
-        return updateSqlEntity;
-    }
+//    /**
+//     * 生成update sql语句
+//     *
+//     * @param t
+//     * @param <T>
+//     * @return
+//     */
+//    public <T> UpdateSqlEntity createUpdateSqlEntity(T t, boolean isAll) {
+//        PropertyColumnRelationMapper propertyColumnRelationMapper = analysisClassRelation(t.getClass());
+//        List<PropertyBaseColumnRelation> idList = propertyColumnRelationMapper.getIds();
+//        List<PropertyBaseColumnRelation> columnList = propertyColumnRelationMapper.getFieldColumnRelations();
+//        List<String> columnStrList = new ArrayList<>();
+//        List<String> idStrList = new ArrayList<>();
+//        List<SqlParameter> valueList = new ArrayList<>();
+//        for (PropertyBaseColumnRelation propertyBaseColumnRelation : columnList) {
+//            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
+//            AbstractSqlInterceptor sqlInterceptor = UPDATE_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
+//            Object o;
+//            if (sqlInterceptor != null && sqlInterceptor.useCondition(propertyColumnRelationMapper)) {
+//                o = sqlInterceptor.updateFill();
+//            } else {
+//                o = beanPropertyModel.getValue(t);
+//            }
+//            if (isAll || o != null) {
+//                String str = guardKeyword(propertyBaseColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
+//                columnStrList.add(str);
+//                valueList.add(new SqlParameter(o));
+//            }
+//        }
+//        for (PropertyBaseColumnRelation propertyBaseColumnRelation : idList) {
+//            BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
+//            Object o = beanPropertyModel.getValue(t);
+//            if (o != null) {
+//                String str = guardKeyword(propertyBaseColumnRelation.getColumnName()) + SqlCommonConstants.EQ + SqlCommonConstants.PLACEHOLDER;
+//                idStrList.add(str);
+//                valueList.add(new SqlParameter(o));
+//            }
+//        }
+//        if (idStrList.isEmpty()) {
+//            throw new NullPointerException("primary key is null");
+//        }
+//        String updateSql = SqlCommonConstants.UPDATE + guardKeyword(propertyColumnRelationMapper.getTableName()) + SqlCommonConstants.SET + WsStringUtils.jointListString(columnStrList, SqlCommonConstants.COMMA) + SqlCommonConstants.WHERE + WsStringUtils.jointListString(idStrList, SqlCommonConstants.SQL_AND);
+//        UpdateSqlEntity updateSqlEntity = new UpdateSqlEntity();
+//        updateSqlEntity.setUpdateSql(updateSql);
+//        updateSqlEntity.setValueList(valueList);
+//        return updateSqlEntity;
+//    }
 
     /**
      * 合并返回数据
@@ -789,15 +789,60 @@ public class SQLModelFactory {
         return new UpdateModel(from, joinTableModelList, conditionList, where);
     }
 
-    /*public <T> UpdateModel createUpdateModel(T t){
+    public <T> UpdateModel createUpdateModel(T t,boolean allUpdate){
         if (t == null){
             throw new NullPointerException("object is null");
         }
         final  PropertyColumnRelationMapper mainMapper = analysisClassRelation(t.getClass());
+        if (mainMapper.getIds().isEmpty()){
+            throw new IllegalArgumentException("No primary key");
+        }
         TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
         final String rootPath = mainMapper.getNickName();
+        translateNameUtils.addLocalMapper(rootPath,mainMapper);
+        List<Condition> whereCondtionList = new ArrayList<>(mainMapper.getIds().size());
 
-    }*/
+        for (PropertyBaseColumnRelation id : mainMapper.getIds()) {
+            Condition condition = createConditionBySqlInterceptor(rootPath,mainMapper,id, SqlEquation.Symbol.EQUAL,SELECT_SQL_INTERCEPTOR_MAP);
+            if (condition == null){
+                Object o = id.getBeanProperty().getValue(t);
+                if (o == null){
+                    if (!allUpdate){
+                        continue;
+                    }
+                    o = SqlCommonConstants.NULL_VALUE;
+                }
+                whereCondtionList.add(
+                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(id.getBeanProperty().getPropertyName(), rootPath, 2),
+                                SqlEquation.Symbol.EQUAL,
+                                o)
+                );
+            }else {
+                whereCondtionList.add(condition);
+            }
+        }
+        List<Condition> updateCondtionList = new ArrayList<>(mainMapper.getFieldColumnRelations().size());
+        for (PropertyBaseColumnRelation baseColumn : mainMapper.getFieldColumnRelations()) {
+            Condition condition = createConditionBySqlInterceptor(rootPath,mainMapper,baseColumn, SqlEquation.Symbol.EQUAL,SELECT_SQL_INTERCEPTOR_MAP);
+            if (condition == null){
+                Object o = baseColumn.getBeanProperty().getValue(t);
+                if (o == null){
+                    if (!allUpdate){
+                        continue;
+                    }
+                    o = SqlCommonConstants.NULL_VALUE;
+                }
+                updateCondtionList.add(
+                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(baseColumn.getBeanProperty().getPropertyName(), rootPath, 2),
+                                SqlEquation.Symbol.EQUAL,
+                                o)
+                );
+            }else {
+                updateCondtionList.add(condition);
+            }
+        }
+        return new UpdateModel(from,Collections.emptyList(),updateCondtionList,new RelationCondition(whereCondtionList,SqlOperator.AND));
+    }
 
     /**
      * 表关联处理
@@ -1191,13 +1236,10 @@ public class SQLModelFactory {
         for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
             AbstractSqlInterceptor interceptor = SELECT_SQL_INTERCEPTOR_MAP.get(propertyBaseColumnRelation.getBeanProperty().getPropertyName());
             if (interceptor != null && interceptor.useCondition(mapper)) {
-                Object fillValue = interceptor.selectFill();
-                if (fillValue == null) {
-                    fillValue = SqlCommonConstants.NULL_VALUE;
+                Condition condition = createConditionBySqlInterceptor(path,mapper,propertyBaseColumnRelation, SqlEquation.Symbol.EQUAL,SELECT_SQL_INTERCEPTOR_MAP);
+                if (condition != null){
+                    conditionList.add(condition);
                 }
-                conditionList.add(
-                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation.getBeanProperty().getPropertyName(), path, 2), SqlEquation.Symbol.EQUAL, fillValue)
-                );
             }
         }
     }
@@ -1209,17 +1251,39 @@ public class SQLModelFactory {
             return;
         }
         for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
-            AbstractSqlInterceptor interceptor = UPDATE_SQL_INTERCEPTOR_MAP.get(propertyBaseColumnRelation.getBeanProperty().getPropertyName());
-            if (interceptor != null && interceptor.useCondition(mapper)) {
-                Object fillValue = interceptor.updateFill();
-                if (fillValue == null) {
-                    fillValue = SqlCommonConstants.NULL_VALUE;
-                }
-                conditionList.add(
-                        new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation.getBeanProperty().getPropertyName(), path, 2), SqlEquation.Symbol.EQUAL, fillValue)
-                );
+            Condition condition = createConditionBySqlInterceptor(path,mapper,propertyBaseColumnRelation, SqlEquation.Symbol.EQUAL,UPDATE_SQL_INTERCEPTOR_MAP);
+            if (condition != null){
+                conditionList.add(condition);
             }
         }
+    }
+
+    /**
+     * 通过sql拦截器创建条件
+     * @param path
+     * @param mapper
+     * @param propertyBaseColumnRelation
+     * @param symbol
+     * @param sqlInterceptorMap
+     * @return
+     */
+    public Condition createConditionBySqlInterceptor(String path,
+                                                     PropertyColumnRelationMapper mapper,
+                                                     PropertyBaseColumnRelation propertyBaseColumnRelation,
+                                                     SqlEquation.Symbol symbol,
+                                                     Map<String, AbstractSqlInterceptor> sqlInterceptorMap) {
+        if (propertyBaseColumnRelation == null){
+            return null;
+        }
+        AbstractSqlInterceptor interceptor = sqlInterceptorMap.get(propertyBaseColumnRelation.getBeanProperty().getPropertyName());
+        if (interceptor != null && interceptor.useCondition(mapper)) {
+            Object fillValue = interceptor.updateFill();
+            if (fillValue == null) {
+                fillValue = SqlCommonConstants.NULL_VALUE;
+            }
+            return new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation.getBeanProperty().getPropertyName(), path, 2), symbol, fillValue);
+        }
+        return null;
     }
 
 

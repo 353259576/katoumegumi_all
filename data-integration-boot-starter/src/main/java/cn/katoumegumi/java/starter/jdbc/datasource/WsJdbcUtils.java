@@ -137,9 +137,8 @@ public class WsJdbcUtils {
         }
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        UpdateSqlEntity updateSqlEntity = sqlModelFactory.createUpdateSqlEntity(t, isAll);
+        UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel(t,isAll));
         log.debug(updateSqlEntity.getUpdateSql());
-
         return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
     }
 
@@ -190,10 +189,10 @@ public class WsJdbcUtils {
         int[] ans = new int[tList.size()];
         int index = 0;
         Map<String, KeyValue<List<Object[]>,List<Integer>>> map = new HashMap<>();
+        MySearchList mySearchList = MySearchList.create(tList.get(0).getClass());
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         for (T t : tList) {
-            MySearchList mySearchList = MySearchList.create(t.getClass());
-            SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-            UpdateSqlEntity updateSqlEntity = sqlModelFactory.createUpdateSqlEntity(t, isAll);
+            UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel(t,isAll));
             KeyValue<List<Object[]>,List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(),new ArrayList<>()));
             keyValue.getKey().add(WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
             keyValue.getValue().add(index++);

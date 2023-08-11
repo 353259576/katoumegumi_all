@@ -2,7 +2,6 @@ package cn.katoumegumi.java.sql.mapper.model;
 
 import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
-import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 
 /**
