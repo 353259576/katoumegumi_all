@@ -313,15 +313,6 @@ public class WsBeanUtils {
     }
 
     public static <T> T createObject(Class<T> clazz) {
-        /*try {
-            return clazz.getConstructor().newInstance();
-        } catch (NoSuchMethodException
-                | InstantiationException
-                | IllegalAccessException
-                | InvocationTargetException e) {
-            e.printStackTrace();
-            return null;
-        }*/
         return (T) WsUnsafeUtils.allocateInstance(clazz);
     }
 

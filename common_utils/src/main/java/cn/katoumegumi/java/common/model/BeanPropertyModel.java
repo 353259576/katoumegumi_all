@@ -80,7 +80,7 @@ public class BeanPropertyModel {
     }
 
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-        A annotation = null;
+        A annotation;
         if (this.field != null) {
             annotation = this.field.getAnnotation(annotationClass);
             if (annotation != null) {

@@ -167,18 +167,8 @@ public class WsUnsafeUtils {
         }
     }
 
-    /*private static Object invoke(Method method, Object... objects) {
-        assert method != null;
-        try {
-            return method.invoke(unsafe, objects);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-    }*/
-
 
     public static long objectFieldOffset(Field f) {
-        //return (long) invoke(objectFieldOffset, f);
         assert objectFieldOffset != null;
         try {
             return (long) objectFieldOffset.invokeExact(f);
@@ -188,7 +178,6 @@ public class WsUnsafeUtils {
     }
 
     public static long staticFieldOffset(Field f) {
-        //return (long) invoke(staticFieldOffset, f);
         assert staticFieldOffset != null;
         try {
             return (long) staticFieldOffset.invokeExact(f);
@@ -197,8 +186,8 @@ public class WsUnsafeUtils {
         }
     }
 
-    public static Object staticFieldBase(Field f){
-        assert  staticFieldBase != null;
+    public static Object staticFieldBase(Field f) {
+        assert staticFieldBase != null;
         try {
             return staticFieldBase.invokeExact(f);
         } catch (Throwable e) {
@@ -207,7 +196,6 @@ public class WsUnsafeUtils {
     }
 
     public static int arrayBaseOffset(Class<?> arrayClass) {
-        //return (int) invoke(arrayBaseOffset, arrayClass);
         assert arrayBaseOffset != null;
         try {
             return (int) arrayBaseOffset.invokeExact(arrayClass);
@@ -217,7 +205,6 @@ public class WsUnsafeUtils {
     }
 
     public static Object allocateInstance(Class<?> cls) {
-        //return invoke(allocateInstance, cls);
         assert allocateInstance != null;
         try {
             return allocateInstance.invokeExact(cls);
@@ -227,7 +214,6 @@ public class WsUnsafeUtils {
     }
 
     public static int arrayIndexScale(Class<?> arrayClass) {
-        //return (int) invoke(arrayIndexScale, arrayClass);
         assert arrayIndexScale != null;
         try {
             return (int) arrayIndexScale.invokeExact(arrayClass);
@@ -244,7 +230,6 @@ public class WsUnsafeUtils {
      * @return
      */
     public static int getInt(Object o, long offset) {
-        //return (int) invoke(getIntByObjectAndLong, o, offset);
         assert getIntByObjectAndLong != null;
         try {
             return (int) getIntByObjectAndLong.invokeExact(o, offset);
@@ -254,7 +239,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putInt(Object o, long offset, int x) {
-        //invoke(putIntByObjectAndOffsetAndLong, o, offset, x);
         assert putIntByObjectAndOffsetAndLong != null;
         try {
             putIntByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -264,7 +248,6 @@ public class WsUnsafeUtils {
     }
 
     public static int getIntVolatile(Object o, long offset) {
-        //return (int) invoke(getIntVolatileByObjectAndLong, o, offset);
         assert getIntVolatileByObjectAndLong != null;
         try {
             return (int) getIntVolatileByObjectAndLong.invokeExact(o, offset);
@@ -274,7 +257,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putIntVolatile(Object o, long offset, int x) {
-        //invoke(putIntVolatileByObjectAndOffsetAndLong, o, offset, x);
         assert putIntVolatileByObjectAndOffsetAndLong != null;
         try {
             putIntVolatileByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -291,7 +273,6 @@ public class WsUnsafeUtils {
      * @return
      */
     public static byte getByte(Object o, long offset) {
-        //return (byte) invoke(getByteByObjectAndLong, o, offset);
         assert getByteByObjectAndLong != null;
         try {
             return (byte) getByteByObjectAndLong.invokeExact(o, offset);
@@ -301,7 +282,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putByte(Object o, long offset, byte x) {
-        //invoke(putByteByObjectAndOffsetAndLong, o, offset, x);
         assert putByteByObjectAndOffsetAndLong != null;
         try {
             putByteByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -311,7 +291,6 @@ public class WsUnsafeUtils {
     }
 
     public static byte getByteVolatile(Object o, long offset) {
-        //return (byte) invoke(getByteVolatileByObjectAndLong, o, offset);
         assert getByteVolatileByObjectAndLong != null;
         try {
             return (byte) getByteVolatileByObjectAndLong.invokeExact(o, offset);
@@ -321,7 +300,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putByteVolatile(Object o, long offset, byte x) {
-        //invoke(putByteVolatileByObjectAndOffsetAndLong, o, offset, x);
         assert putByteVolatileByObjectAndOffsetAndLong != null;
         try {
             putByteVolatileByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -338,7 +316,6 @@ public class WsUnsafeUtils {
      * @return
      */
     public static boolean getBoolean(Object o, long offset) {
-        //return (boolean) invoke(getBooleanByObjectAndLong, o, offset);
         assert getBooleanByObjectAndLong != null;
         try {
             return (boolean) getBooleanByObjectAndLong.invokeExact(o, offset);
@@ -348,7 +325,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putBoolean(Object o, long offset, boolean x) {
-        //invoke(putBooleanByObjectAndOffsetAndLong, o, offset, x);
         assert putBooleanByObjectAndOffsetAndLong != null;
         try {
             putBooleanByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -358,7 +334,6 @@ public class WsUnsafeUtils {
     }
 
     public static boolean getBooleanVolatile(Object o, long offset) {
-        //return (boolean) invoke(getBooleanVolatileByObjectAndLong, o, offset);
         assert getBooleanVolatileByObjectAndLong != null;
         try {
             return (boolean) getBooleanVolatileByObjectAndLong.invokeExact(o, offset);
@@ -368,7 +343,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putBooleanVolatile(Object o, long offset, boolean x) {
-        //invoke(putBooleanVolatileByObjectAndOffsetAndLong, o, offset, x);
         assert putBooleanVolatileByObjectAndOffsetAndLong != null;
         try {
             putBooleanVolatileByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -385,7 +359,6 @@ public class WsUnsafeUtils {
      * @return
      */
     public static char getChar(Object o, long offset) {
-        //return (char) invoke(getCharByObjectAndLong, o, offset);
         assert getCharByObjectAndLong != null;
         try {
             return (char) getCharByObjectAndLong.invokeExact(o, offset);
@@ -395,7 +368,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putChar(Object o, long offset, char x) {
-        //invoke(putCharByObjectAndOffsetAndLong, o, offset, x);
         assert putCharByObjectAndOffsetAndLong != null;
         try {
             putCharByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -405,7 +377,6 @@ public class WsUnsafeUtils {
     }
 
     public static char getCharVolatile(Object o, long offset) {
-        //return (char) invoke(getCharVolatileByObjectAndLong, o, offset);
         assert getCharVolatileByObjectAndLong != null;
         try {
             return (char) getCharVolatileByObjectAndLong.invokeExact(o, offset);
@@ -415,7 +386,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putCharVolatile(Object o, long offset, char x) {
-        //invoke(putCharVolatileByObjectAndOffsetAndLong, o, offset, x);
         assert putCharVolatileByObjectAndOffsetAndLong != null;
         try {
             putCharVolatileByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -432,7 +402,6 @@ public class WsUnsafeUtils {
      * @return
      */
     public static short getShort(Object o, long offset) {
-        //return (short) invoke(getShortByObjectAndLong, o, offset);
         assert getShortByObjectAndLong != null;
         try {
             return (short) getShortByObjectAndLong.invokeExact(o, offset);
@@ -442,7 +411,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putShort(Object o, long offset, short x) {
-        //invoke(putShortByObjectAndOffsetAndLong, o, offset, x);
         assert putShortByObjectAndOffsetAndLong != null;
         try {
             putShortByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -452,7 +420,6 @@ public class WsUnsafeUtils {
     }
 
     public static short getShortVolatile(Object o, long offset) {
-        //return (short) invoke(getShortVolatileByObjectAndLong, o, offset);
         assert getShortVolatileByObjectAndLong != null;
         try {
             return (short) getShortVolatileByObjectAndLong.invokeExact(o, offset);
@@ -462,7 +429,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putShortVolatile(Object o, long offset, short x) {
-        //invoke(putShortVolatileByObjectAndOffsetAndLong, o, offset, x);
         assert putShortVolatileByObjectAndOffsetAndLong != null;
         try {
             putShortVolatileByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -479,7 +445,6 @@ public class WsUnsafeUtils {
      * @return
      */
     public static long getLong(Object o, long offset) {
-        //return (long) invoke(getLongByObjectAndLong, o, offset);
         assert getLongByObjectAndLong != null;
         try {
             return (long) getLongByObjectAndLong.invokeExact(o, offset);
@@ -489,7 +454,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putLong(Object o, long offset, long x) {
-        //invoke(putLongByObjectAndOffsetAndLong, o, offset, x);
         assert putLongByObjectAndOffsetAndLong != null;
         try {
             putLongByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -499,7 +463,6 @@ public class WsUnsafeUtils {
     }
 
     public static long getLongVolatile(Object o, long offset) {
-        //return (long) invoke(getLongVolatileByObjectAndLong, o, offset);
         assert getLongVolatileByObjectAndLong != null;
         try {
             return (long) getLongVolatileByObjectAndLong.invokeExact(o, offset);
@@ -509,7 +472,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putLongVolatile(Object o, long offset, long x) {
-        //invoke(putLongVolatileByObjectAndOffsetAndLong, o, offset, x);
         assert putLongVolatileByObjectAndOffsetAndLong != null;
         try {
             putLongVolatileByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -526,7 +488,6 @@ public class WsUnsafeUtils {
      * @return
      */
     public static float getFloat(Object o, long offset) {
-        //return (float) invoke(getFloatByObjectAndLong, o, offset);
         assert getFloatByObjectAndLong != null;
         try {
             return (float) getFloatByObjectAndLong.invokeExact(o, offset);
@@ -536,7 +497,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putFloat(Object o, long offset, float x) {
-        //invoke(putFloatByObjectAndOffsetAndLong, o, offset, x);
         assert putFloatByObjectAndOffsetAndLong != null;
         try {
             putFloatByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -546,7 +506,6 @@ public class WsUnsafeUtils {
     }
 
     public static float getFloatVolatile(Object o, long offset) {
-        //return (float) invoke(getFloatVolatileByObjectAndLong, o, offset);
         assert getFloatVolatileByObjectAndLong != null;
         try {
             return (float) getFloatVolatileByObjectAndLong.invokeExact(o, offset);
@@ -556,7 +515,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putFloatVolatile(Object o, long offset, float x) {
-        //invoke(putFloatVolatileByObjectAndOffsetAndLong, o, offset, x);
         assert putFloatVolatileByObjectAndOffsetAndLong != null;
         try {
             putFloatVolatileByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -573,7 +531,6 @@ public class WsUnsafeUtils {
      * @return
      */
     public static double getDouble(Object o, long offset) {
-        //return (double) invoke(getDoubleByObjectAndLong, o, offset);
         assert getDoubleByObjectAndLong != null;
         try {
             return (double) getDoubleByObjectAndLong.invokeExact(o, offset);
@@ -583,7 +540,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putDouble(Object o, long offset, double x) {
-        //invoke(putDoubleByObjectAndOffsetAndLong, o, offset, x);
         assert putDoubleByObjectAndOffsetAndLong != null;
         try {
             putDoubleByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -593,7 +549,6 @@ public class WsUnsafeUtils {
     }
 
     public static double getDoubleVolatile(Object o, long offset) {
-        //return (double) invoke(getDoubleVolatileByObjectAndLong, o, offset);
         assert getDoubleVolatileByObjectAndLong != null;
         try {
             return (double) getDoubleVolatileByObjectAndLong.invokeExact(o, offset);
@@ -603,7 +558,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putDoubleVolatile(Object o, long offset, double x) {
-        //invoke(putDoubleVolatileByObjectAndOffsetAndLong, o, offset, x);
         assert putDoubleVolatileByObjectAndOffsetAndLong != null;
         try {
             putDoubleVolatileByObjectAndOffsetAndLong.invokeExact(o, offset, x);
@@ -621,7 +575,6 @@ public class WsUnsafeUtils {
      * @return
      */
     public static Object getObject(Object o, long offset) {
-        //return invoke(getObjectByObjectAndLong, o, offset);
         assert getObjectByObjectAndLong != null;
         try {
             return getObjectByObjectAndLong.invokeExact(o, offset);
@@ -631,7 +584,6 @@ public class WsUnsafeUtils {
     }
 
     public static Object getObjectVolatile(Object o, long offset) {
-        //return invoke(getObjectVolatile, o, offset);
         assert getObjectVolatile != null;
         try {
             return getObjectVolatile.invokeExact(o, offset);
@@ -641,7 +593,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putObject(Object o, long offset, Object x) {
-        //invoke(putObject, o, offset, x);
         assert putObject != null;
         try {
             putObject.invokeExact(o, offset, x);
@@ -651,7 +602,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putObjectVolatile(Object o, long offset, Object x) {
-        //invoke(putObjectVolatile, o, offset, x);
         assert putObjectVolatile != null;
         try {
             putObjectVolatile.invokeExact(o, offset, x);
@@ -661,7 +611,6 @@ public class WsUnsafeUtils {
     }
 
     public static void putOrderedObject(Object o, long offset, Object x) {
-        //invoke(putOrderedObject, o, offset, x);
         assert putOrderedObject != null;
         try {
             putOrderedObject.invokeExact(o, offset, x);
@@ -678,7 +627,6 @@ public class WsUnsafeUtils {
     public final boolean compareAndSwapObject(Object o, long offset,
                                               Object expected,
                                               Object x) {
-        //return (boolean) invoke(compareAndSwapObject, o, offset, expected, x);
         assert compareAndSwapObject != null;
         try {
             return (boolean) compareAndSwapObject.invokeExact(o, offset, expected, x);
@@ -690,7 +638,6 @@ public class WsUnsafeUtils {
     public final boolean compareAndSwapInt(Object o, long offset,
                                            int expected,
                                            int x) {
-        //return (boolean) invoke(compareAndSwapInt, o, offset, expected, x);
         assert compareAndSwapInt != null;
         try {
             return (boolean) compareAndSwapInt.invokeExact(o, offset, expected, x);
@@ -702,7 +649,6 @@ public class WsUnsafeUtils {
     public final boolean compareAndSwapLong(Object o, long offset,
                                             long expected,
                                             long x) {
-        //return (boolean) invoke(compareAndSwapLong, o, offset, expected, x);
         assert compareAndSwapLong != null;
         try {
             return (boolean) compareAndSwapLong.invokeExact(o, offset, expected, x);
@@ -712,7 +658,6 @@ public class WsUnsafeUtils {
     }
 
     public final int getAndAddInt(Object o, long offset, int delta) {
-        //return (int) invoke(getAndAddInt, o, offset, delta);
         assert getAndAddInt != null;
         try {
             return (int) getAndAddInt.invokeExact(o, offset, delta);
@@ -722,7 +667,6 @@ public class WsUnsafeUtils {
     }
 
     public final long getAndAddLong(Object o, long offset, long delta) {
-        //return (long) invoke(getAndAddLong, o, offset, delta);
         assert getAndAddLong != null;
         try {
             return (long) getAndAddLong.invokeExact(o, offset, delta);
@@ -732,7 +676,6 @@ public class WsUnsafeUtils {
     }
 
     public final int getAndSetInt(Object o, long offset, int delta) {
-        //return (int) invoke(getAndSetInt, o, offset, delta);
         assert getAndSetInt != null;
         try {
             return (int) getAndSetInt.invokeExact(o, offset, delta);
@@ -742,7 +685,6 @@ public class WsUnsafeUtils {
     }
 
     public final long getAndSetLong(Object o, long offset, long delta) {
-        //return (long) invoke(getAndSetLong, o, offset, delta);
         assert getAndSetLong != null;
         try {
             return (long) getAndSetLong.invokeExact(o, offset, delta);
@@ -752,7 +694,6 @@ public class WsUnsafeUtils {
     }
 
     public final Object getAndSetObject(Object o, long offset, Object delta) {
-        //return invoke(getAndSetObject, o, offset, delta);
         assert getAndSetObject != null;
         try {
             return getAndSetObject.invokeExact(o, offset, delta);
@@ -765,7 +706,6 @@ public class WsUnsafeUtils {
      * memory
      */
     public static long allocateMemory(long bytes) {
-        //return (long) invoke(allocateMemory, bytes);
         assert allocateMemory != null;
         try {
             return (long) allocateMemory.invokeExact(bytes);
@@ -775,7 +715,6 @@ public class WsUnsafeUtils {
     }
 
     public static long reallocateMemory(long address, long bytes) {
-        //return (long) invoke(reallocateMemory, address, bytes);
         assert reallocateMemory != null;
         try {
             return (long) reallocateMemory.invokeExact(address, bytes);
@@ -785,7 +724,6 @@ public class WsUnsafeUtils {
     }
 
     public static void freeMemory(long address) {
-        //invoke(freeMemory, address);
         assert freeMemory != null;
         try {
             freeMemory.invokeExact(address);
@@ -795,7 +733,6 @@ public class WsUnsafeUtils {
     }
 
     public static void setMemory(long address, long bytes, byte value) {
-        //invoke(setMemoryByAddressAndByteAndValue, address, bytes, value);
         assert setMemoryByAddressAndByteAndValue != null;
         try {
             setMemoryByAddressAndByteAndValue.invokeExact(address, bytes, value);
@@ -805,7 +742,6 @@ public class WsUnsafeUtils {
     }
 
     public static void setMemory(Object o, long offset, long bytes, byte value) {
-        //invoke(setMemoryByObjectAndOffsetAndBytesAndValue, o, offset, bytes, value);
         assert setMemoryByObjectAndOffsetAndBytesAndValue != null;
         try {
             setMemoryByObjectAndOffsetAndBytesAndValue.invokeExact(o, offset, bytes, value);
@@ -815,7 +751,6 @@ public class WsUnsafeUtils {
     }
 
     public static void copyMemory(long srcAddress, long destAddress, long bytes) {
-        //invoke(copyMemoryBySrcAddressAndDestAddressAndBytes, srcAddress, destAddress, bytes);
         assert copyMemoryBySrcAddressAndDestAddressAndBytes != null;
         try {
             copyMemoryBySrcAddressAndDestAddressAndBytes.invokeExact(srcAddress, destAddress, bytes);
@@ -827,7 +762,6 @@ public class WsUnsafeUtils {
     public void copyMemory(Object srcBase, long srcOffset,
                            Object destBase, long destOffset,
                            long bytes) {
-        //invoke(copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes, srcBase, srcOffset, destBase, destOffset, bytes);
         assert copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes != null;
         try {
             copyMemoryBySrcBaseAndSrcAddressAndDesBaseAndDestAddressAndBytes.invokeExact(srcBase, srcOffset, destBase, destOffset, bytes);
@@ -837,7 +771,6 @@ public class WsUnsafeUtils {
     }
 
     public static int addressSize() {
-        //return (int) invoke(addressSize);
         assert addressSize != null;
         try {
             return (int) addressSize.invokeExact();
@@ -847,7 +780,6 @@ public class WsUnsafeUtils {
     }
 
     public static int pageSize() {
-        //return (int) invoke(pageSize);
         assert pageSize != null;
         try {
             return (int) pageSize.invokeExact();
@@ -857,7 +789,6 @@ public class WsUnsafeUtils {
     }
 
     public static void throwException(Throwable ee) {
-        //invoke(throwException, ee);
         assert throwException != null;
         try {
             throwException.invokeExact(ee);
@@ -867,7 +798,6 @@ public class WsUnsafeUtils {
     }
 
     public static void park(boolean isAbsolute, long time) {
-        //invoke(park, isAbsolute, time);
         assert park != null;
         try {
             park.invokeExact(isAbsolute, time);
@@ -877,7 +807,6 @@ public class WsUnsafeUtils {
     }
 
     public static void unpark(Object thread) {
-        //invoke(unpark, thread);
         assert unpark != null;
         try {
             unpark.invokeExact(thread);
@@ -887,7 +816,6 @@ public class WsUnsafeUtils {
     }
 
     public static int getLoadAverage(double[] loadavg, int nelems) {
-        //return (int) invoke(getLoadAverage, loadavg, nelems);
         assert getLoadAverage != null;
         try {
             return (int) getLoadAverage.invokeExact(loadavg, nelems);
@@ -897,7 +825,6 @@ public class WsUnsafeUtils {
     }
 
     public static void loadFence() {
-        //invoke(loadFence);
         assert loadFence != null;
         try {
             loadFence.invokeExact();
@@ -907,7 +834,6 @@ public class WsUnsafeUtils {
     }
 
     public static void storeFence() {
-        //invoke(storeFence);
         assert storeFence != null;
         try {
             storeFence.invokeExact();
@@ -917,7 +843,6 @@ public class WsUnsafeUtils {
     }
 
     public static void fullFence() {
-        //invoke(fullFence);
         assert fullFence != null;
         try {
             fullFence.invokeExact();
@@ -928,7 +853,6 @@ public class WsUnsafeUtils {
 
 
     public void invokeCleaner(java.nio.ByteBuffer directBuffer) {
-        //invoke(invokeCleaner, directBuffer);
         assert invokeCleaner != null;
         try {
             invokeCleaner.invokeExact(directBuffer);
