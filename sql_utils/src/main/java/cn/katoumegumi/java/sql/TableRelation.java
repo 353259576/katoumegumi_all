@@ -156,16 +156,6 @@ public class TableRelation {
         return this;
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
-    }
-
     public MySearchList end() {
         this.mySearchList.getJoins().add(this);
         return this.mySearchList;

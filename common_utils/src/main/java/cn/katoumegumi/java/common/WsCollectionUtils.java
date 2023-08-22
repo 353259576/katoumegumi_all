@@ -344,4 +344,12 @@ public class WsCollectionUtils {
         return list;
     }
 
+    /**
+     * 获取一个空的对象数组
+     * @return
+     */
+    public static Object[] getEmptyObjectArray(){
+        return EMPTY_OBJECT_ARRAY;
+    }
+
 }

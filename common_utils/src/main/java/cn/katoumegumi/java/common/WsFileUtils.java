@@ -10,9 +10,6 @@ import java.util.List;
  * @author 星梦苍天
  */
 public class WsFileUtils {
-    public static void main(String[] args) {
-
-    }
 
     /**
      * 将文件路径的 \\ // 替换成 /
@@ -58,31 +55,25 @@ public class WsFileUtils {
         filePath = adjustFilePath(filePath);
         File file = new File(filePath);
         if (file.exists()) {
-            file.setReadable(true);
-            file.setWritable(true);
-            file.setExecutable(true);
             return file;
-        } else {
-            if (filePath.endsWith("/")) {
-                file.mkdirs();
+        }
+        if (filePath.endsWith("/")) {
+            if (file.mkdirs()){
                 return file;
-            } else {
-                //int position1 = filePath.lastIndexOf('\\');
-                int position = filePath.lastIndexOf('/');
-                //int position = Math.max(position1, position2);
-                String path = filePath.substring(0, position);
-                File fPath = new File(path);
-                fPath.mkdirs();
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                file.setWritable(true);
-                file.setReadable(true);
-                file.setExecutable(true);
-                return file;
+            }else {
+                throw new IllegalArgumentException("文件夹无法创建");
             }
+        } else {
+            int position = filePath.lastIndexOf('/');
+            String path = filePath.substring(0, position);
+            File fPath = new File(path);
+            fPath.mkdirs();
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new IllegalArgumentException(e);
+            }
+            return file;
         }
 
     }

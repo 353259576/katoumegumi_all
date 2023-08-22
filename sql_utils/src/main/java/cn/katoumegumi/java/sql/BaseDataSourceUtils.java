@@ -60,9 +60,9 @@ public class BaseDataSourceUtils {
             throw new IllegalArgumentException("need insert Object is null");
         }
         SQLModelFactory sqlModelFactory = new SQLModelFactory(MySearchList.create(t.getClass()));
-        InsertSqlEntity insertSqlEntity = sqlModelFactory.createInsertSqlEntity(t);
+        final InsertSqlEntity insertSqlEntity = sqlModelFactory.createInsertSqlEntity(t);
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS)) {
             List<SqlParameter> list = insertSqlEntity.getValueList();
             for (int i = 0; i < list.size(); i++) {
                 preparedStatement.setObject(i + 1, list.get(i).getValue());
