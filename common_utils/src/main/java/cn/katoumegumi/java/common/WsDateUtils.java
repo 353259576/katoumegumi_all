@@ -11,7 +11,6 @@ import java.util.function.Function;
 
 public class WsDateUtils {
 
-
     public static final String[] CN_MONTH_NAMES = new String[]{"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"};
 
     public static final String[] CN_WEEK_NAMES = new String[]{"星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"};
@@ -45,7 +44,7 @@ public class WsDateUtils {
     public static final long DEFAULT_ZONE_OFFSET = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
 
     public static void main(String[] args) {
-        Date date = new Date();
+        Date date = WsDateUtils.stringToDate("2023-08-25 23:01:59");
         System.out.println(objectDateFormatString(ignoreTime(date)));
         System.out.println(objectDateFormatString(ignoreMinute(date)));
         System.out.println(objectDateFormatString(ignoreSecond(date)));
@@ -280,7 +279,7 @@ public class WsDateUtils {
      * @return
      */
     public static long ignoreTime(long timestamp,long zoneOffset){
-        return timestamp - timestamp % ONE_DAY - zoneOffset;
+        return timestamp - (timestamp + zoneOffset) % ONE_DAY;
     }
 
     public static long ignoreTime(long timestamp){
