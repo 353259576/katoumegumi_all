@@ -7,13 +7,11 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
  * 当前位置坐标
  * @author ws
  */
-public class ExcelPointLocation {
+public class ExcelPointLocation<T> {
 
     private final Integer columnNum;
 
     private final Integer rowNum;
-
-    private final String columnName;
 
     private final Cell cell;
 
@@ -21,29 +19,26 @@ public class ExcelPointLocation {
 
     private final Sheet sheet;
 
-    private final CTWorksheet ctWorksheet;
-
     private final Workbook workbook;
 
-    private final Integer columnSize;
+    private final ExcelTableColumnProperty<T> excelTableColumnProperty;
 
     private CellStyle cellStyle;
 
-    private volatile Object rowValue;
+    private volatile T rowValue;
 
     private volatile Object globalValue;
 
 
-    public ExcelPointLocation(Integer columnNum, Integer rowNum,Integer columnSize, String columnName, Cell cell,Row row,Sheet sheet,CTWorksheet ctWorksheet,Workbook workbook) {
-        this.columnNum = columnNum;
-        this.rowNum = rowNum;
-        this.columnSize = columnSize;
-        this.columnName = columnName;
+    public ExcelPointLocation(Cell cell,
+                              ExcelTableColumnProperty<T> excelTableColumnProperty) {
+        this.columnNum = cell.getColumnIndex();
+        this.rowNum = cell.getRowIndex();
         this.cell = cell;
-        this.row = row;
-        this.sheet = sheet;
-        this.workbook = workbook;
-        this.ctWorksheet = ctWorksheet;
+        this.row = cell.getRow();
+        this.sheet = this.row.getSheet();
+        this.workbook = this.sheet.getWorkbook();
+        this.excelTableColumnProperty = excelTableColumnProperty;
     }
 
     public Integer getColumnNum() {
@@ -52,10 +47,6 @@ public class ExcelPointLocation {
 
     public Integer getRowNum() {
         return rowNum;
-    }
-
-    public String getColumnName() {
-        return columnName;
     }
 
     public Cell getCell() {
@@ -74,37 +65,38 @@ public class ExcelPointLocation {
         return workbook;
     }
 
+    public ExcelTableColumnProperty<T> getExcelTableColumnProperty() {
+        return excelTableColumnProperty;
+    }
+
     public CellStyle getCellStyle() {
-        if(cellStyle == null){
+        if (this.cellStyle == null){
             this.cellStyle = workbook.createCellStyle();
         }
         return cellStyle;
     }
 
-    public Integer getColumnSize() {
-        return columnSize;
+    public CellStyle getCellStyleNotAutoCreate() {
+        return cellStyle;
     }
 
+    public void setCellStyle(CellStyle cellStyle) {
+        this.cellStyle = cellStyle;
+    }
 
-    public Object getRowValue() {
+    public T getRowValue() {
         return rowValue;
     }
 
-    public ExcelPointLocation setRowValue(Object rowValue) {
+    public void setRowValue(T rowValue) {
         this.rowValue = rowValue;
-        return this;
     }
 
     public Object getGlobalValue() {
         return globalValue;
     }
 
-    public ExcelPointLocation setGlobalValue(Object globalValue) {
+    public void setGlobalValue(Object globalValue) {
         this.globalValue = globalValue;
-        return this;
-    }
-
-    public CTWorksheet getCtWorksheet() {
-        return ctWorksheet;
     }
 }

@@ -1,10 +1,10 @@
 package cn.katoumegumi.java.excel;
 
 /**
- * excel表格尾部填充
+ * excel表格底部单元格填充
  * @author ws
  */
-public interface ExcelColumnEndFill {
+public interface ExcelTableFootCellFill {
 
 
     /**
