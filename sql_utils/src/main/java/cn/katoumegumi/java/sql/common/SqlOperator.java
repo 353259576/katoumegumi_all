@@ -68,7 +68,7 @@ public enum SqlOperator {
     /**
      * 排序
      */
-    SORT,
+    ORDER_BY,
     /**
      * and
      */

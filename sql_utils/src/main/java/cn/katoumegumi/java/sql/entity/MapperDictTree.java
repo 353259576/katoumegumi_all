@@ -14,8 +14,6 @@ public class MapperDictTree {
 
     private FieldColumnRelationMapperName currentMapperName;
 
-    //private PropertyColumnRelationMapper currentMapper;
-
     private Map<Integer, MapperDictTree> childMap;
 
     private MapperDictTree[] mapperDictTrees;

@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.sql.common.OrderByTypeEnums;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.TableJoinType;
 import cn.katoumegumi.java.sql.model.component.SqlEquation;
@@ -20,18 +21,12 @@ import java.util.function.Supplier;
  */
 public class MySearchList {
 
-    private boolean isSingleColumn = false;
-
     private final List<String> columnNameList = new ArrayList<>();
-
     private final List<MySearch> orderSearches = new ArrayList<>();
-
     private final List<MySearchList> ands = new ArrayList<>();
-
     private final List<MySearchList> ors = new ArrayList<>();
-
     private final List<TableRelation> joins = new ArrayList<>();
-
+    private boolean isSingleColumn = false;
     private List<MySearch> mySearches = new ArrayList<>();
 
     private Class<?> mainClass;
@@ -66,6 +61,7 @@ public class MySearchList {
         return new MySearchList().setMainClass(tClass);
     }
 
+
     /**
      * 拼装列名
      *
@@ -73,10 +69,6 @@ public class MySearchList {
      * @param columnName
      * @return
      */
-    private static String getColumnName(String tableName, SupplierFunc<?> columnName) {
-        return getColumnName(tableName, WsReflectUtils.getFieldName(columnName));
-    }
-
     private static String getColumnName(String tableName, SFunction<?, ?> columnName) {
         return getColumnName(tableName, WsReflectUtils.getFieldName(columnName));
     }
@@ -110,7 +102,7 @@ public class MySearchList {
             case DIVIDE:
             case MULTIPLY:
                 if (value == null) {
-                    throw new IllegalArgumentException(fieldName + "的参数不能为空");
+                    throw new NullPointerException(fieldName + "的参数不能为空");
                 }
                 if (!WsBeanUtils.isBaseType(value.getClass())) {
                     throw new IllegalArgumentException(fieldName + "的参数必须为基本类型，当前的类型是：" + value.getClass());
@@ -121,7 +113,17 @@ public class MySearchList {
                     throw new IllegalArgumentException(fieldName + "的参数必须为基本类型，当前的类型是：" + value.getClass());
                 }
                 break;
-            case SORT:
+            case ORDER_BY:
+                if (value == null) {
+                    throw new NullPointerException("排序方式不能为空");
+                }
+                if (value instanceof String) {
+                    String type = ((String) value).toLowerCase();
+                    OrderByTypeEnums.getByType(type);
+                } else if (!(value instanceof OrderByTypeEnums)) {
+                    throw new IllegalArgumentException("排序方式错误:" + value);
+                }
+                break;
             case EQP:
             case LTP:
             case GTP:
@@ -129,29 +131,29 @@ public class MySearchList {
             case LTEP:
             case NEP:
                 if (!(value instanceof String)) {
-                    throw new RuntimeException(fieldName + "的参数必须为字符串类型，当前的类型是：" + value.getClass());
+                    throw new IllegalArgumentException(fieldName + "的参数必须为字符串类型，当前的类型是：" + value.getClass());
                 } else {
                     if (WsStringUtils.isBlank((String) value)) {
-                        throw new RuntimeException(fieldName + "参数不能为空");
+                        throw new NullPointerException(fieldName + "参数不能为空");
                     }
                 }
                 break;
             case IN:
             case NIN:
                 if (!(WsBeanUtils.isArray(value.getClass()) || value instanceof MySearchList)) {
-                    throw new RuntimeException(fieldName + "类型不支持，当前的类型是：" + value.getClass());
+                    throw new IllegalArgumentException(fieldName + "类型不支持，当前的类型是：" + value.getClass());
                 }
                 if (WsCollectionUtils.isEmpty(value)) {
-                    throw new RuntimeException("数组为空");
+                    throw new NullPointerException("数组为空");
                 }
                 break;
             case BETWEEN:
             case NOT_BETWEEN:
                 if (!WsBeanUtils.isArray(value.getClass())) {
-                    throw new RuntimeException(fieldName + "的参数必须是数组类型，当前的类型是：" + value.getClass());
+                    throw new IllegalArgumentException(fieldName + "的参数必须是数组类型，当前的类型是：" + value.getClass());
                 }
                 if (WsCollectionUtils.isEmpty(value)) {
-                    throw new RuntimeException("数组为空");
+                    throw new NullPointerException("数组为空");
                 }
                 break;
             case NULL:
@@ -163,7 +165,7 @@ public class MySearchList {
             case AND:
                 break;
             default:
-                throw new RuntimeException("不支持的查询方式");
+                throw new IllegalArgumentException("不支持的查询方式");
         }
     }
 
@@ -173,24 +175,13 @@ public class MySearchList {
     }
 
     public MySearchList add(String fieldName, SqlOperator operator, Object value) {
-        if (value instanceof SupplierFunc) {
-            value = WsReflectUtils.getFieldName((SupplierFunc<?>) value);
-        }
         checkValue(fieldName, operator, value);
-        if (operator.equals(SqlOperator.SORT)) {
-            orderSearches.add(new MySearch(fieldName, operator, value));
+        if (operator.equals(SqlOperator.ORDER_BY)) {
+            orderSearches.add(new MySearch(fieldName, operator, value instanceof String ? OrderByTypeEnums.getByType(((String) value).toUpperCase()) : value));
             return this;
         }
         mySearches.add(new MySearch(fieldName, operator, value));
         return this;
-    }
-
-    public <T> MySearchList add(SupplierFunc<T> supplierFunc, SqlOperator operator, Object value) {
-        return add(null, supplierFunc, operator, value);
-    }
-
-    public <T> MySearchList add(String tableName, SupplierFunc<T> supplierFunc, SqlOperator operator, Object value) {
-        return add(getColumnName(tableName, supplierFunc), operator, value);
     }
 
     public MySearch get(int i) {
@@ -205,15 +196,6 @@ public class MySearchList {
         return mySearches.isEmpty() && ands.isEmpty() && ors.isEmpty();
     }
 
-
-    /*public MySearchList setPageVO(Page pageVO) {
-        SqlLimit sqlLimit = new SqlLimit();
-        sqlLimit.setCurrent(pageVO.getCurrent());
-        sqlLimit.setSize(pageVO.getSize());
-        sqlLimit.build();
-        this.sqlLimit = sqlLimit;
-        return this;
-    }*/
 
     public Iterator<MySearch> iterator() {
         return mySearches.iterator();
@@ -286,14 +268,6 @@ public class MySearchList {
         return eq(null, columnFieldName, value);
     }
 
-    public MySearchList eq(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.EQ, value);
-    }
-
-    public MySearchList eq(SupplierFunc<?> columnFieldName, Object value) {
-        return eq(null, columnFieldName, value);
-    }
-
     public <T> MySearchList eq(String tableName, SFunction<T, ?> columnFieldName, Object value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.EQ, value);
     }
@@ -315,14 +289,6 @@ public class MySearchList {
     }
 
     public MySearchList ne(String columnFieldName, Object value) {
-        return ne(null, columnFieldName, value);
-    }
-
-    public MySearchList ne(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.NE, value);
-    }
-
-    public MySearchList ne(SupplierFunc<?> columnFieldName, Object value) {
         return ne(null, columnFieldName, value);
     }
 
@@ -350,14 +316,6 @@ public class MySearchList {
         return gt(null, columnFieldName, value);
     }
 
-    public MySearchList gt(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.GT, value);
-    }
-
-    public MySearchList gt(SupplierFunc<?> columnFieldName, Object value) {
-        return gt(null, columnFieldName, value);
-    }
-
     public <T> MySearchList gt(String tableName, SFunction<T, ?> columnFieldName, Object value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.GT, value);
     }
@@ -379,14 +337,6 @@ public class MySearchList {
     }
 
     public MySearchList gte(String columnFieldName, Object value) {
-        return gte(null, columnFieldName, value);
-    }
-
-    public MySearchList gte(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.GTE, value);
-    }
-
-    public MySearchList gte(SupplierFunc<?> columnFieldName, Object value) {
         return gte(null, columnFieldName, value);
     }
 
@@ -414,14 +364,6 @@ public class MySearchList {
         return lt(null, columnFieldName, value);
     }
 
-    public MySearchList lt(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.LT, value);
-    }
-
-    public MySearchList lt(SupplierFunc<?> columnFieldName, Object value) {
-        return lt(null, columnFieldName, value);
-    }
-
     public <T> MySearchList lt(String tableName, SFunction<T, ?> columnFieldName, Object value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LT, value);
     }
@@ -443,14 +385,6 @@ public class MySearchList {
     }
 
     public MySearchList lte(String columnFieldName, Object value) {
-        return lte(null, columnFieldName, value);
-    }
-
-    public MySearchList lte(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.LTE, value);
-    }
-
-    public MySearchList lte(SupplierFunc<?> columnFieldName, Object value) {
         return lte(null, columnFieldName, value);
     }
 
@@ -478,14 +412,6 @@ public class MySearchList {
         return in(null, columnFieldName, value);
     }
 
-    public MySearchList in(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.IN, value);
-    }
-
-    public MySearchList in(SupplierFunc<?> columnFieldName, Object value) {
-        return in(null, columnFieldName, value);
-    }
-
     public <T> MySearchList in(String tableName, SFunction<T, ?> columnFieldName, Object value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.IN, value);
     }
@@ -507,14 +433,6 @@ public class MySearchList {
     }
 
     public MySearchList nIn(String columnFieldName, Object value) {
-        return nIn(null, columnFieldName, value);
-    }
-
-    public MySearchList nIn(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.NIN, value);
-    }
-
-    public MySearchList nIn(SupplierFunc<?> columnFieldName, Object value) {
         return nIn(null, columnFieldName, value);
     }
 
@@ -542,14 +460,6 @@ public class MySearchList {
         return like(null, columnFieldName, value);
     }
 
-    public MySearchList like(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.LIKE, value);
-    }
-
-    public MySearchList like(SupplierFunc<?> columnFieldName, Object value) {
-        return like(null, columnFieldName, value);
-    }
-
     public <T> MySearchList like(String tableName, SFunction<T, ?> columnFieldName, Object value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LIKE, value);
     }
@@ -570,14 +480,6 @@ public class MySearchList {
     }
 
     public MySearchList isNull(String columnFieldName) {
-        return isNull(null, columnFieldName);
-    }
-
-    public MySearchList isNull(String tableName, SupplierFunc<?> columnFieldName) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.NULL, null);
-    }
-
-    public MySearchList isNull(SupplierFunc<?> columnFieldName) {
         return isNull(null, columnFieldName);
     }
 
@@ -604,14 +506,6 @@ public class MySearchList {
         return isNotNull(null, columnFieldName);
     }
 
-    public MySearchList isNotNull(String tableName, SupplierFunc<?> columnFieldName) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.NOTNULL, null);
-    }
-
-    public MySearchList isNotNull(SupplierFunc<?> columnFieldName) {
-        return isNotNull(null, columnFieldName);
-    }
-
     public <T> MySearchList isNotNull(String tableName, SFunction<T, ?> columnFieldName) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.NOTNULL, null);
     }
@@ -629,23 +523,15 @@ public class MySearchList {
      * @return
      */
     public MySearchList sort(String tableName, String columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.SORT, value);
+        return add(getColumnName(tableName, columnFieldName), SqlOperator.ORDER_BY, value);
     }
 
     public MySearchList sort(String columnFieldName, Object value) {
         return sort(null, columnFieldName, value);
     }
 
-    public MySearchList sort(String tableName, SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.SORT, value);
-    }
-
-    public MySearchList sort(SupplierFunc<?> columnFieldName, Object value) {
-        return sort(null, columnFieldName, value);
-    }
-
     public <T> MySearchList sort(String tableName, SFunction<T, ?> columnFieldName, Object value) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.SORT, value);
+        return add(getColumnName(tableName, columnFieldName), SqlOperator.ORDER_BY, value);
     }
 
     public <T> MySearchList sort(SFunction<T, ?> columnFieldName, Object value) {
@@ -666,14 +552,6 @@ public class MySearchList {
     }
 
     public MySearchList between(String columnFieldName, Object value1, Object value2) {
-        return between(null, columnFieldName, value1, value2);
-    }
-
-    public MySearchList between(String tableName, SupplierFunc<?> columnFieldName, Object value1, Object value2) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.BETWEEN, Arrays.asList(value1, value2));
-    }
-
-    public MySearchList between(SupplierFunc<?> columnFieldName, Object value1, Object value2) {
         return between(null, columnFieldName, value1, value2);
     }
 
@@ -699,14 +577,6 @@ public class MySearchList {
     }
 
     public MySearchList notBetween(String columnFieldName, Object value1, Object value2) {
-        return notBetween(null, columnFieldName, value1, value2);
-    }
-
-    public MySearchList notBetween(String tableName, SupplierFunc<?> columnFieldName, Object value1, Object value2) {
-        return add(getColumnName(tableName, columnFieldName), SqlOperator.NOT_BETWEEN, Arrays.asList(value1, value2));
-    }
-
-    public MySearchList notBetween(SupplierFunc<?> columnFieldName, Object value1, Object value2) {
         return notBetween(null, columnFieldName, value1, value2);
     }
 
@@ -820,7 +690,7 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.GTP, getColumnName(valueTableName, value));
     }
 
-    public <T,K> MySearchList gtp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
+    public <T, K> MySearchList gtp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.GTP, getColumnName(valueTableName, value));
     }
 
@@ -865,7 +735,7 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.GTEP, getColumnName(valueTableName, value));
     }
 
-    public <T,K> MySearchList gtep(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
+    public <T, K> MySearchList gtep(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.GTEP, getColumnName(valueTableName, value));
     }
 
@@ -910,7 +780,7 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LTP, getColumnName(valueTableName, value));
     }
 
-    public <T,K> MySearchList ltp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
+    public <T, K> MySearchList ltp(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LTP, getColumnName(valueTableName, value));
     }
 
@@ -955,7 +825,7 @@ public class MySearchList {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LTEP, getColumnName(valueTableName, value));
     }
 
-    public <T,K> MySearchList ltep(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
+    public <T, K> MySearchList ltep(String tableName, SFunction<T, ?> columnFieldName, String valueTableName, SFunction<K, ?> value) {
         return add(getColumnName(tableName, columnFieldName), SqlOperator.LTEP, getColumnName(valueTableName, value));
     }
 
@@ -1002,10 +872,6 @@ public class MySearchList {
         return set(null, columnFieldName, value);
     }
 
-    public MySearchList set(SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(null, columnFieldName), SqlOperator.SET, value);
-    }
-
     public <T> MySearchList set(SFunction<T, ?> columnFieldName, Object value) {
         return add(getColumnName(null, columnFieldName), SqlOperator.SET, value);
     }
@@ -1024,10 +890,6 @@ public class MySearchList {
 
     public MySearchList add(String columnFieldName, Object value) {
         return add(null, columnFieldName, value);
-    }
-
-    public MySearchList add(SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(null, columnFieldName), SqlOperator.ADD, value);
     }
 
     public <T> MySearchList add(SFunction<T, ?> columnFieldName, Object value) {
@@ -1050,10 +912,6 @@ public class MySearchList {
         return subtract(null, columnFieldName, value);
     }
 
-    public MySearchList subtract(SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(null, columnFieldName), SqlOperator.SUBTRACT, value);
-    }
-
     public <T> MySearchList subtract(SFunction<T, ?> columnFieldName, Object value) {
         return add(getColumnName(null, columnFieldName), SqlOperator.SUBTRACT, value);
     }
@@ -1074,10 +932,6 @@ public class MySearchList {
         return multiply(null, columnFieldName, value);
     }
 
-    public MySearchList multiply(SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(null, columnFieldName), SqlOperator.MULTIPLY, value);
-    }
-
     public <T> MySearchList multiply(SFunction<T, ?> columnFieldName, Object value) {
         return add(getColumnName(null, columnFieldName), SqlOperator.MULTIPLY, value);
     }
@@ -1096,10 +950,6 @@ public class MySearchList {
 
     public MySearchList divide(String columnFieldName, Object value) {
         return divide(null, columnFieldName, value);
-    }
-
-    public MySearchList divide(SupplierFunc<?> columnFieldName, Object value) {
-        return add(getColumnName(null, columnFieldName), SqlOperator.DIVIDE, value);
     }
 
     public <T> MySearchList divide(SFunction<T, ?> columnFieldName, Object value) {

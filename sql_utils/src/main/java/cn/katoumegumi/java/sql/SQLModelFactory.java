@@ -7,6 +7,7 @@ import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.common.model.KeyValue;
 import cn.katoumegumi.java.common.model.TripleEntity;
+import cn.katoumegumi.java.sql.common.OrderByTypeEnums;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.ValueTypeConstants;
@@ -672,9 +673,9 @@ public class SQLModelFactory {
             orderByConditionList = new ArrayList<>(this.mySearchList.getOrderSearches().size());
             for (MySearch mySearch : this.mySearchList.getOrderSearches()) {
                 if (mySearch.getFieldName().charAt(mySearch.getFieldName().length() - 1) == SqlCommonConstants.RIGHT_BRACKETS) {
-                    orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, mySearch.getFieldName()), null), WsBeanUtils.objectToT(mySearch.getValue(), String.class)));
+                    orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, mySearch.getFieldName()), null), (OrderByTypeEnums) mySearch.getValue()));
                 } else {
-                    orderByConditionList.add(new OrderByCondition(translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), rootPath, 2), WsBeanUtils.objectToT(mySearch.getValue(), String.class)));
+                    orderByConditionList.add(new OrderByCondition(translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), rootPath, 2), (OrderByTypeEnums) mySearch.getValue()));
                 }
             }
         }

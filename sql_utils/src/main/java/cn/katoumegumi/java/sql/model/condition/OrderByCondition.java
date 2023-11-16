@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.sql.model.condition;
 
+import cn.katoumegumi.java.sql.common.OrderByTypeEnums;
 import cn.katoumegumi.java.sql.model.component.BaseTableColumn;
 import cn.katoumegumi.java.sql.model.component.SqlStringModel;
 
@@ -12,15 +13,15 @@ public class OrderByCondition implements Condition {
 
     private final BaseTableColumn column;
 
-    private final String type;
+    private final OrderByTypeEnums type;
 
-    public OrderByCondition(BaseTableColumn column, String type) {
+    public OrderByCondition(BaseTableColumn column, OrderByTypeEnums type) {
         this.column = column;
         this.type = type;
         this.sql = null;
     }
 
-    public OrderByCondition(SqlStringModel sql, String type) {
+    public OrderByCondition(SqlStringModel sql, OrderByTypeEnums type) {
         this.sql = sql;
         this.type = type;
         this.column = null;
@@ -30,7 +31,7 @@ public class OrderByCondition implements Condition {
         return column;
     }
 
-    public String getType() {
+    public OrderByTypeEnums getType() {
         return type;
     }
 

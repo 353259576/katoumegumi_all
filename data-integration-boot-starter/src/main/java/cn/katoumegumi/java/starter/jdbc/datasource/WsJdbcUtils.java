@@ -48,7 +48,7 @@ public class WsJdbcUtils {
 
     public <T> int insert(T t) {
         if(t == null){
-            throw new IllegalArgumentException("need insert Object is null");
+            throw new IllegalArgumentException("insert Object is null");
         }
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
@@ -211,7 +211,6 @@ public class WsJdbcUtils {
 
     public int delete(MySearchList mySearchList) {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        //DeleteSqlEntity deleteSqlEntity = sqlModelFactory.delete();
         DeleteSqlEntity deleteSqlEntity = SqlEntityFactory.createDeleteSqlEntity(sqlModelFactory.createDeleteModel());
         log.debug(deleteSqlEntity.getDeleteSql());
         return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(), WsCollectionUtils.listToArray(deleteSqlEntity.getValueList(), SqlParameter::getValue));

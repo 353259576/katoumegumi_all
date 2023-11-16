@@ -99,7 +99,7 @@ public class MysqlSqlHandler implements SqlHandler{
                             .append(SQLModelFactory.guardKeyword(entity.getColumnName()));
                 }
                 orderBySql.append(SqlCommonConstants.SPACE)
-                        .append(orderByCondition.getType())
+                        .append(orderByCondition.getType().getOrderByType())
                         .append(SqlCommonConstants.COMMA);
 
             }
@@ -113,7 +113,7 @@ public class MysqlSqlHandler implements SqlHandler{
                         .append(SQLModelFactory.guardKeyword(entity.getColumnName()));
             }
             orderBySql.append(SqlCommonConstants.SPACE)
-                    .append(orderByCondition.getType());
+                    .append(orderByCondition.getType().getOrderByType());
         }
 
         //处理limit语句

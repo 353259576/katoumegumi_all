@@ -181,7 +181,7 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     * 包装
     */
     private void wrapper${table.entityName}(List<${table.entityName}> ${table.firstLowerEntityName}List) {
-        if(WsListUtils.isEmpty(${table.firstLowerEntityName}List)) {
+        if(WsCollectionUtils.isEmpty(${table.firstLowerEntityName}List)) {
             return;
         }
     }

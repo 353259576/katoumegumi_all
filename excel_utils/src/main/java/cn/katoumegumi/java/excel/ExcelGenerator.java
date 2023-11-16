@@ -35,8 +35,6 @@ public class ExcelGenerator<T> {
      */
     private List<T> valueList;
 
-    private final Map<CTWorksheet,Integer> mergeCellCountMap = new HashMap<>();
-
     private static final Field SXSSFSHEET_SH_FIELD = WsReflectUtils.getFieldByName(SXSSFSheet.class,"_sh");
 
     private static final Field XSSFSHEET_WORKSHEET_FIELD = WsReflectUtils.getFieldByName(XSSFSheet.class,"worksheet");
