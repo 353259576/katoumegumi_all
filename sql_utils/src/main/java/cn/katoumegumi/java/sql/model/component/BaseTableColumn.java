@@ -35,7 +35,7 @@ public class BaseTableColumn implements TableColumn {
      * @return
      */
     private static String createColumnName(String tableNickName, String columnName) {
-        return SQLModelFactory.guardKeyword(tableNickName) + '.' + SQLModelFactory.guardKeyword(columnName);
+        return SQLModelFactory.ignoreKeyword(tableNickName) + '.' + SQLModelFactory.ignoreKeyword(columnName);
     }
 
     /**
@@ -46,7 +46,7 @@ public class BaseTableColumn implements TableColumn {
      * @return
      */
     private static String createColumnNickName(String tableNickName, String columnName) {
-        return SQLModelFactory.guardKeyword(tableNickName + '.' + columnName);
+        return SQLModelFactory.ignoreKeyword(tableNickName + '.' + columnName);
     }
 
     @Override

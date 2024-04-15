@@ -3,6 +3,7 @@ package cn.katoumegumi.java.sql.test;
 import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.sql.*;
+import cn.katoumegumi.java.sql.common.OrderByTypeEnums;
 import cn.katoumegumi.java.sql.handler.SqlEntityFactory;
 import cn.katoumegumi.java.sql.model.component.SqlEquation;
 import cn.katoumegumi.java.sql.handler.model.DeleteSqlEntity;
@@ -15,6 +16,7 @@ import cn.katoumegumi.java.sql.test.model.UserDetails;
 import com.google.gson.Gson;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class Test {
@@ -117,10 +119,22 @@ public class Test {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(MySearchList.create(User.class)
                 .setAlias("u")
                 .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
-                .gtep("u",User::getName,"u",User::getName));
+                .gtep("u",User::getName,"u",User::getName)
+                .sort(User::getId,"asc"));
         SelectModel selectModel = sqlModelFactory.createSelectModel();
         SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(selectModel);
         System.out.println(selectSqlEntity.getSelectSql());
+
+        /*User user = new User()
+                .setId(1L)
+                .setName("你好世界")
+                .setPassword("123456")
+                .setCreateDate(LocalDateTime.now());
+        SQLModelFactory modelFactory = new SQLModelFactory(MySearchList.create(User.class));
+        UpdateModel updateModel = modelFactory.createUpdateModel(user,true);
+        UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(updateModel);
+        System.out.println(updateSqlEntity.getUpdateSql());*/
+
     }
 
 

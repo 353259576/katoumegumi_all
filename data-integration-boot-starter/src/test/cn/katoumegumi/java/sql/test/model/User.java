@@ -31,7 +31,7 @@ public class User implements Serializable {
     @Column(name = "password")
     private String password;
 
-    @TableField(value = "create_date",exist = false)
+    @TableField(value = "create_date")
     //@Column(name = "create_date")
     private LocalDateTime createDate;
 

@@ -131,12 +131,12 @@ public class SQLModelFactory {
 
 
     /**
-     * 数据库关键词
+     * 忽略数据库关键词
      *
      * @param keyword
      * @return
      */
-    public static String guardKeyword(String keyword) {
+    public static String ignoreKeyword(String keyword) {
         if (keyword.startsWith("`")) {
             return keyword;
         }
@@ -226,7 +226,7 @@ public class SQLModelFactory {
             BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
             Object o = beanPropertyModel.getValue(t);
             if (o != null) {
-                columnNameList.add(guardKeyword(propertyBaseColumnRelation.getColumnName()));
+                columnNameList.add(ignoreKeyword(propertyBaseColumnRelation.getColumnName()));
                 placeholderList.add(SqlCommonConstants.PLACEHOLDER);
                 validList.add(propertyBaseColumnRelation);
                 valueList.add(new SqlParameter(o));
@@ -244,14 +244,14 @@ public class SQLModelFactory {
                 o = beanPropertyModel.getValue(t);
             }
             if (o != null) {
-                columnNameList.add(guardKeyword(propertyBaseColumnRelation.getColumnName()));
+                columnNameList.add(ignoreKeyword(propertyBaseColumnRelation.getColumnName()));
                 placeholderList.add(SqlCommonConstants.PLACEHOLDER);
                 validList.add(propertyBaseColumnRelation);
                 valueList.add(new SqlParameter(o));
             }
         }
 
-        String insertSql = SqlCommonConstants.INSERT_INTO + guardKeyword(propertyColumnRelationMapper.getTableName()) + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(columnNameList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS + SqlCommonConstants.VALUE + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(placeholderList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS;
+        String insertSql = SqlCommonConstants.INSERT_INTO + ignoreKeyword(propertyColumnRelationMapper.getTableName()) + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(columnNameList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS + SqlCommonConstants.VALUE + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(placeholderList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS;
         InsertSqlEntity entity = new InsertSqlEntity(insertSql);
         //entity.setInsertSql(insertSql);
         entity.setUsedField(validList);
@@ -284,7 +284,7 @@ public class SQLModelFactory {
             BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
             Object o = beanPropertyModel.getValue(tList.get(0));
             validField.add(propertyBaseColumnRelation);
-            columnNameList.add(guardKeyword(propertyBaseColumnRelation.getColumnName()));
+            columnNameList.add(ignoreKeyword(propertyBaseColumnRelation.getColumnName()));
             placeholderList.add(SqlCommonConstants.PLACEHOLDER);
             valueList.add(new SqlParameter(o));
         }
@@ -298,7 +298,7 @@ public class SQLModelFactory {
                 o = beanPropertyModel.getValue(tList.get(0));
             }
             validField.add(propertyBaseColumnRelation);
-            columnNameList.add(guardKeyword(propertyBaseColumnRelation.getColumnName()));
+            columnNameList.add(ignoreKeyword(propertyBaseColumnRelation.getColumnName()));
             placeholderList.add(SqlCommonConstants.PLACEHOLDER);
             valueList.add(new SqlParameter(o));
         }
@@ -321,7 +321,7 @@ public class SQLModelFactory {
             placeholderList.add(placeholderSql);
         }
 
-        String insertSql = SqlCommonConstants.INSERT_INTO + guardKeyword(propertyColumnRelationMapper.getTableName()) + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(columnNameList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS + SqlCommonConstants.VALUE + WsStringUtils.jointListString(placeholderList, ",");
+        String insertSql = SqlCommonConstants.INSERT_INTO + ignoreKeyword(propertyColumnRelationMapper.getTableName()) + SqlCommonConstants.LEFT_BRACKETS + WsStringUtils.jointListString(columnNameList, SqlCommonConstants.COMMA) + SqlCommonConstants.RIGHT_BRACKETS + SqlCommonConstants.VALUE + WsStringUtils.jointListString(placeholderList, ",");
         InsertSqlEntity insertSqlEntity = new InsertSqlEntity(insertSql);
         //insertSqlEntity.setInsertSql(insertSql);
         insertSqlEntity.setUsedField(validField);

@@ -34,41 +34,41 @@ public class MysqlSqlHandler implements SqlHandler{
             TableColumn tableColumn = selectModel.getSelect().get(i);
             if (tableColumn instanceof BaseTableColumn) {
                 BaseTableColumn columnBase = (BaseTableColumn) tableColumn;
-                columnSql.append(SQLModelFactory.guardKeyword(columnBase.getTableAlias()))
+                columnSql.append(SQLModelFactory.ignoreKeyword(columnBase.getTableAlias()))
                         .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
-                        .append(SQLModelFactory.guardKeyword(columnBase.getColumnName()));
+                        .append(SQLModelFactory.ignoreKeyword(columnBase.getColumnName()));
             } else if (tableColumn instanceof DynamicTableColumn) {
                 DynamicTableColumn dynamicTableColumn = (DynamicTableColumn) tableColumn;
                 chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
             }
             columnSql.append(SqlCommonConstants.SPACE)
-                    .append(SQLModelFactory.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()))
+                    .append(SQLModelFactory.ignoreKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()))
                     .append(SqlCommonConstants.COMMA);
         }
         TableColumn tableColumn = selectModel.getSelect().get(columnSize - 1);
         if (tableColumn instanceof BaseTableColumn) {
             BaseTableColumn columnBase = (BaseTableColumn) tableColumn;
-            columnSql.append(SQLModelFactory.guardKeyword(columnBase.getTableAlias()))
+            columnSql.append(SQLModelFactory.ignoreKeyword(columnBase.getTableAlias()))
                     .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
-                    .append(SQLModelFactory.guardKeyword(columnBase.getColumnName()));
+                    .append(SQLModelFactory.ignoreKeyword(columnBase.getColumnName()));
         } else if (tableColumn instanceof DynamicTableColumn) {
             DynamicTableColumn dynamicTableColumn = (DynamicTableColumn) tableColumn;
             chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
         }
         columnSql.append(SqlCommonConstants.SPACE)
-                .append(SQLModelFactory.guardKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()));
+                .append(SQLModelFactory.ignoreKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()));
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
         tableAndJoinTableSql.append(SqlCommonConstants.FROM)
-                .append(SQLModelFactory.guardKeyword(selectModel.getFrom().getTable().getTableName()))
+                .append(SQLModelFactory.ignoreKeyword(selectModel.getFrom().getTable().getTableName()))
                 .append(SqlCommonConstants.SPACE)
-                .append(SQLModelFactory.guardKeyword(selectModel.getFrom().getAlias()));
+                .append(SQLModelFactory.ignoreKeyword(selectModel.getFrom().getAlias()));
         if (WsCollectionUtils.isNotEmpty(selectModel.getJoinList())) {
             for (JoinTableModel joinTableModel : selectModel.getJoinList()) {
                 tableAndJoinTableSql.append(joinTableModel.getJoinType().getValue())
-                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
+                        .append(SQLModelFactory.ignoreKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
                         .append(SqlCommonConstants.SPACE)
-                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getAlias()))
+                        .append(SQLModelFactory.ignoreKeyword(joinTableModel.getJoinTable().getAlias()))
                         .append(SqlCommonConstants.ON);
                 handleRelation(joinTableModel.getOn(), tableAndJoinTableSql, valueList, false);
             }
@@ -94,9 +94,9 @@ public class MysqlSqlHandler implements SqlHandler{
                 if (entity == null) {
                     orderBySql.append(orderByCondition.getSql().getSql());
                 } else {
-                    orderBySql.append(SQLModelFactory.guardKeyword(entity.getTableAlias()))
+                    orderBySql.append(SQLModelFactory.ignoreKeyword(entity.getTableAlias()))
                             .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
-                            .append(SQLModelFactory.guardKeyword(entity.getColumnName()));
+                            .append(SQLModelFactory.ignoreKeyword(entity.getColumnName()));
                 }
                 orderBySql.append(SqlCommonConstants.SPACE)
                         .append(orderByCondition.getType().getOrderByType())
@@ -108,9 +108,9 @@ public class MysqlSqlHandler implements SqlHandler{
             if (entity == null) {
                 orderBySql.append(orderByCondition.getSql().getSql());
             } else {
-                orderBySql.append(SQLModelFactory.guardKeyword(entity.getTableAlias()))
+                orderBySql.append(SQLModelFactory.ignoreKeyword(entity.getTableAlias()))
                         .append(SqlCommonConstants.SQL_COMMON_DELIMITER)
-                        .append(SQLModelFactory.guardKeyword(entity.getColumnName()));
+                        .append(SQLModelFactory.ignoreKeyword(entity.getColumnName()));
             }
             orderBySql.append(SqlCommonConstants.SPACE)
                     .append(orderByCondition.getType().getOrderByType());
@@ -148,20 +148,20 @@ public class MysqlSqlHandler implements SqlHandler{
     public DeleteSqlEntity delete(DeleteModel deleteModel) {
         List<SqlParameter> valueList = new ArrayList<>();
 
-        String mainTableAlias = SQLModelFactory.guardKeyword(deleteModel.getFrom().getAlias());
+        String mainTableAlias = SQLModelFactory.ignoreKeyword(deleteModel.getFrom().getAlias());
 
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
         tableAndJoinTableSql.append(SqlCommonConstants.FROM)
-                .append(SQLModelFactory.guardKeyword(deleteModel.getFrom().getTable().getTableName()))
+                .append(SQLModelFactory.ignoreKeyword(deleteModel.getFrom().getTable().getTableName()))
                 .append(SqlCommonConstants.SPACE)
                 .append(mainTableAlias);
         if (WsCollectionUtils.isNotEmpty(deleteModel.getJoinList())) {
             for (JoinTableModel joinTableModel : deleteModel.getJoinList()) {
                 tableAndJoinTableSql.append(joinTableModel.getJoinType().getValue())
-                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
+                        .append(SQLModelFactory.ignoreKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
                         .append(SqlCommonConstants.SPACE)
-                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getAlias()))
+                        .append(SQLModelFactory.ignoreKeyword(joinTableModel.getJoinTable().getAlias()))
                         .append(SqlCommonConstants.ON);
                 handleRelation(joinTableModel.getOn(), tableAndJoinTableSql, valueList, false);
             }
@@ -187,15 +187,15 @@ public class MysqlSqlHandler implements SqlHandler{
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
         tableAndJoinTableSql
-                .append(SQLModelFactory.guardKeyword(updateModel.getFrom().getTable().getTableName()))
+                .append(SQLModelFactory.ignoreKeyword(updateModel.getFrom().getTable().getTableName()))
                 .append(SqlCommonConstants.SPACE)
-                .append(SQLModelFactory.guardKeyword(updateModel.getFrom().getAlias()));
+                .append(SQLModelFactory.ignoreKeyword(updateModel.getFrom().getAlias()));
         if (WsCollectionUtils.isNotEmpty(updateModel.getJoinList())) {
             for (JoinTableModel joinTableModel : updateModel.getJoinList()) {
                 tableAndJoinTableSql.append(joinTableModel.getJoinType().getValue())
-                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
+                        .append(SQLModelFactory.ignoreKeyword(joinTableModel.getJoinTable().getTable().getTableName()))
                         .append(SqlCommonConstants.SPACE)
-                        .append(SQLModelFactory.guardKeyword(joinTableModel.getJoinTable().getAlias()))
+                        .append(SQLModelFactory.ignoreKeyword(joinTableModel.getJoinTable().getAlias()))
                         .append(SqlCommonConstants.ON);
                 handleRelation(joinTableModel.getOn(), tableAndJoinTableSql, valueList, false);
             }
@@ -435,7 +435,7 @@ public class MysqlSqlHandler implements SqlHandler{
             case ValueTypeConstants.COLUMN_NAME_TYPE:
                 BaseTableColumn baseTableColumn = (BaseTableColumn) value;
                 return new SqlStringAndParameters(
-                        SQLModelFactory.guardKeyword(baseTableColumn.getTableAlias()) + SqlCommonConstants.SQL_COMMON_DELIMITER + SQLModelFactory.guardKeyword(baseTableColumn.getColumnName()),
+                        SQLModelFactory.ignoreKeyword(baseTableColumn.getTableAlias()) + SqlCommonConstants.SQL_COMMON_DELIMITER + SQLModelFactory.ignoreKeyword(baseTableColumn.getColumnName()),
                         null,
                         0
                 );

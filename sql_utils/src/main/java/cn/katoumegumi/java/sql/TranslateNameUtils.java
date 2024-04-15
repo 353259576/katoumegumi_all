@@ -108,19 +108,14 @@ public class TranslateNameUtils {
             parent = parent.parent;
         }
         if (value == null) {
-            //value = particularMap.get(keyword);
             value = getParticular(keyword);
             if (value == null) {
                 value = createAbbreviation(keyword);
                 abbreviationMap.put(keyword, value);
                 particularMap.put(value, keyword);
-                return value;
-            } else {
-                return value;
             }
-        } else {
-            return value;
         }
+        return value;
     }
 
     /**
@@ -137,13 +132,9 @@ public class TranslateNameUtils {
                 value = createAbbreviation(keyword);
                 abbreviationMap.put(keyword, value);
                 particularMap.put(value, keyword);
-                return value;
-            } else {
-                return value;
             }
-        } else {
-            return value;
         }
+        return value;
     }
 
     /**
