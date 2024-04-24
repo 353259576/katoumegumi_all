@@ -49,17 +49,17 @@ public class TableTemplateFieldColumnRelationMapperHandleStrategy implements Fie
     }
 
     @Override
-    public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty,int abbreviation) {
         PropertyBaseColumnRelation templateRelation = mainMapper.containsFieldColumnRelationByFieldName(beanProperty.getPropertyName());
         if (templateRelation == null) {
             return Optional.empty();
         }
-        PropertyBaseColumnRelation relation = new PropertyBaseColumnRelation(templateRelation.isId(), templateRelation.getColumnName(),beanProperty);
+        PropertyBaseColumnRelation relation = new PropertyBaseColumnRelation(templateRelation.isId(), templateRelation.getColumnName(),beanProperty,abbreviation);
         return Optional.of(relation);
     }
 
     @Override
-    public Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty,int abbreviation) {
         return Optional.empty();
     }
 }

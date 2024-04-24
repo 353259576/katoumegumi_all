@@ -7,7 +7,7 @@
     <groupId>cn.katoumegumi.java</groupId>
     <artifactId>katoumegumi_all</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.7-SNAPSHOT</version>
+    <version>1.0.8-SNAPSHOT</version>
     <modules>
         <module>data-integration-boot-starter</module>
         <module>sql_utils</module>
@@ -40,7 +40,7 @@
         <java.version>11</java.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <megumi.version>1.0.7-SNAPSHOT</megumi.version>
+        <megumi.version>1.0.8-SNAPSHOT</megumi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>3.1.2</spring-boot.version>
         <!--<spring-data-version>2021.0.5</spring-data-version>-->
@@ -65,11 +65,11 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>io.netty</groupId>-->
+<!--                <artifactId>netty-all</artifactId>-->
+<!--                <version>${netty.version}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -91,11 +91,11 @@
                 <version>${megumi.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>cn.katoumegumi.java</groupId>
-                <artifactId>http_client</artifactId>
-                <version>${megumi.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>cn.katoumegumi.java</groupId>-->
+<!--                <artifactId>http_client</artifactId>-->
+<!--                <version>${megumi.version}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>ch.qos.logback</groupId>

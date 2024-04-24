@@ -194,12 +194,12 @@ public class FieldColumnRelationMapperFactory {
         }).orElse(false);
     }
 
-    public PropertyBaseColumnRelation getColumnName(int startIndex, PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
-        return getStrategyAndHandle(startIndex, strategy -> strategy.getColumnName(mainMapper, beanProperty)).orElse(null);
+    public PropertyBaseColumnRelation getColumnName(int startIndex, PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty,int abbreviation) {
+        return getStrategyAndHandle(startIndex, strategy -> strategy.getColumnName(mainMapper, beanProperty,abbreviation)).orElse(null);
     }
 
-    public PropertyObjectColumnJoinRelation getJoinRelation(int startIndex, PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
-        return getStrategyAndHandle(startIndex, strategy -> strategy.getJoinRelation(mainMapper, joinMapper, beanProperty)).orElse(null);
+    public PropertyObjectColumnJoinRelation getJoinRelation(int startIndex, PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty,int abbreviation) {
+        return getStrategyAndHandle(startIndex, strategy -> strategy.getJoinRelation(mainMapper, joinMapper, beanProperty,abbreviation)).orElse(null);
     }
 
 
@@ -249,10 +249,13 @@ public class FieldColumnRelationMapperFactory {
                 joinClassFieldList.add(beanPropertyModel);
             }
         }
+        //别名
+        int abbreviation = 0;
         if (WsCollectionUtils.isNotEmpty(baseTypeFieldList)) {
             for (BeanPropertyModel propertyModel : baseTypeFieldList) {
-                PropertyBaseColumnRelation propertyBaseColumnRelation = getColumnName(startIndex, propertyColumnRelationMapper.getBaseTemplateMapper() == null ? propertyColumnRelationMapper : propertyColumnRelationMapper.getBaseTemplateMapper(), propertyModel);
+                PropertyBaseColumnRelation propertyBaseColumnRelation = getColumnName(startIndex, propertyColumnRelationMapper.getBaseTemplateMapper() == null ? propertyColumnRelationMapper : propertyColumnRelationMapper.getBaseTemplateMapper(), propertyModel,abbreviation++);
                 if (propertyBaseColumnRelation == null) {
+                    abbreviation--;
                     continue;
                 }
                 propertyColumnRelationMapper.putFieldColumnRelationMap(propertyModel.getPropertyName(), propertyBaseColumnRelation);
@@ -274,12 +277,14 @@ public class FieldColumnRelationMapperFactory {
                 }
                 try {
                     PropertyColumnRelationMapper joinMapper = analysisClassRelation(joinClass, true);
-                    PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = getJoinRelation(startIndex, propertyColumnRelationMapper, joinMapper, propertyModel);
+                    PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = getJoinRelation(startIndex, propertyColumnRelationMapper, joinMapper, propertyModel,abbreviation++);
                     if (propertyObjectColumnJoinRelation == null) {
+                        abbreviation--;
                         continue;
                     }
                     propertyColumnRelationMapper.getFieldJoinClasses().add(propertyObjectColumnJoinRelation);
                 }catch (RuntimeException e){
+                    abbreviation--;
                     log.info("解析"+ joinClass +"失败:"+e.getMessage());
                 }
             }

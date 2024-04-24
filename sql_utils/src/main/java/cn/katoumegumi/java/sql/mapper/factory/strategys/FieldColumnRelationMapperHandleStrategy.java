@@ -46,9 +46,10 @@ public interface FieldColumnRelationMapperHandleStrategy {
      *
      * @param mainMapper
      * @param beanProperty
+     * @param abbreviation 别名
      * @return
      */
-    Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty);
+    Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty,int abbreviation);
 
     /**
      * 获取关联列对应关系
@@ -56,9 +57,10 @@ public interface FieldColumnRelationMapperHandleStrategy {
      * @param mainMapper
      * @param joinMapper
      * @param beanProperty
+     * @param abbreviation 别名
      * @return key为主表列表 value为关联表列
      */
-    Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty);
+    Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty,int abbreviation);
 
 //    /**
 //     * 处理当前数据

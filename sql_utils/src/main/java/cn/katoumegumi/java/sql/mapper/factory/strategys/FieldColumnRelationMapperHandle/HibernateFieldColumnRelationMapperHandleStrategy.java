@@ -59,7 +59,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
     }
 
     @Override
-    public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty,int abbreviation) {
         Id id = beanProperty.getAnnotation(Id.class);
         Column column = beanProperty.getAnnotation(Column.class);
         if (id == null && column == null) {
@@ -71,11 +71,11 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
         } else {
             columnName = column.name();
         }
-        return Optional.of(new PropertyBaseColumnRelation(id != null, columnName, beanProperty));
+        return Optional.of(new PropertyBaseColumnRelation(id != null, columnName, beanProperty,abbreviation));
     }
 
     @Override
-    public Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
+    public Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty,int abbreviation) {
         JoinColumn joinColumn = beanProperty.getAnnotation(JoinColumn.class);
         if (joinColumn == null) {
             return Optional.empty();
@@ -89,7 +89,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
             referenced = joinMapper.getIds().get(0).getColumnName();
         }
         OneToMany oneToMany = beanProperty.getAnnotation(OneToMany.class);
-        PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = new PropertyObjectColumnJoinRelation(beanProperty);
+        PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = new PropertyObjectColumnJoinRelation(beanProperty,abbreviation);
         propertyObjectColumnJoinRelation.setJoinEntityPropertyName(beanProperty.getPropertyName());
         propertyObjectColumnJoinRelation.setJoinType(TableJoinType.LEFT_JOIN);
         if (oneToMany == null) {

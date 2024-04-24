@@ -52,13 +52,13 @@ public class DefaultFieldColumnRelationMapperHandleStrategy implements FieldColu
     }
 
     @Override
-    public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty) {
-        return Optional.of(new PropertyBaseColumnRelation(false, fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName()), beanProperty));
+    public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty,int abbreviation) {
+        return Optional.of(new PropertyBaseColumnRelation(false, fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName()), beanProperty,abbreviation));
     }
 
     @Override
-    public Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty) {
-        PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = new PropertyObjectColumnJoinRelation(beanProperty);
+    public Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty,int abbreviation) {
+        PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = new PropertyObjectColumnJoinRelation(beanProperty,abbreviation);
         propertyObjectColumnJoinRelation.setJoinEntityPropertyName(beanProperty.getPropertyName());
         propertyObjectColumnJoinRelation.setJoinType(TableJoinType.LEFT_JOIN);
         return Optional.of(propertyObjectColumnJoinRelation);

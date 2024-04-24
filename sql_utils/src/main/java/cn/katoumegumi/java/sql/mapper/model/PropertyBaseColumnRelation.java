@@ -23,13 +23,18 @@ public class PropertyBaseColumnRelation {
      */
     private final String columnName;
 
+    /**
+     * 别名
+     */
+    private final int abbreviation;
 
 
-    public PropertyBaseColumnRelation(boolean id, String columnName, BeanPropertyModel beanPropertyModel) {
+
+    public PropertyBaseColumnRelation(boolean id, String columnName, BeanPropertyModel beanPropertyModel,int abbreviation) {
         this.id = id;
         this.columnName = columnName;
         this.beanProperty = beanPropertyModel;
-
+        this.abbreviation = abbreviation;
     }
 
     public boolean isId() {
@@ -43,5 +48,9 @@ public class PropertyBaseColumnRelation {
 
     public BeanPropertyModel getBeanProperty() {
         return beanProperty;
+    }
+
+    public int getAbbreviation() {
+        return abbreviation;
     }
 }

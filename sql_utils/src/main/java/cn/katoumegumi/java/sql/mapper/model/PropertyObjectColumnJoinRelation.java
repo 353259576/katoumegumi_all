@@ -45,11 +45,17 @@ public class PropertyObjectColumnJoinRelation {
      */
     private String joinTableColumnName;
 
+    /**
+     * 别名
+     */
+    private final int abbreviation;
 
-    public PropertyObjectColumnJoinRelation(BeanPropertyModel beanPropertyModel) {
+
+    public PropertyObjectColumnJoinRelation(BeanPropertyModel beanPropertyModel,int abbreviation) {
         this.isArray = WsReflectUtils.isArrayType(beanPropertyModel.getPropertyClass());
         this.beanProperty = beanPropertyModel;
         this.joinEntityClass = this.isArray?beanPropertyModel.getGenericClass():beanPropertyModel.getPropertyClass();
+        this.abbreviation = abbreviation;
     }
 
     public boolean isArray() {
@@ -96,4 +102,7 @@ public class PropertyObjectColumnJoinRelation {
         return beanProperty;
     }
 
+    public int getAbbreviation() {
+        return abbreviation;
+    }
 }
