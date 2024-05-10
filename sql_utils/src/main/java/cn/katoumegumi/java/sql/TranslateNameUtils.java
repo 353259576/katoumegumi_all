@@ -54,7 +54,6 @@ public class TranslateNameUtils {
     public TranslateNameUtils(TranslateNameUtils translateNameUtils) {
         this.parent = translateNameUtils;
         this.abbreviationNum = translateNameUtils.abbreviationNum;
-
         this.localMapperMap = new HashMap<>();
         this.mainClassNameList = new ArrayList<>();
         this.abbreviationMap = new HashMap<>();
@@ -90,7 +89,6 @@ public class TranslateNameUtils {
             parent = parent.parent;
         }
         return returnValue;
-        //return particularMap.get(value);
     }
 
 
@@ -110,9 +108,7 @@ public class TranslateNameUtils {
         if (value == null) {
             value = getParticular(keyword);
             if (value == null) {
-                value = createAbbreviation(keyword);
-                abbreviationMap.put(keyword, value);
-                particularMap.put(value, keyword);
+                value = setAbbreviation(keyword);
             }
         }
         return value;
@@ -129,9 +125,7 @@ public class TranslateNameUtils {
         if (value == null) {
             value = particularMap.get(keyword);
             if (value == null) {
-                value = createAbbreviation(keyword);
-                abbreviationMap.put(keyword, value);
-                particularMap.put(value, keyword);
+                value = setAbbreviation(keyword);
             }
         }
         return value;
@@ -154,8 +148,12 @@ public class TranslateNameUtils {
      * @param value   简称
      */
     public void setAbbreviation(String keyword, String value) {
-        abbreviationMap.put(keyword, value);
-        particularMap.put(value, keyword);
+        if (abbreviationMap.put(keyword, value) != null){
+            throw new IllegalArgumentException(keyword + " already exists");
+        }
+        if (particularMap.put(value, keyword) != null){
+            throw new IllegalArgumentException("abbreviation:" + value + " already exists");
+        }
     }
 
     /**
@@ -166,8 +164,7 @@ public class TranslateNameUtils {
      */
     public String setAbbreviation(String keyword) {
         String value = createAbbreviation(keyword);
-        abbreviationMap.put(keyword, value);
-        particularMap.put(value, keyword);
+        setAbbreviation(keyword, value);
         return value;
     }
 
