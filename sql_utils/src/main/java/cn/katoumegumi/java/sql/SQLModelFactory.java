@@ -645,9 +645,7 @@ public class SQLModelFactory {
         translateNameUtils.addLocalMapper(rootPath, mainMapper);
         final boolean appointQueryColumn = WsCollectionUtils.isNotEmpty(this.mySearchList.getColumnNameList());
         List<TableColumn> queryColumnList = new ArrayList<>();
-
-        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, queryColumnList, appointQueryColumn, false);
-
+        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, appointQueryColumn?null:queryColumnList, false);
         if (appointQueryColumn) {
             if (this.mySearchList.isSingleColumn()) {
                 //是单列查询自动加入distinct关键字去重
@@ -694,7 +692,7 @@ public class SQLModelFactory {
         TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
         final String rootPath = mainMapper.getNickName();
         translateNameUtils.addLocalMapper(rootPath, mainMapper);
-        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, null, true, true);
+        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, null , true);
         RelationCondition where = handleWhere(rootPath, mainMapper, this.mySearchList);
         return new DeleteModel(from, joinTableModelList, where);
     }
@@ -729,7 +727,7 @@ public class SQLModelFactory {
         TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
         final String rootPath = mainMapper.getNickName();
         translateNameUtils.addLocalMapper(rootPath, mainMapper);
-        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, null, true, true);
+        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, null, true);
         RelationCondition where = handleWhere(rootPath, mainMapper, this.mySearchList);
         List<Condition> conditionList = searchToExpressionCondition(rootPath, updateSearchList, null);
         if (WsCollectionUtils.isEmpty(conditionList)) {
@@ -803,11 +801,10 @@ public class SQLModelFactory {
      * @param rootPath               根路径
      * @param mainMapper             主映射
      * @param queryColumnList        存储查询列的队列
-     * @param appointQueryColumn     是否指定了需要查询的列
      * @param ignoreDefaultJoinTable 是否忽略默认关联的表
      * @return
      */
-    private List<JoinTableModel> handleJoinTableModel(final String rootPath, final PropertyColumnRelationMapper mainMapper, final List<TableColumn> queryColumnList, final boolean appointQueryColumn, final boolean ignoreDefaultJoinTable) {
+    private List<JoinTableModel> handleJoinTableModel(final String rootPath, final PropertyColumnRelationMapper mainMapper, final List<TableColumn> queryColumnList, final boolean ignoreDefaultJoinTable) {
         final List<TableRelation> tableRelationList = this.mySearchList.getJoins();
         final List<JoinTableModel> joinTableModelList = new ArrayList<>();
         final Map<TableRelation, JoinTableModel> usedRelationMap = new HashMap<>();
@@ -826,9 +823,7 @@ public class SQLModelFactory {
                 queue.add(new KeyValue<>(rootPath, propertyObjectColumnJoinRelation));
             }
 
-            if (!appointQueryColumn) {
-                addQueryColumnList(mainMapper, rootPath, queryColumnList);
-            }
+            addQueryColumnList(mainMapper, rootPath, queryColumnList);
 
             while (!queue.isEmpty()) {
                 KeyValue<String, PropertyObjectColumnJoinRelation> keyValue = queue.poll();
@@ -868,9 +863,7 @@ public class SQLModelFactory {
                     joinTableModelList.add(new JoinTableModel(new TableModel(translateNameUtils.getLocalMapper(path), tableAlias), new TableModel(joinMapper, joinTableAlias), propertyObjectColumnJoinRelation.getJoinType(), new RelationCondition(conditionModelList, SqlOperator.AND)));
                 }
                 if (checkChild) {
-                    if (!appointQueryColumn) {
-                        addQueryColumnList(joinMapper, joinPath, queryColumnList);
-                    }
+                    addQueryColumnList(joinMapper, joinPath, queryColumnList);
                     for (PropertyObjectColumnJoinRelation join : joinMapper.getFieldJoinClasses()) {
                         queue.add(new KeyValue<>(joinPath, join));
                     }
@@ -941,6 +934,9 @@ public class SQLModelFactory {
      * @param queryColumnList
      */
     private void addQueryColumnList(final PropertyColumnRelationMapper mapper, final String path, final List<TableColumn> queryColumnList) {
+        if (queryColumnList == null){
+            return;
+        }
         if (WsCollectionUtils.isNotEmpty(mapper.getIds())) {
             for (PropertyBaseColumnRelation propertyBaseColumnRelation : mapper.getIds()) {
                 queryColumnList.add(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation, mapper, path));

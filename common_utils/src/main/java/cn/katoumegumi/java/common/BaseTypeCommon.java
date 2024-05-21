@@ -101,7 +101,7 @@ public class BaseTypeCommon {
                 return WRAPPER_BASE_TYPE_ARRAY[i];
             }
         }
-        throw new NullPointerException("未发现" + clazz.getSimpleName() + "包装类");
+        throw new NullPointerException("not found" + clazz.getSimpleName() + " wrapper class");
     }
 
 

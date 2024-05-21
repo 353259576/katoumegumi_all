@@ -24,7 +24,7 @@ public class ConvertUtils {
         return null;
     }
 
-    public static final Map<Class, ConvertBean> CLASS_CONVERT_BEAN_MAP = new HashMap<>();
+    public static final Map<Class<?>, ConvertBean<?>> CLASS_CONVERT_BEAN_MAP = new HashMap<>();
 
     static {
         ConvertToString convertToString = new ConvertToString();
@@ -73,7 +73,7 @@ public class ConvertUtils {
         if (o.getClass().equals(tClass)) {
             return (T) o;
         }
-        ConvertBean<T> convertBean = CLASS_CONVERT_BEAN_MAP.get(c);
+        ConvertBean<T> convertBean = (ConvertBean<T>) CLASS_CONVERT_BEAN_MAP.get(c);
         if (convertBean == null) {
             return WsBeanUtils.convertBean(o, tClass);
         } else {
