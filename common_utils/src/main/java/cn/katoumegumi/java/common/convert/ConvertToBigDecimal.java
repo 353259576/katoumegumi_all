@@ -13,19 +13,19 @@ import java.util.Date;
  */
 public class ConvertToBigDecimal implements ConvertBean<BigDecimal> {
 
-    private final static Class<?>[] classes = new Class[]{
-            Integer.class,
-            Short.class,
-            Byte.class,
-            Float.class,
-            Double.class,
-            Long.class,
-            BigInteger.class,
-            Date.class,
-            java.sql.Date.class,
-            LocalDate.class,
-            LocalDateTime.class
-    };
+//    private final static Class<?>[] classes = new Class[]{
+//            Integer.class,
+//            Short.class,
+//            Byte.class,
+//            Float.class,
+//            Double.class,
+//            Long.class,
+//            BigInteger.class,
+//            Date.class,
+//            java.sql.Date.class,
+//            LocalDate.class,
+//            LocalDateTime.class
+//    };
 
     public BigDecimal convertBean(Integer bean) {
         return new BigDecimal(bean);
@@ -72,6 +72,9 @@ public class ConvertToBigDecimal implements ConvertBean<BigDecimal> {
         return new BigDecimal(ConvertUtils.convert(date, Date.class).getTime());
     }
 
+    public BigDecimal convertBean(String string){
+        return WsStringUtils.notHasLength(string) ? null : new BigDecimal(string);
+    }
 
     public BigDecimal convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
@@ -81,37 +84,38 @@ public class ConvertToBigDecimal implements ConvertBean<BigDecimal> {
     @Override
     public BigDecimal convert(Object bean) {
         Class<?> tClass = bean.getClass();
-        int i = 0;
-        for (; i < classes.length; ++i) {
-            if (classes[i] == tClass) {
-                break;
-            }
-        }
-        switch (i) {
-            case 0:
-                return convertBean((Integer) bean);
-            case 1:
-                return convertBean((Short) bean);
-            case 2:
-                return convertBean((Byte) bean);
-            case 3:
-                return convertBean((Float) bean);
-            case 4:
-                return convertBean((Double) bean);
-            case 5:
-                return convertBean((Long) bean);
-            case 6:
-                return convertBean((BigInteger) bean);
-            case 7:
-                return convertBean((Date) bean);
-            case 8:
-                return convertBean((java.sql.Date) bean);
-            case 9:
-                return convertBean((LocalDate) bean);
-            case 10:
-                return convertBean((LocalDateTime) bean);
-            default:
-                return convertBean(bean);
+//        int i = 0;
+//        for (; i < classes.length; ++i) {
+//            if (classes[i] == tClass) {
+//                break;
+//            }
+//        }
+        if (tClass == String.class) {
+            return convertBean((String)bean);
+        }else if (tClass == Integer.class){
+            return convertBean((Integer) bean);
+        } else if (tClass == Long.class){
+            return convertBean((Long) bean);
+        } else if (tClass == Double.class){
+            return convertBean((Double) bean);
+        } else if (tClass == Short.class){
+            return convertBean((Short) bean);
+        } else if (tClass == Byte.class){
+            return convertBean((Byte) bean);
+        } else if (tClass == Float.class){
+            return convertBean((Float) bean);
+        } else if (tClass == BigInteger.class){
+            return convertBean((BigInteger) bean);
+        } else if (tClass == Date.class){
+            return convertBean((Date) bean);
+        } else if (tClass == java.sql.Date.class){
+            return convertBean((java.sql.Date) bean);
+        } else if (tClass == LocalDate.class){
+            return convertBean((LocalDate) bean);
+        } else if (tClass == LocalDateTime.class){
+            return convertBean((LocalDateTime) bean);
+        }else {
+            return convertBean(bean);
         }
     }
 }

@@ -164,7 +164,7 @@ public class Encryption {
             // 取得私钥
             PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(privateKeyStringByte);
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
-            return (ECPrivateKey) keyFactory.generatePrivate(pkcs8KeySpec);
+            return keyFactory.generatePrivate(pkcs8KeySpec);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -177,7 +177,7 @@ public class Encryption {
             // 取得公钥
             X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(privateKeyStringByte);
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
-            return (ECPublicKey) keyFactory.generatePublic(x509EncodedKeySpec);
+            return keyFactory.generatePublic(x509EncodedKeySpec);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

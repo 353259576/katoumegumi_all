@@ -46,7 +46,7 @@ public interface FieldColumnRelationMapperHandleStrategy {
      *
      * @param mainMapper
      * @param beanProperty
-     * @param abbreviation 别名
+     * @param abbreviation 缩写
      * @return
      */
     Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty,int abbreviation);
@@ -57,18 +57,10 @@ public interface FieldColumnRelationMapperHandleStrategy {
      * @param mainMapper
      * @param joinMapper
      * @param beanProperty
-     * @param abbreviation 别名
+     * @param abbreviation 缩写
      * @return key为主表列表 value为关联表列
      */
     Optional<PropertyObjectColumnJoinRelation> getJoinRelation(PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty,int abbreviation);
-
-//    /**
-//     * 处理当前数据
-//     * @param clazz
-//     * @param allowIncomplete
-//     * @return
-//     */
-//    PropertyColumnRelationMapper analysisClassRelation(Class<?> clazz, boolean allowIncomplete);
 
 
 }

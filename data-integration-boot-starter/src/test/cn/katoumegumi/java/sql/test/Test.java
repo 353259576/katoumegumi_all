@@ -114,6 +114,12 @@ public class Test {
         }*/
         //test2();
 
+        Map<Integer,Integer> map = new HashMap<>();
+        System.out.println(map.put(1,1));
+        System.out.println(map.put(1,1));
+        System.out.println(map.put(1,1));
+        System.out.println(map.put(1,1));
+
         BeanModel beanModel = WsReflectUtils.createBeanModel(User.class);
         System.out.println(beanModel.toString());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(MySearchList.create(User.class)
@@ -134,6 +140,8 @@ public class Test {
         UpdateModel updateModel = modelFactory.createUpdateModel(user,true);
         UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(updateModel);
         System.out.println(updateSqlEntity.getUpdateSql());*/
+
+        System.out.println(WsBeanUtils.convertBean(1,String.class));
 
     }
 

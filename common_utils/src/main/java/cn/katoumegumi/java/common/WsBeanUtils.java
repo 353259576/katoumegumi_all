@@ -81,7 +81,7 @@ public class WsBeanUtils {
                     } else {
                         Class<?> targetClass = WsReflectUtils.getClassTypeof(targetField);
                         Object setValue;
-                        Object collection = null;
+                        Collection<Object> collection = null;
                         if (targetField.getType().equals(List.class)
                                 || targetField.getType().equals(Collection.class)) {
                             collection = new ArrayList<>();
@@ -92,7 +92,7 @@ public class WsBeanUtils {
                             // setValue = value;
                             targetClass = Object.class;
                         }
-                        setValue = convertToList(value, (Collection) collection, targetClass);
+                        setValue = convertToList(value, collection, targetClass);
                         if (setValue != null) {
                             WsReflectUtils.setValue(target, setValue, targetField);
                         }
@@ -316,7 +316,7 @@ public class WsBeanUtils {
         return (T) WsUnsafeUtils.allocateInstance(clazz);
     }
 
-    public static <T> Collection convertToList(Object o, Collection collection, Class<T> tClass) {
+    public static <T> Collection<Object> convertToList(Object o, Collection<Object> collection, Class<T> tClass) {
         Object object = convertToArray(o, tClass);
         if (object == null) {
             return null;
@@ -1072,29 +1072,13 @@ public class WsBeanUtils {
      * @param o
      * @return
      */
-    private static List arrayToList(Object o) {
-        if (!WsBeanUtils.isArray(o.getClass())) {
-            throw new RuntimeException("非数组类型");
+    private static List<Object> arrayToList(Object o) {
+        if (o == null){
+            throw new NullPointerException("待转换数组为空");
         }
-        if (o instanceof Collection) {
-            Collection collection = (Collection) o;
-            List list = new ArrayList(collection.size());
-            for (Object value : collection) {
-                if (WsBeanUtils.isBaseType(value.getClass())) {
-                    list.add(value);
-                } else if (WsBeanUtils.isArray(value.getClass())) {
-                    list.add(arrayToList(value));
-                } else if (value instanceof Map) {
-                    list.add(o);
-                } else {
-                    list.add(objectToMap(o));
-                }
-            }
-            return list;
-
-        } else {
+        if (o.getClass().isArray()){
             Object[] objects = (Object[]) o;
-            List list = new ArrayList(objects.length);
+            List<Object> list = new ArrayList<>(objects.length);
             for (Object value : objects) {
                 if (WsBeanUtils.isBaseType(value.getClass())) {
                     list.add(value);
@@ -1107,7 +1091,23 @@ public class WsBeanUtils {
                 }
             }
             return list;
+        }else if (o instanceof Collection){
+            Collection<Object> collection = (Collection<Object>) o;
+            List<Object> list = new ArrayList<>(collection.size());
+            for (Object value : collection) {
+                if (WsBeanUtils.isBaseType(value.getClass())) {
+                    list.add(value);
+                } else if (WsBeanUtils.isArray(value.getClass())) {
+                    list.add(arrayToList(value));
+                } else if (value instanceof Map) {
+                    list.add(o);
+                } else {
+                    list.add(objectToMap(o));
+                }
+            }
+            return list;
         }
+        throw new IllegalArgumentException("不支持的类型");
     }
 
 
@@ -1117,14 +1117,14 @@ public class WsBeanUtils {
      * @param o
      * @return
      */
-    private static Map objectToMap(Object o) {
+    private static Map<String,Object> objectToMap(Object o) {
         if (WsBeanUtils.isBaseType(o.getClass()) || WsBeanUtils.isArray(o.getClass())) {
             throw new RuntimeException("格式错误");
         }
 
         Field[] fields = WsReflectUtils.getFieldAll(o.getClass());
 
-        Map<Object, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         for (Field field : fields) {
             Object value = WsReflectUtils.getValue(o, field);
             if (value != null) {

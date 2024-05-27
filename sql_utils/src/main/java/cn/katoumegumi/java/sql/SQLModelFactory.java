@@ -644,7 +644,7 @@ public class SQLModelFactory {
         final String rootPath = mainMapper.getNickName();
         translateNameUtils.addLocalMapper(rootPath, mainMapper);
         final boolean appointQueryColumn = WsCollectionUtils.isNotEmpty(this.mySearchList.getColumnNameList());
-        List<TableColumn> queryColumnList = new ArrayList<>();
+        List<TableColumn> queryColumnList = appointQueryColumn?new ArrayList<>(this.mySearchList.getColumnNameList().size()):new ArrayList<>();
         List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, appointQueryColumn?null:queryColumnList, false);
         if (appointQueryColumn) {
             if (this.mySearchList.isSingleColumn()) {
@@ -1133,8 +1133,6 @@ public class SQLModelFactory {
                     multiExpressionCondition.add(translateNameUtils.getColumnBaseEntity((String) value, rootPath, 2));
                     break;
                 case ValueTypeConstants.SYMBOL_TYPE:
-                    multiExpressionCondition.add(value);
-                    break;
                 case ValueTypeConstants.BASE_VALUE_TYPE:
                 case ValueTypeConstants.COLLECTION_TYPE:
                 case ValueTypeConstants.ARRAY_TYPE:

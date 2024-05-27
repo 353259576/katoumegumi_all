@@ -35,11 +35,8 @@ public class WsStreamUtils {
         } else {
             ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
             try {
-                long size = inputStream.available();
-                if (size > Long.parseLong(Integer.MAX_VALUE + "")) {
-                    throw new RuntimeException("文件过大");
-                }
-                ByteBuffer byteBuffer = ByteBuffer.allocateDirect((int) size);
+                int size = inputStream.available();
+                ByteBuffer byteBuffer = ByteBuffer.allocateDirect(size);
                 readableByteChannel.read(byteBuffer);
                 byteBuffer.flip();
                 return byteBuffer;

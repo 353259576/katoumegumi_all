@@ -43,9 +43,7 @@ public class PoiUtils {
                         .setColumnWidthCellSize(2)
                         .setColumnHeightCellSize(2)
                         //.setColumnWidth(100)
-                        .setExcelTableBodyCellFill((location,strings)->{
-                            location.getCell().setCellValue(strings[0]);
-                        })
+                        .setExcelTableBodyCellFill((location,strings)-> location.getCell().setCellValue(strings[0]))
                         .setExcelTableHeadCellFill(excelTableHeadCellFill)
                         .setExcelTableFootCellFill(location -> location.getCell().setCellValue("姓名"))
                 ).addColumnProperty(c->c.setColumnName("性别")

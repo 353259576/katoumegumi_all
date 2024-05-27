@@ -277,11 +277,7 @@ public class WsImageUtils {
     public static BufferedImage enlargementBufferedImage(BufferedImage bufferedImage, double enlargementTimes, Integer bufferedImageType) {
         int newWidth = (int) (bufferedImage.getWidth() * enlargementTimes);
         int newHeight = (int) (bufferedImage.getHeight() * enlargementTimes);
-        BufferedImage newBufferedImage = new BufferedImage(newWidth, newHeight, bufferedImageType);
-        Graphics2D graphics2D = newBufferedImage.createGraphics();
-        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.drawImage(bufferedImage, 0, 0, newWidth, newHeight, null);
-        return newBufferedImage;
+        return fixedDimensionBufferedImage(bufferedImage, bufferedImageType, newWidth, newHeight);
     }
 
     /**
