@@ -36,7 +36,7 @@ public class WsBeanUtils {
             throw new IllegalArgumentException("不支持转换为接口");
         }
         if (isBaseType(o.getClass())) {
-            return objectToT(o, tClass);
+            return baseTypeConvert(o, tClass);
         }
         Field[] sourceFields = WsReflectUtils.getFieldAll(o.getClass());
         Field[] targetFields = WsReflectUtils.getFieldAll(tClass);
@@ -68,7 +68,7 @@ public class WsBeanUtils {
                 sourceValue = WsReflectUtils.getValue(o, sourceField);
                 if (sourceValue != null) {
                     WsReflectUtils.setValue(
-                            target, WsBeanUtils.objectToT(sourceValue, targetField.getType()), targetField);
+                            target, WsBeanUtils.baseTypeConvert(sourceValue, targetField.getType()), targetField);
                 }
             } else if (isArray(sourceField.getType()) && isArray(targetField.getType())) {
                 Object value = WsReflectUtils.getValue(o, sourceField);
@@ -108,7 +108,7 @@ public class WsBeanUtils {
             if (WsReflectUtils.classCompare(sourceField.getType(), targetField.getType())) {
                 sourceValue = WsReflectUtils.getValue(o, sourceField);
                 if (sourceValue != null) {
-                    WsReflectUtils.setValue(target, objectToT(sourceValue, targetField.getType()), targetField);
+                    WsReflectUtils.setValue(target, baseTypeConvert(sourceValue, targetField.getType()), targetField);
                 }
             }
         }
@@ -122,7 +122,7 @@ public class WsBeanUtils {
      * @param <T>
      * @return
      */
-    public static <T extends Serializable> T cloneBean(T object) {
+    public static <T extends Serializable> T cloneBeanBySerialize(T object) {
         try {
             byte[] bytes = serializeObject(object);
             return deSerializeObject(bytes);
@@ -178,13 +178,12 @@ public class WsBeanUtils {
 
     /**
      * 常见数据格式相互转换
-     *
      * @param object
      * @param tClass
      * @param <T>
      * @return
      */
-    public static <T> T objectToT(Object object, Class<T> tClass) {
+    public static <T> T baseTypeConvert(Object object, Class<T> tClass) {
         Object o = ConvertUtils.convert(object, tClass);
         boolean isPrimitive = tClass.isPrimitive();
         if (isPrimitive && o == null) {
@@ -210,99 +209,99 @@ public class WsBeanUtils {
     }
 
 
-    private static <T> T convertToT(Object object, Class<T> tClass) {
-        try {
-            if (tClass.isPrimitive()) {
-                tClass = (Class<T>) BaseTypeCommon.getWrapperClass(tClass);
-            }
-            if (tClass.equals(object.getClass())) {
-                return (T) object;
-            }
-            if (tClass.equals(Object.class)) {
-                return (T) object;
-            }
-            if (tClass == Integer.class) {
-                if (object instanceof Number) {
-                    return (T) Integer.valueOf(((Number) object).intValue());
-                }
-                return (T) Integer.valueOf(String.valueOf(object));
-            } else if (tClass == Short.class) {
-                if (object instanceof Number) {
-                    return (T) Short.valueOf(((Number) object).shortValue());
-                }
-                return (T) Short.valueOf(String.valueOf(object));
-            } else if (tClass == Byte.class) {
-                return (T) Byte.valueOf(String.valueOf(object));
-            } else if (tClass == Float.class) {
-                if (object instanceof Number) {
-                    return (T) Float.valueOf(((Number) object).floatValue());
-                }
-                return (T) Float.valueOf(String.valueOf(object));
-            } else if (tClass == Double.class) {
-                if (object instanceof Number) {
-                    return (T) Double.valueOf(((Number) object).doubleValue());
-                }
-                return (T) Double.valueOf(String.valueOf(object));
-            } else if (tClass == Long.class) {
-                if (object instanceof Number) {
-                    return (T) Long.valueOf(((Number) object).longValue());
-                }
-                return (T) Long.valueOf(String.valueOf(object));
-            } else if (tClass == Character.class) {
-                return (T) (Object) String.valueOf(object).charAt(0);
-            } else if (tClass == Boolean.class) {
-                return (T) Boolean.valueOf(String.valueOf(object));
-            } else if (tClass == BigInteger.class) {
-                return (T) new BigInteger(String.valueOf(object));
-            } else if (tClass == BigDecimal.class) {
-                return (T) new BigDecimal(String.valueOf(object));
-            } else if (tClass == String.class) {
-                return (T) WsStringUtils.anyToString(object);
-            } else if (tClass == Date.class
-                    || tClass == LocalDateTime.class
-                    || tClass == LocalDate.class
-                    || tClass == java.sql.Date.class) {
-                if (object.getClass() == Date.class) {
-                    if (tClass == LocalDate.class) {
-                        Date date = (Date) object;
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(date);
-                        return (T)
-                                LocalDate.ofYearDay(
-                                        calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR));
-                    }
-                    if (tClass == LocalDateTime.class) {
-                        return (T) LocalDateTime.ofInstant(((Date) object).toInstant(), ZoneId.systemDefault());
-                    }
-                    return (T) new java.sql.Date(((Date) object).getTime());
-                } else {
-                    Date date = WsDateUtils.objectToDate(object);
-                    if (date == null) {
-                        return null;
-                    } else {
-                        if (tClass == LocalDate.class) {
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(date);
-                            return (T)
-                                    LocalDate.ofYearDay(
-                                            calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR));
-                        }
-                        if (tClass == LocalDateTime.class) {
-                            return (T) LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-                        }
-                        if (tClass == java.sql.Date.class) {
-                            return (T) new java.sql.Date(date.getTime());
-                        }
-                        return (T) date;
-                    }
-                }
-            } else {
-                return convertBean(object, tClass);
-            }
-        } catch (Exception e) {
-            return null;
-        }
-    }
+//    private static <T> T convertToT(Object object, Class<T> tClass) {
+//        try {
+//            if (tClass.isPrimitive()) {
+//                tClass = (Class<T>) BaseTypeCommon.getWrapperClass(tClass);
+//            }
+//            if (tClass.equals(object.getClass())) {
+//                return (T) object;
+//            }
+//            if (tClass.equals(Object.class)) {
+//                return (T) object;
+//            }
+//            if (tClass == Integer.class) {
+//                if (object instanceof Number) {
+//                    return (T) Integer.valueOf(((Number) object).intValue());
+//                }
+//                return (T) Integer.valueOf(String.valueOf(object));
+//            } else if (tClass == Short.class) {
+//                if (object instanceof Number) {
+//                    return (T) Short.valueOf(((Number) object).shortValue());
+//                }
+//                return (T) Short.valueOf(String.valueOf(object));
+//            } else if (tClass == Byte.class) {
+//                return (T) Byte.valueOf(String.valueOf(object));
+//            } else if (tClass == Float.class) {
+//                if (object instanceof Number) {
+//                    return (T) Float.valueOf(((Number) object).floatValue());
+//                }
+//                return (T) Float.valueOf(String.valueOf(object));
+//            } else if (tClass == Double.class) {
+//                if (object instanceof Number) {
+//                    return (T) Double.valueOf(((Number) object).doubleValue());
+//                }
+//                return (T) Double.valueOf(String.valueOf(object));
+//            } else if (tClass == Long.class) {
+//                if (object instanceof Number) {
+//                    return (T) Long.valueOf(((Number) object).longValue());
+//                }
+//                return (T) Long.valueOf(String.valueOf(object));
+//            } else if (tClass == Character.class) {
+//                return (T) (Object) String.valueOf(object).charAt(0);
+//            } else if (tClass == Boolean.class) {
+//                return (T) Boolean.valueOf(String.valueOf(object));
+//            } else if (tClass == BigInteger.class) {
+//                return (T) new BigInteger(String.valueOf(object));
+//            } else if (tClass == BigDecimal.class) {
+//                return (T) new BigDecimal(String.valueOf(object));
+//            } else if (tClass == String.class) {
+//                return (T) WsStringUtils.anyToString(object);
+//            } else if (tClass == Date.class
+//                    || tClass == LocalDateTime.class
+//                    || tClass == LocalDate.class
+//                    || tClass == java.sql.Date.class) {
+//                if (object.getClass() == Date.class) {
+//                    if (tClass == LocalDate.class) {
+//                        Date date = (Date) object;
+//                        Calendar calendar = Calendar.getInstance();
+//                        calendar.setTime(date);
+//                        return (T)
+//                                LocalDate.ofYearDay(
+//                                        calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR));
+//                    }
+//                    if (tClass == LocalDateTime.class) {
+//                        return (T) LocalDateTime.ofInstant(((Date) object).toInstant(), ZoneId.systemDefault());
+//                    }
+//                    return (T) new java.sql.Date(((Date) object).getTime());
+//                } else {
+//                    Date date = WsDateUtils.objectToDate(object);
+//                    if (date == null) {
+//                        return null;
+//                    } else {
+//                        if (tClass == LocalDate.class) {
+//                            Calendar calendar = Calendar.getInstance();
+//                            calendar.setTime(date);
+//                            return (T)
+//                                    LocalDate.ofYearDay(
+//                                            calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR));
+//                        }
+//                        if (tClass == LocalDateTime.class) {
+//                            return (T) LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+//                        }
+//                        if (tClass == java.sql.Date.class) {
+//                            return (T) new java.sql.Date(date.getTime());
+//                        }
+//                        return (T) date;
+//                    }
+//                }
+//            } else {
+//                return convertBean(object, tClass);
+//            }
+//        } catch (Exception e) {
+//            return null;
+//        }
+//    }
 
     public static boolean isBaseType(Class<?> clazz) {
         return BaseTypeCommon.verify(clazz);
@@ -439,7 +438,7 @@ public class WsBeanUtils {
             Object[] objects = collection.toArray();
             T[] ts = (T[]) Array.newInstance(tClass, objects.length);
             for (int i = 0; i < objects.length; i++) {
-                ts[i] = objectToT(objects[i], tClass);
+                ts[i] = baseTypeConvert(objects[i], tClass);
             }
             return ts;
         }
@@ -452,49 +451,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rInts[i] = (Integer) objectToT(objects[i], tClass);
+                        rInts[i] = (Integer) baseTypeConvert(objects[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rShorts[i] = (Short) objectToT(objects[i], tClass);
+                        rShorts[i] = (Short) baseTypeConvert(objects[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rLongs[i] = (Long) objectToT(objects[i], tClass);
+                        rLongs[i] = (Long) baseTypeConvert(objects[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rFloats[i] = (Float) objectToT(objects[i], tClass);
+                        rFloats[i] = (Float) baseTypeConvert(objects[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rDoubles[i] = (Double) objectToT(objects[i], tClass);
+                        rDoubles[i] = (Double) baseTypeConvert(objects[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rBytes[i] = (Byte) objectToT(objects[i], tClass);
+                        rBytes[i] = (Byte) baseTypeConvert(objects[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rChars[i] = (Character) objectToT(objects[i], tClass);
+                        rChars[i] = (Character) baseTypeConvert(objects[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, objects.length);
                     for (int i = 0; i < objects.length; i++) {
-                        rBooleans[i] = (Boolean) objectToT(objects[i], tClass);
+                        rBooleans[i] = (Boolean) baseTypeConvert(objects[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -503,7 +502,7 @@ public class WsBeanUtils {
         } else {
             T[] ts = (T[]) Array.newInstance(tClass, objects.length);
             for (int i = 0; i < objects.length; i++) {
-                ts[i] = objectToT(objects[i], tClass);
+                ts[i] = baseTypeConvert(objects[i], tClass);
             }
             return ts;
         }
@@ -516,49 +515,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rInts[i] = (Integer) objectToT(booleans[i], tClass);
+                        rInts[i] = (Integer) baseTypeConvert(booleans[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rShorts[i] = (Short) objectToT(booleans[i], tClass);
+                        rShorts[i] = (Short) baseTypeConvert(booleans[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rLongs[i] = (Long) objectToT(booleans[i], tClass);
+                        rLongs[i] = (Long) baseTypeConvert(booleans[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rFloats[i] = (Float) objectToT(booleans[i], tClass);
+                        rFloats[i] = (Float) baseTypeConvert(booleans[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rDoubles[i] = (Double) objectToT(booleans[i], tClass);
+                        rDoubles[i] = (Double) baseTypeConvert(booleans[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rBytes[i] = (Byte) objectToT(booleans[i], tClass);
+                        rBytes[i] = (Byte) baseTypeConvert(booleans[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rChars[i] = (Character) objectToT(booleans[i], tClass);
+                        rChars[i] = (Character) baseTypeConvert(booleans[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, booleans.length);
                     for (int i = 0; i < booleans.length; i++) {
-                        rBooleans[i] = (Boolean) objectToT(booleans[i], tClass);
+                        rBooleans[i] = (Boolean) baseTypeConvert(booleans[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -567,7 +566,7 @@ public class WsBeanUtils {
         } else {
             objects = (T[]) Array.newInstance(tClass, booleans.length);
             for (int i = 0; i < booleans.length; i++) {
-                objects[i] = objectToT(booleans[i], tClass);
+                objects[i] = baseTypeConvert(booleans[i], tClass);
             }
             return objects;
         }
@@ -580,49 +579,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rInts[i] = (Integer) objectToT(chars[i], tClass);
+                        rInts[i] = (Integer) baseTypeConvert(chars[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rShorts[i] = (Short) objectToT(chars[i], tClass);
+                        rShorts[i] = (Short) baseTypeConvert(chars[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rLongs[i] = (Long) objectToT(chars[i], tClass);
+                        rLongs[i] = (Long) baseTypeConvert(chars[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rFloats[i] = (Float) objectToT(chars[i], tClass);
+                        rFloats[i] = (Float) baseTypeConvert(chars[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rDoubles[i] = (Double) objectToT(chars[i], tClass);
+                        rDoubles[i] = (Double) baseTypeConvert(chars[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rBytes[i] = (Byte) objectToT(chars[i], tClass);
+                        rBytes[i] = (Byte) baseTypeConvert(chars[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rChars[i] = (Character) objectToT(chars[i], tClass);
+                        rChars[i] = (Character) baseTypeConvert(chars[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, chars.length);
                     for (int i = 0; i < chars.length; i++) {
-                        rBooleans[i] = (Boolean) objectToT(chars[i], tClass);
+                        rBooleans[i] = (Boolean) baseTypeConvert(chars[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -631,7 +630,7 @@ public class WsBeanUtils {
         } else {
             objects = (T[]) Array.newInstance(tClass, chars.length);
             for (int i = 0; i < chars.length; i++) {
-                objects[i] = objectToT(chars[i], tClass);
+                objects[i] = baseTypeConvert(chars[i], tClass);
             }
             return objects;
         }
@@ -644,49 +643,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rInts[i] = (Integer) objectToT(bytes[i], tClass);
+                        rInts[i] = (Integer) baseTypeConvert(bytes[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rShorts[i] = (Short) objectToT(bytes[i], tClass);
+                        rShorts[i] = (Short) baseTypeConvert(bytes[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rLongs[i] = (Long) objectToT(bytes[i], tClass);
+                        rLongs[i] = (Long) baseTypeConvert(bytes[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rFloats[i] = (Float) objectToT(bytes[i], tClass);
+                        rFloats[i] = (Float) baseTypeConvert(bytes[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rDoubles[i] = (Double) objectToT(bytes[i], tClass);
+                        rDoubles[i] = (Double) baseTypeConvert(bytes[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rBytes[i] = (Byte) objectToT(bytes[i], tClass);
+                        rBytes[i] = (Byte) baseTypeConvert(bytes[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rChars[i] = (Character) objectToT(bytes[i], tClass);
+                        rChars[i] = (Character) baseTypeConvert(bytes[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, bytes.length);
                     for (int i = 0; i < bytes.length; i++) {
-                        rBooleans[i] = (Boolean) objectToT(bytes[i], tClass);
+                        rBooleans[i] = (Boolean) baseTypeConvert(bytes[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -695,7 +694,7 @@ public class WsBeanUtils {
         } else {
             objects = (T[]) Array.newInstance(tClass, bytes.length);
             for (int i = 0; i < bytes.length; i++) {
-                objects[i] = objectToT(bytes[i], tClass);
+                objects[i] = baseTypeConvert(bytes[i], tClass);
             }
             return objects;
         }
@@ -708,49 +707,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rInts[i] = (Integer) objectToT(doubles[i], tClass);
+                        rInts[i] = (Integer) baseTypeConvert(doubles[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rShorts[i] = (Short) objectToT(doubles[i], tClass);
+                        rShorts[i] = (Short) baseTypeConvert(doubles[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rLongs[i] = (Long) objectToT(doubles[i], tClass);
+                        rLongs[i] = (Long) baseTypeConvert(doubles[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rFloats[i] = (Float) objectToT(doubles[i], tClass);
+                        rFloats[i] = (Float) baseTypeConvert(doubles[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rDoubles[i] = (Double) objectToT(doubles[i], tClass);
+                        rDoubles[i] = (Double) baseTypeConvert(doubles[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rBytes[i] = (Byte) objectToT(doubles[i], tClass);
+                        rBytes[i] = (Byte) baseTypeConvert(doubles[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rChars[i] = (Character) objectToT(doubles[i], tClass);
+                        rChars[i] = (Character) baseTypeConvert(doubles[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, doubles.length);
                     for (int i = 0; i < doubles.length; i++) {
-                        rBooleans[i] = (Boolean) objectToT(doubles[i], tClass);
+                        rBooleans[i] = (Boolean) baseTypeConvert(doubles[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -759,7 +758,7 @@ public class WsBeanUtils {
         } else {
             objects = (T[]) Array.newInstance(tClass, doubles.length);
             for (int i = 0; i < doubles.length; i++) {
-                objects[i] = objectToT(doubles[i], tClass);
+                objects[i] = baseTypeConvert(doubles[i], tClass);
             }
             return objects;
         }
@@ -772,49 +771,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rInts[i] = (Integer) objectToT(floats[i], tClass);
+                        rInts[i] = (Integer) baseTypeConvert(floats[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rShorts[i] = (Short) objectToT(floats[i], tClass);
+                        rShorts[i] = (Short) baseTypeConvert(floats[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rLongs[i] = (Long) objectToT(floats[i], tClass);
+                        rLongs[i] = (Long) baseTypeConvert(floats[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rFloats[i] = (Float) objectToT(floats[i], tClass);
+                        rFloats[i] = (Float) baseTypeConvert(floats[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rDoubles[i] = (Double) objectToT(floats[i], tClass);
+                        rDoubles[i] = (Double) baseTypeConvert(floats[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rBytes[i] = (Byte) objectToT(floats[i], tClass);
+                        rBytes[i] = (Byte) baseTypeConvert(floats[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rChars[i] = (Character) objectToT(floats[i], tClass);
+                        rChars[i] = (Character) baseTypeConvert(floats[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, floats.length);
                     for (int i = 0; i < floats.length; i++) {
-                        rBooleans[i] = (Boolean) objectToT(floats[i], tClass);
+                        rBooleans[i] = (Boolean) baseTypeConvert(floats[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -823,7 +822,7 @@ public class WsBeanUtils {
         } else {
             objects = (T[]) Array.newInstance(tClass, floats.length);
             for (int i = 0; i < floats.length; i++) {
-                objects[i] = objectToT(floats[i], tClass);
+                objects[i] = baseTypeConvert(floats[i], tClass);
             }
             return objects;
         }
@@ -836,49 +835,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rInts[i] = (Integer) objectToT(longs[i], tClass);
+                        rInts[i] = (Integer) baseTypeConvert(longs[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rShorts[i] = (Short) objectToT(longs[i], tClass);
+                        rShorts[i] = (Short) baseTypeConvert(longs[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rLongs[i] = (Long) objectToT(longs[i], tClass);
+                        rLongs[i] = (Long) baseTypeConvert(longs[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rFloats[i] = (Float) objectToT(longs[i], tClass);
+                        rFloats[i] = (Float) baseTypeConvert(longs[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rDoubles[i] = (Double) objectToT(longs[i], tClass);
+                        rDoubles[i] = (Double) baseTypeConvert(longs[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rBytes[i] = (Byte) objectToT(longs[i], tClass);
+                        rBytes[i] = (Byte) baseTypeConvert(longs[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rChars[i] = (Character) objectToT(longs[i], tClass);
+                        rChars[i] = (Character) baseTypeConvert(longs[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, longs.length);
                     for (int i = 0; i < longs.length; i++) {
-                        rBooleans[i] = (Boolean) objectToT(longs[i], tClass);
+                        rBooleans[i] = (Boolean) baseTypeConvert(longs[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -887,7 +886,7 @@ public class WsBeanUtils {
         } else {
             objects = (T[]) Array.newInstance(tClass, longs.length);
             for (int i = 0; i < longs.length; i++) {
-                objects[i] = objectToT(longs[i], tClass);
+                objects[i] = baseTypeConvert(longs[i], tClass);
             }
             return objects;
         }
@@ -900,49 +899,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rInts[i] = (Integer) objectToT(shorts[i], tClass);
+                        rInts[i] = (Integer) baseTypeConvert(shorts[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rShorts[i] = (Short) objectToT(shorts[i], tClass);
+                        rShorts[i] = (Short) baseTypeConvert(shorts[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rLongs[i] = (Long) objectToT(shorts[i], tClass);
+                        rLongs[i] = (Long) baseTypeConvert(shorts[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rFloats[i] = (Float) objectToT(shorts[i], tClass);
+                        rFloats[i] = (Float) baseTypeConvert(shorts[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rDoubles[i] = (Double) objectToT(shorts[i], tClass);
+                        rDoubles[i] = (Double) baseTypeConvert(shorts[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rBytes[i] = (Byte) objectToT(shorts[i], tClass);
+                        rBytes[i] = (Byte) baseTypeConvert(shorts[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rChars[i] = (Character) objectToT(shorts[i], tClass);
+                        rChars[i] = (Character) baseTypeConvert(shorts[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, shorts.length);
                     for (int i = 0; i < shorts.length; i++) {
-                        rBooleans[i] = (Boolean) objectToT(shorts[i], tClass);
+                        rBooleans[i] = (Boolean) baseTypeConvert(shorts[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -951,7 +950,7 @@ public class WsBeanUtils {
         } else {
             objects = (T[]) Array.newInstance(tClass, shorts.length);
             for (int i = 0; i < shorts.length; i++) {
-                objects[i] = objectToT(shorts[i], tClass);
+                objects[i] = baseTypeConvert(shorts[i], tClass);
             }
             return objects;
         }
@@ -972,49 +971,49 @@ public class WsBeanUtils {
                 case "int":
                     int[] rInts = (int[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rInts[i] = (Integer) objectToT(ints[i], tClass);
+                        rInts[i] = (Integer) baseTypeConvert(ints[i], tClass);
                     }
                     return rInts;
                 case "short":
                     short[] rShorts = (short[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rShorts[i] = (Short) objectToT(ints[i], tClass);
+                        rShorts[i] = (Short) baseTypeConvert(ints[i], tClass);
                     }
                     return rShorts;
                 case "long":
                     long[] rLongs = (long[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rLongs[i] = (Long) objectToT(ints[i], tClass);
+                        rLongs[i] = (Long) baseTypeConvert(ints[i], tClass);
                     }
                     return rLongs;
                 case "float":
                     float[] rFloats = (float[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rFloats[i] = (Float) objectToT(ints[i], tClass);
+                        rFloats[i] = (Float) baseTypeConvert(ints[i], tClass);
                     }
                     return rFloats;
                 case "double":
                     double[] rDoubles = (double[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rDoubles[i] = (Double) objectToT(ints[i], tClass);
+                        rDoubles[i] = (Double) baseTypeConvert(ints[i], tClass);
                     }
                     return rDoubles;
                 case "byte":
                     byte[] rBytes = (byte[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rBytes[i] = (Byte) objectToT(ints[i], tClass);
+                        rBytes[i] = (Byte) baseTypeConvert(ints[i], tClass);
                     }
                     return rBytes;
                 case "char":
                     char[] rChars = (char[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rChars[i] = (Character) objectToT(ints[i], tClass);
+                        rChars[i] = (Character) baseTypeConvert(ints[i], tClass);
                     }
                     return rChars;
                 case "boolean":
                     boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, ints.length);
                     for (int i = 0; i < ints.length; i++) {
-                        rBooleans[i] = (Boolean) objectToT(ints[i], tClass);
+                        rBooleans[i] = (Boolean) baseTypeConvert(ints[i], tClass);
                     }
                     return rBooleans;
                 default:
@@ -1023,7 +1022,7 @@ public class WsBeanUtils {
         } else {
             objects = (T[]) Array.newInstance(tClass, ints.length);
             for (int i = 0; i < ints.length; i++) {
-                objects[i] = objectToT(ints[i], tClass);
+                objects[i] = baseTypeConvert(ints[i], tClass);
             }
             return objects;
         }

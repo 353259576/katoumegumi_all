@@ -69,22 +69,22 @@ public class XmlUtils {
     private static void mapToXml(Document document, Element root, Map<Object, Object> map) {
         Set<Map.Entry<Object, Object>> set = map.entrySet();
         for (Map.Entry<Object, Object> entry : set) {
-            String key = WsBeanUtils.objectToT(entry.getKey(), String.class);
+            String key = WsBeanUtils.baseTypeConvert(entry.getKey(), String.class);
             Object value = entry.getValue();
             Element field = document.createElement(key);
 
             if (WsBeanUtils.isBaseType(value.getClass())) {
-                field.appendChild(document.createTextNode(WsBeanUtils.objectToT(value, String.class)));
+                field.appendChild(document.createTextNode(WsBeanUtils.baseTypeConvert(value, String.class)));
             } else if (WsBeanUtils.isArray(value.getClass())) {
                 if (value instanceof Collection) {
                     Collection<Object> collection = (Collection<Object>) value;
                     for (Object o : collection) {
-                        field.appendChild(document.createTextNode(WsBeanUtils.objectToT(o, String.class)));
+                        field.appendChild(document.createTextNode(WsBeanUtils.baseTypeConvert(o, String.class)));
                     }
                 } else {
                     Object[] objects = (Object[]) value;
                     for (Object o : objects) {
-                        field.appendChild(document.createTextNode(WsBeanUtils.objectToT(o, String.class)));
+                        field.appendChild(document.createTextNode(WsBeanUtils.baseTypeConvert(o, String.class)));
                     }
                 }
             } else if (value instanceof Map) {

@@ -103,21 +103,21 @@ public class WsJdbcUtils {
                 if (o instanceof String) {
                     statement.setString(i + 1, WsStringUtils.anyToString(o));
                 } else if (o instanceof Integer || WsReflectUtils.classCompare(int.class, o.getClass())) {
-                    statement.setInt(i + 1, WsBeanUtils.objectToT(o, int.class));
+                    statement.setInt(i + 1, WsBeanUtils.baseTypeConvert(o, int.class));
                 } else if (o instanceof Long || WsReflectUtils.classCompare(o.getClass(), long.class)) {
-                    statement.setLong(i + 1, WsBeanUtils.objectToT(o, long.class));
+                    statement.setLong(i + 1, WsBeanUtils.baseTypeConvert(o, long.class));
                 } else if (o instanceof Short || WsReflectUtils.classCompare(o.getClass(), short.class)) {
-                    statement.setShort(i + 1, WsBeanUtils.objectToT(o, short.class));
+                    statement.setShort(i + 1, WsBeanUtils.baseTypeConvert(o, short.class));
                 } else if (o instanceof Float || WsReflectUtils.classCompare(o.getClass(), Float.class)) {
-                    statement.setFloat(i + 1, WsBeanUtils.objectToT(o, float.class));
+                    statement.setFloat(i + 1, WsBeanUtils.baseTypeConvert(o, float.class));
                 } else if (o instanceof Double || WsReflectUtils.classCompare(o.getClass(), double.class)) {
-                    statement.setDouble(i + 1, WsBeanUtils.objectToT(o, double.class));
+                    statement.setDouble(i + 1, WsBeanUtils.baseTypeConvert(o, double.class));
                 } else if (o instanceof BigDecimal) {
-                    statement.setBigDecimal(i + 1, WsBeanUtils.objectToT(o, BigDecimal.class));
+                    statement.setBigDecimal(i + 1, WsBeanUtils.baseTypeConvert(o, BigDecimal.class));
                 } else if (o instanceof Date) {
-                    statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
+                    statement.setString(i + 1, WsBeanUtils.baseTypeConvert(o, String.class));
                 } else if (o instanceof LocalDate || o instanceof LocalDateTime) {
-                    statement.setString(i + 1, WsBeanUtils.objectToT(o, String.class));
+                    statement.setString(i + 1, WsBeanUtils.baseTypeConvert(o, String.class));
                 }else {
                     statement.setObject(i+1,o);
                     //throw new RuntimeException("不支持的数据类型:" + o.getClass());
@@ -242,7 +242,7 @@ public class WsJdbcUtils {
     private <T> T querySingleColumnObject(String sql,List<Object> parameterList,Class<T> returnType){
         return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), rs -> {
             if (rs.next()) {
-                return WsBeanUtils.objectToT(rs.getObject(1), returnType);
+                return WsBeanUtils.baseTypeConvert(rs.getObject(1), returnType);
             }
             return null;
         });
@@ -382,7 +382,7 @@ public class WsJdbcUtils {
             isUseArray[index] = true;
             PropertyBaseColumnRelation propertyBaseColumnRelation = idList.get(index);
             propertyBaseColumnRelation.getBeanProperty()
-                            .setValue(t,WsBeanUtils.objectToT(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
+                            .setValue(t,WsBeanUtils.baseTypeConvert(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
         });
 
         if(WsCollectionUtils.isNotEmpty(unUseColumnNameList)){
@@ -392,7 +392,7 @@ public class WsJdbcUtils {
                     if(!isUseArray[idIndex]){
                         isUseArray[idIndex] = false;
                         PropertyBaseColumnRelation propertyBaseColumnRelation = idList.get(idIndex);
-                        propertyBaseColumnRelation.getBeanProperty().setValue(t,WsBeanUtils.objectToT(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
+                        propertyBaseColumnRelation.getBeanProperty().setValue(t,WsBeanUtils.baseTypeConvert(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
                         idIndex++;
                         break;
                     }

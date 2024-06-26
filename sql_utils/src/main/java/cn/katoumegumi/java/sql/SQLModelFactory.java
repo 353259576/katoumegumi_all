@@ -346,7 +346,7 @@ public class SQLModelFactory {
             TableColumn tableColumn = this.cacheSelectModel.getSelect().get(0);
             try {
                 while (resultSet.next()) {
-                    Object o = WsBeanUtils.objectToT(resultSet.getObject(1), tableColumn.getBeanProperty().getPropertyClass());
+                    Object o = WsBeanUtils.baseTypeConvert(resultSet.getObject(1), tableColumn.getBeanProperty().getPropertyClass());
                     if (o != null) {
                         tList.add(o);
                     }
@@ -624,7 +624,7 @@ public class SQLModelFactory {
         if (source instanceof byte[]) {
             source = new String((byte[]) source);
         }
-        source = WsBeanUtils.objectToT(source,beanPropertyModel.getPropertyClass());
+        source = WsBeanUtils.baseTypeConvert(source,beanPropertyModel.getPropertyClass());
         beanPropertyModel.setValue(target,source);
     }
 

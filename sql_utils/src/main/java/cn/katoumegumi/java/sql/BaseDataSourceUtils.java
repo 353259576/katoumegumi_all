@@ -41,7 +41,7 @@ public class BaseDataSourceUtils {
             for (int i = 0; i < objectList.size(); i++) {
                 Object o = objectList.get(i);
                 if (o instanceof Date) {
-                    o = WsBeanUtils.objectToT(o, Date.class);
+                    o = WsBeanUtils.baseTypeConvert(o, Date.class);
                 }
                 preparedStatement.setObject(i + 1, o);
             }
@@ -74,7 +74,7 @@ public class BaseDataSourceUtils {
                 int count = resultSet.getMetaData().getColumnCount();
                 if (resultSet.next()) {
                     for (int i = 0; i < count && i < idList.size(); i++) {
-                        WsReflectUtils.setValue(t, WsBeanUtils.objectToT(resultSet.getObject(i + 1), idList.get(i).getBeanProperty().getPropertyClass()), idList.get(i).getBeanProperty().getField());
+                        WsReflectUtils.setValue(t, WsBeanUtils.baseTypeConvert(resultSet.getObject(i + 1), idList.get(i).getBeanProperty().getPropertyClass()), idList.get(i).getBeanProperty().getField());
                     }
                 }
             }
