@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.sql.entity;
+package cn.katoumegumi.java.sql.model.base;
 
 import cn.katoumegumi.java.sql.mapper.model.PropertyObjectColumnJoinRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
@@ -6,6 +6,9 @@ import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * mapper字典树
+ */
 public class MapperDictTree {
 
     private boolean hasArray;

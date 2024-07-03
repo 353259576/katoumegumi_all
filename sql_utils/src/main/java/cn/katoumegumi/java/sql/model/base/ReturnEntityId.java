@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.sql.entity;
+package cn.katoumegumi.java.sql.model.base;
 
 import java.util.Arrays;
 
