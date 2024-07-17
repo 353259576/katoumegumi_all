@@ -22,4 +22,5 @@ module cn.katoumegumi.java.sql.utils {
     exports cn.katoumegumi.java.sql.model.condition;
     exports cn.katoumegumi.java.sql.mapper.factory.strategys;
     exports cn.katoumegumi.java.sql.model.base;
+    exports cn.katoumegumi.java.sql.model.query;
 }

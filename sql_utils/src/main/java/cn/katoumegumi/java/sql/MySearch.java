@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.sql.common.SqlOperator;
+import cn.katoumegumi.java.sql.model.query.QueryColumn;
+import cn.katoumegumi.java.sql.model.query.QueryElement;
 
 /**
  * 查询条件
@@ -8,20 +10,20 @@ import cn.katoumegumi.java.sql.common.SqlOperator;
  * @author ws
  */
 public class MySearch {
-    private final String fieldName;
+    private final QueryElement column;
     private final SqlOperator operator;
     private Object value;
 
 
-    public MySearch(String fieldName, SqlOperator operator, Object value) {
-        this.fieldName = fieldName;
+    public MySearch(QueryElement column, SqlOperator operator, Object value) {
+        this.column = column;
         this.operator = operator;
         this.value = value;
     }
 
 
-    public String getFieldName() {
-        return fieldName;
+    public QueryElement getColumn() {
+        return column;
     }
 
     public SqlOperator getOperator() {

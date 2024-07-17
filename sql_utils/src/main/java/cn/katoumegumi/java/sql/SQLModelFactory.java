@@ -670,10 +670,10 @@ public class SQLModelFactory {
         if (WsCollectionUtils.isNotEmpty(this.mySearchList.getOrderSearches())) {
             orderByConditionList = new ArrayList<>(this.mySearchList.getOrderSearches().size());
             for (MySearch mySearch : this.mySearchList.getOrderSearches()) {
-                if (mySearch.getFieldName().charAt(mySearch.getFieldName().length() - 1) == SqlCommonConstants.RIGHT_BRACKETS) {
-                    orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, mySearch.getFieldName()), null), (OrderByTypeEnums) mySearch.getValue()));
+                if (mySearch.getColumn().charAt(mySearch.getColumn().length() - 1) == SqlCommonConstants.RIGHT_BRACKETS) {
+                    orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, mySearch.getColumn()), null), (OrderByTypeEnums) mySearch.getValue()));
                 } else {
-                    orderByConditionList.add(new OrderByCondition(translateNameUtils.getColumnBaseEntity(mySearch.getFieldName(), rootPath, 2), (OrderByTypeEnums) mySearch.getValue()));
+                    orderByConditionList.add(new OrderByCondition(translateNameUtils.getColumnBaseEntity(mySearch.getColumn(), rootPath, 2), (OrderByTypeEnums) mySearch.getValue()));
                 }
             }
         }
@@ -1007,11 +1007,11 @@ public class SQLModelFactory {
                 case LTP:
                 case GTEP:
                 case LTEP:
-                    left = translateNameUtils.getColumnBaseEntity(search.getFieldName(), rootPath, 2);
+                    left = translateNameUtils.getColumnBaseEntity(search.getColumn(), rootPath, 2);
                     right = translateNameUtils.getColumnBaseEntity((String) search.getValue(), rootPath, 2);
                     break;
                 case SQL:
-                    left = new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, search.getFieldName()), search.getValue());
+                    left = new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, search.getColumn()), search.getValue());
                     break;
                 case EXISTS:
                 case NOT_EXISTS:
@@ -1019,7 +1019,7 @@ public class SQLModelFactory {
                         //right = search.getValue();
                         left = search.getValue();
                     } else {
-                        left = new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, search.getFieldName()), search.getValue());
+                        left = new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, search.getColumn()), search.getValue());
                     }
                     break;
                 case EQUATION:
@@ -1030,7 +1030,7 @@ public class SQLModelFactory {
                 case SUBTRACT:
                 case MULTIPLY:
                 case DIVIDE:
-                    BaseTableColumn baseTableColumn = translateNameUtils.getColumnBaseEntity(search.getFieldName(), rootPath, 2);
+                    BaseTableColumn baseTableColumn = translateNameUtils.getColumnBaseEntity(search.getColumn(), rootPath, 2);
                     MultiExpressionCondition multiExpressionCondition = new MultiExpressionCondition(5);
                     multiExpressionCondition.add(baseTableColumn)
                             .add(SqlEquation.Symbol.EQUAL);
@@ -1046,7 +1046,7 @@ public class SQLModelFactory {
                 case SET:
                     operator = SqlOperator.EQ;
                 default:
-                    left = translateNameUtils.getColumnBaseEntity(search.getFieldName(), rootPath, 2);
+                    left = translateNameUtils.getColumnBaseEntity(search.getColumn(), rootPath, 2);
                     right = search.getValue();
                     if (right == null) {
                         right = SqlCommonConstants.NULL_VALUE;

@@ -100,7 +100,7 @@ public interface SqlCommonConstants {
     /**
      * 表示空值
      */
-    NullValue NULL_VALUE = new NullValue();
+    NullValue NULL_VALUE = NullValue.getInstance();
 
     String EMPTY_STRING = "";
 
