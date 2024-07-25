@@ -530,7 +530,21 @@ public class MySearchList {
     }
 
     public MySearchList sort(String columnFieldName, Object value) {
-        return sort(null, columnFieldName, value);
+b        String[] pathAndName = WsStringUtils.splitArray(columnFieldName,'.');
+        boolean isColumn = pathAndName.length <= 1;
+        if (isColumn){
+            for (String s : pathAndName) {
+                if (!s.matches("[a-zA-Z]")) {
+                    isColumn = false;
+                    break;
+                }
+            }
+        }
+        if (isColumn){
+            return add(QueryColumn.of(pathAndName.length == 1 ?null:pathAndName[0],pathAndName[1]),SqlOperator.ORDER_BY,value);
+        }else {
+            return add(QuerySqlString.of(columnFieldName),SqlOperator.ORDER_BY,value);
+        }
     }
 
     public <T> MySearchList sort(String tableName, SFunction<T, ?> columnFieldName, Object value) {

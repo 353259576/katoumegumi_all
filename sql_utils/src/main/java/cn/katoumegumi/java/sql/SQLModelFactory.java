@@ -23,6 +23,8 @@ import cn.katoumegumi.java.sql.mapper.model.PropertyObjectColumnJoinRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 import cn.katoumegumi.java.sql.model.component.*;
 import cn.katoumegumi.java.sql.model.condition.*;
+import cn.katoumegumi.java.sql.model.query.QueryColumn;
+import cn.katoumegumi.java.sql.model.query.QuerySqlString;
 import cn.katoumegumi.java.sql.model.result.*;
 import cn.katoumegumi.java.sql.resultSet.WsResultSet;
 import org.slf4j.Logger;
@@ -670,11 +672,16 @@ public class SQLModelFactory {
         if (WsCollectionUtils.isNotEmpty(this.mySearchList.getOrderSearches())) {
             orderByConditionList = new ArrayList<>(this.mySearchList.getOrderSearches().size());
             for (MySearch mySearch : this.mySearchList.getOrderSearches()) {
-                if (mySearch.getColumn().charAt(mySearch.getColumn().length() - 1) == SqlCommonConstants.RIGHT_BRACKETS) {
+                if (mySearch.getColumn() instanceof QueryColumn){
+                    orderByConditionList.add(new OrderByCondition(translateNameUtils.getColumnBaseEntity(mySearch.getColumn(), rootPath, 2), (OrderByTypeEnums) mySearch.getValue()));
+                }else {
+                    orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, ((QuerySqlString)mySearch.getColumn()).getSql()), null), (OrderByTypeEnums) mySearch.getValue()));
+                }
+                /*if (mySearch.getColumn().charAt(mySearch.getColumn().length() - 1) == SqlCommonConstants.RIGHT_BRACKETS) {
                     orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, mySearch.getColumn()), null), (OrderByTypeEnums) mySearch.getValue()));
                 } else {
                     orderByConditionList.add(new OrderByCondition(translateNameUtils.getColumnBaseEntity(mySearch.getColumn(), rootPath, 2), (OrderByTypeEnums) mySearch.getValue()));
-                }
+                }*/
             }
         }
         SelectModel selectModel = new SelectModel(queryColumnList, from, joinTableModelList, where, orderByConditionList, this.mySearchList.getSqlLimit());

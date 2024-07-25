@@ -5,6 +5,7 @@ import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 import cn.katoumegumi.java.sql.model.component.BaseTableColumn;
+import cn.katoumegumi.java.sql.model.query.QueryColumn;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -247,7 +248,7 @@ public class TranslateNameUtils {
      * @param type              1 返回的列名 2 查询的列名
      * @return
      */
-    public BaseTableColumn getColumnBaseEntity(String originalFieldName, final String rootPath, final int type) {
+    public BaseTableColumn getColumnBaseEntity(QueryColumn column, final String rootPath, final int type) {
         String path;
         String fieldName;
         originalFieldName = translateTableNickName(rootPath, originalFieldName);
