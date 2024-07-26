@@ -8,6 +8,7 @@ import cn.katoumegumi.java.sql.MySearchList;
 import cn.katoumegumi.java.sql.common.NullValue;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.ValueTypeConstants;
+import cn.katoumegumi.java.sql.model.query.QueryColumn;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +30,7 @@ public class SqlEquation {
 
     public SqlEquation column(String columnName) {
         typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
-        valueList.add(columnName);
+        valueList.add(QueryColumn.of(columnName));
         return this;
     }
 
@@ -50,13 +51,13 @@ public class SqlEquation {
             return column(columnName);
         }
         typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
-        valueList.add(tableName + "." + columnName);
+        valueList.add(QueryColumn.of(tableName,columnName));
         return this;
     }
 
     public <T> SqlEquation column(SFunction<T, ?> columnFunction) {
         typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
-        valueList.add(WsReflectUtils.getFieldName(columnFunction));
+        valueList.add(QueryColumn.of(columnFunction));
         return this;
     }
 
@@ -65,13 +66,22 @@ public class SqlEquation {
             return column(columnFunction);
         }
         typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
-        valueList.add(tableName + "." + WsReflectUtils.getFieldName(columnFunction));
+        valueList.add(QueryColumn.of(tableName,columnFunction));
         return this;
     }
 
     public <T> SqlEquation sql(MySearchList mySearchList) {
         typeList.add(ValueTypeConstants.SEARCH_LIST_TYPE);
         valueList.add(mySearchList);
+        return this;
+    }
+
+    public <T> SqlEquation sql(String sql) {
+        if (WsStringUtils.isBlank(sql)) {
+            throw new IllegalArgumentException("sql string is null");
+        }
+        typeList.add(ValueTypeConstants.SQL_STRING_MODEL_TYPE);
+        valueList.add(new SqlStringModel(sql,null));
         return this;
     }
 

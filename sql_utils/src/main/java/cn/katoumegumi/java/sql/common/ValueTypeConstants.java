@@ -78,4 +78,9 @@ public class ValueTypeConstants {
      */
     public static final int NULL_VALUE_MODEL = 16;
 
+    /**
+     * sql 字符串
+     */
+    public static final int SQL_STRING_VALUE_MODEL = 17;
+
 }

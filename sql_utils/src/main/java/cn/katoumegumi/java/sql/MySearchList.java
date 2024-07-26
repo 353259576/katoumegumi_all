@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  */
 public class MySearchList {
 
-    private final List<String> columnNameList = new ArrayList<>();
+    private final List<QueryElement> columnNameList = new ArrayList<>();
     private final List<MySearch> orderSearches = new ArrayList<>();
     private final List<MySearchList> ands = new ArrayList<>();
     private final List<MySearchList> ors = new ArrayList<>();
@@ -133,12 +133,8 @@ public class MySearchList {
             case GTEP:
             case LTEP:
             case NEP:
-                if (!(value instanceof String)) {
+                if (!(value instanceof QueryColumn)) {
                     throw new IllegalArgumentException(column + "的参数必须为字符串类型，当前的类型是：" + value.getClass());
-                } else {
-                    if (WsStringUtils.isBlank((String) value)) {
-                        throw new NullPointerException(column + "参数不能为空");
-                    }
                 }
                 break;
             case IN:
@@ -530,7 +526,7 @@ public class MySearchList {
     }
 
     public MySearchList sort(String columnFieldName, Object value) {
-b        String[] pathAndName = WsStringUtils.splitArray(columnFieldName,'.');
+        String[] pathAndName = WsStringUtils.splitArray(columnFieldName,'.');
         boolean isColumn = pathAndName.length <= 1;
         if (isColumn){
             for (String s : pathAndName) {
@@ -1223,25 +1219,33 @@ b        String[] pathAndName = WsStringUtils.splitArray(columnFieldName,'.');
      * @return
      */
     public MySearchList singleColumnName(String columnName) {
-        this.columnNameList.add(columnName);
+        this.columnNameList.add(QueryColumn.of(columnName));
+        this.isSingleColumn = true;
+        return this;
+    }
+    public MySearchList singleColumnName(String path,String columnName) {
+        if (WsStringUtils.isBlank(path)){
+            return singleColumnName(columnName);
+        }
+        this.columnNameList.add(QueryColumn.of(path,columnName));
         this.isSingleColumn = true;
         return this;
     }
 
-    public MySearchList singleColumnName(String tableName, String fieldName) {
+    /*public MySearchList singleColumnName(String tableName, String fieldName) {
         if (WsStringUtils.isBlank(tableName)) {
             this.singleColumnName(fieldName);
         } else {
             this.singleColumnName(tableName + '.' + fieldName);
         }
         return this;
-    }
+    }*/
 
     public <T> MySearchList singleColumnName(String tableName, SFunction<T, ?> fieldName) {
         if (WsStringUtils.isBlank(tableName)) {
             this.singleColumnName(WsReflectUtils.getFieldName(fieldName));
         } else {
-            this.singleColumnName(tableName + '.' + WsReflectUtils.getFieldName(fieldName));
+            this.singleColumnName(tableName, WsReflectUtils.getFieldName(fieldName));
         }
         return this;
     }
@@ -1251,7 +1255,7 @@ b        String[] pathAndName = WsStringUtils.splitArray(columnFieldName,'.');
         return this;
     }
 
-    public List<String> getColumnNameList() {
+    public List<QueryElement> getColumnNameList() {
         return columnNameList;
     }
 

@@ -243,44 +243,75 @@ public class TranslateNameUtils {
     /**
      * 根据查询条件生成列基本信息
      *
-     * @param originalFieldName
+     * @param column
      * @param rootPath
      * @param type              1 返回的列名 2 查询的列名
      * @return
      */
     public BaseTableColumn getColumnBaseEntity(QueryColumn column, final String rootPath, final int type) {
-        String path;
-        String fieldName;
-        originalFieldName = translateTableNickName(rootPath, originalFieldName);
-        List<String> fieldNameList = WsStringUtils.split(originalFieldName, SqlCommonConstants.PATH_COMMON_DELIMITER);
-        int size = fieldNameList.size();
-        if (size == 1) {
-            fieldName = fieldNameList.get(0);
-            path = rootPath;
-        } else if (size == 2) {
-            fieldName = fieldNameList.get(1);
-            String key = getParticular(fieldNameList.get(0));
-            if (key == null) {
-                if (!startsWithMainClassName(fieldNameList.get(0))) {
-                    key = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + fieldNameList.get(0);
-                } else {
-                    key = fieldNameList.get(0);
-                }
-            } else {
-                return createColumnBaseEntity(fieldName, key, fieldNameList.get(0), type);
-            }
-            path = key;
 
-        } else {
-            fieldName = fieldNameList.get(size - 1);
-            fieldNameList.remove(size - 1);
-            if (startsWithMainClassName(fieldNameList.get(0))) {
-                path = String.join(".", fieldNameList);
-            } else {
-                path = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + String.join(".", fieldNameList);
-            }
+        if (WsStringUtils.isBlank(column.getPath())){
+            return createColumnBaseEntity(column.getName(), rootPath, type);
         }
-        return createColumnBaseEntity(fieldName, path, type);
+
+        String originalPathName = translateTableNickName(rootPath,column.getPath());
+        List<String> pathNameList = WsStringUtils.split(originalPathName, SqlCommonConstants.PATH_COMMON_DELIMITER);
+        if (pathNameList.size() == 1){
+            String pathName = pathNameList.get(0);
+            String completePath = getParticular(pathName);
+            if (completePath == null) {
+                if (!startsWithMainClassName(pathName)) {
+                    completePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + pathName;
+                } else {
+                    completePath = pathName;
+                }
+                return createColumnBaseEntity(column.getName(),completePath,type);
+            } else {
+                return createColumnBaseEntity(column.getName(), completePath, pathName, type);
+            }
+        }else {
+            String completePath;
+            if (startsWithMainClassName(pathNameList.get(0))) {
+                completePath = String.join(".", pathNameList);
+            } else {
+                completePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + String.join(".", pathNameList);
+            }
+            return createColumnBaseEntity(column.getName(),completePath,type);
+        }
+        
+        
+//        String path;
+//        String fieldName;
+//        originalFieldName = translateTableNickName(rootPath, originalFieldName);
+//        List<String> fieldNameList = WsStringUtils.split(originalFieldName, SqlCommonConstants.PATH_COMMON_DELIMITER);
+//        int size = fieldNameList.size();
+//        if (size == 1) {
+//            fieldName = fieldNameList.get(0);
+//            path = rootPath;
+//        } else if (size == 2) {
+//            fieldName = fieldNameList.get(1);
+//            String key = getParticular(fieldNameList.get(0));
+//            if (key == null) {
+//                if (!startsWithMainClassName(fieldNameList.get(0))) {
+//                    key = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + fieldNameList.get(0);
+//                } else {
+//                    key = fieldNameList.get(0);
+//                }
+//            } else {
+//                return createColumnBaseEntity(fieldName, key, fieldNameList.get(0), type);
+//            }
+//            path = key;
+//
+//        } else {
+//            fieldName = fieldNameList.get(size - 1);
+//            fieldNameList.remove(size - 1);
+//            if (startsWithMainClassName(fieldNameList.get(0))) {
+//                path = String.join(".", fieldNameList);
+//            } else {
+//                path = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + String.join(".", fieldNameList);
+//            }
+//        }
+//        return createColumnBaseEntity(fieldName, path, type);
     }
 
 
