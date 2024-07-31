@@ -1,7 +1,6 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.sql.common.SqlOperator;
-import cn.katoumegumi.java.sql.model.query.QueryColumn;
 import cn.katoumegumi.java.sql.model.query.QueryElement;
 
 /**

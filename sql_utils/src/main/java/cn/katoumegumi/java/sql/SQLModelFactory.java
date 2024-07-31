@@ -678,11 +678,6 @@ public class SQLModelFactory {
                 }else {
                     orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, ((QuerySqlString)mySearch.getColumn()).getSql()), null), (OrderByTypeEnums) mySearch.getValue()));
                 }
-                /*if (mySearch.getColumn().charAt(mySearch.getColumn().length() - 1) == SqlCommonConstants.RIGHT_BRACKETS) {
-                    orderByConditionList.add(new OrderByCondition(new SqlStringModel(translateNameUtils.translateTableNickName(rootPath, mySearch.getColumn()), null), (OrderByTypeEnums) mySearch.getValue()));
-                } else {
-                    orderByConditionList.add(new OrderByCondition(translateNameUtils.getColumnBaseEntity(mySearch.getColumn(), rootPath, 2), (OrderByTypeEnums) mySearch.getValue()));
-                }*/
             }
         }
         SelectModel selectModel = new SelectModel(queryColumnList, from, joinTableModelList, where, orderByConditionList, this.mySearchList.getSqlLimit());
