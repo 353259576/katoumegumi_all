@@ -39,7 +39,7 @@ public class TranslateNameUtils {
     /**
      * 本地对象与表的对应关系
      */
-    private final Map<String, PropertyColumnRelationMapper> localMapperMap;
+    private final Map<String, PropertyColumnRelationMapper> pathMapperMap;
 
     //private final Map<String,ColumnBaseEntity> columnBaseEntityCacheMap = new HashMap<>();
 
@@ -49,13 +49,13 @@ public class TranslateNameUtils {
         this.abbreviationMap = new HashMap<>();
         this.particularMap = new HashMap<>();
         this.abbreviationNum = new AtomicInteger();
-        this.localMapperMap = new HashMap<>();
+        this.pathMapperMap = new HashMap<>();
     }
 
     public TranslateNameUtils(TranslateNameUtils translateNameUtils) {
         this.parent = translateNameUtils;
         this.abbreviationNum = translateNameUtils.abbreviationNum;
-        this.localMapperMap = new HashMap<>();
+        this.pathMapperMap = new HashMap<>();
         this.mainClassNameList = new ArrayList<>();
         this.abbreviationMap = new HashMap<>();
         this.particularMap = new HashMap<>();
@@ -177,9 +177,9 @@ public class TranslateNameUtils {
      */
     public PropertyColumnRelationMapper getLocalMapper(String locationName) {
         TranslateNameUtils parent = this.parent;
-        PropertyColumnRelationMapper mapper = localMapperMap.get(locationName);
+        PropertyColumnRelationMapper mapper = pathMapperMap.get(locationName);
         while (mapper == null && parent != null) {
-            mapper = parent.localMapperMap.get(locationName);
+            mapper = parent.pathMapperMap.get(locationName);
             parent = parent.parent;
         }
         return mapper;
@@ -189,15 +189,15 @@ public class TranslateNameUtils {
     /**
      * 添加本地缓存的mapper
      *
-     * @param locationName
+     * @param path
      * @param mapper
      */
-    public void addLocalMapper(String locationName, PropertyColumnRelationMapper mapper) {
-        localMapperMap.put(locationName, mapper);
+    public void addLocalMapper(String path, PropertyColumnRelationMapper mapper) {
+        pathMapperMap.put(path, mapper);
     }
 
     public int locationMapperSize() {
-        return localMapperMap.size();
+        return pathMapperMap.size();
     }
 
     public void addMainClassName(String mainClassName) {
