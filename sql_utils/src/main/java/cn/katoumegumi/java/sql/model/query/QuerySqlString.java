@@ -7,7 +7,7 @@ public class QuerySqlString implements QueryElement{
     private String sql;
 
     private QuerySqlString(String sql){
-
+        this.sql = sql;
     }
 
     public static QuerySqlString of(String sql){
