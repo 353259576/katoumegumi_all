@@ -1029,8 +1029,8 @@ public class MySearchList {
     public <T> MySearchList join(String tableNickName, Class<?> joinTableClass, String joinTableNickName, String tableColumn, String joinColumn, TableJoinType joinType) {
         TableRelation tableRelation = new TableRelation();
         tableRelation.setJoinEntityClass(joinTableClass);
-        tableRelation.setTableNickName(tableNickName);
-        tableRelation.setJoinTableNickName(joinTableNickName);
+        tableRelation.setMainEntityPath(tableNickName);
+        tableRelation.setJoinEntityPath(joinTableNickName);
         tableRelation.setTableColumn(tableColumn);
         tableRelation.setJoinTableColumn(joinColumn);
         tableRelation.setJoinType(joinType);
@@ -1106,7 +1106,7 @@ public class MySearchList {
         TableRelation tableRelation = new TableRelation(this);
         tableRelation.setJoinType(TableJoinType.INNER_JOIN);
         tableRelation.setJoinEntityClass(tClass);
-        tableRelation.setJoinTableNickName(tClass.getSimpleName());
+        tableRelation.setJoinEntityPath(tClass.getSimpleName());
         return tableRelation;
     }
 
@@ -1120,7 +1120,7 @@ public class MySearchList {
         TableRelation tableRelation = new TableRelation(this);
         tableRelation.setJoinType(TableJoinType.LEFT_JOIN);
         tableRelation.setJoinEntityClass(tClass);
-        tableRelation.setJoinTableNickName(tClass.getSimpleName());
+        tableRelation.setJoinEntityPath(tClass.getSimpleName());
         return tableRelation;
     }
 
@@ -1134,7 +1134,7 @@ public class MySearchList {
         TableRelation tableRelation = new TableRelation(this);
         tableRelation.setJoinType(TableJoinType.RIGHT_JOIN);
         tableRelation.setJoinEntityClass(tClass);
-        tableRelation.setJoinTableNickName(tClass.getSimpleName());
+        tableRelation.setJoinEntityPath(tClass.getSimpleName());
         return tableRelation;
     }
 
@@ -1148,8 +1148,8 @@ public class MySearchList {
         TableRelation tableRelation = new TableRelation(this);
         tableRelation.setJoinEntityClass(tClass);
         consumer.accept(tableRelation);
-        if (WsStringUtils.isBlank(tableRelation.getJoinTableNickName())) {
-            tableRelation.setJoinTableNickName(tableRelation.getJoinEntityClass().getSimpleName());
+        if (WsStringUtils.isBlank(tableRelation.getJoinEntityPath())) {
+            tableRelation.setJoinEntityPath(tableRelation.getJoinEntityClass().getSimpleName());
         }
         joins.add(tableRelation);
         return tableRelation;

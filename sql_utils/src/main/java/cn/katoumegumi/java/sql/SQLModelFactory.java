@@ -814,11 +814,11 @@ public class SQLModelFactory {
         if (!ignoreDefaultJoinTable) {
             final Map<String, TableRelation> tableRelationMap = new HashMap<>();
             for (TableRelation tableRelation : tableRelationList) {
-                if (tableRelation.getTableNickName() == null) {
-                    tableRelationMap.put(translateNameUtils.getCurrentAbbreviation(rootPath) + SqlCommonConstants.KEY_COMMON_DELIMITER + translateNameUtils.getAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath, tableRelation.getJoinTableNickName())), tableRelation);
+                if (tableRelation.getMainEntityPath() == null) {
+                    tableRelationMap.put(translateNameUtils.getCurrentAbbreviation(rootPath) + SqlCommonConstants.KEY_COMMON_DELIMITER + translateNameUtils.getAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath, tableRelation.getJoinEntityPath())), tableRelation);
                 } else {
 
-                    tableRelationMap.put(translateNameUtils.getCurrentAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath, tableRelation.getTableNickName())) + SqlCommonConstants.KEY_COMMON_DELIMITER + translateNameUtils.getAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath, tableRelation.getJoinTableNickName())), tableRelation);
+                    tableRelationMap.put(translateNameUtils.getCurrentAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath, tableRelation.getMainEntityPath())) + SqlCommonConstants.KEY_COMMON_DELIMITER + translateNameUtils.getAbbreviation(translateNameUtils.getCompleteTableNickName(rootPath, tableRelation.getJoinEntityPath())), tableRelation);
                 }
             }
             final Queue<KeyValue<String, PropertyObjectColumnJoinRelation>> queue = new ArrayDeque<>();
@@ -877,11 +877,11 @@ public class SQLModelFactory {
         for (TableRelation tableRelation : tableRelationList) {
             JoinTableModel joinTableModel = usedRelationMap.get(tableRelation);
             if (joinTableModel == null) {
-                String path = tableRelation.getTableNickName() == null ? rootPath : rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableRelation.getTableNickName();
-                String joinPath = tableRelation.getJoinTableNickName() == null ? rootPath : rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableRelation.getJoinTableNickName();
+                String path = tableRelation.getMainEntityPath() == null ? rootPath : rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableRelation.getMainEntityPath();
+                String joinPath = tableRelation.getJoinEntityPath() == null ? rootPath : rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableRelation.getJoinEntityPath();
                 PropertyColumnRelationMapper joinMapper = analysisClassRelation(tableRelation.getJoinEntityClass());
                 translateNameUtils.addLocalMapper(joinPath, joinMapper);
-                PropertyColumnRelationMapper mapper = tableRelation.getTableNickName() == null ? mainMapper : translateNameUtils.getLocalMapper(path);
+                PropertyColumnRelationMapper mapper = tableRelation.getMainEntityPath() == null ? mainMapper : translateNameUtils.getLocalMapper(path);
                 List<Condition> conditionModelList = new ArrayList<>();
                 conditionModelList.add(new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(tableRelation.getTableColumn(), path, 2), SqlEquation.Symbol.EQUAL, translateNameUtils.createColumnBaseEntity(tableRelation.getJoinTableColumn(), joinPath, 2)));
                 List<Condition> selectInterceptorConditionList = getWhereConditionSqlInterceptorConditionList(joinPath, joinMapper);
