@@ -83,13 +83,14 @@ public class TableRelation {
         return this;
     }
 
+    @Deprecated
     public String getTableNickName() {
-        return mainEntityPath;
+        return getMainEntityPath();
     }
 
+    @Deprecated
     public TableRelation setTableNickName(String mainEntityPath) {
-        this.mainEntityPath = mainEntityPath;
-        return this;
+        return setMainEntityPath(mainEntityPath);
     }
 
     public String getTableColumn() {
@@ -101,28 +102,53 @@ public class TableRelation {
         return this;
     }
 
-
+    @Deprecated
     public String getJoinTableNickName() {
+        return getJoinEntityPath();
+    }
+
+    @Deprecated
+    public TableRelation setJoinTableNickName(String joinEntityPath) {
+        return setJoinEntityPath(joinEntityPath);
+    }
+
+    @Deprecated
+    public <T> TableRelation setJoinTableNickName(SFunction<T, ?> joinEntityPath) {
+        return setJoinEntityPath(joinEntityPath);
+    }
+
+    @Deprecated
+    public <T> TableRelation setJoinTableNickName(String mainEntityPath, SFunction<T, ?> joinEntityPath) {
+        return setJoinEntityPath(mainEntityPath, joinEntityPath);
+    }
+
+    public String getMainEntityPath() {
+        return mainEntityPath;
+    }
+
+    public TableRelation setMainEntityPath(String mainEntityPath) {
+        this.mainEntityPath = mainEntityPath;
+        return this;
+    }
+
+    public String getJoinEntityPath() {
         return joinEntityPath;
     }
 
-    public TableRelation setJoinTableNickName(String joinEntityPath) {
+    public TableRelation setJoinEntityPath(String joinEntityPath) {
         this.joinEntityPath = joinEntityPath;
         return this;
     }
 
-    public <T> TableRelation setJoinTableNickName(SFunction<T, ?> joinEntityPath) {
-        this.joinEntityPath = WsReflectUtils.getFieldName(joinEntityPath);
-        return this;
+    public <T> TableRelation setJoinEntityPath(SFunction<T, ?> joinEntityPath) {
+        return setJoinEntityPath(WsReflectUtils.getFieldName(joinEntityPath));
     }
 
-    public <T> TableRelation setJoinTableNickName(String mainEntityPath, SFunction<T, ?> joinEntityPath) {
+    public <T> TableRelation setJoinEntityPath(String mainEntityPath, SFunction<T, ?> joinEntityPath) {
         if (WsStringUtils.isBlank(mainEntityPath)) {
-            this.joinEntityPath = WsReflectUtils.getFieldName(joinEntityPath);
-        } else {
-            this.joinEntityPath = mainEntityPath + '.' + WsReflectUtils.getFieldName(joinEntityPath);
+            return setJoinEntityPath(joinEntityPath);
         }
-        return this;
+        return setJoinEntityPath(mainEntityPath + '.' + WsReflectUtils.getFieldName(joinEntityPath));
     }
 
     public String getJoinTableColumn() {
