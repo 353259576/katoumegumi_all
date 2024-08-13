@@ -83,15 +83,6 @@ public class TableRelation {
         return this;
     }
 
-    @Deprecated
-    public String getTableNickName() {
-        return getMainEntityPath();
-    }
-
-    @Deprecated
-    public TableRelation setTableNickName(String mainEntityPath) {
-        return setMainEntityPath(mainEntityPath);
-    }
 
     public String getTableColumn() {
         return mainEntityPropertyName;
@@ -102,25 +93,6 @@ public class TableRelation {
         return this;
     }
 
-    @Deprecated
-    public String getJoinTableNickName() {
-        return getJoinEntityPath();
-    }
-
-    @Deprecated
-    public TableRelation setJoinTableNickName(String joinEntityPath) {
-        return setJoinEntityPath(joinEntityPath);
-    }
-
-    @Deprecated
-    public <T> TableRelation setJoinTableNickName(SFunction<T, ?> joinEntityPath) {
-        return setJoinEntityPath(joinEntityPath);
-    }
-
-    @Deprecated
-    public <T> TableRelation setJoinTableNickName(String mainEntityPath, SFunction<T, ?> joinEntityPath) {
-        return setJoinEntityPath(mainEntityPath, joinEntityPath);
-    }
 
     public String getMainEntityPath() {
         return mainEntityPath;
@@ -166,11 +138,21 @@ public class TableRelation {
         return this;
     }
 
+    public TableRelation on(String mainEntityPropertyName, String joinEntityPropertyName, Consumer<MySearchList> searchList) {
+        on(mainEntityPropertyName, joinEntityPropertyName);
+        return condition(searchList);
+    }
+
 
     public <T, R> TableRelation on(SFunction<T, ?> mainEntityPropertyName, SFunction<R, ?> joinEntityPropertyName) {
         this.mainEntityPropertyName = WsReflectUtils.getFieldName(mainEntityPropertyName);
         this.joinEntityPropertyName = WsReflectUtils.getFieldName(joinEntityPropertyName);
         return this;
+    }
+
+    public <T, R> TableRelation on(SFunction<T, ?> mainEntityPropertyName, SFunction<R, ?> joinEntityPropertyName, Consumer<MySearchList> searchList) {
+        on(mainEntityPropertyName, joinEntityPropertyName);
+        return condition(searchList);
     }
 
     public String getAlias() {
@@ -192,14 +174,40 @@ public class TableRelation {
     }
 
     public TableRelation condition(Consumer<MySearchList> searchList) {
-        MySearchList mySearchList;
         if (this.conditionSearchList == null) {
-            mySearchList = MySearchList.create();
-        } else {
-            mySearchList = this.conditionSearchList;
+            this.conditionSearchList = MySearchList.create();
         }
         searchList.accept(mySearchList);
-        this.conditionSearchList = mySearchList;
         return this;
+    }
+
+    @Deprecated
+    public String getTableNickName() {
+        return getMainEntityPath();
+    }
+
+    @Deprecated
+    public TableRelation setTableNickName(String mainEntityPath) {
+        return setMainEntityPath(mainEntityPath);
+    }
+
+    @Deprecated
+    public String getJoinTableNickName() {
+        return getJoinEntityPath();
+    }
+
+    @Deprecated
+    public TableRelation setJoinTableNickName(String joinEntityPath) {
+        return setJoinEntityPath(joinEntityPath);
+    }
+
+    @Deprecated
+    public <T> TableRelation setJoinTableNickName(SFunction<T, ?> joinEntityPath) {
+        return setJoinEntityPath(joinEntityPath);
+    }
+
+    @Deprecated
+    public <T> TableRelation setJoinTableNickName(String mainEntityPath, SFunction<T, ?> joinEntityPath) {
+        return setJoinEntityPath(mainEntityPath, joinEntityPath);
     }
 }

@@ -94,34 +94,34 @@ public class SQLModelFactory {
         } else {
             translateNameUtils.setAbbreviation(mapper.getNickName(), mySearchList.getAlias());
         }
-        String prefix = mapper.getNickName();
-        translateNameUtils.addMainClassName(prefix);
-        String tableName;
-        String joinTableName;
+        String rootPath = mapper.getNickName();
+        translateNameUtils.addMainClassName(rootPath);
+        String mainEntityPath;
+        String joinEntityPath;
         for (TableRelation relation : mySearchList.getJoins()) {
-            tableName = relation.getTableNickName();
-            if (WsStringUtils.isNotBlank(tableName)) {
-                tableName = translateNameUtils.translateToTableName(tableName);
-                if (tableName.startsWith(prefix)) {
-                    if (tableName.length() == prefix.length()) {
-                        tableName = null;
+            mainEntityPath = relation.getMainEntityPath();
+            if (WsStringUtils.isNotBlank(mainEntityPath)) {
+                mainEntityPath = translateNameUtils.translateToTableName(mainEntityPath);
+                if (mainEntityPath.startsWith(rootPath)) {
+                    if (mainEntityPath.length() == rootPath.length()) {
+                        mainEntityPath = null;
                     } else {
-                        tableName = tableName.substring(prefix.length() + 1);
+                        mainEntityPath = mainEntityPath.substring(rootPath.length() + 1);
                     }
                 }
             } else {
-                tableName = null;
+                mainEntityPath = null;
             }
-            relation.setTableNickName(tableName);
-            if (WsStringUtils.isNotBlank(relation.getJoinTableNickName())) {
-                joinTableName = translateNameUtils.translateToTableName(relation.getJoinTableNickName());
-                joinTableName = translateNameUtils.getNoPrefixTableName(joinTableName);
-                relation.setJoinTableNickName(joinTableName);
-                joinTableName = prefix + '.' + joinTableName;
+            relation.setMainEntityPath(mainEntityPath);
+            if (WsStringUtils.isNotBlank(relation.getJoinEntityPath())) {
+                joinEntityPath = translateNameUtils.translateToTableName(relation.getJoinEntityPath());
+                joinEntityPath = translateNameUtils.getNoPrefixTableName(joinEntityPath);
+                relation.setJoinEntityPath(joinEntityPath);
+                joinEntityPath = rootPath + '.' + joinEntityPath;
                 if (WsStringUtils.isBlank(relation.getAlias())) {
-                    relation.setAlias(translateNameUtils.createAbbreviation(joinTableName));
+                    relation.setAlias(translateNameUtils.createAbbreviation(joinEntityPath));
                 }
-                translateNameUtils.setAbbreviation(joinTableName, relation.getAlias());
+                translateNameUtils.setAbbreviation(joinEntityPath, relation.getAlias());
             }
 
         }
