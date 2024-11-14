@@ -3,6 +3,7 @@ package cn.katoumegumi.java.sql.model.query;
 import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
+import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 
 import java.util.Objects;
 
@@ -28,7 +29,12 @@ public class QueryColumn implements QueryElement {
             throw new IllegalArgumentException("columnName is null or empty");
         }
         if (WsStringUtils.isBlank(path)){
-            return new QueryColumn(null,name);
+            int index = name.lastIndexOf(SqlCommonConstants.PATH_COMMON_DELIMITER_STR);
+            if (index == -1){
+                return new QueryColumn(null,name);
+            }
+            path = name.substring(0, index);
+            name = name.substring(index+1);
         }
         return new QueryColumn(path, name);
     }

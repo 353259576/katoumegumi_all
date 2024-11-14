@@ -749,7 +749,7 @@ public class SQLModelFactory {
         }
         final  PropertyColumnRelationMapper mainMapper = analysisClassRelation(t.getClass());
         if (mainMapper.getIds().isEmpty()){
-            throw new IllegalArgumentException("No primary key");
+            throw new IllegalArgumentException("no primary key");
         }
         TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
         final String rootPath = mainMapper.getNickName();

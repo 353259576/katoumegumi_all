@@ -526,18 +526,23 @@ public class MySearchList {
     }
 
     public MySearchList sort(String columnFieldName, Object value) {
+        if (WsStringUtils.isBlank(columnFieldName)) {
+            throw new IllegalArgumentException("columnFieldName is null or empty");
+        }
         String[] pathAndName = WsStringUtils.splitArray(columnFieldName,'.');
-        boolean isColumn = pathAndName.length <= 1;
-        if (isColumn){
-            for (String s : pathAndName) {
-                if (!s.matches("[a-zA-Z]")) {
-                    isColumn = false;
-                    break;
-                }
+        boolean isColumn = true;
+        for (String s : pathAndName) {
+            if (!s.matches("^[A-Za-z0-9]+$")) {
+                isColumn = false;
+                break;
             }
         }
         if (isColumn){
-            return add(QueryColumn.of(pathAndName.length == 1 ?null:pathAndName[0],pathAndName[1]),SqlOperator.ORDER_BY,value);
+            if (pathAndName.length <= 1) {
+                return add(QueryColumn.of(null,pathAndName[0]),SqlOperator.ORDER_BY,value);
+            }else {
+                return add(QueryColumn.of(pathAndName[0],pathAndName[1]),SqlOperator.ORDER_BY,value);
+            }
         }else {
             return add(QuerySqlString.of(columnFieldName),SqlOperator.ORDER_BY,value);
         }

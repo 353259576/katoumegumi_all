@@ -11,9 +11,12 @@ import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.model.result.SelectModel;
 import cn.katoumegumi.java.sql.model.result.UpdateModel;
+import cn.katoumegumi.java.sql.test.model.LUser;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
+import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
 import com.google.gson.Gson;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
@@ -22,6 +25,10 @@ import java.util.*;
 public class Test {
 
     public static void main(String[] args) throws NoSuchMethodException, IllegalAccessException {
+        DataSource dataSource = getDataSource();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        WsJdbcUtils wsJdbcUtils = new WsJdbcUtils();
+        wsJdbcUtils.setJdbcTemplate(jdbcTemplate);
 
         /*User user = new User();
 
@@ -124,12 +131,21 @@ public class Test {
         System.out.println(beanModel.toString());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(MySearchList.create(User.class)
                 .setAlias("u")
-                .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
+                .leftJoin(UserDetails.class,t->t.setJoinEntityPath(User::getUserDetails).on(User::getId,UserDetails::getUserId))
+                .leftJoin(UserDetails.class,t->t.setJoinEntityPath("ud").setAlias("ud").on(User::getId,UserDetails::getUserId))
                 .gtep("u",User::getName,"u",User::getName)
+                .eq(User::getName,"测试")
+                .eq("ud",UserDetails::getNickName,"测试")
+                .eqp("u.name","u.name")
+                .sqlEquation(sqlEquation -> sqlEquation.column(User::getName)
+                        .equal().column(User::getPassword))
                 .sort(User::getId,"asc"));
         SelectModel selectModel = sqlModelFactory.createSelectModel();
         SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(selectModel);
         System.out.println(selectSqlEntity.getSelectSql());
+
+        System.out.println("productId".matches("^[A-Za-z0-9]+$"));
+        System.out.println("productId()".matches("^[A-Za-z0-9]+$"));
 
         /*User user = new User()
                 .setId(1L)
@@ -141,8 +157,19 @@ public class Test {
         UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(updateModel);
         System.out.println(updateSqlEntity.getUpdateSql());*/
 
-        System.out.println(WsBeanUtils.convertBean(1,String.class));
+        //System.out.println(WsBeanUtils.convertBean(1,String.class));
 
+        //test();
+
+
+        LUser lUser = new LUser();
+        lUser.setName("你好世界")
+                .setId2(4L)
+                .setAge(10)
+                .setSex(1)
+                .setPassword("123456")
+                .setStatus(1);
+        wsJdbcUtils.insert(List.of(lUser));
     }
 
 
@@ -229,7 +256,7 @@ public class Test {
                     for (int i = 0; i < 10; i++){
                         List<User> userList = dataSourceUtils.selectList(
                                 MySearchList.create(User.class)
-                                        .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))
+                                        .leftJoin(UserDetails.class,t->t.setJoinEntityPath(User::getUserDetails).on(User::getId,UserDetails::getUserId))
                         );
                     }
                 }
@@ -271,8 +298,8 @@ public class Test {
         MySearchList mySearchList = MySearchList.create(User.class)
                 .setSqlLimit(sqlLimit -> sqlLimit.setCurrent(5).setSize(10))
                 .setAlias("u")
-                .leftJoin(UserDetails.class,t->t.setJoinTableNickName("ud1").on(User::getId,UserDetails::getUserId).condition(m->m.eq("ud1",UserDetails::getId,1)))
-                .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).setAlias("ud").on(User::getId,UserDetails::getUserId));
+                .leftJoin(UserDetails.class,t->t.setJoinEntityPath("ud1").on(User::getId,UserDetails::getUserId).condition(m->m.eq("ud1",UserDetails::getId,1)))
+                .leftJoin(UserDetails.class,t->t.setJoinEntityPath(User::getUserDetails).setAlias("ud").on(User::getId,UserDetails::getUserId));
         mySearchList.eq(User::getName,"你好世界");
         mySearchList.eq("ud",UserDetails::getNickName,"你好世界2");
         mySearchList.eqp("ud",UserDetails::getNickName,"u",User::getName);
@@ -361,9 +388,9 @@ public class Test {
 
 
     public static DataSource getDataSource(){
-        String url = "jdbc:mysql://192.168.149.5:3306/wslx?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true";
+        String url = "jdbc:mysql://192.168.3.18:3306/lx?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true";
         String userName = "root";
-        String password = "199645";
+        String password = "123456";
         String driverClassName = "com.mysql.cj.jdbc.Driver";
         String dataBaseName = "root";
         return HikariCPDataSourceFactory.getDataSource(url,userName,password,driverClassName);

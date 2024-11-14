@@ -1,7 +1,6 @@
 package cn.katoumegumi.java.starter.jdbc.datasource;
 
 import cn.katoumegumi.java.starter.jdbc.properties.DruidDataSourceProperties;
-//import io.seata.rm.datasource.DataSourceProxy;
 import com.alibaba.druid.pool.DruidDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

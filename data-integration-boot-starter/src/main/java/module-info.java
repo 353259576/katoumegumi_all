@@ -1,4 +1,6 @@
 module cn.katoumegumi.java.data.integration.boot.starter {
+    requires java.naming;
+    requires java.management;
     requires java.sql;
     requires druid;
     //requires seata.all;

@@ -24,6 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -50,6 +51,9 @@ public class WsJdbcUtils {
         if(t == null){
             throw new IllegalArgumentException("insert Object is null");
         }
+        if (WsReflectUtils.isArrayType(t.getClass())) {
+            throw new RuntimeException("insert Object is array");
+        }
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         InsertSqlEntity insertSqlEntity = sqlModelFactory.createInsertSqlEntity(t);
@@ -59,9 +63,7 @@ public class WsJdbcUtils {
         Map<String, Object> keyMap = keyHolder.getKeys();
         if (WsCollectionUtils.isNotEmpty(keyMap)) {
             List<PropertyBaseColumnRelation> idList = insertSqlEntity.getIdList();
-            boolean[] isUseArray = new boolean[idList.size()];
-            Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
-            setGeneratedKey(t,keyMap,idList,isUseArray,fieldNameAndIndexMap);
+            setGeneratedKey(t,keyMap,idList);
         }
         return row;
     }
@@ -79,10 +81,8 @@ public class WsJdbcUtils {
         List<Map<String, Object>> keyMapList = keyHolder.getKeyList();
         if(WsCollectionUtils.isNotEmpty(keyMapList)){
             List<PropertyBaseColumnRelation> idList = insertSqlEntity.getIdList();
-            boolean[] isUseArray = new boolean[idList.size()];
-            Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
             for (int i = 0; i < keyMapList.size(); i++){
-                setGeneratedKey(tList.get(i),keyMapList.get(i),idList,isUseArray,fieldNameAndIndexMap);
+                setGeneratedKey(tList.get(i),keyMapList.get(i),idList);
             }
         }
         return row;
@@ -367,37 +367,41 @@ public class WsJdbcUtils {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private <T> void setGeneratedKey(T t, Map<String,Object> keyMap, List<PropertyBaseColumnRelation> idList, boolean[] isUseArray, Map<String, Integer> fieldNameAndIndexMap){
+    private <T> void setGeneratedKey(T t, Map<String,Object> keyMap, List<PropertyBaseColumnRelation> idList){
+        boolean[] isUseArray = new boolean[idList.size()];
+        Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
         for (int i = 0; i < idList.size(); i++){
-            isUseArray[i] = false;
             fieldNameAndIndexMap.put(idList.get(i).getColumnName(),i);
         }
-        List<String> unUseColumnNameList = new ArrayList<>();
-        keyMap.forEach((columnName,value)->{
+        List<String> unUseColumnNameList = new ArrayList<>(keyMap.size());
+        for (Map.Entry<String, Object> stringObjectEntry : keyMap.entrySet()) {
+            String columnName = stringObjectEntry.getKey();
             Integer index = fieldNameAndIndexMap.get(columnName);
             if(index == null){
                 unUseColumnNameList.add(columnName);
-                return;
+                continue;
             }
             isUseArray[index] = true;
             PropertyBaseColumnRelation propertyBaseColumnRelation = idList.get(index);
             propertyBaseColumnRelation.getBeanProperty()
-                            .setValue(t,WsBeanUtils.baseTypeConvert(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
-        });
+                    .setValue(t,WsBeanUtils.baseTypeConvert(stringObjectEntry.getValue(), propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
+        }
+        if (CollectionUtils.isEmpty(unUseColumnNameList)) {
+            return;
+        }
 
-        if(WsCollectionUtils.isNotEmpty(unUseColumnNameList)){
-            for (int idIndex = 0,unUseIndex = 0; idIndex < isUseArray.length && unUseIndex < unUseColumnNameList.size();unUseIndex++){
-                Object value = keyMap.get(unUseColumnNameList.get(unUseIndex));
-                while (idIndex < isUseArray.length){
-                    if(!isUseArray[idIndex]){
-                        isUseArray[idIndex] = false;
-                        PropertyBaseColumnRelation propertyBaseColumnRelation = idList.get(idIndex);
-                        propertyBaseColumnRelation.getBeanProperty().setValue(t,WsBeanUtils.baseTypeConvert(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
-                        idIndex++;
-                        break;
-                    }
+        for (int idIndex = 0,unUseIndex = 0; idIndex < isUseArray.length && unUseIndex < unUseColumnNameList.size();unUseIndex++){
+            Object value = keyMap.get(unUseColumnNameList.get(unUseIndex));
+            while (idIndex < isUseArray.length){
+                if (isUseArray[idIndex]){
                     idIndex++;
+                    continue;
                 }
+                isUseArray[idIndex] = false;
+                PropertyBaseColumnRelation propertyBaseColumnRelation = idList.get(idIndex);
+                propertyBaseColumnRelation.getBeanProperty().setValue(t,WsBeanUtils.baseTypeConvert(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
+                idIndex++;
+                break;
             }
         }
     }

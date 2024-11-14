@@ -90,6 +90,8 @@ public interface SqlCommonConstants {
 
     char PATH_COMMON_DELIMITER = '.';
 
+    String PATH_COMMON_DELIMITER_STR = ".";
+
     char SQL_COMMON_DELIMITER = '.';
 
     /**

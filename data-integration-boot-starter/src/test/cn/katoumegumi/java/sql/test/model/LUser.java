@@ -1,14 +1,16 @@
 package cn.katoumegumi.java.sql.test.model;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
+
 
 @Table(name = "l_user")
 public class LUser {
 
     @Id
     private Long id;
+
+    @Id
+    private Long id2;
 
     @Column
     private String name;
@@ -25,13 +27,21 @@ public class LUser {
     @Column
     private Integer age;
 
-
     public Long getId() {
         return id;
     }
 
     public LUser setId(Long id) {
         this.id = id;
+        return this;
+    }
+
+    public Long getId2() {
+        return id2;
+    }
+
+    public LUser setId2(Long id2) {
+        this.id2 = id2;
         return this;
     }
 

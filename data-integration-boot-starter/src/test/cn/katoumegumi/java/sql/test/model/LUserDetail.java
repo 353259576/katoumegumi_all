@@ -1,8 +1,6 @@
 package cn.katoumegumi.java.sql.test.model;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
 
 @Table(name = "l_user_detail")
 public class LUserDetail {

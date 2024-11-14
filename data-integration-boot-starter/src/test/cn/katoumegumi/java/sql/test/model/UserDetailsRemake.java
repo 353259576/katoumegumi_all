@@ -1,7 +1,7 @@
 package cn.katoumegumi.java.sql.test.model;
 
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * @author ws
