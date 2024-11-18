@@ -177,7 +177,7 @@ public class TableRelation {
         if (this.conditionSearchList == null) {
             this.conditionSearchList = MySearchList.create();
         }
-        searchList.accept(mySearchList);
+        searchList.accept(conditionSearchList);
         return this;
     }
 
