@@ -260,18 +260,30 @@ public class MySearchList {
      * @return
      */
     public MySearchList eq(String tableName, String columnFieldName, Object value) {
+        if (value == null){
+            return isNull(tableName, columnFieldName);
+        }
         return add(QueryColumn.of(tableName, columnFieldName), SqlOperator.EQ, value);
     }
 
     public MySearchList eq(String columnFieldName, Object value) {
+        if (value == null){
+            return isNull(columnFieldName);
+        }
         return eq(null, columnFieldName, value);
     }
 
     public <T> MySearchList eq(String tableName, SFunction<T, ?> columnFieldName, Object value) {
+        if (value == null){
+            return isNull(tableName, columnFieldName);
+        }
         return add(QueryColumn.of(tableName, columnFieldName), SqlOperator.EQ, value);
     }
 
     public <T> MySearchList eq(SFunction<T, ?> columnFieldName, Object value) {
+        if (value == null){
+            return isNull(columnFieldName);
+        }
         return eq(null, columnFieldName, value);
     }
 
