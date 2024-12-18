@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,21 @@ public class WsStringUtils {
     private static final String[] CN_NUMBER_NAME = new String[]{"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
 
     private static final String[] CN_DECIMALISM_NAME = new String[]{"", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿"};
+
+    /**
+     * 格式化文本用
+     */
+    private static final char DELIM_START = '{';
+    private static final char DELIM_STOP = '}';
+    private static final char ESCAPE_CHAR = '\\';
+
+    public static void main(String[] args) {
+        System.out.println(
+                format("你好，世界 {{你好}}，\\\\{{{我好}，{大家好",s->{
+                    return s;
+                })
+        );
+    }
 
     public static String jointListString(String[] strings, String sign) {
         return jointListString(Arrays.asList(strings), sign);
@@ -702,6 +718,63 @@ public class WsStringUtils {
         }
         Collections.reverse(list);
         return String.join("", list);
+    }
+
+    /**
+     * 格式化文本
+     * 将{}包裹的文本进行转化
+     * @param format
+     * @param handleFunction
+     * @return
+     */
+    public static String format(String format, Function<String,String> handleFunction) {
+        char[] chars = format.toCharArray();
+        StringBuilder ans = new StringBuilder();
+        StringBuilder sub = null;
+        boolean ignore = false;
+        int count = -1;
+        for (char b : chars) {
+            if (ignore) {
+                ignore = false;
+                if (count == -1) {
+                    ans.append(b);
+                } else {
+                    sub.append(b);
+                }
+                continue;
+            }
+            if (b == DELIM_START) {
+                count = count == -1 ? 1 : count + 1;
+            } else if (b == DELIM_STOP) {
+                count = count == -1 ? -1 : 0;
+            } else if (b == ESCAPE_CHAR) {
+                ignore = true;
+                continue;
+            }
+            if (count == 1) {
+                if (sub == null) {
+                    sub = new StringBuilder();
+                }else {
+                    sub.append(b);
+                }
+            } else if (count == 0) {
+                String temp =handleFunction.apply(sub.toString());
+                if (!WsStringUtils.isEmpty(temp)) {
+                    ans.append(temp);
+                }
+                count = -1;
+                sub = null;
+            } else if (count == -1) {
+                ans.append(b);
+            } else {
+                sub.append(b);
+            }
+        }
+        if (sub != null) {
+            ans.append(DELIM_START);
+            ans.append(sub);
+        }
+        return ans.toString();
     }
 
 }

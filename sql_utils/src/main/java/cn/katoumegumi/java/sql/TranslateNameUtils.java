@@ -19,20 +19,20 @@ public class TranslateNameUtils {
 
     private final TranslateNameUtils parent;
 
-    private final List<String> mainClassNameList;
+    private final List<String> rootPathPrefixList;
 
     /**
-     * 简写
+     * 原始名称->简写
      */
     private final Map<String, String> abbreviationMap;
 
     /**
-     * 原始名称
+     * 简写->原始名称
      */
     private final Map<String, String> particularMap;
 
     /**
-     * 缩写防重复
+     * 防止重复数字
      */
     private final AtomicInteger abbreviationNum;
 
@@ -45,7 +45,7 @@ public class TranslateNameUtils {
 
     public TranslateNameUtils() {
         this.parent = null;
-        this.mainClassNameList = new ArrayList<>();
+        this.rootPathPrefixList = new ArrayList<>();
         this.abbreviationMap = new HashMap<>();
         this.particularMap = new HashMap<>();
         this.abbreviationNum = new AtomicInteger();
@@ -56,7 +56,7 @@ public class TranslateNameUtils {
         this.parent = translateNameUtils;
         this.abbreviationNum = translateNameUtils.abbreviationNum;
         this.pathMapperMap = new HashMap<>();
-        this.mainClassNameList = new ArrayList<>();
+        this.rootPathPrefixList = new ArrayList<>();
         this.abbreviationMap = new HashMap<>();
         this.particularMap = new HashMap<>();
     }
@@ -200,44 +200,64 @@ public class TranslateNameUtils {
         return pathMapperMap.size();
     }
 
-    public void addMainClassName(String mainClassName) {
-        this.mainClassNameList.add(mainClassName + '.');
-    }
-
-    public boolean startsWithMainClassName(String mainClassName) {
-        final String tableName = mainClassName + '.';
-        for (String prefix : mainClassNameList) {
-            if (tableName.startsWith(prefix)) {
-                return true;
-            }
-        }
-        return false;
+    /**
+     * 添加根路径前缀
+     * @param rootPath
+     */
+    public void addRootPathPrefix(String rootPath) {
+        this.rootPathPrefixList.add(rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER);
     }
 
     /**
-     * 去除表别名的主表名称
-     *
+     * 判断当前路径是否是完整路径
+     * 判断路径开头是不是根路径
+     * @param path
      * @return
      */
-    public String getNoPrefixTableName(final String tableName) {
-        if (WsStringUtils.isBlank(tableName)) {
-            return null;
+    public boolean isCompletePath(String path) {
+        if (WsStringUtils.isEmpty(path)) {
+            return false;
         }
-        for (String prefix : mainClassNameList) {
-            if (tableName.startsWith(prefix)) {
-                return tableName.substring(prefix.length());
+        path = path + SqlCommonConstants.PATH_COMMON_DELIMITER;
+        for (String rootPathPrefix : this.rootPathPrefixList) {
+            if (path.startsWith(rootPathPrefix)) {
+                return true;
             }
         }
-        TranslateNameUtils parent = this.parent;
+        if (this.parent == null) {
+            return false;
+        }
+        return this.parent.isCompletePath(path);
+    }
+
+    /**
+     * 获取相对路径
+     * 如果路径是完整路径，去除根路径
+     * @return
+     */
+    public String getRelativePath(final String path) {
+        if (WsStringUtils.isEmpty(path)) {
+            return null;
+        }
+        for (String rootPathPrefix : this.rootPathPrefixList) {
+            if (path.startsWith(rootPathPrefix)) {
+                return path.substring(rootPathPrefix.length());
+            }
+        }
+        if (this.parent == null) {
+            return path;
+        }
+        return this.parent.getRelativePath(path);
+        /*TranslateNameUtils parent = this.parent;
         while (parent != null) {
             for (String prefix : parent.mainClassNameList) {
-                if (tableName.startsWith(prefix)) {
-                    return tableName.substring(prefix.length());
+                if (path.startsWith(prefix)) {
+                    return path.substring(prefix.length());
                 }
             }
             parent = parent.parent;
         }
-        return tableName;
+        return path;*/
     }
 
     /**
@@ -260,7 +280,7 @@ public class TranslateNameUtils {
             String pathName = pathNameList.get(0);
             String completePath = getParticular(pathName);
             if (completePath == null) {
-                if (!startsWithMainClassName(pathName)) {
+                if (!isCompletePath(pathName)) {
                     completePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + pathName;
                 } else {
                     completePath = pathName;
@@ -271,7 +291,7 @@ public class TranslateNameUtils {
             }
         }else {
             String completePath;
-            if (startsWithMainClassName(pathNameList.get(0))) {
+            if (isCompletePath(pathNameList.get(0))) {
                 completePath = String.join(".", pathNameList);
             } else {
                 completePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + String.join(".", pathNameList);
@@ -343,7 +363,17 @@ public class TranslateNameUtils {
      * @return
      */
     public String translateTableNickName(String prefix, String searchSql) {
-        char[] cs = searchSql.toCharArray();
+        return WsStringUtils.format(searchSql,needReplaceStr->{
+            String replaceStr = getParticular(needReplaceStr);
+            if (replaceStr == null) {
+                needReplaceStr = getAddPathTableNickName(prefix, needReplaceStr);
+                return getAbbreviation(needReplaceStr);
+            } else {
+                return needReplaceStr;
+            }
+        });
+
+/*        char[] cs = searchSql.toCharArray();
         List<int[]> locationList = new ArrayList<>();
 
         boolean isStart = false;
@@ -381,7 +411,7 @@ public class TranslateNameUtils {
                 translateStringBuilder.append(Arrays.copyOfRange(cs, startIndex, cs.length));
             }
             return translateStringBuilder.toString();
-        }
+        }*/
     }
 
 
@@ -392,21 +422,24 @@ public class TranslateNameUtils {
      * @return
      */
     public String translateToTableName(String searchSql) {
-        String[] strs = WsStringUtils.splitArray(searchSql, '.');
+        searchSql = WsStringUtils.format(searchSql,s->{
+            String ns = getParticular(s);
+            if (ns == null) {
+                return s;
+            }
+            return ns;
+        });
+        String[] strs = WsStringUtils.splitArray(searchSql, SqlCommonConstants.PATH_COMMON_DELIMITER);
         String ns;
         String s;
         for (int i = 0; i < strs.length; i++) {
             s = strs[i];
-            if (s.startsWith("{")) {
-                s = s.substring(1, s.length() - 1);
-                strs[i] = s;
-            }
             ns = getParticular(s);
             if (ns != null) {
                 strs[i] = ns;
             }
         }
-        return WsStringUtils.jointListString(strs, ".");
+        return WsStringUtils.jointListString(strs, SqlCommonConstants.PATH_COMMON_DELIMITER_STR);
     }
 
 

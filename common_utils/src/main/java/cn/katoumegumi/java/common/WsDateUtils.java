@@ -48,6 +48,8 @@ public class WsDateUtils {
         System.out.println(objectDateFormatString(ignoreTime(date)));
         System.out.println(objectDateFormatString(ignoreMinute(date)));
         System.out.println(objectDateFormatString(ignoreSecond(date)));
+        System.out.println(objectDateFormatString(addDay(date,10)));
+        System.out.println(objectDateFormatString(addDay(date,-10)));
     }
 
     public static String dateStringFormat(String date) {
@@ -318,6 +320,20 @@ public class WsDateUtils {
 
     public static Date ignoreSecond(Date dateTime){
         return new Date(ignoreSecond(dateTime.getTime()));
+    }
+
+    /**
+     * 增加天数
+     * @param timestamp
+     * @param day
+     * @return
+     */
+    public static long addDay(long timestamp,int day){
+        return timestamp + day * ONE_DAY;
+    }
+
+    public static Date addDay(Date date,int day){
+        return new Date(date.getTime() + day * ONE_DAY);
     }
 
 }

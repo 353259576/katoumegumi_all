@@ -95,7 +95,7 @@ public class SQLModelFactory {
             translateNameUtils.setAbbreviation(mapper.getNickName(), mySearchList.getAlias());
         }
         String rootPath = mapper.getNickName();
-        translateNameUtils.addMainClassName(rootPath);
+        translateNameUtils.addRootPathPrefix(rootPath);
         String mainEntityPath;
         String joinEntityPath;
         for (TableRelation relation : mySearchList.getJoins()) {
@@ -115,7 +115,7 @@ public class SQLModelFactory {
             relation.setMainEntityPath(mainEntityPath);
             if (WsStringUtils.isNotBlank(relation.getJoinEntityPath())) {
                 joinEntityPath = translateNameUtils.translateToTableName(relation.getJoinEntityPath());
-                joinEntityPath = translateNameUtils.getNoPrefixTableName(joinEntityPath);
+                joinEntityPath = translateNameUtils.getRelativePath(joinEntityPath);
                 relation.setJoinEntityPath(joinEntityPath);
                 joinEntityPath = rootPath + '.' + joinEntityPath;
                 if (WsStringUtils.isBlank(relation.getAlias())) {
