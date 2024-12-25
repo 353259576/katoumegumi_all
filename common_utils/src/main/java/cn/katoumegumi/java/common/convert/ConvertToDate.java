@@ -40,7 +40,7 @@ public class ConvertToDate implements ConvertBean<Date> {
 
     public Date convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.notHasLength(s) ? null : WsDateUtils.stringToDate(WsDateUtils.dateStringFormat(s), WsDateUtils.LONGTIMESTRING);
+        return WsStringUtils.isEmpty(s) ? null : WsDateUtils.stringToDate(WsDateUtils.dateStringFormat(s), WsDateUtils.LONGTIMESTRING);
     }
 
     @Override

@@ -45,7 +45,7 @@ public class ConvertToLong implements ConvertBean<Long> {
 
     public Long convertBean(Object bean) {
         String o = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.notHasLength(o) ? null : Long.valueOf(o);
+        return WsStringUtils.isEmpty(o) ? null : Long.valueOf(o);
     }
 
     @Override

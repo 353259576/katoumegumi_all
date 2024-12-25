@@ -24,7 +24,7 @@ public class ConvertToFloat implements ConvertBean<Float> {
 
     public Float convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.notHasLength(s) ? null : Float.valueOf(s);
+        return WsStringUtils.isEmpty(s) ? null : Float.valueOf(s);
     }
 
     public Float convertBean(Date date) {

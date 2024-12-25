@@ -23,7 +23,7 @@ public class ConvertToShort implements ConvertBean<Short> {
 
     public Short convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.notHasLength(s) ? null : Short.valueOf(s);
+        return WsStringUtils.isEmpty(s) ? null : Short.valueOf(s);
     }
 
     public Short convertBean(Date date) {

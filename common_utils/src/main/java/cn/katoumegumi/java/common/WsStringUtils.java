@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,6 +31,7 @@ public class WsStringUtils {
     private static final char ESCAPE_CHAR = '\\';
 
     public static void main(String[] args) {
+        System.out.println("你好世界".indexOf("你"));
         System.out.println(
                 format("你好，世界 {{你好}}，\\\\{{{我好}，{大家好",s->{
                     return s;
@@ -55,22 +55,30 @@ public class WsStringUtils {
     }
 
     public static String jointListString(List<String> strings, String sign, int start, int end) {
-        if (strings == null) {
+        if (WsCollectionUtils.isEmpty(strings)) {
             return "";
         }
-        if (strings.isEmpty()) {
+        if (sign == null){
+            sign = "";
+        }
+        start = Math.max(start, 0);
+        end = Math.min(end, strings.size());
+        if (end <= start){
             return "";
         }
-        StringBuilder stringBuffer = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
+        String s;
         for (int i = start; i < end; i++) {
-            if (strings.get(i) == null) {
+            s = strings.get(i);
+            if (s == null) {
                 continue;
             }
-            stringBuffer.append(strings.get(i));
-            stringBuffer.append(sign);
+            if (stringBuilder.length() != 0){
+                stringBuilder.append(sign);
+            }
+            stringBuilder.append(s);
         }
-        stringBuffer.delete(stringBuffer.length() - sign.length(), stringBuffer.length());
-        return stringBuffer.toString();
+        return stringBuilder.toString();
     }
 
 
@@ -100,14 +108,6 @@ public class WsStringUtils {
         return !isBlank(cs);
     }
 
-    public static boolean hasLength(final String str) {
-        return !notHasLength(str);
-    }
-
-    public static boolean notHasLength(final String str) {
-        return str == null || str.isEmpty();
-    }
-
     /**
      * 判断字符串是否都是数字
      *
@@ -115,36 +115,35 @@ public class WsStringUtils {
      * @return
      */
     public static boolean isNumber(String str) {
-        if (str == null) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
         char[] chars = str.toCharArray();
-        if (str.isEmpty()) {
-            return false;
-        }
-        boolean isHave = false;
         int i = 0;
         if (chars[0] == '-' || chars[0] == '+') {
             i++;
         }
+        boolean existNumber = false;
+        boolean existPoint = false;
         for (; i < chars.length; i++) {
-            if (chars[i] < 48 || chars[i] > 58) {
-                if (chars[i] == '.') {
-                    if (i == 0 || i == chars.length - 1 || isHave) {
-                        return false;
-                    } else {
-                        isHave = true;
-                    }
-                } else {
+            char c = chars[i];
+            if (isNumber(c)){
+                existNumber = true;
+            }else if (c == '.'){
+                if (!existNumber || existPoint){
                     return false;
                 }
+                existPoint = true;
+            }else {
+                return false;
             }
         }
-        return true;
+        return existNumber;
     }
 
     public static boolean isNumber(char c) {
-        return c >= 48 && c <= 58;
+        return Character.isDigit(c);
+        //return c >= 48 && c <= 58;
     }
 
     /**
@@ -154,7 +153,7 @@ public class WsStringUtils {
      * @return
      */
     public static boolean isMajuscule(char c) {
-        return c >= 'A' && c <= 'Z';
+        return Character.isUpperCase(c);
     }
 
     /**
@@ -164,7 +163,8 @@ public class WsStringUtils {
      * @return
      */
     public static boolean isMinuscule(char c) {
-        return c >= 'a' && c <= 'z';
+        return Character.isLowerCase(c);
+        //return c >= 'a' && c <= 'z';
     }
 
 
@@ -178,23 +178,7 @@ public class WsStringUtils {
         if (str == null) {
             return false;
         }
-        byte[] bytes;
-        try {
-            bytes = str.getBytes(StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            bytes = str.getBytes();
-        }
-
-        if (bytes.length == 0) {
-            return false;
-        }
-        for (byte aByte : bytes) {
-            if (aByte == SPACE) {
-                return false;
-            }
-        }
-        return true;
-
+        return str.indexOf(SPACE) > 0;
     }
 
     /**
@@ -398,41 +382,32 @@ public class WsStringUtils {
      * @return
      */
     public static String createRandomNum(int size) {
-        StringBuilder stringBuilder = new StringBuilder();
-        ThreadLocalRandom random = ThreadLocalRandom.current();
-        int length = size / 9;
-        int endSize = size % 9;
-        int i;
-        String si;
-        int sLength;
-        int replenishSize;
-        while (length > 0) {
-            i = random.nextInt(999999999);
-            si = Integer.toString(i);
-            sLength = si.length();
-            replenishSize = 9 - sLength;
-            while (replenishSize > 0) {
-                stringBuilder.append(0);
-                replenishSize--;
-            }
-            stringBuilder.append(si);
-            length--;
+        if (size < 1){
+            return "";
         }
-        if (endSize > 0) {
-            double value = Math.pow(10, endSize);
-            i = random.nextInt((int) value);
-            si = Integer.toString(i);
-            sLength = si.length();
-            replenishSize = endSize - sLength;
-            while (replenishSize > 0) {
-                stringBuilder.append(0);
-                replenishSize--;
+        StringBuilder stringBuilder = new StringBuilder(size);
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int i;
+        String s;
+        int replenish;
+        while (size > 0){
+            size -= 9;
+            if (size > 0){
+                i = random.nextInt(999999999);
+                s = Integer.toString(i);
+                replenish = 9 - s.length();
+            }else {
+                i = random.nextInt((int) Math.pow(10, 9 + size));
+                s = Integer.toString(i);
+                replenish = 9 + size - s.length();
             }
-            stringBuilder.append(si);
+            while (replenish > 0) {
+                stringBuilder.append('0');
+                replenish--;
+            }
+            stringBuilder.append(s);
         }
         return stringBuilder.toString();
-
-
     }
 
     /**
@@ -442,26 +417,24 @@ public class WsStringUtils {
      * @return
      */
     public static String camel_case(String str) {
-        char g = '_';
+        if (WsStringUtils.isEmpty(str)){
+            return "";
+        }
         char[] chars = str.toCharArray();
-        StringBuilder stringBuffer = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         int length = str.length();
-        char c = chars[0];
-
-        if (c >= 'A' && c <= 'Z') {
-            c += 32;
-        }
-        stringBuffer.append(c);
-        for (int i = 1; i < length; i++) {
+        char c;
+        for (int i = 0; i < length; i++){
             c = chars[i];
-            if (c >= 'A' && c <= 'Z') {
-                c += 32;
-                stringBuffer.append(g);
+            if (Character.isUpperCase(c)){
+                if (stringBuilder.length() != 0){
+                    stringBuilder.append('_');
+                }
+                c = Character.toLowerCase(c);
             }
-
-            stringBuffer.append(c);
+            stringBuilder.append(c);
         }
-        return stringBuffer.toString();
+        return stringBuilder.length() == str.length()?str:stringBuilder.toString();
     }
 
     /**
@@ -471,30 +444,30 @@ public class WsStringUtils {
      * @return
      */
     public static String camelCase(String str) {
-        if (!str.contains("_")) {
-            return str;
+        if (WsStringUtils.isEmpty(str)){
+            return "";
         }
-        char g = '_';
-        str = str.toLowerCase();
+        StringBuilder stringBuilder = new StringBuilder();
         char[] chars = str.toCharArray();
-        StringBuilder stringBuffer = new StringBuilder();
-        int length = str.length();
-        char c = chars[0];
-        boolean nextToUp = false;
-        stringBuffer.append(c);
-        for (int i = 1; i < length; i++) {
-            c = chars[i];
-            if (c == g) {
-                nextToUp = true;
-            } else {
-                if (nextToUp) {
-                    c -= 32;
-                    nextToUp = false;
-                }
-                stringBuffer.append(c);
+        boolean needUp = false;
+        for (char c : chars) {
+            if (c == '_') {
+                needUp = true;
+                continue;
             }
+            if (needUp) {
+                if (Character.isLowerCase(c)) {
+                    c = Character.toUpperCase(c);
+                }
+            }else {
+                if (Character.isUpperCase(c)){
+                    c = Character.toLowerCase(c);
+                }
+            }
+            stringBuilder.append(c);
+            needUp = false;
         }
-        return stringBuffer.toString();
+        return stringBuilder.toString();
     }
 
     /**
@@ -504,14 +477,20 @@ public class WsStringUtils {
      * @return
      */
     public static String firstCharToLowerCase(String str) {
-        if (WsStringUtils.isBlank(str)) {
-            return null;
+        if (WsStringUtils.isEmpty(str)) {
+            return str;
         }
-        int length = str.length();
-        if (length == 1) {
+        char c = str.charAt(0);
+        if (Character.isWhitespace(c)){
+            return firstCharToLowerCase(str.trim());
+        }
+        if (!Character.isLetter(c) || Character.isLowerCase(c)){
+            return str;
+        }
+        if (str.length() == 1){
             return str.toLowerCase();
         }
-        return str.substring(0, 1).toLowerCase() + str.substring(1, length);
+        return Character.toLowerCase(c) + str.substring(1);
     }
 
     /**
@@ -561,7 +540,8 @@ public class WsStringUtils {
      * @return
      */
     public static boolean isAlphabetOrNumber(char c) {
-        return (48 <= c && c <= 57) || (97 <= c && c <= 122) || (65 <= c && c <= 90);
+        return Character.isLetterOrDigit(c);
+        //return (48 <= c && c <= 57) || (97 <= c && c <= 122) || (65 <= c && c <= 90);
     }
 
     /**

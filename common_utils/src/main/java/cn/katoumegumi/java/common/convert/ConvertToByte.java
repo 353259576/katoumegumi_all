@@ -23,7 +23,7 @@ public class ConvertToByte implements ConvertBean<Byte> {
 
     public Byte convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.notHasLength(s) ? null : Byte.valueOf(s);
+        return WsStringUtils.isEmpty(s) ? null : Byte.valueOf(s);
     }
 
     public Byte convertBean(Date date) {

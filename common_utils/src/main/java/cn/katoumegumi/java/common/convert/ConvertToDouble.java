@@ -24,7 +24,7 @@ public class ConvertToDouble implements ConvertBean<Double> {
 
     public Double convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.notHasLength(s) ? null : Double.valueOf(s);
+        return WsStringUtils.isEmpty(s) ? null : Double.valueOf(s);
     }
 
     public Double convertBean(String bean) {

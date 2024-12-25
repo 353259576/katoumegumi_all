@@ -23,7 +23,7 @@ public class ConvertToInteger implements ConvertBean<Integer> {
 
     public Integer convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.notHasLength(s) ? null : Integer.valueOf(s);
+        return WsStringUtils.isEmpty(s) ? null : Integer.valueOf(s);
     }
 
     public Integer convertBean(Date date) {

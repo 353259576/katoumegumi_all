@@ -73,12 +73,12 @@ public class ConvertToBigDecimal implements ConvertBean<BigDecimal> {
     }
 
     public BigDecimal convertBean(String string){
-        return WsStringUtils.notHasLength(string) ? null : new BigDecimal(string);
+        return WsStringUtils.isEmpty(string) ? null : new BigDecimal(string);
     }
 
     public BigDecimal convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.notHasLength(s) ? null : new BigDecimal(s);
+        return WsStringUtils.isEmpty(s) ? null : new BigDecimal(s);
     }
 
     @Override

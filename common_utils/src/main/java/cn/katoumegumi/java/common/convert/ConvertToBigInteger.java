@@ -16,7 +16,7 @@ public class ConvertToBigInteger implements ConvertBean<BigInteger> {
 
     public BigInteger convertBean(Object bean) {
         String s = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.notHasLength(s) ? null : new BigInteger(s);
+        return WsStringUtils.isEmpty(s) ? null : new BigInteger(s);
     }
 
     public BigInteger convertBean(Date date) {
