@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class WsStringUtils {
@@ -23,12 +24,29 @@ public class WsStringUtils {
 
     private static final String[] CN_DECIMALISM_NAME = new String[]{"", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿"};
 
+    // 使用 Unicode 块来定义汉字字符范围，包括 CJK 统一表意文字和其他扩展区
+    private static final Pattern CHINESE_CHAR_PATTERN = Pattern.compile("\\p{IsHan}");
+
+    private static final Set<Character.UnicodeBlock> CJK_UNICODE_BLOCK_SET = new HashSet<>();
+
     /**
      * 格式化文本用
      */
     private static final char DELIM_START = '{';
     private static final char DELIM_STOP = '}';
     private static final char ESCAPE_CHAR = '\\';
+
+
+    static {
+        addCJKUniCodeBlock(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS);
+        addCJKUniCodeBlock(Character.UnicodeBlock.CJK_COMPATIBILITY);
+        addCJKUniCodeBlock(Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS);
+        addCJKUniCodeBlock(Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT);
+        addCJKUniCodeBlock(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A);
+        addCJKUniCodeBlock(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B);
+        addCJKUniCodeBlock(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C);
+        addCJKUniCodeBlock(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D);
+    }
 
     public static void main(String[] args) {
         System.out.println("你好世界".indexOf("你"));
@@ -37,6 +55,14 @@ public class WsStringUtils {
                     return s;
                 })
         );
+        System.out.println(getIdentical("你好世界","你好世界"));
+        System.out.println(getIdentical("你好2世界","你好1世界"));
+        System.out.println(getDisparate("你好2世界","你好1世界"));
+        List<String> list = split("你好,世界,你好,世界,世界,你好",',');
+        for (String s : list) {
+            System.out.println(s);
+        }
+
     }
 
     public static String jointListString(String[] strings, String sign) {
@@ -501,19 +527,20 @@ public class WsStringUtils {
      * @return
      */
     public static List<String> split(String str, char c) {
+        if (isEmpty(str)){
+            return Collections.emptyList();
+        }
         char[] cs = str.toCharArray();
         List<String> list = new ArrayList<>();
-
         int startIndex = 0;
         int endIndex;
-
         for (int i = 0; i < cs.length; ++i) {
             if (cs[i] == c) {
                 endIndex = i;
                 if (startIndex == endIndex) {
                     list.add(BLANK_STRING);
                 } else {
-                    list.add(new String(Arrays.copyOfRange(cs, startIndex, endIndex)));
+                    list.add(str.substring(startIndex,endIndex));
                 }
                 startIndex = i + 1;
             }
@@ -523,7 +550,7 @@ public class WsStringUtils {
         if (startIndex == endIndex) {
             list.add(BLANK_STRING);
         } else {
-            list.add(new String(Arrays.copyOfRange(cs, startIndex, endIndex)));
+            list.add(str.substring(startIndex,endIndex));
         }
         return list;
     }
@@ -551,19 +578,23 @@ public class WsStringUtils {
      * @return
      */
     public static boolean isChinese(char c) {
-        return c >= 19968 && c <= 40869;
+        Character.UnicodeBlock unicodeBlock = Character.UnicodeBlock.of(c);
+        return CJK_UNICODE_BLOCK_SET.contains(unicodeBlock);
     }
 
-    /**
-     * 判断字符串是不是都是汉字
-     *
-     * @param string
-     * @return
-     */
-    public static boolean isChinese(String string) {
-        string = new String(string.getBytes(StandardCharsets.UTF_8));
-        for (char c : string.toCharArray()) {
-            if (!isChinese(c)) {
+    public synchronized static void addCJKUniCodeBlock(Character.UnicodeBlock unicodeBlock) {
+        if (unicodeBlock == null){
+            return;
+        }
+        CJK_UNICODE_BLOCK_SET.add(unicodeBlock);
+    }
+
+    public static boolean isChinese(String s) {
+        if (WsStringUtils.isEmpty(s)){
+            return false;
+        }
+        for (int i = 0; i < s.length(); i++){
+            if (!isChinese(s.charAt(i))){
                 return false;
             }
         }
@@ -577,8 +608,10 @@ public class WsStringUtils {
      * @return
      */
     public static String interceptedChinese(String str) {
+        if (isEmpty(str)){
+            return str;
+        }
         StringBuilder sb = new StringBuilder();
-        str = new String(str.getBytes(StandardCharsets.UTF_8));
         for (char c : str.toCharArray()) {
             if (isChinese(c)) {
                 sb.append(c);
@@ -596,18 +629,28 @@ public class WsStringUtils {
      * @return
      */
     public static String getIdentical(String str1, String str2) {
+        if (isEmpty(str1) || isEmpty(str2)){
+            return "";
+        }
         char[] s1 = str1.toCharArray();
         char[] s2 = str2.toCharArray();
         int size = Math.min(s1.length, s2.length);
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < size; i++) {
-            if (s1[i] == s2[i]) {
-                stringBuilder.append(s1[i]);
-            } else {
+        int i = 0;
+        for (; i < size; i++) {
+            if (s1[i] != s2[i]) {
                 break;
             }
         }
-        return stringBuilder.length() == 0 ? null : stringBuilder.toString();
+        if (i == 0) {
+            return "";
+        }
+        if (str1.length() > str2.length()){
+            str1 = str2;
+        }
+        if (i == size){
+            return str1;
+        }
+        return str1.substring(0, i);
     }
 
     /**
@@ -618,20 +661,22 @@ public class WsStringUtils {
      * @return
      */
     public static String getDisparate(String part, String intact) {
+        if (isEmpty(part) || isEmpty(intact)){
+            return "";
+        }
         char[] s1 = part.toCharArray();
         char[] s2 = intact.toCharArray();
         int size = Math.min(s1.length, s2.length);
         int i = 0;
-        for (; i < size; i++) {
+        for (; i < s1.length; i++) {
             if (s1[i] != s2[i]) {
                 break;
             }
         }
-
         if (i >= s2.length) {
-            return null;
+            return "";
         }
-        return String.copyValueOf(s2, i, s2.length - i);
+        return intact.substring(i);
     }
 
     /**
