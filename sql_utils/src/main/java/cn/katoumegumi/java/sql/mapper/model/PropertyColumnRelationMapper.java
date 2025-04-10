@@ -113,7 +113,7 @@ public class PropertyColumnRelationMapper {
     }
 
 
-    public String getNickName() {
+    public String getEntityName() {
         return entityName;
     }
 
@@ -183,7 +183,9 @@ public class PropertyColumnRelationMapper {
             return false;
         }
         PropertyColumnRelationMapper that = (PropertyColumnRelationMapper) o;
-        return Objects.equals(entityName, that.entityName) && Objects.equals(tableName, that.tableName) && Objects.equals(entityClass, that.entityClass);
+        return Objects.equals(entityName, that.entityName)
+                && Objects.equals(tableName, that.tableName)
+                && Objects.equals(entityClass, that.entityClass);
     }
 
     @Override

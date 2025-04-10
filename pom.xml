@@ -45,9 +45,9 @@
         <spring-boot.version>3.3.5</spring-boot.version>
         <zxing.version>3.4.1</zxing.version>
         <mybatis.plus.version>3.5.9</mybatis.plus.version>
-        <poi.version>5.2.4</poi.version>
-        <lang3.vaersion>3.13.0</lang3.vaersion>
-        <logback.version>1.4.12</logback.version>
+        <poi.version>5.4.0</poi.version>
+        <lang3.vaersion>3.17.0</lang3.vaersion>
+        <!--<logback.version>1.4.12</logback.version>-->
         <hikariCP.version>3.4.5</hikariCP.version>
         <gson.version>2.10.1</gson.version>
         <freemarker.version>2.3.30</freemarker.version>
@@ -81,12 +81,12 @@
                 <version>${megumi.version}</version>
             </dependency>
 
-            <dependency>
+            <!--<dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
                 <optional>true</optional>
-            </dependency>
+            </dependency>-->
 
             <dependency>
                 <groupId>com.google.code.gson</groupId>

@@ -6,8 +6,8 @@ import cn.katoumegumi.java.starter.jdbc.datasource.DynamicDataSourceHolder;
 import cn.katoumegumi.java.starter.jdbc.datasource.annotation.DynamicDataSourceAdvisor;
 import cn.katoumegumi.java.starter.jdbc.properties.DataSourcePropertiesList;
 import cn.katoumegumi.java.starter.jdbc.properties.DruidDataSourceProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -28,7 +28,7 @@ import java.util.Map;
 @EnableConfigurationProperties(value = {DataSourcePropertiesList.class})
 public class DataSourceConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(DataSourceConfig.class);
+    private static final Log log = LogFactory.getLog(DataSourceConfig.class);
 
     private final DataSourcePropertiesList dataSourcePropertiesList;
 
@@ -59,16 +59,25 @@ public class DataSourceConfig {
         dynamicDataSource.setDefaultTargetDataSource(druidDataSource);
         DynamicDataSourceHolder.defaultDataSource = properties.getAlias();
         DynamicDataSourceHolder.dataSourceNameSet.add(properties.getAlias());
-        log.info("默认数据源：{}创建成功，数据源：{}", properties.getAlias(), druidDataSource);
+        if (log.isInfoEnabled()){
+            log.info(String.format("默认数据源：%s创建成功，数据源：%s",properties.getAlias(), druidDataSource));
+        }
+
         for (int i = 1, length = list.size(); i < length; i++) {
             properties = list.get(i);
             druidDataSource = factory.initDatasource(properties, dataSourcePropertiesList.isSeataEnable());
             if (druidDataSource != null) {
                 map.put(properties.getAlias(), druidDataSource);
                 DynamicDataSourceHolder.dataSourceNameSet.add(properties.getAlias());
-                log.info("数据源：{}创建成功,数据源：{}", properties.getAlias(), druidDataSource);
+                if (log.isInfoEnabled()){
+                    log.info(String.format("数据源：%s创建成功,数据源：%s",properties.getAlias(), druidDataSource));
+                }
+
             } else {
-                log.info("数据源：{}创建失败", properties.getAlias());
+                if (log.isInfoEnabled()){
+                    log.info(String.format("数据源：%s创建失败", properties.getAlias()));
+                }
+
             }
         }
         dynamicDataSource.setTargetDataSources(map);

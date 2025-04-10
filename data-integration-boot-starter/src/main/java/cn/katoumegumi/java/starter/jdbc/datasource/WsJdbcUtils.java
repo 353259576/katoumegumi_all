@@ -17,8 +17,8 @@ import cn.katoumegumi.java.sql.handler.model.SqlParameter;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.ArgumentPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  */
 public class WsJdbcUtils {
 
-    public static final Logger log = LoggerFactory.getLogger(WsJdbcUtils.class);
+    public static final Log log = LogFactory.getLog(WsJdbcUtils.class);
 
 
     private JdbcTemplate jdbcTemplate;
@@ -57,7 +57,9 @@ public class WsJdbcUtils {
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         InsertSqlEntity insertSqlEntity = sqlModelFactory.createInsertSqlEntity(t);
-        log.debug(insertSqlEntity.getInsertSql());
+        if (log.isDebugEnabled()) {
+            log.debug(insertSqlEntity.getInsertSql());
+        }
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         Map<String, Object> keyMap = keyHolder.getKeys();
@@ -75,7 +77,9 @@ public class WsJdbcUtils {
         MySearchList mySearchList = MySearchList.create(tList.get(0).getClass());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         InsertSqlEntity insertSqlEntity = sqlModelFactory.createInsertSqlEntity(tList);
-        log.debug(insertSqlEntity.getInsertSql());
+        if (log.isDebugEnabled()) {
+            log.debug(insertSqlEntity.getInsertSql());
+        }
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         List<Map<String, Object>> keyMapList = keyHolder.getKeyList();
@@ -138,7 +142,9 @@ public class WsJdbcUtils {
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel(t,isAll));
-        log.debug(updateSqlEntity.getUpdateSql());
+        if (log.isDebugEnabled()) {
+            log.debug(updateSqlEntity.getUpdateSql());
+        }
         return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
     }
 
@@ -148,7 +154,9 @@ public class WsJdbcUtils {
         }
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel());
-        log.debug(updateSqlEntity.getUpdateSql());
+        if (log.isDebugEnabled()) {
+            log.debug(updateSqlEntity.getUpdateSql());
+        }
         return jdbcTemplate.update(updateSqlEntity.getUpdateSql(), WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
     }
 
@@ -169,7 +177,9 @@ public class WsJdbcUtils {
         for (Map.Entry<String, KeyValue<List<Object[]>, List<Integer>>> stringKeyValueEntry : map.entrySet()) {
             String sql = stringKeyValueEntry.getKey();
             KeyValue<List<Object[]>,List<Integer>> keyValue = stringKeyValueEntry.getValue();
-            log.debug(sql);
+            if (log.isDebugEnabled()) {
+                log.debug(sql);
+            }
             int[] returnAns = jdbcTemplate.batchUpdate(sql, keyValue.getKey());
             for (int i = 0; i < returnAns.length; i++){
                 ans[keyValue.getValue().get(i)] = returnAns[i];
@@ -200,7 +210,9 @@ public class WsJdbcUtils {
         for (Map.Entry<String, KeyValue<List<Object[]>, List<Integer>>> stringKeyValueEntry : map.entrySet()) {
             String sql = stringKeyValueEntry.getKey();
             KeyValue<List<Object[]>,List<Integer>> keyValue = stringKeyValueEntry.getValue();
-            log.debug(sql);
+            if (log.isDebugEnabled()) {
+                log.debug(sql);
+            }
             int[] returnAns = jdbcTemplate.batchUpdate(sql, keyValue.getKey());
             for (int i = 0; i < returnAns.length; i++){
                 ans[keyValue.getValue().get(i)] = returnAns[i];
@@ -212,7 +224,9 @@ public class WsJdbcUtils {
     public int delete(MySearchList mySearchList) {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         DeleteSqlEntity deleteSqlEntity = SqlEntityFactory.createDeleteSqlEntity(sqlModelFactory.createDeleteModel());
-        log.debug(deleteSqlEntity.getDeleteSql());
+        if (log.isDebugEnabled()) {
+            log.debug(deleteSqlEntity.getDeleteSql());
+        }
         return jdbcTemplate.update(deleteSqlEntity.getDeleteSql(), WsCollectionUtils.listToArray(deleteSqlEntity.getValueList(), SqlParameter::getValue));
     }
 
@@ -228,7 +242,9 @@ public class WsJdbcUtils {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(sqlModelFactory.createSelectModel());
         String sql = selectSqlEntity.getSelectSql();
-        log.debug(sql);
+        if (log.isDebugEnabled()) {
+            log.debug(sql);
+        }
         List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
         return queryList(sql, parameterList, sqlModelFactory);
     }
@@ -265,7 +281,9 @@ public class WsJdbcUtils {
         List<T> tList = getListT(mySearchList);
         if (WsCollectionUtils.isNotEmpty(tList)) {
             if (tList.size() > 1) {
-                log.warn("本次查询数据大于一条但是仅显示一条。");
+                if (log.isWarnEnabled()){
+                    log.warn("本次查询数据大于一条但是仅显示一条。");
+                }
             }
             return tList.get(0);
         }
@@ -303,9 +321,11 @@ public class WsJdbcUtils {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(sqlModelFactory.createSelectModel());
         String sql = selectSqlEntity.getSelectSql();
-        log.debug(sql);
         String countSql = selectSqlEntity.getCountSql();
-        log.info(countSql);
+        if (log.isDebugEnabled()) {
+            log.debug(sql);
+            log.debug(countSql);
+        }
         List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
         Long count = querySingleColumnObject(countSql,parameterList,Long.class);
         if(count == null){

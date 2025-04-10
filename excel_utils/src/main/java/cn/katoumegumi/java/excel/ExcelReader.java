@@ -2,8 +2,6 @@ package cn.katoumegumi.java.excel;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;

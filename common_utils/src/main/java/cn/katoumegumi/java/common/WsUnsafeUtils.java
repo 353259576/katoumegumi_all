@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.common;
 
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
@@ -25,7 +26,6 @@ public class WsUnsafeUtils {
                 unsafe = f.get(null);
             } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
                 log.info("Unsafe Load Fail:" + e.getMessage());
-                //log.info(e.getMessage());
             }
         }
     }

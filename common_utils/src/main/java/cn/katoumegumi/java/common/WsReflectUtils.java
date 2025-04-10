@@ -26,7 +26,9 @@ public class WsReflectUtils {
 
     private static final String WRITE_REPLACE_FUNCTION_NAME = "writeReplace";
 
-    private static final Map<String, WeakReference<String>> FIELD_NAME_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, WeakReference<String>> FIELD_NAME_CACHE = new ConcurrentHashMap<>();
+
+    private static final Map<Class<?>, WeakReference<Map<String,Field>>> FIELD_MAP_CACHE = new ConcurrentHashMap<>();
 
     private static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
 
@@ -77,16 +79,24 @@ public class WsReflectUtils {
      * @return
      */
     public static Map<String,Field> getFieldMap(Class<?> clazz) {
-        Map<String,Field> fieldNameAndFeildMap = new LinkedHashMap<>();
+        if (clazz == null) {
+            return Collections.emptyMap();
+        }
+        WeakReference<Map<String,Field>> fieldMapCache = FIELD_MAP_CACHE.get(clazz);
+        Map<String,Field> fieldNameAndFeildMap;
+        if (fieldMapCache != null && (fieldNameAndFeildMap = fieldMapCache.get()) != null) {
+            return fieldNameAndFeildMap;
+        }
+        fieldNameAndFeildMap = new LinkedHashMap<>();
+        Class<?> originalClass = clazz;
         for (; !(clazz == Object.class || clazz == null); clazz = clazz.getSuperclass()) {
             Field[] fields = clazz.getDeclaredFields();
             for (Field value : fields) {
                 String name = value.getName();
-                if (!fieldNameAndFeildMap.containsKey(name)){
-                    fieldNameAndFeildMap.put(name,value);
-                }
+                fieldNameAndFeildMap.putIfAbsent(name, value);
             }
         }
+        FIELD_MAP_CACHE.put(originalClass, new WeakReference<>(fieldNameAndFeildMap));
         return fieldNameAndFeildMap;
     }
 
@@ -99,20 +109,26 @@ public class WsReflectUtils {
      * @return
      */
     public static Method[] getObjectMethodByName(String methodName, Class<?> clazz) {
-        Method[] methods;
-        Set<Method> methodSet = new HashSet<>();
-        methods = clazz.getDeclaredMethods();
-        Collections.addAll(methodSet, methods);
-        methods = clazz.getMethods();
-        Collections.addAll(methodSet, methods);
+
         List<Method> methodList = new ArrayList<>();
-        methodSet.forEach(method -> {
+        Set<Method> methodSet = new HashSet<>();
+        for (Method declaredMethod : clazz.getDeclaredMethods()) {
+            if (!methodSet.add(declaredMethod)) {
+                continue;
+            }
+            if (declaredMethod.getName().equals(methodName)) {
+                methodList.add(declaredMethod);
+            }
+        }
+        for (Method method : clazz.getMethods()) {
+            if (!methodSet.add(method)) {
+                continue;
+            }
             if (method.getName().equals(methodName)) {
                 methodList.add(method);
             }
-        });
+        }
         return methodList.toArray(new Method[0]);
-
     }
 
     /**
@@ -182,14 +198,14 @@ public class WsReflectUtils {
      */
     public static <T> String getFieldName(SupplierFunc<T> supplierFunc) {
         String n = supplierFunc.getClass().getName();
-        return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(() -> {
+        return Optional.ofNullable(FIELD_NAME_CACHE.get(n)).map(WeakReference::get).orElseGet(() -> {
             try {
                 Method method = supplierFunc.getClass().getDeclaredMethod(WRITE_REPLACE_FUNCTION_NAME);
                 method.setAccessible(true);
                 SerializedLambda serializedLambda = (SerializedLambda) method.invoke(supplierFunc);
                 String name = serializedLambda.getImplMethodName();
                 String value = methodToFieldName(name);
-                FIELD_NAME_MAP.put(n, new WeakReference<>(value));
+                FIELD_NAME_CACHE.put(n, new WeakReference<>(value));
                 return value;
             } catch (ReflectiveOperationException e) {
                 e.printStackTrace();
@@ -207,11 +223,11 @@ public class WsReflectUtils {
      */
     public static <T> String getFieldName(SFunction<T, ?> sFunction) {
         String n = sFunction.getClass().getName();
-        return Optional.ofNullable(FIELD_NAME_MAP.get(n)).map(WeakReference::get).orElseGet(() -> {
+        return Optional.ofNullable(FIELD_NAME_CACHE.get(n)).map(WeakReference::get).orElseGet(() -> {
             SerializedLambda serializedLambda = getSerializedLambda(sFunction);
             String name = serializedLambda.getImplMethodName();
             String value = methodToFieldName(name);
-            FIELD_NAME_MAP.put(n, new WeakReference<>(value));
+            FIELD_NAME_CACHE.put(n, new WeakReference<>(value));
             return value;
         });
     }

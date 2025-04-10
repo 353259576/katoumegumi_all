@@ -2,14 +2,13 @@ package cn.katoumegumi.java.starter.jdbc.datasource;
 
 import cn.katoumegumi.java.starter.jdbc.properties.DruidDataSourceProperties;
 import com.alibaba.druid.pool.DruidDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import javax.sql.DataSource;
 
 public class DruidDataSourceCreateFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(DruidDataSourceCreateFactory.class);
+    private static final Log log = LogFactory.getLog(DruidDataSourceCreateFactory.class);
 
     public DataSource initDatasource(DruidDataSourceProperties properties, boolean enable) {
 
@@ -41,7 +40,10 @@ public class DruidDataSourceCreateFactory {
             }*/
             return druidDataSource;
         } catch (Exception e) {
-            log.info("加载数据库失败：{}", e.getMessage());
+            if (log.isErrorEnabled()) {
+                log.info(String.format("加载数据库失败：%s", e.getMessage()),e);
+            }
+
             return null;
         }
     }

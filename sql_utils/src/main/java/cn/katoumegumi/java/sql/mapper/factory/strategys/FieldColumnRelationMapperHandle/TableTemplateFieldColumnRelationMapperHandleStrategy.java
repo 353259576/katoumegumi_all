@@ -39,7 +39,7 @@ public class TableTemplateFieldColumnRelationMapperHandleStrategy implements Fie
         TableTemplate tableTemplate = clazz.getAnnotation(TableTemplate.class);
         Class<?> templateClass = tableTemplate.value();
         PropertyColumnRelationMapper baseMapper = FieldColumnRelationMapperFactory.analysisClassRelation(templateClass, true);
-        PropertyColumnRelationMapper mapper = new PropertyColumnRelationMapper(baseMapper.getNickName(), baseMapper.getTableName(), clazz, baseMapper);
+        PropertyColumnRelationMapper mapper = new PropertyColumnRelationMapper(baseMapper.getEntityName(), baseMapper.getTableName(), clazz, baseMapper);
         return Optional.of(mapper);
     }
 

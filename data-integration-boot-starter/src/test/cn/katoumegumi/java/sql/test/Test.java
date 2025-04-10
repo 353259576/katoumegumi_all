@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -170,6 +171,15 @@ public class Test {
                 .setPassword("123456")
                 .setStatus(1);
         wsJdbcUtils.insert(List.of(lUser));*/
+
+        User user = new User();
+        User user1 = new User();
+        Map<String, Field> fieldMap = WsReflectUtils.getFieldMap(user.getClass());
+        System.gc();
+        Map<String, Field> fieldMap1 = WsReflectUtils.getFieldMap(user1.getClass());
+        System.out.println(fieldMap);
+        System.out.println(fieldMap1);
+        List<String> list = new ArrayList<>();
     }
 
 

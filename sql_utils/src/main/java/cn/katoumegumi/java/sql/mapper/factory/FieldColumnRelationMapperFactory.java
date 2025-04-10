@@ -11,6 +11,8 @@ import cn.katoumegumi.java.sql.mapper.factory.strategys.FieldColumnRelationMappe
 import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyObjectColumnJoinRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 /**
  * 用于生成FieldColumnRelationMapper
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class FieldColumnRelationMapperFactory {
 
-    private static final Logger log = Logger.getLogger(FieldColumnRelationMapperFactory.class.getName());
+    private static final Log log = LogFactory.getLog(FieldColumnRelationMapperFactory.class);
 
     /**
      * 缓存实体对应的对象属性与列名的关联
@@ -107,7 +108,7 @@ public class FieldColumnRelationMapperFactory {
                 try {
                     FIELD_COLUMN_RELATION_MAPPER_FACTORY.createFieldColumnRelationMapper(c, allowIncomplete);
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                     throw e;
                 } finally {
                     CLASS_COUNT_DOWN_LATCH_MAP.remove(c);
@@ -131,7 +132,7 @@ public class FieldColumnRelationMapperFactory {
                 throw new RuntimeException("解析超时,无法解析：" + clazz);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new RuntimeException("程序异常中断");
         }
     }

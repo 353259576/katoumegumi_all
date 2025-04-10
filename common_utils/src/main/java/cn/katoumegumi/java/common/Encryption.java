@@ -90,11 +90,18 @@ public class Encryption {
      * @return
      */
     public static String sha1Encoder(String str) {
+        byte[] bytes = sha1EncoderByte(str);
+        if (bytes == null) {
+            return null;
+        }
+        return byteHexToString(bytes);
+    }
+
+    public static byte[] sha1EncoderByte(String str) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
             messageDigest.update(str.getBytes(StandardCharsets.UTF_8));
-            byte[] bytes = messageDigest.digest();
-            return byteHexToString(bytes);
+            return messageDigest.digest();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -109,12 +116,19 @@ public class Encryption {
      * @return
      */
     public static String hmacSha1Encoder(String str, String key) {
+        byte[] bytes = hmacSha1EncoderByte(str, key);
+        if (bytes == null) {
+            return null;
+        }
+        return byteHexToString(bytes);
+    }
+
+    public static byte[] hmacSha1EncoderByte(String str, String key) {
         try {
             Mac mac = Mac.getInstance("HmacSHA1");
             SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), mac.getAlgorithm());
             mac.init(secretKeySpec);
-            byte[] bytes = mac.doFinal(str.getBytes());
-            return byteHexToString(bytes);
+            return mac.doFinal(str.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -123,12 +137,19 @@ public class Encryption {
 
 
     public static String hmacSha256Encoder(String str, String key) {
+        byte[] bytes = hmacSha256EncoderByte(str, key);
+        if (bytes == null) {
+            return null;
+        }
+        return byteHexToString(bytes);
+    }
+
+    public static byte[] hmacSha256EncoderByte(String str, String key) {
         try {
             Mac mac = Mac.getInstance("HMACSHA256");
             SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), mac.getAlgorithm());
             mac.init(secretKeySpec);
-            byte[] bytes = mac.doFinal(str.getBytes());
-            return byteHexToString(bytes);
+            return mac.doFinal(str.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
             return null;

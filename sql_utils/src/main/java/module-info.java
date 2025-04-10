@@ -3,9 +3,9 @@ module cn.katoumegumi.java.sql.utils {
     requires com.zaxxer.hikari;
     requires cn.katoumegumi.java.common.utils;
     requires java.persistence;
-    requires org.slf4j;
     requires com.baomidou.mybatis.plus.annotation;
     requires jakarta.persistence;
+    requires spring.jcl;
 
     exports cn.katoumegumi.java.sql;
     exports cn.katoumegumi.java.sql.common;

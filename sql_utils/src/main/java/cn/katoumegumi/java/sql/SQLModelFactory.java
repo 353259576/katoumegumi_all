@@ -28,8 +28,8 @@ import cn.katoumegumi.java.sql.model.query.QueryElement;
 import cn.katoumegumi.java.sql.model.query.QuerySqlString;
 import cn.katoumegumi.java.sql.model.result.*;
 import cn.katoumegumi.java.sql.resultSet.WsResultSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -39,7 +39,7 @@ import java.util.*;
  */
 public class SQLModelFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(SQLModelFactory.class);
+    private static final Log log = LogFactory.getLog(SQLModelFactory.class);
 
     /**
      * 插入参数注入
@@ -90,11 +90,12 @@ public class SQLModelFactory {
         mainClass = mySearchList.getMainClass();
         PropertyColumnRelationMapper mapper = analysisClassRelation(mainClass);
         if (WsStringUtils.isBlank(mySearchList.getAlias())) {
-            translateNameUtils.setAbbreviation(mapper.getNickName());
+            translateNameUtils.setAbbreviation(mapper.getEntityName());
         } else {
-            translateNameUtils.setAbbreviation(mapper.getNickName(), mySearchList.getAlias());
+            translateNameUtils.setAbbreviation(mapper.getEntityName(), mySearchList.getAlias());
         }
-        String rootPath = mapper.getNickName();
+        //完善表关联数据
+        String rootPath = mapper.getEntityName();
         translateNameUtils.addRootPathPrefix(rootPath);
         String mainEntityPath;
         String joinEntityPath;
@@ -371,7 +372,7 @@ public class SQLModelFactory {
 
 
             PropertyColumnRelationMapper mainMapper = analysisClassRelation(mainClass);
-            String rootPath = mainMapper.getNickName();
+            String rootPath = mainMapper.getEntityName();
 
 
             List<PropertyBaseColumnRelation> columnRelationList = new ArrayList<>(length);
@@ -643,8 +644,8 @@ public class SQLModelFactory {
      */
     public SelectModel createSelectModel() {
         final PropertyColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
-        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
-        final String rootPath = mainMapper.getNickName();
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getEntityName()));
+        final String rootPath = mainMapper.getEntityName();
         translateNameUtils.addLocalMapper(rootPath, mainMapper);
         final boolean appointQueryColumn = WsCollectionUtils.isNotEmpty(this.mySearchList.getColumnNameList());
         List<TableColumn> queryColumnList = appointQueryColumn?new ArrayList<>(this.mySearchList.getColumnNameList().size()):new ArrayList<>();
@@ -692,8 +693,8 @@ public class SQLModelFactory {
      */
     public DeleteModel createDeleteModel() {
         final PropertyColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
-        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
-        final String rootPath = mainMapper.getNickName();
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getEntityName()));
+        final String rootPath = mainMapper.getEntityName();
         translateNameUtils.addLocalMapper(rootPath, mainMapper);
         List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, null , true);
         RelationCondition where = handleWhere(rootPath, mainMapper, this.mySearchList);
@@ -706,8 +707,8 @@ public class SQLModelFactory {
      */
     public InsertModel createInsertModel(){
         final PropertyColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
-        final String rootPath = mainMapper.getNickName();
-        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
+        final String rootPath = mainMapper.getEntityName();
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getEntityName()));
         List<TableColumn> idList = new ArrayList<>(mainMapper.getIds().size());
         List<TableColumn> tableColumnList = new ArrayList<>(mainMapper.getFieldColumnRelations().size());
         for (PropertyBaseColumnRelation id : mainMapper.getIds()) {
@@ -727,8 +728,8 @@ public class SQLModelFactory {
     public UpdateModel createUpdateModel() {
         final PropertyColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
         List<MySearch> updateSearchList = this.mySearchList.filterUpdateSearch();
-        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
-        final String rootPath = mainMapper.getNickName();
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getEntityName()));
+        final String rootPath = mainMapper.getEntityName();
         translateNameUtils.addLocalMapper(rootPath, mainMapper);
         List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper, null, true);
         RelationCondition where = handleWhere(rootPath, mainMapper, this.mySearchList);
@@ -751,8 +752,8 @@ public class SQLModelFactory {
         if (mainMapper.getIds().isEmpty()){
             throw new IllegalArgumentException("no primary key");
         }
-        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getNickName()));
-        final String rootPath = mainMapper.getNickName();
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAbbreviation(mainMapper.getEntityName()));
+        final String rootPath = mainMapper.getEntityName();
         translateNameUtils.addLocalMapper(rootPath,mainMapper);
         List<Condition> whereCondtionList = new ArrayList<>(mainMapper.getIds().size());
 

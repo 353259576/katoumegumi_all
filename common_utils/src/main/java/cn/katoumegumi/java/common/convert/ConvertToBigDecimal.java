@@ -13,20 +13,6 @@ import java.util.Date;
  */
 public class ConvertToBigDecimal implements ConvertBean<BigDecimal> {
 
-//    private final static Class<?>[] classes = new Class[]{
-//            Integer.class,
-//            Short.class,
-//            Byte.class,
-//            Float.class,
-//            Double.class,
-//            Long.class,
-//            BigInteger.class,
-//            Date.class,
-//            java.sql.Date.class,
-//            LocalDate.class,
-//            LocalDateTime.class
-//    };
-
     public BigDecimal convertBean(Integer bean) {
         return new BigDecimal(bean);
     }
@@ -84,12 +70,6 @@ public class ConvertToBigDecimal implements ConvertBean<BigDecimal> {
     @Override
     public BigDecimal convert(Object bean) {
         Class<?> tClass = bean.getClass();
-//        int i = 0;
-//        for (; i < classes.length; ++i) {
-//            if (classes[i] == tClass) {
-//                break;
-//            }
-//        }
         if (tClass == String.class) {
             return convertBean((String)bean);
         }else if (tClass == Integer.class){
