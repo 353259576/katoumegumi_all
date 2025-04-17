@@ -51,7 +51,7 @@ public class WsStringUtils {
     public static void main(String[] args) {
         System.out.println("你好世界".indexOf("你"));
         System.out.println(
-                format("你好，世界 {{你好}}，\\\\{{{我好}，{大家好",s->{
+                format("你好，世界 {{你好，\\\\{{{我好，{大家好",s->{
                     return s;
                 })
         );
@@ -757,6 +757,7 @@ public class WsStringUtils {
         StringBuilder ans = new StringBuilder();
         StringBuilder sub = null;
         boolean ignore = false;
+        boolean isChange = false;
         int count = -1;
         for (char b : chars) {
             if (ignore) {
@@ -784,6 +785,7 @@ public class WsStringUtils {
                 }
             } else if (count == 0) {
                 String temp =handleFunction.apply(sub.toString());
+                isChange = true;
                 if (!WsStringUtils.isEmpty(temp)) {
                     ans.append(temp);
                 }
@@ -794,6 +796,9 @@ public class WsStringUtils {
             } else {
                 sub.append(b);
             }
+        }
+        if (!isChange) {
+            return format;
         }
         if (sub != null) {
             ans.append(DELIM_START);
