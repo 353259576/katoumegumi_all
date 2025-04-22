@@ -62,4 +62,9 @@ public class DynamicTableColumn implements TableColumn {
     public PropertyBaseColumnRelation getFieldColumnRelation() {
         return originalTableColumn.getFieldColumnRelation();
     }
+
+    @Override
+    public String getColumnAlias() {
+        return originalTableColumn.getColumnAlias();
+    }
 }

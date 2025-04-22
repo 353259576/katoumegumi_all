@@ -5,15 +5,18 @@ import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.common.OrderByTypeEnums;
 import cn.katoumegumi.java.sql.handler.SqlEntityFactory;
+import cn.katoumegumi.java.sql.handler.model.SqlParameter;
 import cn.katoumegumi.java.sql.model.component.SqlEquation;
 import cn.katoumegumi.java.sql.handler.model.DeleteSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
+import cn.katoumegumi.java.sql.model.component.TableColumn;
 import cn.katoumegumi.java.sql.model.result.SelectModel;
 import cn.katoumegumi.java.sql.model.result.UpdateModel;
 import cn.katoumegumi.java.sql.test.model.LUser;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
+import cn.katoumegumi.java.sql.test.model.UserDetailsRemake;
 import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
 import com.google.gson.Gson;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,6 +25,7 @@ import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Test {
 
@@ -122,28 +126,28 @@ public class Test {
         }*/
         //test2();
 
-        Map<Integer,Integer> map = new HashMap<>();
-        System.out.println(map.put(1,1));
-        System.out.println(map.put(1,1));
-        System.out.println(map.put(1,1));
-        System.out.println(map.put(1,1));
-
         BeanModel beanModel = WsReflectUtils.createBeanModel(User.class);
         System.out.println(beanModel.toString());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(MySearchList.create(User.class)
                 .setAlias("u")
                 .leftJoin(UserDetails.class,t->t.setJoinEntityPath(User::getUserDetails).setAlias("ud1").on(User::getId,UserDetails::getUserId).condition(m->m.eq("ud1",UserDetails::getId,1)))
                 .leftJoin(UserDetails.class,t->t.setJoinEntityPath("ud").setAlias("ud").on(User::getId,UserDetails::getUserId).condition(m->m.eq("ud",UserDetails::getId,1)))
-                /*.gtep("u",User::getName,"u",User::getName)
+                .gtep("u",User::getName,"u",User::getName)
                 .eq(User::getName,"测试")
                 .eq("ud",UserDetails::getNickName,"测试")
                 .eqp("u.name","u.name")
                 .sqlEquation(sqlEquation -> sqlEquation.column(User::getName)
                         .equal().column(User::getPassword))
-                .sort(User::getId,"asc")*/);
+                .sort(User::getId,"asc"));
         SelectModel selectModel = sqlModelFactory.createSelectModel();
+        for (TableColumn tableColumn : selectModel.getSelect()) {
+            System.out.println(tableColumn.getColumnAlias());
+        }
         SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(selectModel);
         System.out.println(selectSqlEntity.getSelectSql());
+        System.out.println(selectSqlEntity.getCountSql());
+        System.out.println(new Gson().toJson(selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList())));
+
 
         System.out.println("productId".matches("^[A-Za-z0-9]+$"));
         System.out.println("productId()".matches("^[A-Za-z0-9]+$"));
@@ -160,7 +164,7 @@ public class Test {
 
         //System.out.println(WsBeanUtils.convertBean(1,String.class));
 
-        test();
+        //test();
 
 
         /*LUser lUser = new LUser();
@@ -180,6 +184,8 @@ public class Test {
         System.out.println(fieldMap);
         System.out.println(fieldMap1);
         List<String> list = new ArrayList<>();
+
+        test2();
     }
 
 
@@ -254,6 +260,31 @@ public class Test {
 //        System.out.println(SqlEntityFactory.handleSelect(sqlModelUtils.transferToSelectModel()).getSelectSql());
         DataSource dataSource = getDataSource();
         BaseDataSourceUtils dataSourceUtils = new BaseDataSourceUtils(dataSource);
+
+        /*for (int i = 0; i < 100; i++){
+            User user = new User();
+            user.setCreateDate(LocalDateTime.now());
+            user.setName("用户" + i);
+            user.setPassword("密码" + i);
+            dataSourceUtils.insert(user);
+            for (int j = 0; j < 10; j++) {
+                UserDetails userDetails = new UserDetails();
+                userDetails.setUserId(user.getId());
+                userDetails.setSex((j & 1) == 0?"男":"女");
+                userDetails.setNickName("用户昵称"+i + "-" + j);
+                dataSourceUtils.insert(userDetails);
+                for (int k = 0; k < 10; k++) {
+                    UserDetailsRemake userDetailsRemake = new UserDetailsRemake();
+                    userDetailsRemake.setUserDetailsId(userDetails.getId());
+                    userDetailsRemake.setRemake("备注"+i + "-" + j +"-" +k);
+                    dataSourceUtils.insert(userDetailsRemake);
+                }
+            }
+
+        }*/
+
+
+
         /*List<User> list = dataSourceUtils.selectList(
                 MySearchList.create(User.class)
                         .leftJoin(UserDetails.class,t->t.setJoinTableNickName(User::getUserDetails).on(User::getId,UserDetails::getUserId))

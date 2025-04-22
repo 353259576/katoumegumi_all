@@ -9,6 +9,7 @@ import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SqlParameter;
 import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
+import cn.katoumegumi.java.sql.model.result.SelectModel;
 import cn.katoumegumi.java.sql.resultSet.strategys.JdkResultSet;
 
 import javax.sql.DataSource;
@@ -30,7 +31,8 @@ public class BaseDataSourceUtils {
 
     public <T> List<T> selectList(MySearchList mySearchList) {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        SelectSqlEntity entity = SqlEntityFactory.createSelectSqlEntity(sqlModelFactory.createSelectModel());
+        SelectModel selectModel = sqlModelFactory.createSelectModel();
+        SelectSqlEntity entity = SqlEntityFactory.createSelectSqlEntity(selectModel);
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -46,7 +48,7 @@ public class BaseDataSourceUtils {
                 preparedStatement.setObject(i + 1, o);
             }
             resultSet = preparedStatement.executeQuery();
-            return sqlModelFactory.convertResult(new JdkResultSet(resultSet));
+            return sqlModelFactory.convertResult(selectModel,new JdkResultSet(resultSet));
         } catch (SQLException exception) {
             exception.printStackTrace();
         } finally {

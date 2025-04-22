@@ -17,11 +17,14 @@ public class JoinTableModel {
 
     private final RelationCondition on;
 
-    public JoinTableModel(TableModel table, TableModel joinTable, TableJoinType joinType, RelationCondition on) {
+    private final boolean queryColumn;
+
+    public JoinTableModel(TableModel table, TableModel joinTable, TableJoinType joinType, RelationCondition on,boolean queryColumn) {
         this.table = table;
         this.joinTable = joinTable;
         this.joinType = joinType == null ? TableJoinType.INNER_JOIN : joinType;
         this.on = on;
+        this.queryColumn = queryColumn;
     }
 
     public TableModel getTable() {
@@ -38,5 +41,9 @@ public class JoinTableModel {
 
     public RelationCondition getOn() {
         return on;
+    }
+
+    public boolean isQueryColumn() {
+        return queryColumn;
     }
 }

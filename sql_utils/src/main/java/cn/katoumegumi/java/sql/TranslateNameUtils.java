@@ -24,12 +24,12 @@ public class TranslateNameUtils {
     /**
      * 原始名称->简写
      */
-    private final Map<String, String> abbreviationMap;
+    private final Map<String, String> aliasMap;
 
     /**
      * 简写->原始名称
      */
-    private final Map<String, String> particularMap;
+    private final Map<String, String> originalNameMap;
 
     /**
      * 防止重复数字
@@ -46,8 +46,8 @@ public class TranslateNameUtils {
     public TranslateNameUtils() {
         this.parent = null;
         this.rootPathPrefixList = new ArrayList<>();
-        this.abbreviationMap = new HashMap<>();
-        this.particularMap = new HashMap<>();
+        this.aliasMap = new HashMap<>();
+        this.originalNameMap = new HashMap<>();
         this.abbreviationNum = new AtomicInteger();
         this.pathMapperMap = new HashMap<>();
     }
@@ -57,23 +57,23 @@ public class TranslateNameUtils {
         this.abbreviationNum = translateNameUtils.abbreviationNum;
         this.pathMapperMap = new HashMap<>();
         this.rootPathPrefixList = new ArrayList<>();
-        this.abbreviationMap = new HashMap<>();
-        this.particularMap = new HashMap<>();
+        this.aliasMap = new HashMap<>();
+        this.originalNameMap = new HashMap<>();
     }
 
 
     /**
      * 创建简称
-     *
      * @param keyword
      * @return
      */
-    public String createAbbreviation(String keyword) {
-        if (keyword.length() < 2) {
-            return keyword + SqlCommonConstants.KEY_COMMON_DELIMITER + abbreviationNum.getAndAdd(1);
-        } else {
-            return keyword.substring(0, 1) + SqlCommonConstants.KEY_COMMON_DELIMITER + abbreviationNum.getAndAdd(1);
+    public String createAlias(String keyword) {
+        String prefixStr = keyword.length() < 2 ? keyword + SqlCommonConstants.KEY_COMMON_DELIMITER : keyword.substring(0, 1) + SqlCommonConstants.KEY_COMMON_DELIMITER;
+        String abbreviation = prefixStr + abbreviationNum.getAndAdd(1);
+        while (aliasMap.containsKey(abbreviation)) {
+            abbreviation = prefixStr + abbreviationNum.getAndAdd(1);
         }
+        return abbreviation;
     }
 
     /**
@@ -82,11 +82,11 @@ public class TranslateNameUtils {
      * @param value 简称
      * @return
      */
-    public String getParticular(String value) {
+    public String getOriginalName(String value) {
         TranslateNameUtils parent = this.parent;
-        String returnValue = particularMap.get(value);
+        String returnValue = originalNameMap.get(value);
         while (returnValue == null && parent != null) {
-            returnValue = parent.particularMap.get(value);
+            returnValue = parent.originalNameMap.get(value);
             parent = parent.parent;
         }
         return returnValue;
@@ -99,17 +99,17 @@ public class TranslateNameUtils {
      * @param keyword
      * @return
      */
-    public String getAbbreviation(String keyword) {
+    public String getAlias(String keyword) {
         TranslateNameUtils parent = this.parent;
-        String value = abbreviationMap.get(keyword);
+        String value = aliasMap.get(keyword);
         while (value == null && parent != null) {
-            value = parent.abbreviationMap.get(keyword);
+            value = parent.aliasMap.get(keyword);
             parent = parent.parent;
         }
         if (value == null) {
-            value = getParticular(keyword);
+            value = getOriginalName(keyword);
             if (value == null) {
-                value = setAbbreviation(keyword);
+                value = setAlias(keyword);
             }
         }
         return value;
@@ -121,12 +121,12 @@ public class TranslateNameUtils {
      * @param keyword
      * @return
      */
-    public String getCurrentAbbreviation(String keyword) {
-        String value = abbreviationMap.get(keyword);
+    public String getCurrentAlias(String keyword) {
+        String value = aliasMap.get(keyword);
         if (value == null) {
-            value = particularMap.get(keyword);
+            value = originalNameMap.get(keyword);
             if (value == null) {
-                value = setAbbreviation(keyword);
+                value = setAlias(keyword);
             }
         }
         return value;
@@ -138,22 +138,22 @@ public class TranslateNameUtils {
      * @param keyword
      * @return
      */
-    public String getCurrentAbbreviationAndNotAutoSet(String keyword) {
-        return abbreviationMap.get(keyword);
+    public String getCurrentAliasAndNotAutoSet(String keyword) {
+        return aliasMap.get(keyword);
     }
 
     /**
      * 设置简称
      *
-     * @param keyword 实际名称
-     * @param value   简称
+     * @param originalName 实际名称
+     * @param alias   简称
      */
-    public void setAbbreviation(String keyword, String value) {
-        if (abbreviationMap.put(keyword, value) != null){
-            throw new IllegalArgumentException(keyword + " already exists");
+    public void setAlias(String originalName, String alias) {
+        if (aliasMap.put(originalName, alias) != null){
+            throw new IllegalArgumentException(originalName + " already exists");
         }
-        if (particularMap.put(value, keyword) != null){
-            throw new IllegalArgumentException("abbreviation:" + value + " already exists");
+        if (originalNameMap.put(alias, originalName) != null){
+            throw new IllegalArgumentException("alias:" + alias + " already exists");
         }
     }
 
@@ -163,9 +163,9 @@ public class TranslateNameUtils {
      * @param keyword
      * @return
      */
-    public String setAbbreviation(String keyword) {
-        String value = createAbbreviation(keyword);
-        setAbbreviation(keyword, value);
+    public String setAlias(String keyword) {
+        String value = createAlias(keyword);
+        setAlias(keyword, value);
         return value;
     }
 
@@ -248,16 +248,6 @@ public class TranslateNameUtils {
             return path;
         }
         return this.parent.getRelativePath(path);
-        /*TranslateNameUtils parent = this.parent;
-        while (parent != null) {
-            for (String prefix : parent.mainClassNameList) {
-                if (path.startsWith(prefix)) {
-                    return path.substring(prefix.length());
-                }
-            }
-            parent = parent.parent;
-        }
-        return path;*/
     }
 
     /**
@@ -278,7 +268,7 @@ public class TranslateNameUtils {
         List<String> pathNameList = WsStringUtils.split(originalPathName, SqlCommonConstants.PATH_COMMON_DELIMITER);
         if (pathNameList.size() == 1){
             String pathName = pathNameList.get(0);
-            String completePath = getParticular(pathName);
+            String completePath = getOriginalName(pathName);
             if (completePath == null) {
                 if (!isCompletePath(pathName)) {
                     completePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + pathName;
@@ -298,53 +288,20 @@ public class TranslateNameUtils {
             }
             return createColumnBaseEntity(column.getName(),completePath,type);
         }
-        
-        
-//        String path;
-//        String fieldName;
-//        originalFieldName = translateTableNickName(rootPath, originalFieldName);
-//        List<String> fieldNameList = WsStringUtils.split(originalFieldName, SqlCommonConstants.PATH_COMMON_DELIMITER);
-//        int size = fieldNameList.size();
-//        if (size == 1) {
-//            fieldName = fieldNameList.get(0);
-//            path = rootPath;
-//        } else if (size == 2) {
-//            fieldName = fieldNameList.get(1);
-//            String key = getParticular(fieldNameList.get(0));
-//            if (key == null) {
-//                if (!startsWithMainClassName(fieldNameList.get(0))) {
-//                    key = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + fieldNameList.get(0);
-//                } else {
-//                    key = fieldNameList.get(0);
-//                }
-//            } else {
-//                return createColumnBaseEntity(fieldName, key, fieldNameList.get(0), type);
-//            }
-//            path = key;
-//
-//        } else {
-//            fieldName = fieldNameList.get(size - 1);
-//            fieldNameList.remove(size - 1);
-//            if (startsWithMainClassName(fieldNameList.get(0))) {
-//                path = String.join(".", fieldNameList);
-//            } else {
-//                path = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + String.join(".", fieldNameList);
-//            }
-//        }
-//        return createColumnBaseEntity(fieldName, path, type);
     }
 
 
     public BaseTableColumn createColumnBaseEntity(final PropertyBaseColumnRelation propertyBaseColumnRelation, final PropertyColumnRelationMapper mapper, final String path) {
-        return new BaseTableColumn(propertyBaseColumnRelation, mapper.getTableName(), path, getAbbreviation(path));
+        return new BaseTableColumn(propertyBaseColumnRelation, mapper.getTableName(), path, getAlias(path));
     }
 
     public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final int type) {
-        return createColumnBaseEntity(fieldName, path, getAbbreviation(path), type);
+        return createColumnBaseEntity(fieldName, path, getAlias(path), type);
     }
 
-    public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final String abbreviation, final int type) {
-        PropertyColumnRelationMapper mapper = getLocalMapper(path);
+    public BaseTableColumn createColumnBaseEntity(final String fieldName, final String path, final String alias, final int type) {
+        PropertyColumnRelationMapper mapper = getLocalMapper(alias);
+        //PropertyColumnRelationMapper mapper = getLocalMapper(path);
         if (mapper == null) {
             throw new NullPointerException("can not find mapper by path:" + path);
         }
@@ -352,7 +309,7 @@ public class TranslateNameUtils {
             mapper = mapper.getBaseTemplateMapper() == null ? mapper : mapper.getBaseTemplateMapper();
         }
         PropertyBaseColumnRelation propertyBaseColumnRelation = mapper.getFieldColumnRelationByFieldName(fieldName);
-        return new BaseTableColumn(propertyBaseColumnRelation, mapper.getTableName(), path, abbreviation);
+        return new BaseTableColumn(propertyBaseColumnRelation, mapper.getTableName(), path, alias);
     }
 
 
@@ -364,66 +321,26 @@ public class TranslateNameUtils {
      */
     public String translateTableNickName(String prefix, String searchSql) {
         return WsStringUtils.format(searchSql,needReplaceStr->{
-            String replaceStr = getParticular(needReplaceStr);
+            String replaceStr = getOriginalName(needReplaceStr);
             if (replaceStr == null) {
-                needReplaceStr = getAddPathTableNickName(prefix, needReplaceStr);
-                return getAbbreviation(needReplaceStr);
+                //needReplaceStr = getAddPathTableNickName(prefix, needReplaceStr);
+                needReplaceStr = getCompleteEntityPath(prefix, needReplaceStr);
+                return getAlias(needReplaceStr);
             } else {
                 return needReplaceStr;
             }
         });
-
-/*        char[] cs = searchSql.toCharArray();
-        List<int[]> locationList = new ArrayList<>();
-
-        boolean isStart = false;
-        int startIndex = 0;
-        for (int i = 0; i < cs.length; ++i) {
-            if (cs[i] == '{') {
-                isStart = true;
-                startIndex = i;
-            } else if (cs[i] == '}' && isStart) {
-                locationList.add(new int[]{startIndex, i});
-            }
-        }
-        if (locationList.isEmpty()) {
-            return searchSql;
-        } else {
-            startIndex = 0;
-            StringBuilder translateStringBuilder = new StringBuilder();
-            String replaceStr;
-
-            for (int[] ints : locationList) {
-                if (ints[0] > startIndex) {
-                    translateStringBuilder.append(Arrays.copyOfRange(cs, startIndex, ints[0]));
-                }
-                String needReplaceStr = new String(Arrays.copyOfRange(cs, ints[0] + 1, ints[1]));
-                replaceStr = getParticular(needReplaceStr);
-                if (replaceStr == null) {
-                    needReplaceStr = getAddPathTableNickName(prefix, needReplaceStr);
-                    translateStringBuilder.append(getAbbreviation(needReplaceStr));
-                } else {
-                    translateStringBuilder.append(needReplaceStr);
-                }
-                startIndex = ints[1] + 1;
-            }
-            if (startIndex < cs.length) {
-                translateStringBuilder.append(Arrays.copyOfRange(cs, startIndex, cs.length));
-            }
-            return translateStringBuilder.toString();
-        }*/
     }
 
 
     /**
-     * 转换sql语句里{}里的字段
-     *
+     * 将{}包裹的文本转换为实体名称
      * @param searchSql
      * @return
      */
-    public String translateToTableName(String searchSql) {
+    public String translateToEntityName(String searchSql) {
         searchSql = WsStringUtils.format(searchSql,s->{
-            String ns = getParticular(s);
+            String ns = getOriginalName(s);
             if (ns == null) {
                 return s;
             }
@@ -434,7 +351,7 @@ public class TranslateNameUtils {
         String s;
         for (int i = 0; i < strs.length; i++) {
             s = strs[i];
-            ns = getParticular(s);
+            ns = getOriginalName(s);
             if (ns != null) {
                 strs[i] = ns;
             }
@@ -445,31 +362,42 @@ public class TranslateNameUtils {
 
     /**
      * 获取完成表名称
-     *
      * @param rootPath
-     * @param originalTableNickName
+     * @param relativePath
      * @return
      */
-    public String getCompleteTableNickName(final String rootPath, String originalTableNickName) {
-        String tableNickName = getCurrentAbbreviationAndNotAutoSet(originalTableNickName);
+    public String getCompleteEntityPath(final String rootPath, String relativePath) {
+        String tableNickName = getCurrentAliasAndNotAutoSet(relativePath);
         if (tableNickName == null) {
-            return getAddPathTableNickName(rootPath, originalTableNickName);
+            //return getAddPathTableNickName(rootPath, relativePath);
+            if (relativePath.length() < rootPath.length()) {
+                relativePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + relativePath;
+            } else {
+                if (relativePath.startsWith(rootPath)) {
+                    if (!(relativePath.length() == rootPath.length() || relativePath.charAt(rootPath.length()) == SqlCommonConstants.PATH_COMMON_DELIMITER)) {
+                        relativePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + relativePath;
+                    }
+                } else {
+                    relativePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + relativePath;
+                }
+            }
+            return relativePath;
         }
-        return originalTableNickName;
+        return relativePath;
     }
 
-    public String getAddPathTableNickName(final String rootPath, String tableNickName) {
-        if (tableNickName.length() < rootPath.length()) {
-            tableNickName = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableNickName;
+/*    public String getAddPathTableNickName(final String rootPath, String relativePath) {
+        if (relativePath.length() < rootPath.length()) {
+            relativePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + relativePath;
         } else {
-            if (tableNickName.startsWith(rootPath)) {
-                if (!(tableNickName.length() == rootPath.length() || tableNickName.charAt(rootPath.length()) == SqlCommonConstants.PATH_COMMON_DELIMITER)) {
-                    tableNickName = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableNickName;
+            if (relativePath.startsWith(rootPath)) {
+                if (!(relativePath.length() == rootPath.length() || relativePath.charAt(rootPath.length()) == SqlCommonConstants.PATH_COMMON_DELIMITER)) {
+                    relativePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + relativePath;
                 }
             } else {
-                tableNickName = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + tableNickName;
+                relativePath = rootPath + SqlCommonConstants.PATH_COMMON_DELIMITER + relativePath;
             }
         }
-        return tableNickName;
-    }
+        return relativePath;
+    }*/
 }

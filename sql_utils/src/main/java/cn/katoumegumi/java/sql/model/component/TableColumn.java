@@ -40,6 +40,12 @@ public interface TableColumn {
      */
     String getBeanPropertyName();
 
+    /**
+     * 获取列别名
+     * @return
+     */
+    String getColumnAlias();
+
     PropertyBaseColumnRelation getFieldColumnRelation();
 
 }

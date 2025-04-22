@@ -41,7 +41,6 @@ public class MapperDictTree {
             current = current.getChildMap().computeIfAbsent(mapperName, name -> new MapperDictTree(depth + 1));
         }
         current.setCurrentMapperName(fieldColumnRelationMapperName);
-        //current.setCurrentMapper(fieldColumnRelationMapperName.getMapper());
     }
 
     public int getDepth() {

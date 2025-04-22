@@ -2,6 +2,7 @@ package cn.katoumegumi.java.sql.model.component;
 
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.sql.SQLModelFactory;
+import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 
 /**
@@ -16,6 +17,8 @@ public class BaseTableColumn implements TableColumn {
     private final String tablePath;
 
     private final String tableAlias;
+
+    private String columnAlias;
 
     private final PropertyBaseColumnRelation propertyBaseColumnRelation;
 
@@ -85,6 +88,14 @@ public class BaseTableColumn implements TableColumn {
     @Override
     public PropertyBaseColumnRelation getFieldColumnRelation() {
         return propertyBaseColumnRelation;
+    }
+
+    @Override
+    public String getColumnAlias() {
+        if (this.columnAlias == null) {
+            this.columnAlias = this.tableAlias + SqlCommonConstants.SQL_COMMON_DELIMITER + this.propertyBaseColumnRelation.getAbbreviation();
+        }
+        return this.columnAlias;
     }
 
     /**

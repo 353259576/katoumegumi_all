@@ -11,6 +11,7 @@ import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
+import cn.katoumegumi.java.sql.model.result.SelectModel;
 import cn.katoumegumi.java.sql.resultSet.strategys.JdkResultSet;
 import cn.katoumegumi.java.sql.model.component.SqlLimit;
 import cn.katoumegumi.java.sql.handler.model.SqlParameter;
@@ -240,18 +241,19 @@ public class WsJdbcUtils {
      */
     public <T> List<T> getListT(MySearchList mySearchList) {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(sqlModelFactory.createSelectModel());
+        SelectModel selectModel = sqlModelFactory.createSelectModel();
+        SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(selectModel);
         String sql = selectSqlEntity.getSelectSql();
         if (log.isDebugEnabled()) {
             log.debug(sql);
         }
         List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
-        return queryList(sql, parameterList, sqlModelFactory);
+        return queryList(sql, parameterList,selectModel, sqlModelFactory);
     }
 
-    private <T> List<T> queryList(String sql, List<Object> parameterList, SQLModelFactory sqlModelFactory) {
+    private <T> List<T> queryList(String sql, List<Object> parameterList,SelectModel selectModel, SQLModelFactory sqlModelFactory) {
         return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), rs -> {
-            return sqlModelFactory.convertResult(new JdkResultSet(rs));
+            return sqlModelFactory.convertResult(selectModel,new JdkResultSet(rs));
         });
     }
 
@@ -319,7 +321,8 @@ public class WsJdbcUtils {
      */
     public <T> IPage<T> getTPage(MySearchList mySearchList) {
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(sqlModelFactory.createSelectModel());
+        SelectModel selectModel = sqlModelFactory.createSelectModel();
+        SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(selectModel);
         String sql = selectSqlEntity.getSelectSql();
         String countSql = selectSqlEntity.getCountSql();
         if (log.isDebugEnabled()) {
@@ -334,7 +337,7 @@ public class WsJdbcUtils {
         SqlLimit sqlLimit = mySearchList.getSqlLimit();
         List<T> tList;
         if(count > sqlLimit.getOffset()) {
-            tList = queryList(sql, parameterList, sqlModelFactory);
+            tList = queryList(sql, parameterList,selectModel, sqlModelFactory);
         }else {
             tList = new ArrayList<>(0);
         }

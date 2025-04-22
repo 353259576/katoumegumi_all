@@ -17,7 +17,7 @@ public class FieldColumnRelationMapperName {
     /**
      * 简称
      */
-    private final String abbreviation;
+    private final String alias;
 
     /**
      * 完整名称
@@ -34,9 +34,9 @@ public class FieldColumnRelationMapperName {
      */
     private final int[] completeNameSplitSignNameList;
 
-    public FieldColumnRelationMapperName(int index, String abbreviation, String completeName, PropertyColumnRelationMapper mapper) {
+    public FieldColumnRelationMapperName(int index, String alias, String completeName, PropertyColumnRelationMapper mapper) {
         this.index = index;
-        this.abbreviation = abbreviation;
+        this.alias = alias;
         this.completeName = completeName;
         this.mapper = mapper;
         this.completeNameSplitNameList = WsStringUtils.splitArray(this.completeName, '.');
@@ -71,8 +71,8 @@ public class FieldColumnRelationMapperName {
         return completeNameSplitSignNameList;
     }
 
-    public String getAbbreviation() {
-        return abbreviation;
+    public String getAlias() {
+        return alias;
     }
 
     public int getIndex() {

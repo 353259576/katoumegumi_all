@@ -42,7 +42,8 @@ public class MysqlSqlHandler implements SqlHandler{
                 chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
             }
             columnSql.append(SqlCommonConstants.SPACE)
-                    .append(SQLModelFactory.ignoreKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()))
+                    //.append(SQLModelFactory.ignoreKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()))
+                    .append(SQLModelFactory.ignoreKeyword(tableColumn.getColumnAlias()))
                     .append(SqlCommonConstants.COMMA);
         }
         TableColumn tableColumn = selectModel.getSelect().get(columnSize - 1);
@@ -56,7 +57,7 @@ public class MysqlSqlHandler implements SqlHandler{
             chooseHandleConditionFunction(dynamicTableColumn.getDynamicColumn(), columnSql, valueList);
         }
         columnSql.append(SqlCommonConstants.SPACE)
-                .append(SQLModelFactory.ignoreKeyword(tableColumn.getTableAlias() + SqlCommonConstants.PATH_COMMON_DELIMITER + tableColumn.getBeanPropertyName()));
+                .append(SQLModelFactory.ignoreKeyword(tableColumn.getColumnAlias()));
         //处理关联表
         StringBuilder tableAndJoinTableSql = new StringBuilder();
         tableAndJoinTableSql.append(SqlCommonConstants.FROM)
