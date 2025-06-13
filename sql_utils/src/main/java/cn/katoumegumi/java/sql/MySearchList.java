@@ -1011,7 +1011,9 @@ public class MySearchList {
         for (Consumer<MySearchList> consumer : consumers) {
             MySearchList mySearchList = MySearchList.create();
             consumer.accept(mySearchList);
-            if (WsCollectionUtils.isNotEmpty(mySearchList.getAll()) || WsCollectionUtils.isNotEmpty(mySearchList.getAnds()) || WsCollectionUtils.isNotEmpty(mySearchList.getOrs())) {
+            if (WsCollectionUtils.isNotEmpty(mySearchList.getAll()) ||
+                    WsCollectionUtils.isNotEmpty(mySearchList.getAnds()) ||
+                    WsCollectionUtils.isNotEmpty(mySearchList.getOrs())) {
                 ands.add(mySearchList);
             }
         }
@@ -1024,7 +1026,9 @@ public class MySearchList {
         for (Consumer<MySearchList> consumer : consumers) {
             MySearchList mySearchList = MySearchList.create();
             consumer.accept(mySearchList);
-            if (WsCollectionUtils.isNotEmpty(mySearchList.getAll()) || WsCollectionUtils.isNotEmpty(mySearchList.getAnds()) || WsCollectionUtils.isNotEmpty(mySearchList.getOrs())) {
+            if (WsCollectionUtils.isNotEmpty(mySearchList.getAll()) ||
+                    WsCollectionUtils.isNotEmpty(mySearchList.getAnds()) ||
+                    WsCollectionUtils.isNotEmpty(mySearchList.getOrs())) {
                 ors.add(mySearchList);
             }
         }

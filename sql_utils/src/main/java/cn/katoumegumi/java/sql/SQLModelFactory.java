@@ -71,11 +71,6 @@ public class SQLModelFactory {
      */
     private final Class<?> mainClass;
 
-    /**
-     * 缓存的sqlEntity
-     */
-    private SelectModel cacheSelectModel;
-
     public SQLModelFactory(MySearchList mySearchList) {
         this(mySearchList, new TranslateNameUtils(), false);
     }
@@ -90,7 +85,7 @@ public class SQLModelFactory {
         mainClass = mySearchList.getMainClass();
         PropertyColumnRelationMapper mapper = analysisClassRelation(mainClass);
         String rootPath = mapper.getEntityName();
-        //设置rootpath
+        //设置root path
         if (WsStringUtils.isBlank(mySearchList.getAlias())) {
             translateNameUtils.setAlias(rootPath);
         } else {
@@ -212,18 +207,15 @@ public class SQLModelFactory {
     }
 
     private static Object createNeedMergeValue(WsResultSet resultSet, ExistEntityInfo parentExistEntityInfo, MapperDictTree mapperDictTree, List<int[][]> locationList, List<PropertyBaseColumnRelation> columnRelationList, boolean isArray) throws SQLException {
-        if (parentExistEntityInfo == null) {
+        if (parentExistEntityInfo == null || !isArray) {
             return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
         }
-        if (!isArray) {
-            return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
-        }
-        PropertyColumnRelationMapper mapper = mapperDictTree.getCurrentMapperName().getMapper();
+        FieldColumnRelationMapperName mapperName = mapperDictTree.getCurrentMapperName();
+        PropertyColumnRelationMapper mapper = mapperName.getMapper();
         if (mapper.getIds().isEmpty()) {
             //没有id数据不能合并
             return createValue(resultSet, mapperDictTree, locationList, columnRelationList);
         }
-        FieldColumnRelationMapperName mapperName = mapperDictTree.getCurrentMapperName();
         int[][] location = locationList.get(mapperName.getIndex());
         Object[] ids = new Object[mapper.getIds().size()];
         boolean isNotNullObject = false;
@@ -521,7 +513,7 @@ public class SQLModelFactory {
             return convertMultiResult(selectModel,resultSet);
         } else {
             List<Object> tList = new ArrayList<>();
-            TableColumn tableColumn = this.cacheSelectModel.getSelect().get(0);
+            TableColumn tableColumn = selectModel.getSelect().get(0);
             try {
                 while (resultSet.next()) {
                     Object o = WsBeanUtils.baseTypeConvert(resultSet.getObject(1), tableColumn.getBeanProperty().getPropertyClass());
@@ -540,19 +532,15 @@ public class SQLModelFactory {
         try {
             final int length = resultSet.getColumnCount();
             if (length == 0) {
-                return new ArrayList<>(0);
+                return new ArrayList<>();
             }
             PropertyColumnRelationMapper mainMapper = selectModel.getFrom().getTable();
             String rootPath = mainMapper.getEntityName();
-            Map<String,TableColumn> tableColumnMap = new HashMap<>(selectModel.getSelect().size());
-            for (TableColumn tableColumn : selectModel.getSelect()) {
-                tableColumnMap.put(tableColumn.getColumnAlias(),tableColumn);
-            }
-
             List<PropertyBaseColumnRelation> columnRelationList = new ArrayList<>(length);
             List<int[][]> localtionList = new ArrayList<>();
-            Map<String, FieldColumnRelationMapperName> abbreviationAndMapperNameMap = new HashMap<>();
+            Map<String, FieldColumnRelationMapperName> aliasAndMapperNameMap = new HashMap<>();
             String columnNameTemp;
+            TableColumn tableColumnTemp;
             List<String> nameListTemp;
             PropertyColumnRelationMapper mapperTemp;
             PropertyBaseColumnRelation propertyBaseColumnRelationTemp;
@@ -566,16 +554,15 @@ public class SQLModelFactory {
 
             for (int i = 0; i < length; i++) {
                 columnNameTemp = resultSet.getColumnLabel(i + 1);
-                TableColumn tableColumn = tableColumnMap.get(columnNameTemp);
+                tableColumnTemp = selectModel.getSelect().get(i);
                 nameListTemp = WsStringUtils.split(columnNameTemp, SqlCommonConstants.SQL_COMMON_DELIMITER);
                 //获取映射名称
-                fieldColumnRelationMapperNameTemp = abbreviationAndMapperNameMap.get(nameListTemp.get(0));
+                fieldColumnRelationMapperNameTemp = aliasAndMapperNameMap.get(nameListTemp.get(0));
                 if (fieldColumnRelationMapperNameTemp == null) {
-                    mapperTemp = translateNameUtils.getLocalMapper(tableColumn.getTableAlias());
-                    //mapperTemp = translateNameUtils.getLocalMapper(tableColumn.getTablePath());
-                    fieldColumnRelationMapperNameTemp = new FieldColumnRelationMapperName(mapperNameIndex++, tableColumn.getTableAlias(), tableColumn.getTablePath(), mapperTemp);
+                    mapperTemp = translateNameUtils.getLocalMapper(tableColumnTemp.getTableAlias());
+                    fieldColumnRelationMapperNameTemp = new FieldColumnRelationMapperName(mapperNameIndex++, tableColumnTemp.getTableAlias(), tableColumnTemp.getTablePath(), mapperTemp);
                     mapperNameSign = fieldColumnRelationMapperNameTemp.setCompleteNameSplitSignNameList(mapperNameAndSignMap, mapperNameSign);
-                    abbreviationAndMapperNameMap.put(fieldColumnRelationMapperNameTemp.getAlias(), fieldColumnRelationMapperNameTemp);
+                    aliasAndMapperNameMap.put(fieldColumnRelationMapperNameTemp.getAlias(), fieldColumnRelationMapperNameTemp);
                 } else {
                     mapperTemp = fieldColumnRelationMapperNameTemp.getMapper();
                 }
@@ -591,7 +578,7 @@ public class SQLModelFactory {
                 }
 
                 //填写位置数组
-                propertyBaseColumnRelationTemp = tableColumn.getFieldColumnRelation();
+                propertyBaseColumnRelationTemp = tableColumnTemp.getFieldColumnRelation();
                 if (propertyBaseColumnRelationTemp.isId()) {
                     locationListTemp[0][mapperTemp.getLocation(propertyBaseColumnRelationTemp)] = i;
                 } else {
@@ -601,7 +588,7 @@ public class SQLModelFactory {
             }
 
             MapperDictTree mapperDictTree = new MapperDictTree();
-            for (FieldColumnRelationMapperName name : abbreviationAndMapperNameMap.values()) {
+            for (FieldColumnRelationMapperName name : aliasAndMapperNameMap.values()) {
                 mapperDictTree.add(name);
             }
 
@@ -626,14 +613,31 @@ public class SQLModelFactory {
             return (List<T>) valueList;
 
 
-        } catch (SQLException throwables) {
-            log.error(throwables.getMessage(),throwables);
-            return new ArrayList<>(0);
+        } catch (SQLException e) {
+            log.error(e.getMessage(),e);
+            return new ArrayList<>();
         }
     }
 
     public TranslateNameUtils getTranslateNameUtils() {
         return translateNameUtils;
+    }
+
+
+    public SelectModel createSelectCountModel() {
+        final PropertyColumnRelationMapper mainMapper = analysisClassRelation(this.mySearchList.getMainClass());
+        TableModel from = new TableModel(mainMapper, translateNameUtils.getCurrentAlias(mainMapper.getEntityName()));
+        final String rootPath = mainMapper.getEntityName();
+        translateNameUtils.addLocalMapper(from.getAlias(), mainMapper);
+        List<TableColumn> queryColumnList = new ArrayList<>(1);
+        if (WsCollectionUtils.isNotEmpty(mainMapper.getIds())) {
+            queryColumnList.add(translateNameUtils.getColumnBaseEntity(QueryColumn.of(mainMapper.getIds().get(0).getBeanProperty().getPropertyName()), rootPath, 2));
+        }else {
+            queryColumnList.add(translateNameUtils.getColumnBaseEntity(QueryColumn.of(mainMapper.getFieldColumnRelations().get(0).getBeanProperty().getPropertyName()), rootPath, 2));
+        }
+        List<JoinTableModel> joinTableModelList = handleJoinTableModel(rootPath, mainMapper);
+        RelationCondition where = handleWhere(rootPath, mainMapper, this.mySearchList);
+        return new SelectModel(queryColumnList, from, joinTableModelList, where, null, this.mySearchList.getSqlLimit());
     }
 
 
@@ -684,9 +688,8 @@ public class SQLModelFactory {
                 }
             }
         }
-        SelectModel selectModel = new SelectModel(queryColumnList, from, joinTableModelList, where, orderByConditionList, this.mySearchList.getSqlLimit());
-        this.cacheSelectModel = selectModel;
-        return selectModel;
+        //this.cacheSelectModel = selectModel;
+        return new SelectModel(queryColumnList, from, joinTableModelList, where, orderByConditionList, this.mySearchList.getSqlLimit());
     }
 
     /**
@@ -783,7 +786,7 @@ public class SQLModelFactory {
         }
         List<Condition> updateCondtionList = new ArrayList<>(mainMapper.getFieldColumnRelations().size());
         for (PropertyBaseColumnRelation baseColumn : mainMapper.getFieldColumnRelations()) {
-            Condition condition = createConditionBySqlInterceptor(rootPath, mainMapper, baseColumn, SqlEquation.Symbol.EQUAL, SELECT_SQL_INTERCEPTOR_MAP);
+            Condition condition = createConditionBySqlInterceptor(rootPath, mainMapper, baseColumn, SqlEquation.Symbol.EQUAL, UPDATE_SQL_INTERCEPTOR_MAP);
             if (condition == null) {
                 Object o = baseColumn.getBeanProperty().getValue(t);
                 if (o == null) {
@@ -1031,7 +1034,7 @@ public class SQLModelFactory {
     }
 
     /**
-     * mysearch转condition
+     * mySearch转condition
      *
      * @param rootPath
      * @param searches

@@ -355,6 +355,18 @@ public class WsJdbcUtils {
         return getTPage(mySearchList);
     }
 
+    public Long getCount(MySearchList mySearchList) {
+        SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
+        SelectModel selectModel = sqlModelFactory.createSelectCountModel();
+        SelectSqlEntity selectSqlEntity = SqlEntityFactory.createSelectSqlEntity(selectModel);
+        String countSql = selectSqlEntity.getCountSql();
+        if (log.isDebugEnabled()) {
+            log.debug(countSql);
+        }
+        List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
+        return querySingleColumnObject(countSql,parameterList,Long.class);
+    }
+
     /**
      * 添加或保存（只支持单主键）
      * @param t
