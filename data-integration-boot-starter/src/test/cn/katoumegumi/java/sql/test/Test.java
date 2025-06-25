@@ -429,7 +429,7 @@ public class Test {
 
 
     public static DataSource getDataSource(){
-        String url = "jdbc:mysql://192.168.3.18:3306/lx?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true";
+        String url = "jdbc:mysql://192.168.3.18:3306/lx?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true";
         String userName = "root";
         String password = "123456";
         String driverClassName = "com.mysql.cj.jdbc.Driver";

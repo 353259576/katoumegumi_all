@@ -48,11 +48,7 @@ public class BeanPropertyModel {
             this.propertyClass = this.getMethod.getReturnType();
             propertyType = this.getMethod.getGenericReturnType();
         }
-        if (propertyType != null){
-            genericClass = WsReflectUtils.getGenericsType(propertyType);
-        }else {
-            genericClass = null;
-        }
+        this.genericClass = WsReflectUtils.getGenericsType(propertyType);
     }
 
     public String getPropertyName() {

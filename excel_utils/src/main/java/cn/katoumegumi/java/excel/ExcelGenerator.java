@@ -39,7 +39,7 @@ public class ExcelGenerator<T> {
 
     private static final Field XSSFSHEET_WORKSHEET_FIELD = WsReflectUtils.getFieldByName(XSSFSheet.class,"worksheet");
 
-    private ExcelSheetGenerator<T> excelSheetGenerator;
+    private final ExcelSheetGenerator<T> excelSheetGenerator;
 
 
 
