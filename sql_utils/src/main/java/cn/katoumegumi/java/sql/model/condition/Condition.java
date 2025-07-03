@@ -9,6 +9,6 @@ public interface Condition {
 //     * 转换为sql语句
 //     * @return sql语句与参数数组
 //     */
-//    public SqlStringAndParameters toSqlString();
+//    public SqlStringModel toSqlString();
 
 }

@@ -185,7 +185,8 @@ public class Test {
         System.out.println(fieldMap1);
         List<String> list = new ArrayList<>();
 
-        test2();
+        //test2();
+        test();
     }
 
 

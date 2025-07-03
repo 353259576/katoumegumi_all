@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.sql.common;
 
-import cn.katoumegumi.java.sql.model.component.SqlStringAndParameters;
+import cn.katoumegumi.java.sql.model.component.SqlStringModel;
 
 public interface SqlCommonConstants {
 
@@ -109,11 +109,11 @@ public interface SqlCommonConstants {
     /**
      * 条件为空
      */
-    SqlStringAndParameters EMPTY_SQL_STRING_AND_PARAMETERS = new SqlStringAndParameters(null, null, 0, ValueTypeConstants.NULL_TYPE);
+    SqlStringModel EMPTY_SQL_STRING_AND_PARAMETERS = new SqlStringModel(null, null, 0, ValueTypeConstants.NULL_TYPE);
 
     /**
      * null值
      */
-    SqlStringAndParameters NULL_VALUE_SQL_STRING_AND_PARAMETERS = new SqlStringAndParameters(null, null, 1, ValueTypeConstants.NULL_VALUE_MODEL);
+    SqlStringModel NULL_VALUE_SQL_STRING_AND_PARAMETERS = new SqlStringModel(null, null, 1, ValueTypeConstants.NULL_VALUE_MODEL);
 
 }
