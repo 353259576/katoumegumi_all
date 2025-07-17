@@ -8,6 +8,9 @@
     <artifactId>katoumegumi_all</artifactId>
     <packaging>pom</packaging>
     <version>${revision}</version>
+
+    <name>katoumegumi_all</name>
+
     <modules>
         <module>data-integration-boot-starter</module>
         <module>sql_utils</module>
@@ -40,7 +43,9 @@
         <system>github</system>
         <url>https://github.com/353259576/katoumegumi_all/issues</url>
     </issueManagement>
-
+    <description>
+        katoumegumi_all
+    </description>
     <properties>
         <revision>1.0.8.20250717</revision>
         <java.version>11</java.version>
@@ -264,27 +269,6 @@
         </repository>
     </repositories>
 
-    <!--<build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>-->
-
-
     <build>
         <finalName>${project.name}</finalName>
         <resources>
@@ -391,11 +375,11 @@
                     <skip>true</skip>
                 </configuration>-->
             </plugin>
-            <!--gpg加密插件-->
+            <!-- GPG 加密插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
+                <version>3.2.8</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -403,11 +387,17 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
+                        <configuration>
+                            <keyname>${gpg.keyname}</keyname>
+                            <passphraseServerId>${gpg.keyname}</passphraseServerId>
+                            <executable>gpg2</executable>  <!-- 指定gpg2路径 -->
+<!--                            <gpgArguments>-->
+<!--                                <arg>&#45;&#45;pinentry-mode</arg>-->
+<!--                                <arg>loopback</arg>  &lt;!&ndash; 解决密码输入问题 &ndash;&gt;-->
+<!--                            </gpgArguments>-->
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.central</groupId>
@@ -421,41 +411,6 @@
 
         </plugins>
     </build>
-
-    <!--<profiles>
-        <profile>
-            &lt;!&ndash; 本地开发环境 &ndash;&gt;
-            <id>dev</id>
-            <properties>
-                <profiles.active>dev</profiles.active>
-            </properties>
-            <activation>
-                &lt;!&ndash; 设置默认激活这个配置 &ndash;&gt;
-                <activeByDefault>true</activeByDefault>
-            </activation>
-
-        </profile>
-        <profile>
-            &lt;!&ndash;打包环境&ndash;&gt;
-            <id>release</id>
-            <properties>
-                <profiles.active>release</profiles.active>
-            </properties>
-            &lt;!&ndash;定义snapshots库和releases库的nexus地址&ndash;&gt;
-
-        </profile>
-    </profiles>-->
-    <!--<distributionManagement>
-        <snapshotRepository>
-            &lt;!&ndash;oss需要对应到settings.xml下的service的id&ndash;&gt;
-            <id>oss</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>oss</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>-->
 
 
 </project>
