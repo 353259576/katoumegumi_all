@@ -7,13 +7,12 @@
     <groupId>cn.katoumegumi.java</groupId>
     <artifactId>katoumegumi_all</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.8-SNAPSHOT</version>
+    <version>${revision}</version>
     <modules>
         <module>data-integration-boot-starter</module>
         <module>sql_utils</module>
         <module>code_generator</module>
         <module>common_utils</module>
-        <!--<module>http_client</module>-->
         <module>excel_utils</module>
         <module>vertx-mysql-client-support</module>
     </modules>
@@ -24,6 +23,7 @@
             <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
+
     <developers>
         <developer>
             <name>ws</name>
@@ -31,16 +31,21 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:https://gitee.com/w1048058226/ws_all.git</connection>
-        <developerConnection>scm:https://gitee.com/w1048058226/ws_all.git</developerConnection>
-        <url>https://gitee.com/w1048058226/ws_all.git</url>
+        <connection>scm:https://github.com/353259576/katoumegumi_all.git</connection>
+        <developerConnection>scm:https://github.com/353259576/katoumegumi_all.git</developerConnection>
+        <url>https://github.com/353259576/katoumegumi_all.git</url>
     </scm>
+    <url>https://github.com/353259576/katoumegumi_all</url>
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/353259576/katoumegumi_all/issues</url>
+    </issueManagement>
 
     <properties>
+        <revision>1.0.8.20250717</revision>
         <java.version>11</java.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <megumi.version>1.0.8-SNAPSHOT</megumi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>3.3.5</spring-boot.version>
         <zxing.version>3.4.1</zxing.version>
@@ -72,13 +77,13 @@
             <dependency>
                 <groupId>cn.katoumegumi.java</groupId>
                 <artifactId>common_utils</artifactId>
-                <version>${megumi.version}</version>
+                <version>${revision}</version>
             </dependency>
 
             <dependency>
                 <groupId>cn.katoumegumi.java</groupId>
                 <artifactId>sql_utils</artifactId>
-                <version>${megumi.version}</version>
+                <version>${revision}</version>
             </dependency>
 
             <!--<dependency>
@@ -315,53 +320,76 @@
                     <target>${maven.compiler.target}</target>
                     <source>${maven.compiler.source}</source>
                     <encoding>UTF-8</encoding>
-                    <skip>true</skip>
+                    <!--<skip>true</skip>-->
                 </configuration>
             </plugin>
-            <!--<plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.2.5</version>
-            </plugin>-->
-
-            <!--生产源码文件插件-->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.2.7</version>
                 <configuration>
-                    <attach>true</attach>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>compile</phase>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--源代码-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.1.0</version>
+                <inherited>true</inherited>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludeResources>true</excludeResources>
+                    <useDefaultExcludes>true</useDefaultExcludes>
+                </configuration>
             </plugin>
+
             <!--生产javadoc插件-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
+                        <id>bundle-sources</id>
                         <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
+                <!--<configuration>
                     <show>private</show>
                     <nohelp>true</nohelp>
                     <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
                     <docencoding>UTF-8</docencoding>
                     <skip>true</skip>
-                </configuration>
+                </configuration>-->
             </plugin>
             <!--gpg加密插件-->
             <plugin>
@@ -381,7 +409,15 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
 
         </plugins>
     </build>
@@ -409,9 +445,9 @@
 
         </profile>
     </profiles>-->
-    <distributionManagement>
+    <!--<distributionManagement>
         <snapshotRepository>
-            <!--oss需要对应到settings.xml下的service的id-->
+            &lt;!&ndash;oss需要对应到settings.xml下的service的id&ndash;&gt;
             <id>oss</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </snapshotRepository>
@@ -419,7 +455,7 @@
             <id>oss</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
-    </distributionManagement>
+    </distributionManagement>-->
 
 
 </project>

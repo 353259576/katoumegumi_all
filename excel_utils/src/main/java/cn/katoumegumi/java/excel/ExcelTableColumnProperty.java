@@ -2,6 +2,7 @@ package cn.katoumegumi.java.excel;
 
 /**
  * excel表列属性
+ * @param <T> 行数据类型
  * @author ws
  */
 public class ExcelTableColumnProperty<T> {

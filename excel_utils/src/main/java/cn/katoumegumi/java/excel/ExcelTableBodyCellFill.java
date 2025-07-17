@@ -2,6 +2,7 @@ package cn.katoumegumi.java.excel;
 
 /**
  * excel表体单元格填充
+ * @param <T> 行数据类型
  * @author ws
  */
 public interface ExcelTableBodyCellFill<T> {

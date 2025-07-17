@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+/**
+ * 表sheet生成器
+ * @param <T> 行数据类型
+ */
 public class ExcelSheetGenerator<T> {
 
     private final ExcelGenerator<?> excelGenerator;

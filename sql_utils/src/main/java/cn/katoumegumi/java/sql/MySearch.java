@@ -20,19 +20,34 @@ public class MySearch {
         this.value = value;
     }
 
-
+    /**
+     * 获取列
+     * @return
+     */
     public QueryElement getColumn() {
         return column;
     }
 
+    /**
+     * 获取符号
+     * @return
+     */
     public SqlOperator getOperator() {
         return operator;
     }
 
+    /**
+     * 获取值
+     * @return
+     */
     public Object getValue() {
         return value;
     }
 
+    /**
+     * 设置值
+     * @param value
+     */
     public void setValue(Object value) {
         this.value = value;
     }

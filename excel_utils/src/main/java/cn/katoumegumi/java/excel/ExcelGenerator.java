@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 
 /**
  * excel表格生成器
- *
+ * @param <T> valueList 类型
  * @author ws
  */
 public class ExcelGenerator<T> {
@@ -56,9 +56,8 @@ public class ExcelGenerator<T> {
 
     /**
      * 计算Excel对应横向格子id
-     *
-     * @param index
-     * @return
+     * @param index 索引
+     * @return 获取excel列索引
      */
     public static String getExcelIndex(Integer index) {
         //index -= 1;
@@ -97,6 +96,11 @@ public class ExcelGenerator<T> {
         return this;
     }
 
+    /**
+     * 添加列配置
+     * @param consumer 列配置
+     * @return
+     */
     public ExcelGenerator<T> addColumnProperty(Consumer<ExcelTableColumnProperty<T>> consumer) {
         excelSheetGenerator.addColumnProperty(consumer);
         return this;
@@ -107,6 +111,10 @@ public class ExcelGenerator<T> {
         return this;
     }
 
+    /**
+     * 生成文件byte[]
+     * @return
+     */
     public byte[] build() {
         try {
             excelSheetGenerator.createTitle()
@@ -132,9 +140,8 @@ public class ExcelGenerator<T> {
 
     /**
      * 合并单元格去除了验证
-     * @param sheet
-     * @param region
-     * @return
+     * @param sheet Sheet
+     * @param region CellRangeAddress
      */
     public void addMergedRegion(Sheet sheet,CellRangeAddress region) {
         if (region.getNumberOfCells() < 2) {
