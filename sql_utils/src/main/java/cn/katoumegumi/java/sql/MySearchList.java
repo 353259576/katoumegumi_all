@@ -525,48 +525,7 @@ public class MySearchList {
         return isNotNull(null, columnFieldName);
     }
 
-    /**
-     * 排序
-     *
-     * @param tableName
-     * @param columnFieldName
-     * @param value
-     * @return
-     */
-    public MySearchList sort(String tableName, String columnFieldName, Object value) {
-        return add(QueryColumn.of(tableName, columnFieldName), SqlOperator.ORDER_BY, value);
-    }
 
-    public MySearchList sort(String columnFieldName, Object value) {
-        if (WsStringUtils.isBlank(columnFieldName)) {
-            throw new IllegalArgumentException("columnFieldName is null or empty");
-        }
-        String[] pathAndName = WsStringUtils.splitArray(columnFieldName,'.');
-        boolean isColumn = true;
-        for (String s : pathAndName) {
-            if (!s.matches("^[A-Za-z0-9]+$")) {
-                isColumn = false;
-                break;
-            }
-        }
-        if (isColumn){
-            if (pathAndName.length <= 1) {
-                return add(QueryColumn.of(null,pathAndName[0]),SqlOperator.ORDER_BY,value);
-            }else {
-                return add(QueryColumn.of(pathAndName[0],pathAndName[1]),SqlOperator.ORDER_BY,value);
-            }
-        }else {
-            return add(QuerySqlString.of(columnFieldName),SqlOperator.ORDER_BY,value);
-        }
-    }
-
-    public <T> MySearchList sort(String tableName, SFunction<T, ?> columnFieldName, Object value) {
-        return add(QueryColumn.of(tableName, columnFieldName), SqlOperator.ORDER_BY, value);
-    }
-
-    public <T> MySearchList sort(SFunction<T, ?> columnFieldName, Object value) {
-        return sort(null, columnFieldName, value);
-    }
 
     /**
      * between
@@ -984,6 +943,94 @@ public class MySearchList {
 
     public <T> MySearchList divide(SFunction<T, ?> columnFieldName, Object value) {
         return add(QueryColumn.of(null, columnFieldName), SqlOperator.DIVIDE, value);
+    }
+
+
+    /**
+     * 排序
+     *
+     * @param tableName
+     * @param columnFieldName
+     * @param value
+     * @return
+     */
+    public MySearchList sort(String tableName, String columnFieldName, Object value) {
+        return add(QueryColumn.of(tableName, columnFieldName), SqlOperator.ORDER_BY, value);
+    }
+
+    public MySearchList sort(String columnFieldName, Object value) {
+        if (WsStringUtils.isBlank(columnFieldName)) {
+            throw new IllegalArgumentException("columnFieldName is null or empty");
+        }
+        String[] pathAndName = WsStringUtils.splitArray(columnFieldName,'.');
+        boolean isColumn = true;
+        for (String s : pathAndName) {
+            if (!s.matches("^[A-Za-z0-9]+$")) {
+                isColumn = false;
+                break;
+            }
+        }
+        if (isColumn){
+            if (pathAndName.length <= 1) {
+                return add(QueryColumn.of(null,pathAndName[0]),SqlOperator.ORDER_BY,value);
+            }else {
+                return add(QueryColumn.of(pathAndName[0],pathAndName[1]),SqlOperator.ORDER_BY,value);
+            }
+        }else {
+            return add(QuerySqlString.of(columnFieldName),SqlOperator.ORDER_BY,value);
+        }
+    }
+
+    public <T> MySearchList sort(String tableName, SFunction<T, ?> columnFieldName, Object value) {
+        return add(QueryColumn.of(tableName, columnFieldName), SqlOperator.ORDER_BY, value);
+    }
+
+    public <T> MySearchList sort(SFunction<T, ?> columnFieldName, Object value) {
+        return sort(null, columnFieldName, value);
+    }
+
+    /**
+     * 顺序排序
+     * @param tableName
+     * @param columnFieldName
+     * @return
+     */
+    public MySearchList sortAsc(String tableName, String columnFieldName) {
+        return sort(tableName,columnFieldName,OrderByTypeEnums.ASC);
+    }
+
+    public MySearchList sortAsc(String columnFieldName) {
+        return sort(columnFieldName,OrderByTypeEnums.ASC);
+    }
+
+    public <T> MySearchList sortAsc(String tableName, SFunction<T, ?> columnFieldName) {
+        return sort(tableName,columnFieldName,OrderByTypeEnums.ASC);
+    }
+
+    public <T> MySearchList sortAsc(SFunction<T, ?> columnFieldName) {
+        return  sort(columnFieldName,OrderByTypeEnums.ASC);
+    }
+
+    /**
+     * 倒序排序
+     * @param tableName
+     * @param columnFieldName
+     * @return
+     */
+    public MySearchList sortDesc(String tableName, String columnFieldName) {
+        return sort(tableName,columnFieldName,OrderByTypeEnums.DESC);
+    }
+
+    public MySearchList sortDesc(String columnFieldName) {
+        return sort(columnFieldName,OrderByTypeEnums.DESC);
+    }
+
+    public <T> MySearchList sortDesc(String tableName, SFunction<T, ?> columnFieldName) {
+        return sort(tableName,columnFieldName,OrderByTypeEnums.DESC);
+    }
+
+    public <T> MySearchList sortDesc(SFunction<T, ?> columnFieldName) {
+        return  sort(columnFieldName,OrderByTypeEnums.DESC);
     }
 
     public MySearchList and(MySearchList... mySearchLists) {
