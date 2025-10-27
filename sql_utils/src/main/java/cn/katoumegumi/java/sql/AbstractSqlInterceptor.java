@@ -1,5 +1,9 @@
 package cn.katoumegumi.java.sql;
 
+import cn.katoumegumi.java.sql.interceptor.BaseInsertSqlInterceptor;
+import cn.katoumegumi.java.sql.interceptor.BaseSelectSqlInterceptor;
+import cn.katoumegumi.java.sql.interceptor.BaseSqlInterceptor;
+import cn.katoumegumi.java.sql.interceptor.BaseUpdateSqlInterceptor;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
 
 /**
@@ -7,7 +11,7 @@ import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
  *
  * @author ws
  */
-public interface AbstractSqlInterceptor {
+public interface AbstractSqlInterceptor extends BaseInsertSqlInterceptor, BaseUpdateSqlInterceptor, BaseSelectSqlInterceptor {
 
     /**
      * 是否在查询语句中起作用
@@ -35,51 +39,6 @@ public interface AbstractSqlInterceptor {
     default boolean isUpdate() {
         return false;
     }
-
-
-    /**
-     * 使用条件
-     *
-     * @param propertyColumnRelationMapper
-     * @return
-     */
-    default boolean useCondition(PropertyColumnRelationMapper propertyColumnRelationMapper) {
-        return true;
-    }
-
-    /**
-     * 插入语句自动填充
-     *
-     * @return
-     */
-    default Object insertFill() {
-        return null;
-    }
-
-    /**
-     * 修改语句自动填充
-     *
-     * @return
-     */
-    default Object updateFill() {
-        return null;
-    }
-
-    /**
-     * 查询语句自动填充
-     *
-     * @return
-     */
-    default Object selectFill() {
-        return null;
-    }
-
-    /**
-     * 需要自动注入的属性名称
-     *
-     * @return
-     */
-    String fieldName();
 
 
 }

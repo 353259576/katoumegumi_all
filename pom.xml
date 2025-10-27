@@ -390,11 +390,7 @@
                         <configuration>
                             <keyname>${gpg.keyname}</keyname>
                             <passphraseServerId>${gpg.keyname}</passphraseServerId>
-                            <executable>gpg2</executable>  <!-- 指定gpg2路径 -->
-<!--                            <gpgArguments>-->
-<!--                                <arg>&#45;&#45;pinentry-mode</arg>-->
-<!--                                <arg>loopback</arg>  &lt;!&ndash; 解决密码输入问题 &ndash;&gt;-->
-<!--                            </gpgArguments>-->
+                            <executable>C://Program Files (x86)//GnuPG//bin//gpg.exe</executable>
                         </configuration>
                     </execution>
                 </executions>

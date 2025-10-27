@@ -40,14 +40,18 @@ public class Encryption {
         //Security.getAlgorithms("KeyFactory").forEach(System.out::println);
         //Security.getAlgorithms("KeyPairGenerator").forEach(System.out::println);
         //Arrays.stream(Security.getProviders()).map(Provider::getInfo).forEach(System.out::println);
-
+        System.out.println(md5Encoder(""));
     }
 
 
     //*****************************************************************************************************
     public static String desEncoder(String str, String password) {
         try {
-            password = md5Encoder(password).substring(0, 8);
+            password = md5Encoder(password);
+            if (password == null) {
+                throw new NullPointerException("password is null");
+            }
+            password = password.substring(0,8);
             //SecureRandom secureRandom = new SecureRandom();
             IvParameterSpec ivParameterSpec = new IvParameterSpec(password.getBytes(StandardCharsets.UTF_8));
             DESKeySpec desKeySpec = new DESKeySpec(password.getBytes());
@@ -64,7 +68,11 @@ public class Encryption {
 
     public static String desDecoder(String str, String password) {
         try {
-            password = md5Encoder(password).substring(0, 8);
+            password = md5Encoder(password);
+            if (password == null) {
+                throw new NullPointerException("password is null");
+            }
+            password = password.substring(0,8);
             //SecureRandom secureRandom = new SecureRandom();
             IvParameterSpec ivParameterSpec = new IvParameterSpec(password.getBytes());
             DESKeySpec desKeySpec = new DESKeySpec(password.getBytes());
@@ -246,6 +254,9 @@ public class Encryption {
      * @return
      */
     public static String md5Encoder(String str) {
+        if (str == null) {
+            str = "";
+        }
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.update(str.getBytes(StandardCharsets.UTF_8));

@@ -13,6 +13,7 @@ import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.ValueTypeConstants;
 import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SqlParameter;
+import cn.katoumegumi.java.sql.interceptor.*;
 import cn.katoumegumi.java.sql.mapper.factory.FieldColumnRelationMapperFactory;
 import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
 import cn.katoumegumi.java.sql.mapper.model.PropertyColumnRelationMapper;
@@ -31,8 +32,12 @@ import cn.katoumegumi.java.sql.resultSet.WsResultSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * @author ws
@@ -41,25 +46,12 @@ public class SQLModelFactory {
 
     private static final Log log = LogFactory.getLog(SQLModelFactory.class);
 
-    /**
-     * 插入参数注入
-     */
-    private static final Map<String, AbstractSqlInterceptor> INSERT_SQL_INTERCEPTOR_MAP = new HashMap<>();
-    /**
-     * 修改参数注入
-     */
-    private static final Map<String, AbstractSqlInterceptor> UPDATE_SQL_INTERCEPTOR_MAP = new HashMap<>();
-    /**
-     * 查询参数注入
-     */
-    private static final Map<String, AbstractSqlInterceptor> SELECT_SQL_INTERCEPTOR_MAP = new HashMap<>();
-
+    private static final SQlInterceptorRegistry SQL_INTERCEPTOR_REGISTRY = new SQlInterceptorRegistry();
 
     /**
      * 表名和列名转换
      */
     private final TranslateNameUtils translateNameUtils;
-
 
     /**
      * 表查询条件
@@ -183,16 +175,11 @@ public class SQLModelFactory {
      *
      * @param sqlInterceptor
      */
-    public static void addSqlInterceptor(AbstractSqlInterceptor sqlInterceptor) {
-        if (sqlInterceptor.isInsert()) {
-            INSERT_SQL_INTERCEPTOR_MAP.put(sqlInterceptor.fieldName(), sqlInterceptor);
+    public static void addSqlInterceptor(BaseSqlInterceptor sqlInterceptor) {
+        if (sqlInterceptor == null) {
+            return;
         }
-        if (sqlInterceptor.isUpdate()) {
-            UPDATE_SQL_INTERCEPTOR_MAP.put(sqlInterceptor.fieldName(), sqlInterceptor);
-        }
-        if (sqlInterceptor.isSelect()) {
-            SELECT_SQL_INTERCEPTOR_MAP.put(sqlInterceptor.fieldName(), sqlInterceptor);
-        }
+        SQL_INTERCEPTOR_REGISTRY.addSqlInterceptor(sqlInterceptor);
     }
 
 
@@ -408,7 +395,7 @@ public class SQLModelFactory {
         for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
             BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
             Object o;
-            AbstractSqlInterceptor sqlInterceptor = INSERT_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
+            BaseInsertSqlInterceptor sqlInterceptor = SQL_INTERCEPTOR_REGISTRY.getInsertSqlInterceptor(beanPropertyModel.getPropertyName());
             if (sqlInterceptor != null && sqlInterceptor.useCondition(analysisClassRelation(mainClass))) {
                 o = sqlInterceptor.insertFill();
             } else {
@@ -461,7 +448,7 @@ public class SQLModelFactory {
         }
         for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
             BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
-            AbstractSqlInterceptor sqlInterceptor = INSERT_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
+            BaseInsertSqlInterceptor sqlInterceptor = SQL_INTERCEPTOR_REGISTRY.getInsertSqlInterceptor(beanPropertyModel.getPropertyName());
             Object o;
             if (sqlInterceptor != null && sqlInterceptor.useCondition(propertyColumnRelationMapper)) {
                 o = sqlInterceptor.insertFill();
@@ -480,7 +467,7 @@ public class SQLModelFactory {
         for (int i = 1; i < size; i++) {
             for (PropertyBaseColumnRelation propertyBaseColumnRelation : validField) {
                 BeanPropertyModel beanPropertyModel = propertyBaseColumnRelation.getBeanProperty();
-                AbstractSqlInterceptor sqlInterceptor = INSERT_SQL_INTERCEPTOR_MAP.get(beanPropertyModel.getPropertyName());
+                BaseInsertSqlInterceptor sqlInterceptor = SQL_INTERCEPTOR_REGISTRY.getInsertSqlInterceptor(beanPropertyModel.getPropertyName());
                 Object o;
                 if (sqlInterceptor != null && sqlInterceptor.useCondition(propertyColumnRelationMapper)) {
                     o = sqlInterceptor.insertFill();
@@ -766,7 +753,7 @@ public class SQLModelFactory {
         List<Condition> whereCondtionList = new ArrayList<>(mainMapper.getIds().size());
 
         for (PropertyBaseColumnRelation id : mainMapper.getIds()) {
-            Condition condition = createConditionBySqlInterceptor(rootPath, mainMapper, id, SqlEquation.Symbol.EQUAL, SELECT_SQL_INTERCEPTOR_MAP);
+            Condition condition = createConditionBySqlInterceptor(rootPath, mainMapper, id, SqlEquation.Symbol.EQUAL, SQL_INTERCEPTOR_REGISTRY::getSelectSqlInterceptor);
             if (condition == null) {
                 Object o = id.getBeanProperty().getValue(t);
                 if (o == null) {
@@ -786,7 +773,7 @@ public class SQLModelFactory {
         }
         List<Condition> updateCondtionList = new ArrayList<>(mainMapper.getFieldColumnRelations().size());
         for (PropertyBaseColumnRelation baseColumn : mainMapper.getFieldColumnRelations()) {
-            Condition condition = createConditionBySqlInterceptor(rootPath, mainMapper, baseColumn, SqlEquation.Symbol.EQUAL, UPDATE_SQL_INTERCEPTOR_MAP);
+            Condition condition = createConditionBySqlInterceptor(rootPath, mainMapper, baseColumn, SqlEquation.Symbol.EQUAL, SQL_INTERCEPTOR_REGISTRY::getUpdateSqlInterceptor);
             if (condition == null) {
                 Object o = baseColumn.getBeanProperty().getValue(t);
                 if (o == null) {
@@ -1212,76 +1199,116 @@ public class SQLModelFactory {
      */
     public List<Condition> getWhereConditionSqlInterceptorConditionList(String path, PropertyColumnRelationMapper mapper) {
         List<Condition> conditionList = new ArrayList<>();
-        fillWhereConditionSqlInterceptorConditionList(conditionList, path, mapper, mapper.getIds());
-        fillWhereConditionSqlInterceptorConditionList(conditionList, path, mapper, mapper.getFieldColumnRelations());
+        fillConditionListBySqlInterceptor(conditionList, path, mapper, mapper.getIds(), SQL_INTERCEPTOR_REGISTRY::getSelectSqlInterceptor);
+        fillConditionListBySqlInterceptor(conditionList, path, mapper, mapper.getFieldColumnRelations(),SQL_INTERCEPTOR_REGISTRY::getSelectSqlInterceptor);
         return conditionList;
     }
 
     public List<Condition> getUpdateConditionSqlInterceptorConditionList(String path, PropertyColumnRelationMapper mapper) {
         List<Condition> conditionList = new ArrayList<>();
-        fillUpdateConditionSqlInterceptorConditionList(conditionList, path, mapper, mapper.getIds());
-        fillUpdateConditionSqlInterceptorConditionList(conditionList, path, mapper, mapper.getFieldColumnRelations());
+        fillConditionListBySqlInterceptor(conditionList, path, mapper, mapper.getIds(),SQL_INTERCEPTOR_REGISTRY::getUpdateSqlInterceptor);
+        fillConditionListBySqlInterceptor(conditionList, path, mapper, mapper.getFieldColumnRelations(),SQL_INTERCEPTOR_REGISTRY::getUpdateSqlInterceptor);
         return conditionList;
     }
 
-    public void fillWhereConditionSqlInterceptorConditionList(List<Condition> conditionList,
-                                                              String path, PropertyColumnRelationMapper mapper,
-                                                              List<PropertyBaseColumnRelation> propertyBaseColumnRelationList) {
-        if (WsCollectionUtils.isEmpty(propertyBaseColumnRelationList)) {
-            return;
-        }
-        for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
-            AbstractSqlInterceptor interceptor = SELECT_SQL_INTERCEPTOR_MAP.get(propertyBaseColumnRelation.getBeanProperty().getPropertyName());
-            if (interceptor != null && interceptor.useCondition(mapper)) {
-                Condition condition = createConditionBySqlInterceptor(path, mapper, propertyBaseColumnRelation, SqlEquation.Symbol.EQUAL, SELECT_SQL_INTERCEPTOR_MAP);
-                if (condition != null) {
-                    conditionList.add(condition);
-                }
-            }
-        }
-    }
 
-    public void fillUpdateConditionSqlInterceptorConditionList(List<Condition> conditionList,
-                                                               String path, PropertyColumnRelationMapper mapper,
-                                                               List<PropertyBaseColumnRelation> propertyBaseColumnRelationList) {
+    /**
+     * 通过SQL拦截器填充条件列表
+     *
+     * @param conditionList 条件列表，用于存储生成的条件
+     * @param path 实体路径
+     * @param mapper 属性列关系映射器
+     * @param propertyBaseColumnRelationList 属性基础列关系列表
+     * @param getInterceptorFunction 获取拦截器的函数，根据字段名获取相应的SQL拦截器
+     */
+    public void fillConditionListBySqlInterceptor(List<Condition> conditionList, 
+                                                  String path,
+                                                  PropertyColumnRelationMapper mapper, 
+                                                  List<PropertyBaseColumnRelation> propertyBaseColumnRelationList,
+                                                  Function<String, BaseSqlInterceptor> getInterceptorFunction) {
+        // 检查属性基础列关系列表是否为空
         if (WsCollectionUtils.isEmpty(propertyBaseColumnRelationList)) {
             return;
         }
+        // 遍历所有属性基础列关系，为每个关系创建条件并添加到条件列表中
         for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
-            Condition condition = createConditionBySqlInterceptor(path, mapper, propertyBaseColumnRelation, SqlEquation.Symbol.EQUAL, UPDATE_SQL_INTERCEPTOR_MAP);
+            Condition condition = createConditionBySqlInterceptor(path, mapper, propertyBaseColumnRelation, SqlEquation.Symbol.EQUAL, getInterceptorFunction);
             if (condition != null) {
                 conditionList.add(condition);
             }
         }
     }
 
+    /*public void fillWhereConditionSqlInterceptorConditionList(List<Condition> conditionList,
+                                                              String path, PropertyColumnRelationMapper mapper,
+                                                              List<PropertyBaseColumnRelation> propertyBaseColumnRelationList) {
+        if (WsCollectionUtils.isEmpty(propertyBaseColumnRelationList)) {
+            return;
+        }
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
+            Condition condition = createConditionBySqlInterceptor(path, mapper, propertyBaseColumnRelation, SqlEquation.Symbol.EQUAL, SQL_INTERCEPTOR_REGISTRY::getSelectSqlInterceptor);
+            if (condition != null) {
+                conditionList.add(condition);
+            }
+        }
+    }*/
+
+    /*public void fillUpdateConditionSqlInterceptorConditionList(List<Condition> conditionList,
+                                                               String path, PropertyColumnRelationMapper mapper,
+                                                               List<PropertyBaseColumnRelation> propertyBaseColumnRelationList) {
+        if (WsCollectionUtils.isEmpty(propertyBaseColumnRelationList)) {
+            return;
+        }
+        for (PropertyBaseColumnRelation propertyBaseColumnRelation : propertyBaseColumnRelationList) {
+            Condition condition = createConditionBySqlInterceptor(path, mapper, propertyBaseColumnRelation, SqlEquation.Symbol.EQUAL, SQL_INTERCEPTOR_REGISTRY::getUpdateSqlInterceptor);
+            if (condition != null) {
+                conditionList.add(condition);
+            }
+        }
+    }*/
+
+
     /**
      * 通过sql拦截器创建条件
      *
-     * @param path
-     * @param mapper
-     * @param propertyBaseColumnRelation
-     * @param symbol
-     * @param sqlInterceptorMap
-     * @return
+     * @param path 实体路径
+     * @param mapper 属性列关系映射器
+     * @param propertyBaseColumnRelation 属性基础列关系
+     * @param symbol SQL操作符
+     * @param getInterceptorFunction 获取拦截器的函数
+     * @return 条件对象，如果无法创建则返回null
      */
     public Condition createConditionBySqlInterceptor(String path,
                                                      PropertyColumnRelationMapper mapper,
                                                      PropertyBaseColumnRelation propertyBaseColumnRelation,
                                                      SqlEquation.Symbol symbol,
-                                                     Map<String, AbstractSqlInterceptor> sqlInterceptorMap) {
+                                                     Function<String,BaseSqlInterceptor> getInterceptorFunction) {
+        // 检查属性列关系是否为空
         if (propertyBaseColumnRelation == null) {
             return null;
         }
-        AbstractSqlInterceptor interceptor = sqlInterceptorMap.get(propertyBaseColumnRelation.getBeanProperty().getPropertyName());
-        if (interceptor != null && interceptor.useCondition(mapper)) {
-            Object fillValue = interceptor.updateFill();
-            if (fillValue == null) {
-                fillValue = SqlCommonConstants.NULL_VALUE;
-            }
-            return new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation.getBeanProperty().getPropertyName(), path, 2), symbol, fillValue);
+        // 获取并检查拦截器是否可用
+        BaseSqlInterceptor interceptor = getInterceptorFunction.apply(propertyBaseColumnRelation.getBeanProperty().getPropertyName());
+        if (interceptor == null || !interceptor.useCondition(mapper)) {
+            return null;
         }
-        return null;
+        // 根据拦截器类型获取填充值
+        Object fillValue;
+        if (interceptor instanceof BaseSelectSqlInterceptor) {
+            fillValue = ((BaseSelectSqlInterceptor) interceptor).selectFill();
+        }else if (interceptor instanceof BaseUpdateSqlInterceptor) {
+            fillValue = ((BaseUpdateSqlInterceptor) interceptor).updateFill();
+        }else if (interceptor instanceof BaseInsertSqlInterceptor) {
+            fillValue = ((BaseInsertSqlInterceptor) interceptor).insertFill();
+        }else {
+            throw new IllegalArgumentException("Unsupported sqlInterceptor:" + interceptor.getClass().getName());
+        }
+        // 处理空值情况
+        if (fillValue == null) {
+            fillValue = SqlCommonConstants.NULL_VALUE;
+        }
+        // 创建并返回条件对象
+        return new SingleExpressionCondition(translateNameUtils.createColumnBaseEntity(propertyBaseColumnRelation.getBeanProperty().getPropertyName(), path, 2), symbol, fillValue);
     }
 
 

@@ -319,7 +319,17 @@ public class Test {
 
             @Override
             public Object selectFill() {
-                return null;
+                return "测试查询";
+            }
+
+            @Override
+            public Object insertFill() {
+                return "测试新增";
+            }
+
+            @Override
+            public Object updateFill() {
+                return "测试修改";
             }
 
             @Override
