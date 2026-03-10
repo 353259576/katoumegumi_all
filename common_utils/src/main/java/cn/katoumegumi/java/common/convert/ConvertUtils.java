@@ -60,22 +60,25 @@ public class ConvertUtils {
         CLASS_CONVERT_BEAN_MAP.put(getClass(convertToLocalDateTime.getClass()), convertToLocalDateTime);
     }
 
-    public static <T> T convert(Object o, Class<T> tClass) {
+    public static <T> T convert(Object o, Class<T> targetClass) {
         if (o == null) {
             return null;
         }
-        Class<?> c;
-        if (tClass.isPrimitive()) {
-            c = BaseTypeCommon.getWrapperClass(tClass);
-        } else {
-            c = tClass;
+        if (targetClass == null) {
+            throw new NullPointerException("convert target class is null");
         }
-        if (o.getClass().equals(tClass)) {
+        Class<?> c;
+        if (targetClass.isPrimitive()) {
+            c = BaseTypeCommon.getWrapperClass(targetClass);
+        } else {
+            c = targetClass;
+        }
+        if (o.getClass().equals(targetClass)) {
             return (T) o;
         }
         ConvertBean<T> convertBean = (ConvertBean<T>) CLASS_CONVERT_BEAN_MAP.get(c);
         if (convertBean == null) {
-            return WsBeanUtils.convertBean(o, tClass);
+            return WsBeanUtils.convertBean(o, targetClass);
         } else {
             return convertBean.convert(o);
         }
@@ -89,6 +92,10 @@ public class ConvertUtils {
      */
     public static <T> void addConvertBean(ConvertBean<T> convertBean) {
         CLASS_CONVERT_BEAN_MAP.put(getClass(convertBean.getClass()), convertBean);
+    }
+
+    public static <T> ConvertBean<T> getConvertBean(Class<T> c) {
+        return  (ConvertBean<T>) CLASS_CONVERT_BEAN_MAP.get(c);
     }
 
 }
