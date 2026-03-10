@@ -5,11 +5,6 @@ import cn.katoumegumi.java.common.convert.ConvertUtils;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -304,7 +299,7 @@ public class WsBeanUtils {
 //    }
 
     public static boolean isBaseType(Class<?> clazz) {
-        return BaseTypeCommon.verify(clazz);
+        return BaseTypeCommon.isBaseType(clazz);
     }
 
     public static boolean isArray(Class<?> clazz) {

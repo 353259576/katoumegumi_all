@@ -57,7 +57,7 @@ public class WsCollectionUtils {
             return ((Map<?, ?>) obj).isEmpty();
         } else {
             if (obj.getClass().isArray()) {
-                if (BaseTypeCommon.verifyArray(obj.getClass())) {
+                if (BaseTypeCommon.isBaseTypeArray(obj.getClass())) {
                     return Array.getLength(obj) == 0;
                 } else {
                     return ((Object[]) obj).length == 0;
