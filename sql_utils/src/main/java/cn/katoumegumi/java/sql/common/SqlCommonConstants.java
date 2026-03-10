@@ -100,20 +100,23 @@ public interface SqlCommonConstants {
     char SQL_COMMON_UPDATE_SET_CONDITION_DELIMITER = ',';
 
     /**
-     * 表示空值
+     * 表示空值(区别于null)
      */
-    NullValue NULL_VALUE = NullValue.getInstance();
+    Object NULL_VALUE = new Object();
 
+    /**
+     * 空字符串
+     */
     String EMPTY_STRING = "";
 
     /**
      * 条件为空
      */
-    SqlStringModel EMPTY_SQL_STRING_AND_PARAMETERS = new SqlStringModel(null, null, 0, ValueTypeConstants.NULL_TYPE);
+    SqlStringModel EMPTY_SQL_STRING_AND_PARAMETERS = new SqlStringModel(null, null, 0, ValueType.NULL_TYPE);
 
     /**
      * null值
      */
-    SqlStringModel NULL_VALUE_SQL_STRING_AND_PARAMETERS = new SqlStringModel(null, null, 1, ValueTypeConstants.NULL_VALUE_MODEL);
+    SqlStringModel NULL_VALUE_SQL_STRING_AND_PARAMETERS = new SqlStringModel(null, null, 1, ValueType.NULL_VALUE_MODEL);
 
 }
