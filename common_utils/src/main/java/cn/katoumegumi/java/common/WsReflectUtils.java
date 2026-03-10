@@ -699,6 +699,9 @@ public class WsReflectUtils {
                 continue;
             }
             String name = method.getName();
+            if (name.length() < 3) {
+                continue;
+            }
             if (name.startsWith(METHOD_NAME_SET)){
                 if (name.length() == 3 || method.getParameterCount() != 1){
                     continue;
@@ -714,7 +717,7 @@ public class WsReflectUtils {
                 Object[] objects = beanPropertyMap.computeIfAbsent(name, n->new Object[3]);
                 objects[1] = method;
             }else if (name.startsWith(METHOD_NAME_IS)){
-                if (name.length() == 2 || method.getParameterCount() != 0){
+                if (method.getParameterCount() != 0){
                     continue;
                 }
                 name = WsStringUtils.firstCharToLowerCase(name.substring(2));
