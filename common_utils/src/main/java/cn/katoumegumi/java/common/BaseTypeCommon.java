@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 基本类型
@@ -15,31 +13,11 @@ import java.util.Set;
  */
 public class BaseTypeCommon {
 
-    private static final Set<Class<?>> CLASS_SET = new HashSet<>(18);
+    private static final Set<Class<?>> CLASS_SET = new HashSet<>();
 
-    private static final Set<Class<?>> ARRAY_CLASS_SET = new HashSet<>(18);
+    private static final Set<Class<?>> ARRAY_CLASS_SET = new HashSet<>();
 
-    private static final Class<?>[] BASE_TYPE_ARRAY = new Class[]{
-            boolean.class,
-            char.class,
-            byte.class,
-            short.class,
-            int.class,
-            float.class,
-            long.class,
-            double.class
-    };
-
-    private static final Class<?>[] WRAPPER_BASE_TYPE_ARRAY = new Class[]{
-            Boolean.class,
-            Character.class,
-            Byte.class,
-            Short.class,
-            Integer.class,
-            Float.class,
-            Long.class,
-            Double.class
-    };
+    private static final Map<Class<?>,Class<?>> BASE_AND_WRAPPER_TYPE_MAP = new HashMap<>();
 
     static {
         CLASS_SET.add(byte.class);
@@ -75,18 +53,27 @@ public class BaseTypeCommon {
         ARRAY_CLASS_SET.add(float[].class);
         ARRAY_CLASS_SET.add(double[].class);
         ARRAY_CLASS_SET.add(boolean[].class);
+
+        BASE_AND_WRAPPER_TYPE_MAP.put(int.class,Integer.class);
+        BASE_AND_WRAPPER_TYPE_MAP.put(long.class,Long.class);
+        BASE_AND_WRAPPER_TYPE_MAP.put(short.class,Short.class);
+        BASE_AND_WRAPPER_TYPE_MAP.put(boolean.class,Boolean.class);
+        BASE_AND_WRAPPER_TYPE_MAP.put(double.class,Double.class);
+        BASE_AND_WRAPPER_TYPE_MAP.put(float.class,Float.class);
+        BASE_AND_WRAPPER_TYPE_MAP.put(char.class,Character.class);
+        BASE_AND_WRAPPER_TYPE_MAP.put(byte.class,Byte.class);
     }
 
-    public static boolean verify(Class<?> tClass) {
-        return CLASS_SET.contains(tClass);
+    public static boolean isBaseType(Class<?> tClass) {
+        return tClass != null && CLASS_SET.contains(tClass);
     }
 
-    public static boolean verify(Object o) {
-        return verify(o.getClass());
+    public static boolean isBaseType(Object o) {
+        return o != null && isBaseType(o.getClass());
     }
 
-    public static boolean verifyArray(Class<?> tClass) {
-        return ARRAY_CLASS_SET.contains(tClass);
+    public static boolean isBaseTypeArray(Class<?> tClass) {
+        return tClass != null && ARRAY_CLASS_SET.contains(tClass);
     }
 
     /**
@@ -96,12 +83,11 @@ public class BaseTypeCommon {
      * @return
      */
     public static Class<?> getWrapperClass(Class<?> clazz) {
-        for (int i = 0; i < 8; i++) {
-            if (clazz.equals(BASE_TYPE_ARRAY[i])) {
-                return WRAPPER_BASE_TYPE_ARRAY[i];
-            }
+        Class<?> aClass = BASE_AND_WRAPPER_TYPE_MAP.get(clazz);
+        if (aClass == null) {
+            throw new IllegalArgumentException("not find " + clazz.getSimpleName() + " wrapper class");
         }
-        throw new NullPointerException("not found" + clazz.getSimpleName() + " wrapper class");
+        return aClass;
     }
 
 
