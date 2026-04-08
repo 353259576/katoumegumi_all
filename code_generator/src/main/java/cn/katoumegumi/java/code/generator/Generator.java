@@ -136,7 +136,7 @@ public class Generator {
 
         DataSource dataSource = HikariCPDataSourceFactory.getDataSource(url, userName, password, driverClassName);
 
-        Generator generator = new Generator("cn.katoumegumi.java.lx", "D:\\project\\项目\\ws_all\\server_example");
+        Generator generator = new Generator("cn.katoumegumi.java.lx", "");
         generator.setEntityPath("entity/model")
                 .setServicePath("service")
                 .setServiceImplPath("serviceImpl")
