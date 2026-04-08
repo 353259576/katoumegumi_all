@@ -10,7 +10,7 @@ import cn.katoumegumi.java.common.model.TripleEntity;
 import cn.katoumegumi.java.sql.common.OrderByTypeEnums;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.SqlOperator;
-import cn.katoumegumi.java.sql.common.ValueTypeConstants;
+import cn.katoumegumi.java.sql.common.ValueType;
 import cn.katoumegumi.java.sql.handler.model.InsertSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SqlParameter;
 import cn.katoumegumi.java.sql.interceptor.*;
@@ -32,9 +32,6 @@ import cn.katoumegumi.java.sql.resultSet.WsResultSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Function;
@@ -263,7 +260,6 @@ public class SQLModelFactory {
                         list.add(subValue);
                         cacheSubValue[i] = list;
                         propertyObjectColumnJoinRelation.getBeanProperty().setValue(value, list);
-                        //WsReflectUtils.setValue(value, list, propertyObjectColumnJoinRelation.getField());
                     }
                 } else {
                     if (subValue == null) {
@@ -271,7 +267,6 @@ public class SQLModelFactory {
                     } else {
                         cacheSubValue[i] = subValue;
                         propertyObjectColumnJoinRelation.getBeanProperty().setValue(value, subValue);
-                        //WsReflectUtils.setValue(value, subValue, propertyObjectColumnJoinRelation.getField());
                     }
                 }
             } else {
@@ -330,13 +325,12 @@ public class SQLModelFactory {
     private static boolean fillObjectValue(Object o, Object[] values, int[] location, List<PropertyBaseColumnRelation> columnRelationList) {
         boolean isAdd = false;
         for (int i = 0; i < location.length; i++) {
-            PropertyBaseColumnRelation propertyBaseColumnRelationTemp = columnRelationList.get(location[i]);
             Object value = values[i];
             if (value == null) {
                 continue;
             }
+            setValue(o, value, columnRelationList.get(location[i]).getBeanProperty());
             isAdd = true;
-            setValue(o, value, propertyBaseColumnRelationTemp.getBeanProperty());
         }
         return isAdd;
     }
@@ -344,13 +338,12 @@ public class SQLModelFactory {
     private static boolean fillObjectValue(Object o, WsResultSet resultSet, int[] location, List<PropertyBaseColumnRelation> columnRelationList) throws SQLException {
         boolean isAdd = false;
         for (int j : location) {
-            PropertyBaseColumnRelation propertyBaseColumnRelationTemp = columnRelationList.get(j);
             Object value = resultSet.getObject(j + 1);
             if (value == null) {
                 continue;
             }
+            setValue(o, value, columnRelationList.get(j).getBeanProperty());
             isAdd = true;
-            setValue(o, value, propertyBaseColumnRelationTemp.getBeanProperty());
         }
         return isAdd;
     }
@@ -526,6 +519,10 @@ public class SQLModelFactory {
             List<PropertyBaseColumnRelation> columnRelationList = new ArrayList<>(length);
             List<int[][]> localtionList = new ArrayList<>();
             Map<String, FieldColumnRelationMapperName> aliasAndMapperNameMap = new HashMap<>();
+            int mapperNameSign = 0;
+            Map<String, Integer> mapperNameAndSignMap = new HashMap<>();
+            int mapperNameIndex = 0;
+
             String columnNameTemp;
             TableColumn tableColumnTemp;
             List<String> nameListTemp;
@@ -534,10 +531,7 @@ public class SQLModelFactory {
             FieldColumnRelationMapperName fieldColumnRelationMapperNameTemp;
             //0是id的坐标 1是非id坐标-
             int[][] locationListTemp;
-            int mapperNameSign = 0;
-            Map<String, Integer> mapperNameAndSignMap = new HashMap<>();
 
-            int mapperNameIndex = 0;
 
             for (int i = 0; i < length; i++) {
                 columnNameTemp = resultSet.getColumnLabel(i + 1);
@@ -1166,21 +1160,21 @@ public class SQLModelFactory {
             Integer type = sqlEquation.getTypeList().get(i);
             Object value = sqlEquation.getValueList().get(i);
             switch (type) {
-                case ValueTypeConstants.COLUMN_NAME_TYPE:
+                case ValueType.COLUMN_NAME_TYPE:
                     multiExpressionCondition.add(translateNameUtils.getColumnBaseEntity((QueryColumn) value, rootPath, 2));
                     break;
-                case ValueTypeConstants.SYMBOL_TYPE:
-                case ValueTypeConstants.BASE_VALUE_TYPE:
-                case ValueTypeConstants.COLLECTION_TYPE:
-                case ValueTypeConstants.ARRAY_TYPE:
-                case ValueTypeConstants.NULL_VALUE_MODEL:
+                case ValueType.SYMBOL_TYPE:
+                case ValueType.BASE_VALUE_TYPE:
+                case ValueType.COLLECTION_TYPE:
+                case ValueType.ARRAY_TYPE:
+                case ValueType.NULL_VALUE_MODEL:
                     multiExpressionCondition.add(value);
                     break;
-                case ValueTypeConstants.SEARCH_LIST_TYPE:
+                case ValueType.SEARCH_LIST_TYPE:
                     SQLModelFactory sqlModelFactory = new SQLModelFactory((MySearchList) value, translateNameUtils);
                     multiExpressionCondition.add(sqlModelFactory.createSelectModel());
                     break;
-                case ValueTypeConstants.SQL_EQUATION_MODEL:
+                case ValueType.SQL_EQUATION_MODEL:
                     multiExpressionCondition.add(transferSqlEquationToCondition(rootPath, (SqlEquation) value));
                     break;
                 default:

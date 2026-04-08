@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.sql.model.condition;
 
+import cn.katoumegumi.java.sql.common.ValueType;
 import cn.katoumegumi.java.sql.model.component.SqlEquation;
 
 /**
@@ -13,9 +14,9 @@ public class SingleExpressionCondition extends AbstractExpressionCondition {
         this.values[0] = left;
         this.values[1] = symbol;
         this.values[2] = right;
-        this.types[0] = getValueType(left);
-        this.types[1] = getValueType(symbol);
-        this.types[2] = getValueType(right);
+        this.types[0] = ValueType.getValueType(left);
+        this.types[1] = ValueType.getValueType(symbol);
+        this.types[2] = ValueType.getValueType(right);
 
     }
 

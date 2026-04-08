@@ -2,12 +2,10 @@ package cn.katoumegumi.java.sql.model.component;
 
 import cn.katoumegumi.java.common.SFunction;
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.sql.MySearchList;
-import cn.katoumegumi.java.sql.common.NullValue;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
-import cn.katoumegumi.java.sql.common.ValueTypeConstants;
+import cn.katoumegumi.java.sql.common.ValueType;
 import cn.katoumegumi.java.sql.model.query.QueryColumn;
 
 import java.util.ArrayList;
@@ -29,19 +27,19 @@ public class SqlEquation {
     private final List<Object> valueList = new ArrayList<>();
 
     public SqlEquation column(String columnName) {
-        typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(QueryColumn.of(columnName));
         return this;
     }
 
     public SqlEquation column(SqlEquation equation) {
-        typeList.add(ValueTypeConstants.SQL_EQUATION_MODEL);
+        typeList.add(ValueType.SQL_EQUATION_MODEL);
         valueList.add(equation);
         return this;
     }
 
     public SqlEquation column(SqlFunction function) {
-        typeList.add(ValueTypeConstants.SQL_FUNCTION_MODEL);
+        typeList.add(ValueType.SQL_FUNCTION_MODEL);
         valueList.add(function);
         return this;
     }
@@ -50,13 +48,13 @@ public class SqlEquation {
         if (WsStringUtils.isBlank(tableName)) {
             return column(columnName);
         }
-        typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(QueryColumn.of(tableName,columnName));
         return this;
     }
 
     public <T> SqlEquation column(SFunction<T, ?> columnFunction) {
-        typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(QueryColumn.of(columnFunction));
         return this;
     }
@@ -65,13 +63,13 @@ public class SqlEquation {
         if (WsStringUtils.isBlank(tableName)) {
             return column(columnFunction);
         }
-        typeList.add(ValueTypeConstants.COLUMN_NAME_TYPE);
+        typeList.add(ValueType.COLUMN_NAME_TYPE);
         valueList.add(QueryColumn.of(tableName,columnFunction));
         return this;
     }
 
     public <T> SqlEquation sql(MySearchList mySearchList) {
-        typeList.add(ValueTypeConstants.SEARCH_LIST_TYPE);
+        typeList.add(ValueType.SEARCH_LIST_TYPE);
         valueList.add(mySearchList);
         return this;
     }
@@ -80,7 +78,7 @@ public class SqlEquation {
         if (WsStringUtils.isBlank(sql)) {
             throw new IllegalArgumentException("sql string is null");
         }
-        typeList.add(ValueTypeConstants.SQL_STRING_MODEL_TYPE);
+        typeList.add(ValueType.SQL_STRING_MODEL_TYPE);
         valueList.add(new SqlStringModel(sql,null));
         return this;
     }
@@ -88,16 +86,16 @@ public class SqlEquation {
     public SqlEquation value(Object o) {
         int valueType;
         if (o == null) {
-            valueType = ValueTypeConstants.NULL_VALUE_MODEL;
+            valueType = ValueType.NULL_VALUE_MODEL;
             o = SqlCommonConstants.NULL_VALUE;
         } else if (WsBeanUtils.isBaseType(o.getClass())) {
-            valueType = ValueTypeConstants.BASE_VALUE_TYPE;
+            valueType = ValueType.BASE_VALUE_TYPE;
         } else if (o instanceof Collection) {
-            valueType = ValueTypeConstants.COLLECTION_TYPE;
-        } else if (WsBeanUtils.isArray(o.getClass())) {
-            valueType = ValueTypeConstants.ARRAY_TYPE;
-        } else if (o instanceof NullValue) {
-            valueType = ValueTypeConstants.NULL_VALUE_MODEL;
+            valueType = ValueType.COLLECTION_TYPE;
+        } else if (o.getClass().isArray()) {
+            valueType = ValueType.ARRAY_TYPE;
+        } else if (o.equals(SqlCommonConstants.NULL_VALUE)) {
+            valueType = ValueType.NULL_VALUE_MODEL;
         } else {
             throw new IllegalArgumentException("不支持的值");
         }
@@ -107,7 +105,7 @@ public class SqlEquation {
     }
 
     public SqlEquation symbol(Object o) {
-        typeList.add(ValueTypeConstants.SYMBOL_TYPE);
+        typeList.add(ValueType.SYMBOL_TYPE);
         valueList.add(o);
         return this;
     }

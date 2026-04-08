@@ -1,8 +1,8 @@
 package cn.katoumegumi.java.sql.model.component;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.sql.common.NullValue;
-import cn.katoumegumi.java.sql.common.ValueTypeConstants;
+import cn.katoumegumi.java.sql.common.SqlCommonConstants;
+import cn.katoumegumi.java.sql.common.ValueType;
 
 import java.util.Collection;
 
@@ -36,15 +36,15 @@ public class SqlStringModel {
         this.value = value;
         this.placeholderNum = placeholderNum;
         if (value == null) {
-            this.valueType = ValueTypeConstants.NULL_TYPE;
+            this.valueType = ValueType.NULL_TYPE;
         } else if (WsBeanUtils.isBaseType(value.getClass())) {
-            this.valueType = ValueTypeConstants.BASE_VALUE_TYPE;
+            this.valueType = ValueType.BASE_VALUE_TYPE;
         } else if (value instanceof Collection) {
-            this.valueType = ValueTypeConstants.COLLECTION_TYPE;
+            this.valueType = ValueType.COLLECTION_TYPE;
         } else if (WsBeanUtils.isArray(value.getClass())) {
-            this.valueType = ValueTypeConstants.ARRAY_TYPE;
-        } else if (value instanceof NullValue) {
-            this.valueType = ValueTypeConstants.NULL_VALUE_MODEL;
+            this.valueType = ValueType.ARRAY_TYPE;
+        } else if (value.equals(SqlCommonConstants.NULL_VALUE)) {
+            this.valueType = ValueType.NULL_VALUE_MODEL;
         } else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());
         }
@@ -55,19 +55,19 @@ public class SqlStringModel {
         this.sql = sql;
         this.value = value;
         if (value == null) {
-            this.valueType = ValueTypeConstants.NULL_TYPE;
+            this.valueType = ValueType.NULL_TYPE;
             this.placeholderNum = 0;
         } else if (WsBeanUtils.isBaseType(value.getClass())) {
-            this.valueType = ValueTypeConstants.BASE_VALUE_TYPE;
+            this.valueType = ValueType.BASE_VALUE_TYPE;
             this.placeholderNum = 1;
         } else if (value instanceof Collection) {
-            this.valueType = ValueTypeConstants.COLLECTION_TYPE;
+            this.valueType = ValueType.COLLECTION_TYPE;
             this.placeholderNum = ((Collection<?>) value).size();
         } else if (WsBeanUtils.isArray(value.getClass())) {
-            this.valueType = ValueTypeConstants.ARRAY_TYPE;
+            this.valueType = ValueType.ARRAY_TYPE;
             this.placeholderNum = ((Object[]) value).length;
-        }  else if (value instanceof NullValue) {
-            this.valueType = ValueTypeConstants.NULL_VALUE_MODEL;
+        }  else if (value.equals(SqlCommonConstants.NULL_VALUE)) {
+            this.valueType = ValueType.NULL_VALUE_MODEL;
             this.placeholderNum = 0;
         }else {
             throw new IllegalArgumentException("不支持的类:" + value.getClass());

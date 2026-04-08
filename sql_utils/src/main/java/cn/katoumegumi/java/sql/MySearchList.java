@@ -1038,6 +1038,14 @@ public class MySearchList {
         return this;
     }
 
+    public MySearchList and(List<MySearchList> andList) {
+        if (WsCollectionUtils.isEmpty(andList)) {
+            return this;
+        }
+        ands.addAll(andList);
+        return this;
+    }
+
     public MySearchList and(Supplier<MySearchList> supplier) {
         ands.add(supplier.get());
         return this;
@@ -1045,6 +1053,14 @@ public class MySearchList {
 
     public MySearchList or(MySearchList... mySearchLists) {
         ors.addAll(Arrays.asList(mySearchLists));
+        return this;
+    }
+
+    public MySearchList or(List<MySearchList> orList) {
+        if (WsCollectionUtils.isEmpty(orList)) {
+            return this;
+        }
+        ors.addAll(orList);
         return this;
     }
 

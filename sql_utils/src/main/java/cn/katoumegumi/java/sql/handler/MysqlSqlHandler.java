@@ -5,7 +5,7 @@ import cn.katoumegumi.java.common.WsCollectionUtils;
 import cn.katoumegumi.java.sql.SQLModelFactory;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
 import cn.katoumegumi.java.sql.common.SqlOperator;
-import cn.katoumegumi.java.sql.common.ValueTypeConstants;
+import cn.katoumegumi.java.sql.common.ValueType;
 import cn.katoumegumi.java.sql.handler.model.DeleteSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SelectSqlEntity;
 import cn.katoumegumi.java.sql.handler.model.SqlParameter;
@@ -388,13 +388,13 @@ public class MysqlSqlHandler implements SqlHandler{
 
             boolean addBrackets = true;
             switch (type) {
-                case ValueTypeConstants.NULL_TYPE:
+                case ValueType.NULL_TYPE:
                     //continue;
-                case ValueTypeConstants.COLUMN_NAME_TYPE:
-                case ValueTypeConstants.SYMBOL_TYPE:
-                case ValueTypeConstants.BASE_VALUE_TYPE:
-                case ValueTypeConstants.SQL_FUNCTION_CONDITION:
-                case ValueTypeConstants.NULL_VALUE_MODEL:
+                case ValueType.COLUMN_NAME_TYPE:
+                case ValueType.SYMBOL_TYPE:
+                case ValueType.BASE_VALUE_TYPE:
+                case ValueType.SQL_FUNCTION_CONDITION:
+                case ValueType.NULL_VALUE_MODEL:
                     addBrackets = false;
                     break;
             }
@@ -420,47 +420,47 @@ public class MysqlSqlHandler implements SqlHandler{
 
     private static SqlStringModel handleExpressionConditionValue(int type, Object value) {
         switch (type) {
-            case ValueTypeConstants.NULL_TYPE:
+            case ValueType.NULL_TYPE:
                 return SqlCommonConstants.EMPTY_SQL_STRING_AND_PARAMETERS;
-            case ValueTypeConstants.NULL_VALUE_MODEL:
+            case ValueType.NULL_VALUE_MODEL:
                 return SqlCommonConstants.NULL_VALUE_SQL_STRING_AND_PARAMETERS;
-            case ValueTypeConstants.BASE_VALUE_TYPE:
-                return new SqlStringModel(null, value, 1, ValueTypeConstants.BASE_VALUE_TYPE);
-            case ValueTypeConstants.COLLECTION_TYPE:
-                return new SqlStringModel(null, value, ((Collection<?>) value).size(), ValueTypeConstants.COLLECTION_TYPE);
-            case ValueTypeConstants.ARRAY_TYPE:
-                return new SqlStringModel(null, value, ((Object[]) value).length, ValueTypeConstants.ARRAY_TYPE);
-            case ValueTypeConstants.SELECT_MODEL_TYPE:
+            case ValueType.BASE_VALUE_TYPE:
+                return new SqlStringModel(null, value, 1, ValueType.BASE_VALUE_TYPE);
+            case ValueType.COLLECTION_TYPE:
+                return new SqlStringModel(null, value, ((Collection<?>) value).size(), ValueType.COLLECTION_TYPE);
+            case ValueType.ARRAY_TYPE:
+                return new SqlStringModel(null, value, ((Object[]) value).length, ValueType.ARRAY_TYPE);
+            case ValueType.SELECT_MODEL_TYPE:
                 SelectSqlEntity entity = SqlEntityFactory.createSelectSqlEntity((SelectModel) value);
                 return new SqlStringModel(entity.getSelectSql(), entity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList()), entity.getValueList().size());
-            case ValueTypeConstants.COLUMN_NAME_TYPE:
+            case ValueType.COLUMN_NAME_TYPE:
                 BaseTableColumn baseTableColumn = (BaseTableColumn) value;
                 return new SqlStringModel(
                         SQLModelFactory.ignoreKeyword(baseTableColumn.getTableAlias()) + SqlCommonConstants.SQL_COMMON_DELIMITER + SQLModelFactory.ignoreKeyword(baseTableColumn.getColumnName()),
                         null,
                         0
                 );
-            case ValueTypeConstants.SQL_STRING_MODEL_TYPE:
+            case ValueType.SQL_STRING_MODEL_TYPE:
                 SqlStringModel sqlStringModel = (SqlStringModel) value;
                 return new SqlStringModel(sqlStringModel.getSql(), sqlStringModel.getValue());
-            case ValueTypeConstants.CONDITION_RELATION_MODEL_TYPE:
+            case ValueType.CONDITION_RELATION_MODEL_TYPE:
                 StringBuilder stringBuilder = new StringBuilder();
                 List<SqlParameter> objectList = new ArrayList<>();
                 handleRelation((RelationCondition) value, stringBuilder, objectList, true);
-                return new SqlStringModel(stringBuilder.toString(), objectList.stream().map(SqlParameter::getValue).collect(Collectors.toList()), objectList.size(), ValueTypeConstants.COLLECTION_TYPE);
-            case ValueTypeConstants.SYMBOL_TYPE:
+                return new SqlStringModel(stringBuilder.toString(), objectList.stream().map(SqlParameter::getValue).collect(Collectors.toList()), objectList.size(), ValueType.COLLECTION_TYPE);
+            case ValueType.SYMBOL_TYPE:
                 return new SqlStringModel(((SqlEquation.Symbol) value).getSymbol(), null);
-            case ValueTypeConstants.SINGLE_EXPRESSION_CONDITION_MODEL:
+            case ValueType.SINGLE_EXPRESSION_CONDITION_MODEL:
                 StringBuilder singleExpressionConditionSql = new StringBuilder();
                 List<SqlParameter> singleExpressionConditionSqlParameterList = new ArrayList<>();
                 handleSingleExpressionCondition((SingleExpressionCondition) value, singleExpressionConditionSql, singleExpressionConditionSqlParameterList);
                 return new SqlStringModel(singleExpressionConditionSql.toString(), singleExpressionConditionSqlParameterList.stream().map(SqlParameter::getValue).collect(Collectors.toList()));
-            case ValueTypeConstants.MULTI_EXPRESSION_CONDITION_MODEL:
+            case ValueType.MULTI_EXPRESSION_CONDITION_MODEL:
                 StringBuilder multiExpressionConditionSql = new StringBuilder();
                 List<SqlParameter> multiExpressionConditionSqlParameterList = new ArrayList<>();
                 handleMultiExpressionCondition((MultiExpressionCondition) value, multiExpressionConditionSql, multiExpressionConditionSqlParameterList);
                 return new SqlStringModel(multiExpressionConditionSql.toString(), multiExpressionConditionSqlParameterList.stream().map(SqlParameter::getValue).collect(Collectors.toList()));
-            case ValueTypeConstants.SQL_FUNCTION_CONDITION:
+            case ValueType.SQL_FUNCTION_CONDITION:
                 return handleSqlFunctionCondition((SqlFunctionCondition) value);
             default:
                 throw new IllegalArgumentException("不支持的类:" + value.getClass());
@@ -521,13 +521,13 @@ public class MysqlSqlHandler implements SqlHandler{
     private static void sqlStringAndParametersValueAddInList(SqlStringModel sqlStringAndParameters, List<SqlParameter> valueList) {
 
         switch (sqlStringAndParameters.getValueType()) {
-            case ValueTypeConstants.NULL_VALUE_MODEL:
+            case ValueType.NULL_VALUE_MODEL:
                 valueList.add(new SqlParameter(null, null));
                 break;
-            case ValueTypeConstants.BASE_VALUE_TYPE:
+            case ValueType.BASE_VALUE_TYPE:
                 valueList.add(new SqlParameter(null, sqlStringAndParameters.getValue()));
                 break;
-            case ValueTypeConstants.COLLECTION_TYPE:
+            case ValueType.COLLECTION_TYPE:
                 Collection<?> collection = (Collection<?>) sqlStringAndParameters.getValue();
                 if (WsCollectionUtils.isNotEmpty(collection)) {
                     for (Object o : collection) {
@@ -535,7 +535,7 @@ public class MysqlSqlHandler implements SqlHandler{
                     }
                 }
                 break;
-            case ValueTypeConstants.ARRAY_TYPE:
+            case ValueType.ARRAY_TYPE:
                 Object[] objects = (Object[]) sqlStringAndParameters.getValue();
                 if (WsCollectionUtils.isNotEmpty(objects)) {
                     for (Object o : objects) {

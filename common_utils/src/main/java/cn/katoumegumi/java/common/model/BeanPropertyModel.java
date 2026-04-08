@@ -83,9 +83,17 @@ public class BeanPropertyModel {
                 return annotation;
             }
         }
-        annotation = this.getMethod.getAnnotation(annotationClass);
-        if (annotation == null && this.setMethod != null) {
-            return this.setMethod.getAnnotation(annotationClass);
+        if (this.setMethod != null) {
+            annotation = this.setMethod.getAnnotation(annotationClass);
+            if (annotation != null) {
+                return annotation;
+            }
+        }
+        if (this.getMethod != null) {
+            annotation = this.getMethod.getAnnotation(annotationClass);
+            if (annotation != null) {
+                return annotation;
+            }
         }
         return null;
     }

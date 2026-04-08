@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.sql.model.condition;
 
+import cn.katoumegumi.java.sql.common.ValueType;
+
 /**
  * 多表达式条件(例如：a + b = c)
  */
@@ -25,7 +27,7 @@ public class MultiExpressionCondition extends AbstractExpressionCondition {
             throw new ArrayIndexOutOfBoundsException("已达到最大数量,禁止添加");
         }
         this.values[this.index] = value;
-        this.types[this.index] = getValueType(value);
+        this.types[this.index] = ValueType.getValueType(value);
         this.index++;
         return this;
     }

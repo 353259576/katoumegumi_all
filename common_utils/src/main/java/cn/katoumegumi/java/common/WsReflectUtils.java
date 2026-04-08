@@ -34,6 +34,15 @@ public class WsReflectUtils {
 
     private static final Field WRITE_REPLACE_METHOD_FIELD = WsReflectUtils.getFieldByName(ObjectStreamClass.class, "writeReplaceMethod");
 
+    public static void main(String[] args) {
+        Field field = getFieldByName(GenericsTypeModel.class,"genericsTypeModelList");
+        System.out.println(getGenericsType(field.getGenericType()).getName());
+
+        String str = "List< Map< String, List<Map<String,>>>>";
+        List<GenericsTypeModel> list = getGenericsType(str.toCharArray(), new int[]{0, str.length()});
+        System.out.println(list);
+    }
+
     public static Field getFieldForObject(String name, Object object) {
         Class<?> clazz = object.getClass();
         return getFieldForClass(name, clazz);
@@ -142,50 +151,13 @@ public class WsReflectUtils {
         if (parent == null || child == null) {
             return false;
         }
-        if (parent == Object.class) {
+        if (child == parent || parent == Object.class) {
             return true;
         }
         if (child == Object.class) {
             return false;
         }
-
-        if (parent == child) {
-            return true;
-        }
-
-        if (parent.isInterface()) {
-            if (child.isInterface()) {
-                Class<?>[] cs = child.getInterfaces();
-                if (WsCollectionUtils.isEmpty(cs)) {
-                    return false;
-                }
-                for (Class<?> clazz : cs) {
-                    return classCompare(clazz, parent);
-                }
-            } else {
-                Class<?> parentClazz = child.getSuperclass();
-                if (classCompare(parentClazz, parent)) {
-                    return true;
-                } else {
-                    Class<?>[] cs = child.getInterfaces();
-                    if (WsCollectionUtils.isEmpty(cs)) {
-                        return false;
-                    }
-                    for (Class<?> clazz : cs) {
-                        return classCompare(clazz, parent);
-                    }
-                }
-            }
-
-        } else {
-            if (child.isInterface()) {
-                return false;
-            } else {
-                Class<?> parentClazz = child.getSuperclass();
-                return classCompare(parentClazz, parent);
-            }
-        }
-        return false;
+        return parent.isAssignableFrom(child);
     }
 
 
@@ -349,10 +321,14 @@ public class WsReflectUtils {
             return null;
         }
         GenericsTypeModel genericsTypeModel = getGenericsType(type.getTypeName());
-        if (genericsTypeModel.getGenericsTypeModelList() == null || genericsTypeModel.getGenericsTypeModelList().size() != 1){
+        List<GenericsTypeModel> genericsTypeModelList = genericsTypeModel.getGenericsTypeModelList();
+        if (WsCollectionUtils.isEmpty(genericsTypeModelList) || genericsTypeModelList.size() != 1) {
             return null;
         }
-        String className = genericsTypeModel.getGenericsTypeModelList().get(0).getClassName();
+        String className = genericsTypeModelList.get(0).getClassName();
+        if (WsStringUtils.isEmpty(className)) {
+            return null;
+        }
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException e) {
@@ -362,58 +338,84 @@ public class WsReflectUtils {
     }
 
     public static GenericsTypeModel getGenericsType(String typeName){
-        return getGenericsType(typeName,new int[]{0,typeName.length()}).get(0);
+        return getGenericsType(typeName.toCharArray(),new int[]{0,typeName.length()}).get(0);
     }
 
-    private static List<GenericsTypeModel> getGenericsType(String typeName,int[] startAndEnd){
-        StringBuilder sb = new StringBuilder();
+    private static final char GENERIC_START = '<';
+    private static final char GENERIC_END = '>';
+    private static final char GENERIC_SEPARATOR = ',';
+
+    private static List<GenericsTypeModel> getGenericsType(char[] typeName,int[] startAndEndIndex){
         List<GenericsTypeModel> list = new ArrayList<>();
         GenericsTypeModel genericsTypeModel = new GenericsTypeModel();
-        ignoreBeginBlank(startAndEnd,typeName,sb);
-        int statIndex = startAndEnd[0];
-        int endIndex = startAndEnd[1];
-        for (; statIndex < endIndex; statIndex++){
-            char c = typeName.charAt(statIndex);
-            if (c == '<'){
-
-                startAndEnd[0] = statIndex + 1;
-                genericsTypeModel.setGenericsTypeModelList(getGenericsType(typeName,startAndEnd));
-                statIndex = startAndEnd[0] - 1;
-            }else if (c == '>'){
-                statIndex++;
+        StringBuilder sb = new StringBuilder();
+        trimBlank(startAndEndIndex,typeName);
+        int startIndex = startAndEndIndex[0];
+        int endIndex = startAndEndIndex[1];
+        for (; startIndex < endIndex; startIndex++){
+            char c = typeName[startIndex];
+            if (c == GENERIC_START){
+                startAndEndIndex[0] = startIndex + 1;
+                genericsTypeModel.setGenericsTypeModelList(getGenericsType(typeName,startAndEndIndex));
+                startIndex = startAndEndIndex[0] - 1;
+            }else if (c == GENERIC_END){
+                startIndex++;
                 break;
-            }else if (c == ','){
+            }else if (c == GENERIC_SEPARATOR){
                 genericsTypeModel.setClassName(sb.toString());
                 list.add(genericsTypeModel);
-                sb = new StringBuilder();
                 genericsTypeModel = new GenericsTypeModel();
-                startAndEnd[0] = statIndex + 1;
-                ignoreBeginBlank(startAndEnd,typeName,sb);
-                statIndex = startAndEnd[0] - 1;
+                if (sb.length() != 0) {
+                    sb = new StringBuilder();
+                }
+                startAndEndIndex[0] = startIndex + 1;
+                trimBlank(startAndEndIndex,typeName);
+                startIndex = startAndEndIndex[0] - 1;
             }else {
                 sb.append(c);
             }
         }
-        startAndEnd[0] = statIndex;
+        startAndEndIndex[0] = startIndex;
         genericsTypeModel.setClassName(sb.toString());
         list.add(genericsTypeModel);
         return list;
     }
 
-    private static void ignoreBeginBlank(int[] startAndEnd,String typeName,StringBuilder stringBuilder){
-        int statIndex = startAndEnd[0];
-        int endIndex = startAndEnd[1];
-        for (;statIndex < endIndex;statIndex++){
-            char c = typeName.charAt(statIndex);
-            if (c == ' '){
-                continue;
-            }
-            stringBuilder.append(c);
-            statIndex++;
-            break;
+    /**
+     * 去除字符数组中指定范围的前后空白字符，并更新索引数组
+     *
+     * @param startAndEndIndex 长度为 2 的整型数组，[0] 为起始索引，[1] 为结束索引（不包含）
+     * @param typeName 待处理的字符数组
+     */
+    private static void trimBlank(int[] startAndEndIndex, char[] typeName) {
+        int sIndex = startAndEndIndex[0];
+        int eIndex = startAndEndIndex[1];
+        if (sIndex < 0) {
+            sIndex = 0;
         }
-        startAndEnd[0] = statIndex;
+        if (eIndex > typeName.length) {
+            eIndex = typeName.length;
+        }
+        if (sIndex < eIndex) {
+            for (; sIndex < eIndex; sIndex++) {
+                char c = typeName[sIndex];
+                if (Character.isWhitespace(c)) {
+                    continue;
+                }
+                break;
+            }
+            for (; eIndex > sIndex; eIndex--) {
+                char c = typeName[eIndex - 1];
+                if (Character.isWhitespace(c)) {
+                    continue;
+                }
+                break;
+            }
+        }
+        startAndEndIndex[0] = sIndex;
+        startAndEndIndex[1] = eIndex;
     }
+
 
     /**
      * 判读字段是不是数组

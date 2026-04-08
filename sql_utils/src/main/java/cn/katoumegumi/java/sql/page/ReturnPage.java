@@ -37,4 +37,8 @@ public class ReturnPage<T> {
     public List<T> getData() {
         return data;
     }
+
+    public long getAllPage() {
+        return allPage;
+    }
 }

@@ -49,12 +49,13 @@
     <properties>
         <revision>1.0.8.20250717</revision>
         <java.version>11</java.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <!--<maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>-->
+        <maven.compiler.release>11</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>3.3.5</spring-boot.version>
+        <spring-boot.version>3.5.7</spring-boot.version>
         <zxing.version>3.4.1</zxing.version>
-        <mybatis.plus.version>3.5.9</mybatis.plus.version>
+        <mybatis.plus.version>3.5.14</mybatis.plus.version>
         <poi.version>5.4.0</poi.version>
         <lang3.vaersion>3.17.0</lang3.vaersion>
         <!--<logback.version>1.4.12</logback.version>-->
@@ -301,8 +302,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <target>${maven.compiler.target}</target>
-                    <source>${maven.compiler.source}</source>
+                    <release>${maven.compiler.release}</release>
                     <encoding>UTF-8</encoding>
                     <!--<skip>true</skip>-->
                 </configuration>
