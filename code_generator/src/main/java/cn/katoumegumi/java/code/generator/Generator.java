@@ -128,9 +128,9 @@ public class Generator {
     }
 
     public static void main(String[] args) {
-        String url = "jdbc:mysql://47.96.119.77:3306/zs_jym_ms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true";
-        String userName = "root";
-        String password = "Qq123456789.";
+        String url = "jdbc:mysql://localhost:3306/zs_jym_ms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true";
+        String userName = "";
+        String password = "";
         String driverClassName = "com.mysql.cj.jdbc.Driver";
         String dataBaseName = "zs_jym_ms";
 
