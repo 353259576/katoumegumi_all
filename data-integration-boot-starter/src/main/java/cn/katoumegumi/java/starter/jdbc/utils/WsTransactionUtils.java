@@ -23,8 +23,8 @@ public class WsTransactionUtils {
             object = runnable.run();
             platformTransactionManager.commit(transactionStatus);
         } catch (Exception e) {
-            e.printStackTrace();
             platformTransactionManager.rollback(transactionStatus);
+            throw new RuntimeException(e);
         }
         return object;
     }

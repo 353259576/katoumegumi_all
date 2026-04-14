@@ -58,7 +58,7 @@ public class DataSourceConfig {
         map.put(properties.getAlias(), druidDataSource);
         dynamicDataSource.setDefaultTargetDataSource(druidDataSource);
         DynamicDataSourceHolder.defaultDataSource = properties.getAlias();
-        DynamicDataSourceHolder.dataSourceNameSet.add(properties.getAlias());
+        DynamicDataSourceHolder.dataSourceNameSet.put(properties.getAlias(),true);
         if (log.isInfoEnabled()){
             log.info(String.format("默认数据源：%s创建成功，数据源：%s",properties.getAlias(), druidDataSource));
         }
@@ -68,7 +68,7 @@ public class DataSourceConfig {
             druidDataSource = factory.initDatasource(properties, dataSourcePropertiesList.isSeataEnable());
             if (druidDataSource != null) {
                 map.put(properties.getAlias(), druidDataSource);
-                DynamicDataSourceHolder.dataSourceNameSet.add(properties.getAlias());
+                DynamicDataSourceHolder.dataSourceNameSet.put(properties.getAlias(),true);
                 if (log.isInfoEnabled()){
                     log.info(String.format("数据源：%s创建成功,数据源：%s",properties.getAlias(), druidDataSource));
                 }

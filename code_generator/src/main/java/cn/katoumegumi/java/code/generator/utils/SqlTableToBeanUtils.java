@@ -42,7 +42,7 @@ public class SqlTableToBeanUtils {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        return null;
+        throw new RuntimeException("获取数据库连接失败");
     }
 
 

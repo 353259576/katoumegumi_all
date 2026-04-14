@@ -1,13 +1,13 @@
 package cn.katoumegumi.java.starter.jdbc.datasource;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamicDataSourceHolder {
 
     public static final ThreadLocal<String> THREAD_LOCAL = new ThreadLocal<>();
     public static String defaultDataSource;
-    public static final Set<String> dataSourceNameSet = new HashSet<>();
+    public static final Map<String,Boolean> dataSourceNameSet = new ConcurrentHashMap<>();
 
     public static String getDataSource() {
 

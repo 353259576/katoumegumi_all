@@ -106,22 +106,19 @@ public class FieldColumnRelationMapperFactory {
             CountDownLatch cdl = new CountDownLatch(1);
             EXECUTOR_SERVICE.execute(() -> {
                 try {
-                    FIELD_COLUMN_RELATION_MAPPER_FACTORY.createFieldColumnRelationMapper(c, allowIncomplete);
+                    FIELD_COLUMN_RELATION_MAPPER_FACTORY.createFieldColumnRelationMapper(c);
                 } catch (Throwable e) {
                     log.error(e.getMessage(), e);
-                    throw e;
                 } finally {
                     CLASS_COUNT_DOWN_LATCH_MAP.remove(c);
                     cdl.countDown();
                 }
-
-
             });
 
             return cdl;
         });
         try {
-            boolean k = countDownLatch.await(3, TimeUnit.MINUTES);
+            boolean k = countDownLatch.await(1, TimeUnit.MINUTES);
             if (k) {
                 propertyColumnRelationMapper = MAPPER_MAP.get(clazz);
                 if (propertyColumnRelationMapper == null) {
@@ -132,8 +129,9 @@ public class FieldColumnRelationMapperFactory {
                 throw new RuntimeException("解析超时,无法解析：" + clazz);
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             log.error(e.getMessage(), e);
-            throw new RuntimeException("程序异常中断");
+            throw new RuntimeException("程序异常中断:" + clazz.getName(),e);
         }
     }
 
@@ -225,7 +223,7 @@ public class FieldColumnRelationMapperFactory {
     }
 
 
-    public PropertyColumnRelationMapper createFieldColumnRelationMapper(Class<?> clazz, boolean allowIncomplete) {
+    public PropertyColumnRelationMapper createFieldColumnRelationMapper(Class<?> clazz) {
         int startIndex = getCanHandleFieldColumnRelationMapperStrategyIndex(clazz);
         if (startIndex == -1) {
             return null;
@@ -268,31 +266,32 @@ public class FieldColumnRelationMapperFactory {
             }
         }
 
-        putIncompleteMapper(clazz, propertyColumnRelationMapper);
-
-        if (WsCollectionUtils.isNotEmpty(joinClassFieldList)) {
+        if (!WsCollectionUtils.isEmpty(joinClassFieldList)) {
+            putIncompleteMapper(clazz, propertyColumnRelationMapper);
             for (BeanPropertyModel propertyModel : joinClassFieldList) {
-                Class<?> joinClass = WsReflectUtils.isArrayType(propertyModel.getPropertyClass())?propertyModel.getGenericClass():propertyModel.getPropertyClass();
-                if (joinClass == null){
+                Class<?> joinClass = WsReflectUtils.isArrayType(propertyModel.getPropertyClass()) ? propertyModel.getGenericClass() : propertyModel.getPropertyClass();
+                if (joinClass == null) {
                     continue;
                 }
                 try {
                     PropertyColumnRelationMapper joinMapper = analysisClassRelation(joinClass, true);
-                    PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = getJoinRelation(startIndex, propertyColumnRelationMapper, joinMapper, propertyModel,abbreviation++);
+                    PropertyObjectColumnJoinRelation propertyObjectColumnJoinRelation = getJoinRelation(startIndex, propertyColumnRelationMapper, joinMapper, propertyModel, abbreviation++);
                     if (propertyObjectColumnJoinRelation == null) {
                         abbreviation--;
                         continue;
                     }
                     propertyColumnRelationMapper.getFieldJoinClasses().add(propertyObjectColumnJoinRelation);
-                }catch (RuntimeException e){
+                } catch (RuntimeException e) {
                     abbreviation--;
-                    log.info("解析"+ joinClass +"失败:"+e.getMessage());
+                    log.info("解析" + joinClass + "失败:" + e.getMessage());
                 }
             }
         }
         propertyColumnRelationMapper.markSignLocation();
         putMapper(clazz, propertyColumnRelationMapper);
-        removeIncompleteMapper(clazz);
+        if (!WsCollectionUtils.isEmpty(joinClassFieldList)) {
+            removeIncompleteMapper(clazz);
+        }
         return propertyColumnRelationMapper;
     }
 
