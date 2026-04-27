@@ -474,9 +474,9 @@ public class WsReflectUtils {
                 }
             } else if (clazz.equals(float.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {
-                    return WsUnsafeUtils.getObjectVolatile(o, address);
+                    return WsUnsafeUtils.getFloatVolatile(o, address);
                 } else {
-                    return WsUnsafeUtils.getObject(o, address);
+                    return WsUnsafeUtils.getFloat(o, address);
                 }
             } else if (clazz.equals(short.class)) {
                 if (Modifier.isVolatile(field.getModifiers())) {

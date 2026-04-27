@@ -14,6 +14,7 @@ import cn.katoumegumi.java.sql.resultSet.strategys.JdkResultSet;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,7 +55,7 @@ public class BaseDataSourceUtils {
         } finally {
             WsStreamUtils.close(resultSet, preparedStatement, connection);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public <T> int insert(T t) {

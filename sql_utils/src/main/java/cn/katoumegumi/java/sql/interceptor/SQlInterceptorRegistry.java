@@ -29,7 +29,7 @@ public class SQlInterceptorRegistry {
      * @param sqlInterceptor
      * @return
      */
-    public boolean addSqlInterceptor(BaseSqlInterceptor sqlInterceptor) {
+    public synchronized  boolean addSqlInterceptor(BaseSqlInterceptor sqlInterceptor) {
         if (sqlInterceptor == null) {
             return false;
         }

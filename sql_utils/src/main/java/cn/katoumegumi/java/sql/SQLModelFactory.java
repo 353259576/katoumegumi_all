@@ -1132,7 +1132,7 @@ public class SQLModelFactory {
             case BETWEEN:
                 return SqlEquation.Symbol.BETWEEN;
             case NOT_BETWEEN:
-                return SqlEquation.Symbol.NOT;
+                return SqlEquation.Symbol.NOT_BETWEEN;
             case SQL:
                 return SqlEquation.Symbol.SQL;
             case ADD:

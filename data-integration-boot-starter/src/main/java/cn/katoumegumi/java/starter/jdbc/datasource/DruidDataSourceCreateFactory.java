@@ -41,7 +41,7 @@ public class DruidDataSourceCreateFactory {
             return druidDataSource;
         } catch (Exception e) {
             if (log.isErrorEnabled()) {
-                log.info(String.format("加载数据库失败：%s", e.getMessage()),e);
+                log.error(String.format("加载数据库失败：%s", e.getMessage()),e);
             }
 
             return null;

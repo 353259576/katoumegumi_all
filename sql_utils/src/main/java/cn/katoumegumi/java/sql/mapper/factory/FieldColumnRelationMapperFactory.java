@@ -214,7 +214,8 @@ public class FieldColumnRelationMapperFactory {
         return INCOMPLETE_MAPPER_MAP.remove(clazz);
     }
 
-    public static boolean addFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperHandleStrategy strategy) {
+
+    public synchronized static boolean addFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperHandleStrategy strategy) {
         if (strategy.canUse()) {
             FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.add(strategy);
             return true;

@@ -24,7 +24,7 @@ public class ConvertUtils {
         return null;
     }
 
-    public static final Map<Class<?>, ConvertBean<?>> CLASS_CONVERT_BEAN_MAP = new HashMap<>();
+    private static final Map<Class<?>, ConvertBean<?>> CLASS_CONVERT_BEAN_MAP = new HashMap<>();
 
     static {
         ConvertToString convertToString = new ConvertToString();
@@ -90,7 +90,7 @@ public class ConvertUtils {
      * @param convertBean
      * @param <T>
      */
-    public static <T> void addConvertBean(ConvertBean<T> convertBean) {
+    public synchronized static <T> void addConvertBean(ConvertBean<T> convertBean) {
         CLASS_CONVERT_BEAN_MAP.put(getClass(convertBean.getClass()), convertBean);
     }
 

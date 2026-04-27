@@ -1,4 +1,4 @@
-# Except this file !.gitignore 
+# Except this file !.gitignore
 .classpath
 .project
 .settings
@@ -17,3 +17,5 @@ test/logs
 yarn.lock
 .flattened-pom.xml
 .fleet
+.ai
+.trae
