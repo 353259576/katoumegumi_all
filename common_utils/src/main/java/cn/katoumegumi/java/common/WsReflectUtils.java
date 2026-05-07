@@ -56,6 +56,9 @@ public class WsReflectUtils {
             } catch (NoSuchFieldException e) {
                 //e.printStackTrace();
             }
+            if (field != null) {
+                break;
+            }
         }
         return field;
     }
