@@ -130,7 +130,8 @@
 ```yaml
 megumi:
   datasource:
-    enable: true
+    enable: true                    # 启用数据源自动配置
+    seataEnable: false              # 是否启用 Seata 分布式事务
     druids:
       - alias: master
         url: jdbc:mysql://localhost:3306/your_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true

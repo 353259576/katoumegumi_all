@@ -18,14 +18,22 @@ A lightweight Java MySQL persistence layer framework built on Spring JDBC Templa
 | `code_generator` | FreeMarker-based code generator for Entity/Service/Controller/Mapper from DB schema | sql_utils, freemarker |
 | `excel_utils` | Apache POI SXSSFWorkbook-based streaming Excel exporter | poi, poi-ooxml |
 
-## Key Classes
+## Key Classes & Architecture
 
-- **`WsJdbcUtils`** (boot-starter) — Core entry point. Provides `insert()`, `update()`, `delete()`, `getListT()`, `getTOne()`, `getTPage()` etc.
-- **`MySearchList`** (sql_utils) — Fluent condition builder. Chain `.eq()`, `.gt()`, `.in()`, `.and()`, `.leftJoin()` etc. Uses `SFunction<T,R>` for type-safe lambda field references.
-- **`SQLModelFactory`** (sql_utils) — Builds SQL entities from MySearchList. Pluggable via `SqlHandler` interface (MySQL impl in `MysqlSqlHandler`).
-- **`WsJdbcUtils.saveOrUpdate()`** — Upsert by primary key; only supports single PK.
-- **DynamicDataSource** — Multi-datasource switching via `@DataBase(dataBaseName = "alias")` annotation on Spring proxy methods, or manually via `DynamicDataSourceHolder`.
-- **`SFunction<T,R>`** (common_utils) — Custom functional interface for serializing lambda references to property names at runtime.
+### Entry Point: `WsJdbcUtils` (boot-starter)
+Core entry point for all database operations. Provides `insert()`, `update()`, `delete()`, `selectList()`, `selectOne()`, `selectPage()`, `saveOrUpdate()` etc. Each method accepts a `MySearchList` condition builder and returns typed results.
+
+### SQL Builder: `MySearchList` (sql_utils)
+Fluent condition builder — chain `.eq()`, `.gt()`, `.in()`, `.and()`, `.or()`, `.leftJoin()` etc. Uses `SFunction<T,R>` for type-safe lambda field references (`User::getStatus`). Also supports aggregate functions via `SqlFunction.create("COUNT", "id")`.
+
+### SQL Generation: `SQLModelFactory` (sql_utils)
+Builds SQL entities from MySearchList. Pluggable via `SqlHandler` interface — default implementation is `MysqlSqlHandler`. Factory also manages global SQL interceptors and field-column mapping strategies.
+
+### Multi-Datasource: `DynamicDataSource` + `@DataBase`
+Switches datasource at runtime via AOP. Annotate methods with `@DataBase(dataBaseName = "alias")` or use `DynamicDataSourceHolder` manually. Configured via Druid connection pools in `DataSourceConfig`.
+
+### Lambda Support: `SFunction<T,R>` (common_utils)
+Custom functional interface that serializes lambda references to property names at runtime, enabling type-safe column references without string magic.
 
 ## Entity Annotation Strategy
 
@@ -43,7 +51,19 @@ public class User {
 
 ## SQL Interceptors
 
-Register globally via `SQLModelFactory.addSqlInterceptor()`. Implement `BaseInsertSqlInterceptor`, `BaseUpdateSqlInterceptor`, or `AbstractSqlInterceptor` to auto-fill fields (e.g., createTime, updateTime).
+Register globally via `SQLModelFactory.addSqlInterceptor()`:
+- **`BaseInsertSqlInterceptor`** — auto-fill insert fields (createTime, createUser)
+- **`BaseUpdateSqlInterceptor`** — auto-fill update fields (updateTime, updateUser)
+- **`AbstractSqlInterceptor`** — generic interceptor for any SQL phase
+
+## Field-Column Mapping Strategies
+
+Pluggable via `FieldColumnRelationMapperFactory`. Built-in strategies:
+1. **TableTemplate** — custom `@TableTemplate` annotation
+2. **Jakarta Persistence** — `@Column`, `@Entity`, `@Table`
+3. **Hibernate** — `@Column` from Hibernate annotations
+4. **MyBatis-Plus** — `@TableName`, `@TableId`, `@TableField`
+5. **Default** — camelCase to snake_case conversion
 
 ## Spring Boot Auto-Configuration
 
@@ -52,6 +72,8 @@ Two auto-config classes registered in `META-INF/spring.factories`:
 - **`JdbcConfig`** — Configures WsJdbcUtils bean and transaction manager.
 
 YAML config property prefix: `megumi.datasource.druids[*]` with fields `alias`, `url`, `username`, `password`.
+
+Transaction management via `WsTransactionUtils` in boot-starter.
 
 ## Build & Development
 
