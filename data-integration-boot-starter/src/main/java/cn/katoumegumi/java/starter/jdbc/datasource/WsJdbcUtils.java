@@ -1,8 +1,11 @@
 package cn.katoumegumi.java.starter.jdbc.datasource;
 
 import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.convert.ConvertUtils;
+import cn.katoumegumi.java.common.function.TripleConsumer;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.common.model.KeyValue;
+import cn.katoumegumi.java.common.model.TripleEntity;
 import cn.katoumegumi.java.sql.*;
 import cn.katoumegumi.java.sql.handler.SqlEntityFactory;
 import cn.katoumegumi.java.sql.handler.model.DeleteSqlEntity;
@@ -33,6 +36,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -49,7 +55,7 @@ public class WsJdbcUtils {
 
 
     public <T> int insert(T t) {
-        if(t == null){
+        if (t == null) {
             throw new IllegalArgumentException("insert Object is null");
         }
         if (WsReflectUtils.isArrayType(t.getClass())) {
@@ -66,7 +72,7 @@ public class WsJdbcUtils {
         Map<String, Object> keyMap = keyHolder.getKeys();
         if (WsCollectionUtils.isNotEmpty(keyMap)) {
             List<PropertyBaseColumnRelation> idList = insertSqlEntity.getIdList();
-            setGeneratedKey(t,keyMap,idList);
+            setGeneratedKey(t, keyMap, idList);
         }
         return row;
     }
@@ -84,48 +90,164 @@ public class WsJdbcUtils {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int row = jdbcTemplate.update(createPreparedStatement(insertSqlEntity), keyHolder);
         List<Map<String, Object>> keyMapList = keyHolder.getKeyList();
-        if(WsCollectionUtils.isNotEmpty(keyMapList)){
+        if (WsCollectionUtils.isNotEmpty(keyMapList)) {
             List<PropertyBaseColumnRelation> idList = insertSqlEntity.getIdList();
-            for (int i = 0; i < keyMapList.size(); i++){
-                setGeneratedKey(tList.get(i),keyMapList.get(i),idList);
+            for (int i = 0; i < keyMapList.size(); i++) {
+                setGeneratedKey(tList.get(i), keyMapList.get(i), idList);
             }
         }
         return row;
     }
 
 
+
+    private final static Map<Class<?>, TripleConsumer<PreparedStatement, Integer, Object>> SET_STATEMENT_MAP = Map.ofEntries(
+            Map.entry(String.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s, i, o)  -> {
+                try {
+                    s.setString(i, (String) o);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }),
+            Map.entry(Integer.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setInt(i, (int)o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(int.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setInt(i, (int)o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(Long.class,(TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setLong(i, (long) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(long.class,(TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setLong(i, (long) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(Short.class,(TripleConsumer<PreparedStatement, Integer, Object>)  (s,i,o)  -> {
+                try {
+                    s.setShort(i, (short) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(short.class,(TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setShort(i, (short) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+
+            Map.entry(Float.class,(TripleConsumer<PreparedStatement, Integer, Object>)  (s,i,o)  -> {
+                try {
+                    s.setFloat(i, (float) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(float.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o) -> {
+                try {
+                    s.setFloat(i, (float) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(Double.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o) -> {
+                try {
+                    s.setDouble(i, (double) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(double.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setDouble(i, (double) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(Boolean.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setBoolean(i, (boolean) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(boolean.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setBoolean(i, (boolean) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(Byte.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setByte(i, (byte) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(byte.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setByte(i, (byte) o);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(BigDecimal.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setBigDecimal(i, ConvertUtils.convert(o, BigDecimal.class));
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(LocalDateTime.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setString(i, ConvertUtils.convert(o, String.class));
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }),
+            Map.entry(LocalDate.class, (TripleConsumer<PreparedStatement, Integer, Object>) (s,i,o)  -> {
+                try {
+                    s.setString(i, ConvertUtils.convert(o, String.class));
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            })
+    );
+
     private PreparedStatementCreator createPreparedStatement(InsertSqlEntity insertSqlEntity) {
         return connection -> {
             PreparedStatement statement = connection.prepareStatement(insertSqlEntity.getInsertSql(), Statement.RETURN_GENERATED_KEYS);
-            Object o;
             List<?> valueList = WsCollectionUtils.listToList(insertSqlEntity.getValueList(), SqlParameter::getValue);
             for (int i = 0; i < valueList.size(); i++) {
-                o = valueList.get(i);
+                Object o = valueList.get(i);
                 if (o == null) {
                     statement.setNull(i + 1, Types.NULL);
                     continue;
                 }
-                if (o instanceof String) {
-                    statement.setString(i + 1, WsStringUtils.anyToString(o));
-                } else if (o instanceof Integer || WsReflectUtils.classCompare(int.class, o.getClass())) {
-                    statement.setInt(i + 1, WsBeanUtils.baseTypeConvert(o, int.class));
-                } else if (o instanceof Long || WsReflectUtils.classCompare(o.getClass(), long.class)) {
-                    statement.setLong(i + 1, WsBeanUtils.baseTypeConvert(o, long.class));
-                } else if (o instanceof Short || WsReflectUtils.classCompare(o.getClass(), short.class)) {
-                    statement.setShort(i + 1, WsBeanUtils.baseTypeConvert(o, short.class));
-                } else if (o instanceof Float || WsReflectUtils.classCompare(o.getClass(), Float.class)) {
-                    statement.setFloat(i + 1, WsBeanUtils.baseTypeConvert(o, float.class));
-                } else if (o instanceof Double || WsReflectUtils.classCompare(o.getClass(), double.class)) {
-                    statement.setDouble(i + 1, WsBeanUtils.baseTypeConvert(o, double.class));
-                } else if (o instanceof BigDecimal) {
-                    statement.setBigDecimal(i + 1, WsBeanUtils.baseTypeConvert(o, BigDecimal.class));
+                TripleConsumer<PreparedStatement, Integer, Object> consumer = SET_STATEMENT_MAP.get(o.getClass());
+                if (consumer != null) {
+                    consumer.accept(statement, i + 1, o);
                 } else if (o instanceof Date) {
                     statement.setString(i + 1, WsBeanUtils.baseTypeConvert(o, String.class));
-                } else if (o instanceof LocalDate || o instanceof LocalDateTime) {
-                    statement.setString(i + 1, WsBeanUtils.baseTypeConvert(o, String.class));
-                }else {
-                    statement.setObject(i+1,o);
-                    //throw new RuntimeException("不支持的数据类型:" + o.getClass());
+                } else {
+                    statement.setObject(i + 1, o);
                 }
             }
             return statement;
@@ -142,7 +264,7 @@ public class WsJdbcUtils {
         }
         MySearchList mySearchList = MySearchList.create(t.getClass());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
-        UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel(t,isAll));
+        UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel(t, isAll));
         if (log.isDebugEnabled()) {
             log.debug(updateSqlEntity.getUpdateSql());
         }
@@ -166,23 +288,23 @@ public class WsJdbcUtils {
             return EMPTY_INT_ARRAY;
         }
         int[] ans = new int[mySearchLists.size()];
-        Map<String, KeyValue<List<Object[]>,List<Integer>>> map = new HashMap<>();
+        Map<String, KeyValue<List<Object[]>, List<Integer>>> map = new HashMap<>();
         int index = 0;
         for (MySearchList mySearchList : mySearchLists) {
             SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
             UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel());
-            KeyValue<List<Object[]>,List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(),new ArrayList<>()));
+            KeyValue<List<Object[]>, List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(), new ArrayList<>()));
             keyValue.getKey().add(WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
             keyValue.getValue().add(index++);
         }
         for (Map.Entry<String, KeyValue<List<Object[]>, List<Integer>>> stringKeyValueEntry : map.entrySet()) {
             String sql = stringKeyValueEntry.getKey();
-            KeyValue<List<Object[]>,List<Integer>> keyValue = stringKeyValueEntry.getValue();
+            KeyValue<List<Object[]>, List<Integer>> keyValue = stringKeyValueEntry.getValue();
             if (log.isDebugEnabled()) {
                 log.debug(sql);
             }
             int[] returnAns = jdbcTemplate.batchUpdate(sql, keyValue.getKey());
-            for (int i = 0; i < returnAns.length; i++){
+            for (int i = 0; i < returnAns.length; i++) {
                 ans[keyValue.getValue().get(i)] = returnAns[i];
             }
         }
@@ -199,23 +321,23 @@ public class WsJdbcUtils {
         }
         int[] ans = new int[tList.size()];
         int index = 0;
-        Map<String, KeyValue<List<Object[]>,List<Integer>>> map = new HashMap<>();
+        Map<String, KeyValue<List<Object[]>, List<Integer>>> map = new HashMap<>();
         MySearchList mySearchList = MySearchList.create(tList.get(0).getClass());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(mySearchList);
         for (T t : tList) {
-            UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel(t,isAll));
-            KeyValue<List<Object[]>,List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(),new ArrayList<>()));
+            UpdateSqlEntity updateSqlEntity = SqlEntityFactory.createUpdateSqlEntity(sqlModelFactory.createUpdateModel(t, isAll));
+            KeyValue<List<Object[]>, List<Integer>> keyValue = map.computeIfAbsent(updateSqlEntity.getUpdateSql(), sql -> new KeyValue<>(new ArrayList<>(), new ArrayList<>()));
             keyValue.getKey().add(WsCollectionUtils.listToArray(updateSqlEntity.getValueList(), SqlParameter::getValue));
             keyValue.getValue().add(index++);
         }
         for (Map.Entry<String, KeyValue<List<Object[]>, List<Integer>>> stringKeyValueEntry : map.entrySet()) {
             String sql = stringKeyValueEntry.getKey();
-            KeyValue<List<Object[]>,List<Integer>> keyValue = stringKeyValueEntry.getValue();
+            KeyValue<List<Object[]>, List<Integer>> keyValue = stringKeyValueEntry.getValue();
             if (log.isDebugEnabled()) {
                 log.debug(sql);
             }
             int[] returnAns = jdbcTemplate.batchUpdate(sql, keyValue.getKey());
-            for (int i = 0; i < returnAns.length; i++){
+            for (int i = 0; i < returnAns.length; i++) {
                 ans[keyValue.getValue().get(i)] = returnAns[i];
             }
         }
@@ -248,16 +370,16 @@ public class WsJdbcUtils {
             log.debug(sql);
         }
         List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
-        return queryList(sql, parameterList,selectModel, sqlModelFactory);
+        return queryList(sql, parameterList, selectModel, sqlModelFactory);
     }
 
-    private <T> List<T> queryList(String sql, List<Object> parameterList,SelectModel selectModel, SQLModelFactory sqlModelFactory) {
+    private <T> List<T> queryList(String sql, List<Object> parameterList, SelectModel selectModel, SQLModelFactory sqlModelFactory) {
         return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), rs -> {
-            return sqlModelFactory.convertResult(selectModel,new JdkResultSet(rs));
+            return sqlModelFactory.convertResult(selectModel, new JdkResultSet(rs));
         });
     }
 
-    private <T> T querySingleColumnObject(String sql,List<Object> parameterList,Class<T> returnType){
+    private <T> T querySingleColumnObject(String sql, List<Object> parameterList, Class<T> returnType) {
         return jdbcTemplate.query(sql, new ArgumentPreparedStatementSetter(parameterList.toArray()), rs -> {
             if (rs.next()) {
                 return WsBeanUtils.baseTypeConvert(rs.getObject(1), returnType);
@@ -283,7 +405,7 @@ public class WsJdbcUtils {
         List<T> tList = getListT(mySearchList);
         if (WsCollectionUtils.isNotEmpty(tList)) {
             if (tList.size() > 1) {
-                if (log.isWarnEnabled()){
+                if (log.isWarnEnabled()) {
                     log.warn("本次查询数据大于一条但是仅显示一条。");
                 }
             }
@@ -330,15 +452,15 @@ public class WsJdbcUtils {
             log.debug(countSql);
         }
         List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
-        Long count = querySingleColumnObject(countSql,parameterList,Long.class);
-        if(count == null){
+        Long count = querySingleColumnObject(countSql, parameterList, Long.class);
+        if (count == null) {
             count = 0L;
         }
         SqlLimit sqlLimit = mySearchList.getSqlLimit();
         List<T> tList;
-        if(count > sqlLimit.getOffset()) {
-            tList = queryList(sql, parameterList,selectModel, sqlModelFactory);
-        }else {
+        if (count > sqlLimit.getOffset()) {
+            tList = queryList(sql, parameterList, selectModel, sqlModelFactory);
+        } else {
             tList = new ArrayList<>(0);
         }
         IPage<T> iPage = new Page<>();
@@ -364,31 +486,32 @@ public class WsJdbcUtils {
             log.debug(countSql);
         }
         List<Object> parameterList = selectSqlEntity.getValueList().stream().map(SqlParameter::getValue).collect(Collectors.toList());
-        return querySingleColumnObject(countSql,parameterList,Long.class);
+        return querySingleColumnObject(countSql, parameterList, Long.class);
     }
 
     /**
      * 添加或保存（只支持单主键）
+     *
      * @param t
      * @param <T>
      * @return
      */
-    public <T> Integer saveOrUpdate(T t){
+    public <T> Integer saveOrUpdate(T t) {
         PropertyColumnRelationMapper propertyColumnRelationMapper = SQLModelFactory.getFieldColumnRelationMapper(t.getClass());
         List<PropertyBaseColumnRelation> propertyBaseColumnRelations = propertyColumnRelationMapper.getIds();
         PropertyBaseColumnRelation relation = propertyBaseColumnRelations.get(0);
         BeanPropertyModel beanPropertyModel = relation.getBeanProperty();
         Object o = beanPropertyModel.getValue(t);
-        if(o == null){
+        if (o == null) {
             return insert(t);
-        }else {
+        } else {
             MySearchList mySearchList = MySearchList.create(t.getClass());
             mySearchList.singleColumnName(beanPropertyModel.getPropertyName());
-            mySearchList.eq(beanPropertyModel.getPropertyName(),o);
+            mySearchList.eq(beanPropertyModel.getPropertyName(), o);
             Object oldIndex = getTOne(mySearchList);
-            if(oldIndex == null){
+            if (oldIndex == null) {
                 return insert(t);
-            }else {
+            } else {
                 return update(t);
             }
         }
@@ -402,39 +525,39 @@ public class WsJdbcUtils {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private <T> void setGeneratedKey(T t, Map<String,Object> keyMap, List<PropertyBaseColumnRelation> idList){
+    private <T> void setGeneratedKey(T t, Map<String, Object> keyMap, List<PropertyBaseColumnRelation> idList) {
         boolean[] isUseArray = new boolean[idList.size()];
         Map<String, Integer> fieldNameAndIndexMap = new HashMap<>(idList.size());
-        for (int i = 0; i < idList.size(); i++){
-            fieldNameAndIndexMap.put(idList.get(i).getColumnName(),i);
+        for (int i = 0; i < idList.size(); i++) {
+            fieldNameAndIndexMap.put(idList.get(i).getColumnName(), i);
         }
         List<String> unUseColumnNameList = new ArrayList<>(keyMap.size());
         for (Map.Entry<String, Object> stringObjectEntry : keyMap.entrySet()) {
             String columnName = stringObjectEntry.getKey();
             Integer index = fieldNameAndIndexMap.get(columnName);
-            if(index == null){
+            if (index == null) {
                 unUseColumnNameList.add(columnName);
                 continue;
             }
             isUseArray[index] = true;
             PropertyBaseColumnRelation propertyBaseColumnRelation = idList.get(index);
             propertyBaseColumnRelation.getBeanProperty()
-                    .setValue(t,WsBeanUtils.baseTypeConvert(stringObjectEntry.getValue(), propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
+                    .setValue(t, WsBeanUtils.baseTypeConvert(stringObjectEntry.getValue(), propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
         }
         if (CollectionUtils.isEmpty(unUseColumnNameList)) {
             return;
         }
 
-        for (int idIndex = 0,unUseIndex = 0; idIndex < isUseArray.length && unUseIndex < unUseColumnNameList.size();unUseIndex++){
+        for (int idIndex = 0, unUseIndex = 0; idIndex < isUseArray.length && unUseIndex < unUseColumnNameList.size(); unUseIndex++) {
             Object value = keyMap.get(unUseColumnNameList.get(unUseIndex));
-            while (idIndex < isUseArray.length){
-                if (isUseArray[idIndex]){
+            while (idIndex < isUseArray.length) {
+                if (isUseArray[idIndex]) {
                     idIndex++;
                     continue;
                 }
                 isUseArray[idIndex] = false;
                 PropertyBaseColumnRelation propertyBaseColumnRelation = idList.get(idIndex);
-                propertyBaseColumnRelation.getBeanProperty().setValue(t,WsBeanUtils.baseTypeConvert(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
+                propertyBaseColumnRelation.getBeanProperty().setValue(t, WsBeanUtils.baseTypeConvert(value, propertyBaseColumnRelation.getBeanProperty().getPropertyClass()));
                 idIndex++;
                 break;
             }

@@ -7,4 +7,5 @@ module cn.katoumegumi.java.common.utils {
     exports cn.katoumegumi.java.common;
     exports cn.katoumegumi.java.common.model;
     exports cn.katoumegumi.java.common.convert;
+    exports cn.katoumegumi.java.common.function;
 }
