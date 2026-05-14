@@ -71,13 +71,14 @@ public class BaseDataSourceUtils {
                 preparedStatement.setObject(i + 1, list.get(i).getValue());
             }
             int updateRow = preparedStatement.executeUpdate();
-            ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            List<PropertyBaseColumnRelation> idList = insertSqlEntity.getIdList();
-            if (WsCollectionUtils.isNotEmpty(idList) && resultSet != null) {
-                int count = resultSet.getMetaData().getColumnCount();
-                if (resultSet.next()) {
-                    for (int i = 0; i < count && i < idList.size(); i++) {
-                        WsReflectUtils.setValue(t, WsBeanUtils.baseTypeConvert(resultSet.getObject(i + 1), idList.get(i).getBeanProperty().getPropertyClass()), idList.get(i).getBeanProperty().getField());
+            try (ResultSet resultSet = preparedStatement.getGeneratedKeys()){
+                List<PropertyBaseColumnRelation> idList = insertSqlEntity.getIdList();
+                if (WsCollectionUtils.isNotEmpty(idList) && resultSet != null) {
+                    int count = resultSet.getMetaData().getColumnCount();
+                    if (resultSet.next()) {
+                        for (int i = 0; i < count && i < idList.size(); i++) {
+                            WsReflectUtils.setValue(t, WsBeanUtils.baseTypeConvert(resultSet.getObject(i + 1), idList.get(i).getBeanProperty().getPropertyClass()), idList.get(i).getBeanProperty().getField());
+                        }
                     }
                 }
             }
