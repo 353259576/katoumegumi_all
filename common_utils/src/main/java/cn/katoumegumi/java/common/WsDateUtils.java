@@ -2,10 +2,9 @@ package cn.katoumegumi.java.common;
 
 import cn.katoumegumi.java.common.model.WsRun;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -46,11 +45,15 @@ public class WsDateUtils {
 
     public static void main(String[] args) {
 
+        System.out.println(getDefaultZoneOffset());
+        System.out.println(DEFAULT_ZONE_OFFSET);
+
         System.out.println(Character.isDigit('-'));
         System.out.println(Character.isDigit('.'));
         System.out.println(Character.isDigit('1'));
 
-        System.out.println(WsDateUtils.dateToString(stringToDate("11111111111111111",LONGTIMESTRING),CNLONGTIMESTRING));
+        System.out.println(WsDateUtils.dateToString(stringToDate("11111111111111111"),CNLONGTIMESTRING));
+        System.out.println(WsDateUtils.dateToString(stringToDate("2020-01-01"),SMALLTIMESTRING));
 
         Date date = WsDateUtils.stringToDate("2023-08-25 23:01:59");
         System.out.println(objectDateFormatString(date));
@@ -130,13 +133,13 @@ public class WsDateUtils {
         return sb.toString();
     }
 
-    public static Date stringToDate(String date, String format) {
+    public static Date stringToDate(String date) {
         try {
             date = dateStringFormat(date);
             if (WsStringUtils.isEmpty(date)) {
                 throw new IllegalArgumentException("date is null");
             }
-            DateTimeFormatter simpleDateFormat = getDateFormat(format);
+            DateTimeFormatter simpleDateFormat = getDateFormat(LONGTIMESTRING);
             if (simpleDateFormat == null) {
                 throw new IllegalArgumentException("date format is null");
             }
@@ -148,19 +151,24 @@ public class WsDateUtils {
         }
     }
 
-    public static Date stringToDate(String date) {
-        return stringToDate(date, LONGTIMESTRING);
-    }
-
     public static Date objectToDate(Object date) {
+        if (date == null) {
+            return null;
+        }
         try {
-            String dateString = objectDateFormatString(date);
-            if (WsStringUtils.isEmpty(dateString)) {
-                throw new NullPointerException("date is null");
+            if (date instanceof Date) {
+                return (Date) date;
+            } else if (date instanceof LocalDateTime) {
+                return Date.from(((LocalDateTime) date).atZone(ZoneId.systemDefault()).toInstant());
+            } else {
+                String dateString = objectDateFormatString(date);
+                if (WsStringUtils.isEmpty(dateString)) {
+                    throw new NullPointerException("date is null");
+                }
+                DateTimeFormatter simpleDateFormat = getDateFormat(LONGTIMESTRING);
+                LocalDateTime localDateTime = LocalDateTime.parse(dateString,simpleDateFormat);
+                return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
             }
-            DateTimeFormatter simpleDateFormat = getDateFormat(LONGTIMESTRING);
-            LocalDateTime localDateTime = LocalDateTime.parse(dateString,simpleDateFormat);
-            return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -201,7 +209,7 @@ public class WsDateUtils {
             }*/ else if (object instanceof Number) {
                 return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
             } else if (object instanceof LocalDate) {
-                return ((LocalDate) object).format(getDateFormat(LONGTIMESTRING));
+                return ((LocalDate) object).format(getDateFormat(SMALLTIMESTRING));
             } else if (object instanceof LocalDateTime) {
                 return ((LocalDateTime) object).format(getDateFormat(LONGTIMESTRING));
             } else {
@@ -412,6 +420,7 @@ public class WsDateUtils {
     }
 
     public static long getDefaultZoneOffset() {
-        return DEFAULT_ZONE_OFFSET;
+        return ZoneId.systemDefault().getRules()
+                .getOffset(Instant.now()).getTotalSeconds() * 1000L;
     }
 }
