@@ -74,7 +74,7 @@ public class Encryption {
             }
             password = password.substring(0,8);
             //SecureRandom secureRandom = new SecureRandom();
-            IvParameterSpec ivParameterSpec = new IvParameterSpec(password.getBytes());
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(password.getBytes(StandardCharsets.UTF_8));
             DESKeySpec desKeySpec = new DESKeySpec(password.getBytes());
             SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(DES_ALGORITHM);
             SecretKey secretKey = secretKeyFactory.generateSecret(desKeySpec);

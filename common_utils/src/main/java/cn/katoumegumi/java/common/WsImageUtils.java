@@ -27,7 +27,7 @@ public class WsImageUtils {
         //Font font = new Font("微软雅黑",Font.PLAIN,15);
         Font sourceBlack = Font.createFont(Font.TRUETYPE_FONT,new File("C:/UserData/work/tmp/img/SubsetOTF/CN/SourceHanSansCN-Normal.otf"));
         Font font = sourceBlack.deriveFont(Font.PLAIN,15F);
-        FontMetrics fontMetrics = J_LABEL.getFontMetrics(font);
+        FontMetrics fontMetrics = getFontMetrics(font);
         WsTextArea textArea = new WsTextArea(fontMetrics,"     测试123测试\n测试123测试")
                 .setTextAlign((3<<8)|1)
                 .setMargin(new WsMargin(20,20,20,20))
@@ -82,29 +82,28 @@ public class WsImageUtils {
      * @return
      */
     public static BufferedImage changeImageSize(BufferedImage oldBufferedImage, Integer multiple) {
-        try {
-            int oldWidth = oldBufferedImage.getWidth();
-            int oldHeight = oldBufferedImage.getHeight();
-            int newWidth;
-            int newHeight;
-            if (multiple >= 0) {
-                newWidth = oldWidth * multiple;
-                newHeight = oldHeight * multiple;
-            } else {
-                multiple = -multiple;
-                newWidth = oldWidth / multiple;
-                newHeight = oldHeight / multiple;
-            }
-            BufferedImage newBufferedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D newGraphics2D = newBufferedImage.createGraphics();
-            newGraphics2D.setBackground(Color.WHITE);
-            newGraphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            newGraphics2D.drawImage(oldBufferedImage, 0, 0, newWidth, newHeight, null);
-            return newBufferedImage;
-        } catch (Exception e) {
-            e.printStackTrace();
+        int oldWidth = oldBufferedImage.getWidth();
+        int oldHeight = oldBufferedImage.getHeight();
+        int newWidth;
+        int newHeight;
+        if (multiple >= 0) {
+            newWidth = oldWidth * multiple;
+            newHeight = oldHeight * multiple;
+        } else {
+            multiple = -multiple;
+            newWidth = oldWidth / multiple;
+            newHeight = oldHeight / multiple;
+        }
+        BufferedImage newBufferedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D newGraphics2D = newBufferedImage.createGraphics();
+        if (newGraphics2D == null) {
             return null;
         }
+        newGraphics2D.setBackground(Color.WHITE);
+        newGraphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        newGraphics2D.drawImage(oldBufferedImage, 0, 0, newWidth, newHeight, null);
+        newGraphics2D.dispose();
+        return newBufferedImage;
     }
 
     /**
@@ -244,23 +243,25 @@ public class WsImageUtils {
      * @param bufferedImageType
      * @return
      */
-    public static BufferedImage setBufferedImageAlpha(BufferedImage bufferedImage, Integer alpha, Integer bufferedImageType) {
+    public static BufferedImage setBufferedImageAlpha(BufferedImage bufferedImage, int alpha, int bufferedImageType) {
+        if (bufferedImage == null) {
+            throw new IllegalArgumentException("bufferedImage不能为null");
+        }
         if (alpha < 0 || alpha > 255) {
-            throw new RuntimeException("范围错误[0,255]");
+            throw new IllegalArgumentException("alpha范围错误[0,255],当前:" + alpha);
         }
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
         BufferedImage newBufferedImage = new BufferedImage(width, height, bufferedImageType);
-        int oa;
-        int a;
-        int rgb;
         int[] rgbsArray = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
-        int length = rgbsArray.length;
-        for (int i = 0; i < length; ++i) {
-            rgb = rgbsArray[i] & 0x00FFFFFF;
-            oa = rgbsArray[i] >>> 24;
-            a = oa == 0 ? 0 : alpha << 24;
-            rgbsArray[i] = a ^ rgb;
+        int aShifted = alpha << 24;
+        for (int i = 0; i < rgbsArray.length; ++i) {
+            int a = rgbsArray[i] >>> 24;
+            if (a == 0) {
+                continue;
+            }
+            int rgb = rgbsArray[i] & 0x00FFFFFF;
+            rgbsArray[i] = aShifted | rgb;
         }
         newBufferedImage.setRGB(0, 0, width, height, rgbsArray, 0, width);
         return newBufferedImage;
@@ -612,7 +613,7 @@ public class WsImageUtils {
         return new Color(Integer.parseInt(value.substring(1, 3), 16), Integer.parseInt(value.substring(3, 5), 16), Integer.parseInt(value.substring(5, 7), 16));
     }
 
-    public static FontMetrics getFontMetrics(Font font) {
+    public static synchronized FontMetrics getFontMetrics(Font font) {
         return J_LABEL.getFontMetrics(font);
     }
 
