@@ -2,11 +2,12 @@ package cn.katoumegumi.java.common;
 
 import cn.katoumegumi.java.common.model.WsRun;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class WsDateUtils {
@@ -34,7 +35,7 @@ public class WsDateUtils {
         return end - start;
     };
 
-    private static final ThreadLocal<Map<String, SimpleDateFormat>> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<>();
+    private static final Map<String,DateTimeFormatter> DATE_TIME_FORMATTER_MAP = new ConcurrentHashMap<>();
 
     public static final long ONE_SECONDS = 1000L;
     public static final long ONE_MINUTES = 60L * ONE_SECONDS;
@@ -44,7 +45,16 @@ public class WsDateUtils {
     public static final long DEFAULT_ZONE_OFFSET = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
 
     public static void main(String[] args) {
+
+        System.out.println(Character.isDigit('-'));
+        System.out.println(Character.isDigit('.'));
+        System.out.println(Character.isDigit('1'));
+
+        System.out.println(WsDateUtils.dateToString(stringToDate("11111111111111111",LONGTIMESTRING),CNLONGTIMESTRING));
+
         Date date = WsDateUtils.stringToDate("2023-08-25 23:01:59");
+        System.out.println(objectDateFormatString(date));
+        System.out.println(dateToString(date,CNLONGTIMESTRING));
         System.out.println(objectDateFormatString(ignoreTime(date)));
         System.out.println(objectDateFormatString(ignoreMinute(date)));
         System.out.println(objectDateFormatString(ignoreSecond(date)));
@@ -53,43 +63,89 @@ public class WsDateUtils {
     }
 
     public static String dateStringFormat(String date) {
+        if (date == null) {
+            return null;
+        }
         char[] chars = date.toCharArray();
-        List<String> strings = new ArrayList<>();
-        for (int i = 0; i < chars.length; i++) {
-            StringBuilder stringBuffer = new StringBuilder();
-            while (i < chars.length && chars[i] > 47 && chars[i] < 58) {
-                stringBuffer.append(chars[i]);
-                i++;
-            }
-            if (stringBuffer.length() > 0) {
-                strings.add(stringBuffer.toString());
+        int i = 0;
+        for (; i < chars.length; i++) {
+            char c = chars[i];
+            if (c >= '0' && c <= '9') {
+                break;
             }
         }
-        if (strings.size() > 5) {
-            return strings.get(0) + "-" + strings.get(1) + "-" + strings.get(2) + " " + strings.get(3) + ":" + strings.get(4) + ":" + strings.get(5);
+        if (i >= chars.length) {
+            return null;
         }
-        if (strings.size() > 2) {
-            return strings.get(0) + "-" + strings.get(1) + "-" + strings.get(2) + " 00:00:00";
-        }
-        if (strings.size() == 1) {
-            if (WsStringUtils.isNumber(strings.get(0))) {
-                Date date1 = new Date(Long.parseLong(strings.get(0)));
-                return WsDateUtils.dateToString(date1, WsDateUtils.LONGTIMESTRING);
+        int[] times = new int[6];
+        int tIndex = 0;
+        for (; i < chars.length; i++) {
+            if (tIndex == times.length) {
+                break;
+            }
+            char c = chars[i];
+            if (c >= '0' && c <= '9') {
+                times[tIndex] = times[tIndex] * 10 + (c - '0');
+            }else if (chars[i - 1] >= '0' && chars[i - 1] <= '9'){
+                tIndex++;
             }
         }
-        return null;
+        if (tIndex == 0 && WsStringUtils.isNumber(date)) {
+            return WsDateUtils.dateToString(new Date(Long.parseLong(date)), WsDateUtils.LONGTIMESTRING);
+        }
+        StringBuilder sb = new StringBuilder();
+        if (times[0] < 10) {
+            sb.append('0')
+                    .append('0')
+                    .append('0')
+                    .append(times[0]);
+        }else if (times[0] < 100) {
+            sb.append('0')
+                    .append('0')
+                    .append(times[0]);
+        } else if (times[0] < 1000) {
+            sb.append('0')
+                    .append(times[0]);
+        } else {
+            sb.append(times[0]);
+        }
+
+        for (i = 1; i < times.length; i++) {
+            if (i < 3) {
+                sb.append('-');
+            }else if (i > 3) {
+                sb.append(':');
+            } else {
+                sb.append(' ');
+            }
+            if (times[i] < 10) {
+                sb.append('0');
+            }
+            if (i < 3) {
+                sb.append(times[i] == 0 ? 1:times[i]);
+            }else {
+                sb.append(times[i]);
+            }
+        }
+        return sb.toString();
     }
 
-    public static Date stringToDate(String date, String mode) {
+    public static Date stringToDate(String date, String format) {
         try {
             date = dateStringFormat(date);
-            SimpleDateFormat simpleDateFormat = getDateFormat(mode);
-            return simpleDateFormat.parse(date);
+            if (WsStringUtils.isEmpty(date)) {
+                throw new IllegalArgumentException("date is null");
+            }
+            DateTimeFormatter simpleDateFormat = getDateFormat(format);
+            if (simpleDateFormat == null) {
+                throw new IllegalArgumentException("date format is null");
+            }
+            LocalDateTime localDateTime = LocalDateTime.parse(date,simpleDateFormat);
+            return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-
     }
 
     public static Date stringToDate(String date) {
@@ -99,8 +155,12 @@ public class WsDateUtils {
     public static Date objectToDate(Object date) {
         try {
             String dateString = objectDateFormatString(date);
-            SimpleDateFormat simpleDateFormat = getDateFormat(LONGTIMESTRING);
-            return simpleDateFormat.parse(dateString);
+            if (WsStringUtils.isEmpty(dateString)) {
+                throw new NullPointerException("date is null");
+            }
+            DateTimeFormatter simpleDateFormat = getDateFormat(LONGTIMESTRING);
+            LocalDateTime localDateTime = LocalDateTime.parse(dateString,simpleDateFormat);
+            return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -109,11 +169,24 @@ public class WsDateUtils {
     }
 
     public static String dateToString(Date date, String dateType) {
-        SimpleDateFormat simpleDateFormat = getDateFormat(dateType);
-        return simpleDateFormat.format(date);
+        if (date == null) {
+            return null;
+        }
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        return dateToString(localDateTime, dateType);
+    }
+    public static String dateToString(LocalDateTime localDateTime, String dateType) {
+        if (localDateTime == null) {
+            return null;
+        }
+        DateTimeFormatter simpleDateFormat = getDateFormat(dateType);
+        return localDateTime.format(simpleDateFormat);
     }
 
     public static <T> String objectDateFormatString(T object) {
+        if (object == null) {
+            return null;
+        }
         try {
             if (object instanceof String) {
                 if (WsStringUtils.isNumber((String) object)) {
@@ -123,14 +196,14 @@ public class WsDateUtils {
                 }
             } else if (object instanceof Date) {
                 return dateToString((Date) object, LONGTIMESTRING);
-            } else if (object.getClass().isPrimitive()) {
+            } /*else if (object.getClass().isPrimitive()) {
                 return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
-            } else if (object instanceof Number) {
+            }*/ else if (object instanceof Number) {
                 return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
             } else if (object instanceof LocalDate) {
-                return ((LocalDate) object).format(DateTimeFormatter.ofPattern(LONGTIMESTRING));
+                return ((LocalDate) object).format(getDateFormat(LONGTIMESTRING));
             } else if (object instanceof LocalDateTime) {
-                return ((LocalDateTime) object).format(DateTimeFormatter.ofPattern(LONGTIMESTRING));
+                return ((LocalDateTime) object).format(getDateFormat(LONGTIMESTRING));
             } else {
                 return null;
             }
@@ -247,15 +320,19 @@ public class WsDateUtils {
             case 5:
                 longs[index++] = difference / ONE_WEEK;
                 difference = difference % ONE_WEEK;
+                // intentional fall-through
             case 4:
                 longs[index++] = difference / ONE_DAY;
                 difference = difference % ONE_DAY;
+                // intentional fall-through
             case 3:
                 longs[index++] = difference / ONE_HOUR;
                 difference = difference % ONE_HOUR;
+                // intentional fall-through
             case 2:
                 longs[index++] = difference / ONE_MINUTES;
                 difference = difference % ONE_MINUTES;
+                // intentional fall-through
             case 1:
                 longs[index] = difference / ONE_SECONDS;
                 break;
@@ -265,13 +342,11 @@ public class WsDateUtils {
         return longs;
     }
 
-    public static SimpleDateFormat getDateFormat(String pattern) {
-        Map<String, SimpleDateFormat> stringSimpleDateFormatMap = DATE_FORMAT_THREAD_LOCAL.get();
-        if (stringSimpleDateFormatMap == null) {
-            stringSimpleDateFormatMap = new HashMap<>();
-            DATE_FORMAT_THREAD_LOCAL.set(stringSimpleDateFormatMap);
+    public static DateTimeFormatter getDateFormat(String pattern) {
+        if (pattern == null) {
+            return null;
         }
-        return stringSimpleDateFormatMap.computeIfAbsent(pattern, SimpleDateFormat::new);
+        return DATE_TIME_FORMATTER_MAP.computeIfAbsent(pattern,p->DateTimeFormatter.ofPattern(pattern));
     }
 
     /**
@@ -285,7 +360,7 @@ public class WsDateUtils {
     }
 
     public static long ignoreTime(long timestamp){
-        return ignoreTime(timestamp,DEFAULT_ZONE_OFFSET);
+        return ignoreTime(timestamp,getDefaultZoneOffset());
     }
 
     public static Date ignoreTime(Date dateTime,long zoneOffset){
@@ -293,7 +368,7 @@ public class WsDateUtils {
     }
 
     public static Date ignoreTime(Date dateTime){
-        return new Date(ignoreTime(dateTime.getTime(),DEFAULT_ZONE_OFFSET));
+        return new Date(ignoreTime(dateTime.getTime(),getDefaultZoneOffset()));
     }
 
     /**
@@ -336,4 +411,7 @@ public class WsDateUtils {
         return new Date(date.getTime() + day * ONE_DAY);
     }
 
+    public static long getDefaultZoneOffset() {
+        return DEFAULT_ZONE_OFFSET;
+    }
 }
