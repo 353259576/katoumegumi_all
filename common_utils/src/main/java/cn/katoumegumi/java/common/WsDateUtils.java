@@ -4,7 +4,6 @@ import cn.katoumegumi.java.common.model.WsRun;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -41,12 +40,11 @@ public class WsDateUtils {
     public static final long ONE_HOUR = 60L * ONE_MINUTES;
     public static final long ONE_DAY = 24L * ONE_HOUR;
     public static final long ONE_WEEK = 7L * ONE_DAY;
-    public static final long DEFAULT_ZONE_OFFSET = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
+    //public static final long DEFAULT_ZONE_OFFSET = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
 
     public static void main(String[] args) {
 
         System.out.println(getDefaultZoneOffset());
-        System.out.println(DEFAULT_ZONE_OFFSET);
 
         System.out.println(Character.isDigit('-'));
         System.out.println(Character.isDigit('.'));
