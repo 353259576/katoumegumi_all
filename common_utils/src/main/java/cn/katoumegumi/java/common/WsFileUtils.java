@@ -18,8 +18,8 @@ public class WsFileUtils {
      * @return
      */
     public static String adjustFilePath(String oldFilePath) {
-        oldFilePath = oldFilePath.replaceAll("\\\\", "/");
-        oldFilePath = oldFilePath.replaceAll("//", "/");
+        oldFilePath = oldFilePath.replace("\\\\", "/");
+        oldFilePath = oldFilePath.replace("//", "/");
         return oldFilePath;
     }
 

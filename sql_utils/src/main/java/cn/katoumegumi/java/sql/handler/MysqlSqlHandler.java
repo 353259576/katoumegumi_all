@@ -333,10 +333,10 @@ public class MysqlSqlHandler implements SqlHandler{
                     throw new IllegalArgumentException("模糊查询条件不能为空");
                 }
                 int checkKey = 0;
-                if (searchKey.startsWith("%")) {
+                if (searchKey.charAt(0) == '%') {
                     checkKey |= 1;
                 }
-                if (searchKey.endsWith("%")) {
+                if (searchKey.charAt(searchKey.length() - 1) == '%') {
                     checkKey |= 2;
                 }
                 switch (checkKey) {
