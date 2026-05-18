@@ -6,8 +6,7 @@ import cn.katoumegumi.java.common.WsCollectionUtils;
 import cn.katoumegumi.java.common.WsReflectUtils;
 import cn.katoumegumi.java.common.model.GenericsTypeModel;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ConvertUtils {
 
@@ -67,13 +66,17 @@ public class ConvertUtils {
         if (targetClass == null) {
             throw new NullPointerException("convert target class is null");
         }
+        if (o.getClass().equals(targetClass)) {
+            return (T) o;
+        }
+
         Class<?> c;
         if (targetClass.isPrimitive()) {
             c = BaseTypeCommon.getWrapperClass(targetClass);
         } else {
             c = targetClass;
         }
-        if (o.getClass().equals(targetClass)) {
+        if (c.isInstance(o)) {
             return (T) o;
         }
         ConvertBean<T> convertBean = (ConvertBean<T>) CLASS_CONVERT_BEAN_MAP.get(c);
