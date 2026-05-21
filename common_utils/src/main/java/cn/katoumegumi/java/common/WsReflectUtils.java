@@ -31,8 +31,7 @@ public class WsReflectUtils {
 
     private static final SoftReferenceCache<Class<?>, Map<String,Field>> FIELD_MAP_CACHE = new SoftReferenceCache<>();
 
-
-
+    private static final SoftReferenceCache<Class<?>, BeanModel> BEAN_MODEL_CACHE = new SoftReferenceCache<>();
 
     private static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
 
@@ -123,9 +122,9 @@ public class WsReflectUtils {
     public static Method[] getObjectMethodByName(String methodName, Class<?> clazz) {
 
         List<Method> methodList = new ArrayList<>();
-        Set<Method> methodSet = new HashSet<>();
+        Set<Method> existSet = new HashSet<>();
         for (Method declaredMethod : clazz.getDeclaredMethods()) {
-            if (!methodSet.add(declaredMethod)) {
+            if (!existSet.add(declaredMethod)) {
                 continue;
             }
             if (declaredMethod.getName().equals(methodName)) {
@@ -133,7 +132,7 @@ public class WsReflectUtils {
             }
         }
         for (Method method : clazz.getMethods()) {
-            if (!methodSet.add(method)) {
+            if (!existSet.add(method)) {
                 continue;
             }
             if (method.getName().equals(methodName)) {
@@ -700,6 +699,11 @@ public class WsReflectUtils {
      */
     public static BeanModel createBeanModel(Class<?> bClass){
 
+        BeanModel cacheBeanModel = BEAN_MODEL_CACHE.get(bClass);
+        if (cacheBeanModel != null) {
+            return cacheBeanModel;
+        }
+
         Map<String,Field> fieldMap = WsReflectUtils.getFieldMap(bClass);
 
         Method[] methods = bClass.getMethods();
@@ -764,6 +768,7 @@ public class WsReflectUtils {
                 throw new RuntimeException(e);
             }
         }
+        BEAN_MODEL_CACHE.put(bClass,beanModel);
         return beanModel;
     }
 }
