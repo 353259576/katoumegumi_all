@@ -25,7 +25,7 @@ public class ConvertToDate implements ConvertBean<Date> {
     }
 
     public Date convertBean(java.sql.Date bean) {
-        return bean;
+        return WsDateUtils.objectToDate(bean);
     }
 
     public Date convertBean(LocalDate bean) {
@@ -39,8 +39,9 @@ public class ConvertToDate implements ConvertBean<Date> {
     }
 
     public Date convertBean(Object bean) {
-        String s = ConvertUtils.convert(bean, String.class);
-        return WsStringUtils.isEmpty(s) ? null : WsDateUtils.stringToDate(WsDateUtils.dateStringFormat(s));
+        return WsDateUtils.objectToDate(bean);
+        /*String s = ConvertUtils.convert(bean, String.class);
+        return WsStringUtils.isEmpty(s) ? null : WsDateUtils.stringToDate(WsDateUtils.dateStringFormat(s));*/
     }
 
     @Override

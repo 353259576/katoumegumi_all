@@ -2,6 +2,8 @@ package cn.katoumegumi.java.common;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,6 +45,8 @@ public class BaseTypeCommon {
         CLASS_SET.add(LocalDateTime.class);
         CLASS_SET.add(BigDecimal.class);
         CLASS_SET.add(BigInteger.class);
+        CLASS_SET.add(Timestamp.class);
+        CLASS_SET.add(Time.class);
 
 
         ARRAY_CLASS_SET.add(int[].class);

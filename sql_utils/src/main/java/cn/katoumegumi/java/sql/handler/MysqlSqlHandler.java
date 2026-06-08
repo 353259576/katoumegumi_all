@@ -2,6 +2,7 @@ package cn.katoumegumi.java.sql.handler;
 
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsCollectionUtils;
+import cn.katoumegumi.java.common.WsStringUtils;
 import cn.katoumegumi.java.common.convert.ConvertUtils;
 import cn.katoumegumi.java.sql.SQLModelFactory;
 import cn.katoumegumi.java.sql.common.SqlCommonConstants;
@@ -330,7 +331,7 @@ public class MysqlSqlHandler implements SqlHandler{
                 sql.append(singleExpressionCondition.getSymbol().getSymbol());
                 right = handleExpressionConditionValue(singleExpressionCondition.getRightType(), singleExpressionCondition.getRight());
                 String searchKey = ConvertUtils.convert(right.getValue(), String.class);
-                if (searchKey == null) {
+                if (WsStringUtils.isEmpty(searchKey)) {
                     throw new IllegalArgumentException("模糊查询条件不能为空");
                 }
                 int checkKey = 0;

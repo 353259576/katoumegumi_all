@@ -1,7 +1,10 @@
 package cn.katoumegumi.java.common;
 
+import cn.katoumegumi.java.common.convert.ConvertUtils;
 import cn.katoumegumi.java.common.model.WsRun;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -22,6 +25,7 @@ public class WsDateUtils {
     public static final String CNLONGTIMESTRING = "yyyy年MM月dd日 HH时mm分ss秒";
     public static final String SMALLTIMESTRING = "yyyy-MM-dd";
     public static final String CNSMALLTIMESTRING = "yyyy年MM月dd日";
+    public static final String ONLY_TIME = "HH:mm:ss";
 
     /**
      * 获取一段程序的执行时间
@@ -40,7 +44,8 @@ public class WsDateUtils {
     public static final long ONE_HOUR = 60L * ONE_MINUTES;
     public static final long ONE_DAY = 24L * ONE_HOUR;
     public static final long ONE_WEEK = 7L * ONE_DAY;
-    //public static final long DEFAULT_ZONE_OFFSET = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
+    public static final long DEFAULT_ZONE_OFFSET = ZoneId.systemDefault().getRules()
+            .getOffset(Instant.now()).getTotalSeconds() * 1000L;//Calendar.getInstance().get(Calendar.ZONE_OFFSET);
 
     public static void main(String[] args) {
 
@@ -53,7 +58,7 @@ public class WsDateUtils {
         System.out.println(WsDateUtils.dateToString(stringToDate("11111111111111111"),CNLONGTIMESTRING));
         System.out.println(WsDateUtils.dateToString(stringToDate("2020-01-01"),SMALLTIMESTRING));
 
-        Date date = WsDateUtils.stringToDate("2023-08-25 23:01:59");
+        Date date = WsDateUtils.stringToDate("1980-08-25 23:01:59");
         System.out.println(objectDateFormatString(date));
         System.out.println(dateToString(date,CNLONGTIMESTRING));
         System.out.println(objectDateFormatString(ignoreTime(date)));
@@ -61,6 +66,17 @@ public class WsDateUtils {
         System.out.println(objectDateFormatString(ignoreSecond(date)));
         System.out.println(objectDateFormatString(addDay(date,10)));
         System.out.println(objectDateFormatString(addDay(date,-10)));
+
+        Date date1 = stringToDate("2020-01-01 09:09:09");
+        LocalDate localDate = LocalDate.now();
+        java.sql.Date date2 = ConvertUtils.convert(date1,java.sql.Date.class);
+        Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+        Time time = Time.valueOf(LocalTime.now());
+        java.sql.Date date3 = java.sql.Date.valueOf(localDate);
+        String date2Str = objectDateFormatString(date3);
+        System.out.println(date2);
+        System.out.println(getCNWeekdayName(new Date()));
+        System.out.println(getCNMonthName(new Date()));
     }
 
     public static String dateStringFormat(String date) {
@@ -154,19 +170,30 @@ public class WsDateUtils {
             return null;
         }
         try {
-            if (date instanceof Date) {
+            Class<?> clazz = date.getClass();
+            if (clazz == Date.class) {
                 return (Date) date;
-            } else if (date instanceof LocalDateTime) {
-                return Date.from(((LocalDateTime) date).atZone(ZoneId.systemDefault()).toInstant());
-            } else {
-                String dateString = objectDateFormatString(date);
-                if (WsStringUtils.isEmpty(dateString)) {
-                    throw new NullPointerException("date is null");
-                }
-                DateTimeFormatter simpleDateFormat = getDateFormat(LONGTIMESTRING);
-                LocalDateTime localDateTime = LocalDateTime.parse(dateString,simpleDateFormat);
-                return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
             }
+            if (clazz == String.class) {
+                return stringToDate((String) date);
+            }
+            if (clazz == LocalDateTime.class) {
+                return Date.from(((LocalDateTime) date).atZone(ZoneId.systemDefault()).toInstant());
+            }
+            if (clazz == LocalDate.class) {
+                ZonedDateTime zonedDateTime = ((LocalDate)date).atStartOfDay(ZoneId.systemDefault());
+                return Date.from(zonedDateTime.toInstant());
+            }
+            if (date instanceof Date) {
+                return new Date(((Date) date).getTime());
+            }
+            String dateString = objectDateFormatString(date);
+            if (WsStringUtils.isEmpty(dateString)) {
+                throw new NullPointerException("date is null");
+            }
+            DateTimeFormatter simpleDateFormat = getDateFormat(LONGTIMESTRING);
+            LocalDateTime localDateTime = LocalDateTime.parse(dateString,simpleDateFormat);
+            return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -177,6 +204,9 @@ public class WsDateUtils {
     public static String dateToString(Date date, String dateType) {
         if (date == null) {
             return null;
+        }
+        if (date.getClass() != (Date.class)) {
+            date = new Date(date.getTime());
         }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
         return dateToString(localDateTime, dateType);
@@ -189,28 +219,50 @@ public class WsDateUtils {
         return localDateTime.format(simpleDateFormat);
     }
 
+    public static String dateToString(LocalDate localDate, String dateType) {
+        if (localDate == null) {
+            return null;
+        }
+        DateTimeFormatter simpleDateFormat = getDateFormat(dateType);
+        return localDate.format(simpleDateFormat);
+    }
+
+    public static String dateToString(LocalTime localTime, String dateType) {
+        if (localTime == null) {
+            return null;
+        }
+        DateTimeFormatter simpleDateFormat = getDateFormat(dateType);
+        return localTime.format(simpleDateFormat);
+    }
+
     public static <T> String objectDateFormatString(T object) {
         if (object == null) {
             return null;
         }
         try {
-            if (object instanceof String) {
+            Class<?> clazz = object.getClass();
+            if (clazz == String.class) {
                 if (WsStringUtils.isNumber((String) object)) {
                     return dateToString(new Date(Long.parseLong((String) object)), LONGTIMESTRING);
                 } else {
                     return dateStringFormat((String) object);
                 }
-            } else if (object instanceof Date) {
-                return dateToString((Date) object, LONGTIMESTRING);
-            } /*else if (object.getClass().isPrimitive()) {
+            }
+            else if (object instanceof Date) {
+                if (clazz == java.sql.Date.class) {
+                    return dateToString(((java.sql.Date)object).toLocalDate(),SMALLTIMESTRING);
+                } else if (clazz == Time.class) {
+                    return dateToString(((Time) object).toLocalTime(),ONLY_TIME);
+                }else {
+                    return dateToString((Date) object, LONGTIMESTRING);
+                }
+            } else if (object instanceof Number) {
                 return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
-            }*/ else if (object instanceof Number) {
-                return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
-            } else if (object instanceof LocalDate) {
-                return ((LocalDate) object).format(getDateFormat(SMALLTIMESTRING));
-            } else if (object instanceof LocalDateTime) {
+            }  else if (clazz == LocalDateTime.class) {
                 return ((LocalDateTime) object).format(getDateFormat(LONGTIMESTRING));
-            } else {
+            } else if (clazz == LocalDate.class) {
+                return ((LocalDate) object).format(getDateFormat(SMALLTIMESTRING));
+            }else {
                 return null;
             }
         } catch (Exception e) {
@@ -235,10 +287,12 @@ public class WsDateUtils {
      * @return 中文星期
      */
     public static String getCNWeekdayName(Date date) {
-        Calendar calendar = Calendar.getInstance();
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        int weekday = localDateTime.getDayOfWeek().getValue();
+        /*Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        int weekday = calendar.get(Calendar.DAY_OF_WEEK);
-        weekday = getCnWeek(weekday);
+        int weekday = calendar.get(Calendar.DAY_OF_WEEK);*/
+        //weekday = getCnWeek(weekday);
         return CN_WEEK_NAMES[weekday - 1];
     }
 
@@ -249,9 +303,8 @@ public class WsDateUtils {
      * @return 中文月
      */
     public static String getCNMonthName(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return CN_MONTH_NAMES[calendar.get(Calendar.MONTH)];
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        return CN_MONTH_NAMES[localDateTime.getMonthValue() - 1];
     }
 
     /**
@@ -362,7 +415,11 @@ public class WsDateUtils {
      * @return
      */
     public static long ignoreTime(long timestamp,long zoneOffset){
-        return timestamp - (timestamp + zoneOffset) % ONE_DAY;
+        long localTime = timestamp + zoneOffset;
+        // 手动实现数学取模：先取余，加上除数，再取余
+        long timeOfDay = ((localTime % ONE_DAY) + ONE_DAY) % ONE_DAY;
+        return timestamp - timeOfDay;
+        //return timestamp - (timestamp + zoneOffset) % ONE_DAY;
     }
 
     public static long ignoreTime(long timestamp){
@@ -418,7 +475,6 @@ public class WsDateUtils {
     }
 
     public static long getDefaultZoneOffset() {
-        return ZoneId.systemDefault().getRules()
-                .getOffset(Instant.now()).getTotalSeconds() * 1000L;
+        return DEFAULT_ZONE_OFFSET;
     }
 }

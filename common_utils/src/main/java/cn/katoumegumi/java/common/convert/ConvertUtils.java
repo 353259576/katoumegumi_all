@@ -39,6 +39,7 @@ public class ConvertUtils {
         ConvertToBigDecimal convertToBigDecimal = new ConvertToBigDecimal();
         ConvertToDate convertToDate = new ConvertToDate();
         ConvertToSqlDate convertToSqlDate = new ConvertToSqlDate();
+        ConvertToSqlTimestamp convertToSqlTimestamp = new ConvertToSqlTimestamp();
         ConvertToLocalDate convertToLocalDate = new ConvertToLocalDate();
         ConvertToLocalDateTime convertToLocalDateTime = new ConvertToLocalDateTime();
 
@@ -57,6 +58,7 @@ public class ConvertUtils {
         CLASS_CONVERT_BEAN_MAP.put(getClass(convertToSqlDate.getClass()), convertToSqlDate);
         CLASS_CONVERT_BEAN_MAP.put(getClass(convertToLocalDate.getClass()), convertToLocalDate);
         CLASS_CONVERT_BEAN_MAP.put(getClass(convertToLocalDateTime.getClass()), convertToLocalDateTime);
+        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToSqlTimestamp.getClass()), convertToSqlTimestamp);
     }
 
     public static <T> T convert(Object o, Class<T> targetClass) {
@@ -66,7 +68,7 @@ public class ConvertUtils {
         if (targetClass == null) {
             throw new NullPointerException("convert target class is null");
         }
-        if (o.getClass().equals(targetClass)) {
+        if (o.getClass() == targetClass) {
             return (T) o;
         }
 
