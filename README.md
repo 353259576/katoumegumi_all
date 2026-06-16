@@ -20,7 +20,11 @@
 - [WsJdbcUtils API 参考](#wsjdbcutils-api-参考)
 - [MySearchList 条件构造器](#mysearchlist-条件构造器)
   - [基本查询](#基本查询)
-  - [常用条件](#常用条件)
+  - [比较运算](#比较运算)
+  - [范围查询](#范围查询)
+  - [空值判断](#空值判断)
+  - [模糊查询](#模糊查询)
+  - [IN查询](#in查询)
   - [表字段比较](#表字段比较)
   - [算术运算](#算术运算)
   - [排序](#排序)
@@ -42,8 +46,6 @@
 - [多数据源切换](#多数据源切换)
 - [事务支持](#事务支持)
 - [SQL拦截器（自动填充）](#sql拦截器自动填充)
-- [代码生成器](#代码生成器)
-- [Excel工具](#excel工具)
 - [通用工具类](#通用工具类)
 - [构建与发布](#构建与发布)
 - [许可证](#许可证)
@@ -54,12 +56,11 @@
 
 - **低侵入**：基于 Spring JDBC Template 封装，与现有项目无缝集成
 - **链式API**：使用 MySearchList 条件构造器，支持流式编程
+- **类型安全**：支持 Lambda/SFunction 方式引用字段，编译期检查
 - **多表关联**：支持 LEFT / RIGHT / INNER JOIN，复杂关联查询
 - **自动填充**：支持查询 / 新增 / 修改拦截器，自动填充公共字段
 - **多数据源**：支持多数据库配置和动态切换（基于 Druid 连接池）
 - **双注解兼容**：同时支持 JPA（Jakarta Persistence）和 MyBatis-Plus 注解
-- **代码生成**：内置代码生成器，可快速生成 Entity / Service / Controller / Mapper
-- **Excel导出**：基于 POI 的流式 Excel 生成器，支持大数据量导出
 
 ---
 
@@ -70,8 +71,6 @@
 | data-integration-boot-starter | Spring Boot Starter，自动配置 WsJdbcUtils，入口类 |
 | sql_utils | SQL 语句生成工具（支持 MySQL），包含条件构造器和拦截器 |
 | common_utils | 通用工具类，反射、集合、字符串、Bean 转换等 |
-| code_generator | 代码生成器，基于 FreeMarker 模板引擎 |
-| excel_utils | Excel 操作工具，基于 Apache POI 的流式生成器 |
 
 ---
 
@@ -104,11 +103,6 @@
 │  WsBeanUtils / WsReflectUtils / WsStringUtils    │
 │  WsCollectionUtils / WsDateUtils / WsFileUtils   │
 └───────────────────────────────────────────────────┘
-
-  ┌─────────────────┐    ┌─────────────────┐
-  │  code_generator │    │   excel_utils   │
-  │  (代码生成器)    │    │  (Excel工具)     │
-  └─────────────────┘    └─────────────────┘
 ```
 
 ---
@@ -275,7 +269,7 @@ public class UserDetails {
 
 `MySearchList` 是核心查询条件构造器，支持流式链式编程。
 
-**强烈推荐使用 `Lambda/SFunction` 方式处理字段名**，示例中均使用 Lambda 表达式（如 `User::getId`），同时框架也提供了 String 字段名的重载方法作为兼容。
+**强烈推荐使用 `Lambda/SFunction` 方式处理字段名**，示例中均使用 Lambda 表达式（如 `User::getId`），这样可以在编译期检查字段引用的正确性。同时也提供了 String 字段名的重载方法作为兼容。
 
 ### 基本查询
 
@@ -308,116 +302,285 @@ IPage<User> page = jdbcUtils.getTPage(pageSearch);
 long count = jdbcUtils.getCount(search);
 ```
 
-### 常用条件
+### 比较运算
+
+MySearchList 支持所有常见的比较运算符：
 
 ```java
 MySearchList search = MySearchList.create(User.class)
-    // 等于 EQ
+    // 等于
     .eq(User::getName, "张三")
-    .ne(User::getName, "李四")         // 不等于
 
-    // 比较运算
-    .gt(User::getAge, 18)              // 大于
-    .gte(User::getAge, 18)             // 大于等于
-    .lt(User::getAge, 60)              // 小于
-    .lte(User::getAge, 60)             // 小于等于
+    // 不等于
+    .ne(User::getName, "李四")
 
-    // 模糊查询
-    .like(User::getName, "张%")         // LIKE
+    // 大于
+    .gt(User::getAge, 18)
 
-    // IN / NOT IN
-    .in(User::getId, Arrays.asList(1, 2, 3))
-    .nIn(User::getStatus, Arrays.asList("deleted", "disabled"))
+    // 大于等于
+    .gte(User::getAge, 18)
 
-    // 空值判断
+    // 小于
+    .lt(User::getAge, 60)
+
+    // 小于等于
+    .lte(User::getAge, 60);
+
+List<User> list = jdbcUtils.getListT(search);
+```
+
+**带表别名的比较运算**：
+
+```java
+MySearchList search = MySearchList.create(User.class)
+    .setAlias("u")
+    .eq("u", User::getName, "张三")       // u.name = '张三'
+    .gt("u", User::getAge, 18);           // u.age > 18
+```
+
+### 范围查询
+
+```java
+MySearchList search = MySearchList.create(User.class)
+    // 闭区间查询 [18, 60]
+    .between(User::getAge, 18, 60)
+
+    // 排除区间查询，等价于 age < 0 OR age > 17
+    .notBetween(User::getAge, 0, 17);
+```
+
+### 空值判断
+
+```java
+MySearchList search = MySearchList.create(User.class)
+    // 字段为NULL
     .isNull(User::getDeleteTime)
-    .isNotNull(User::getUpdateTime)
 
-    // 范围查询
-    .between(User::getAge, 18, 60)              // 闭区间
-    .notBetween(User::getAge, 0, 17);           // 排除区间
+    // 字段不为NULL
+    .isNotNull(User::getUpdateTime);
+```
+
+**注意**：当使用 `.eq(field, null)` 时，会自动转换为 `.isNull(field)`：
+
+```java
+// 以下两种写法等价
+MySearchList.create(User.class).eq(User::getDeleteTime, null);
+MySearchList.create(User.class).isNull(User::getDeleteTime);
+```
+
+### 模糊查询
+
+```java
+MySearchList search = MySearchList.create(User.class)
+    // 模糊匹配，需要自己写通配符
+    .like(User::getName, "%张%")          // 包含"张"
+    .like(User::getName, "张%")           // 以"张"开头
+    .like(User::getName, "%三");          // 以"三"结尾
+```
+
+### IN查询
+
+```java
+MySearchList search = MySearchList.create(User.class)
+    // IN 查询
+    .in(User::getId, Arrays.asList(1, 2, 3))
+    .in(User::getStatus, Arrays.asList("active", "pending"))
+
+    // NOT IN 查询
+    .nIn(User::getStatus, Arrays.asList("deleted", "disabled"));
 ```
 
 ### 表字段比较
 
-```java
-// 字段与字段比较（EQP = Equal to Parameter）
-MySearchList search = MySearchList.create(User.class)
-    .eqp(User::getName, User::getNickName)      // name = nickName
-    .gtp(User::getAge, User::getMinAge)         // age > minAge
-    .gtep(User::getAge, User::getMinAge)        // age >= minAge
-    .ltp(User::getSalary, User::getMaxSalary)   // salary < maxSalary
-    .ltep(User::getScore, User::getPassScore);  // score <= passScore
+当需要比较两个字段的值时，使用 `eqp/gtp/gtep/ltp/ltep` 方法（p 代表 parameter）：
 
-// 带表别名的字段比较
+```java
+MySearchList search = MySearchList.create(User.class)
+    // 字段与字段比较
+    .eqp(User::getName, User::getNickName)       // name = nickName
+    .gtp(User::getAge, User::getMinAge)          // age > minAge
+    .gtep(User::getAge, User::getMinAge)         // age >= minAge
+    .ltp(User::getSalary, User::getMaxSalary)    // salary < maxSalary
+    .ltep(User::getScore, User::getPassScore);   // score <= passScore
+```
+
+**带表别名的字段比较**：
+
+```java
 MySearchList search = MySearchList.create(User.class)
     .setAlias("u")
-    .eqp("u", User::getName, "u", User::getNickName);   // u.name = u.nickName
+    // 指定两个字段的表别名
+    .eqp("u", User::getName, "u", User::getNickName)   // u.name = u.nickName
+    .gtp("u", User::getAge, "d", Department::getMinAge); // u.age > d.minAge
 ```
 
 ### 算术运算
 
+算术运算主要用于 UPDATE 操作：
+
 ```java
+// 字段自增/自减
 MySearchList updateSearch = MySearchList.create(User.class)
     .eq(User::getId, 1)
     .add(User::getVisitCount, 1)            // visitCount = visitCount + 1
-    .subtract(User::getBalance, 100);       // balance = balance - 100
-// 同样支持 multiply() / divide()
+    .subtract(User::getBalance, 100)        // balance = balance - 100
+    .multiply(User::getScore, 1.1)          // score = score * 1.1
+    .divide(User::getTotal, 2);             // total = total / 2
+
+jdbcUtils.update(updateSearch);
 ```
 
 ### 排序
 
 ```java
 MySearchList search = MySearchList.create(User.class)
+    // 指定排序方式
     .sort(User::getCreateTime, "desc")      // 倒序
     .sort(User::getName, "asc")             // 升序
 
     // 快捷方式
-    .sortDesc(User::getCreateTime)
-    .sortAsc(User::getName);
+    .sortDesc(User::getCreateTime)          // 创建时间倒序
+    .sortAsc(User::getName);                // 名称升序
+```
+
+**多字段排序**：
+
+```java
+MySearchList search = MySearchList.create(User.class)
+    .sortDesc(User::getCreateTime)          // 首先按创建时间倒序
+    .sortAsc(User::getName)                 // 然后按名称升序
+    .sortDesc(User::getAge);                // 最后按年龄倒序
+```
+
+**带表别名的排序**：
+
+```java
+MySearchList search = MySearchList.create(User.class)
+    .setAlias("u")
+    .sortDesc("u", User::getCreateTime);    // ORDER BY u.create_time DESC
 ```
 
 ### 条件判断
 
+当某些查询条件需要根据业务逻辑动态添加时，使用 `condition` 方法：
+
 ```java
 boolean isAdmin = true;
+String searchName = "张三";
+Integer minAge = 18;
 
 MySearchList search = MySearchList.create(User.class)
     .eq(User::getStatus, "active")
-    .condition(isAdmin, m -> m.eq(User::getRole, "admin"));  // 条件为true时才添加
+    // 条件为true时才添加条件
+    .condition(isAdmin, m -> m.eq(User::getRole, "admin"))
+    // 动态条件：只有当参数不为空时才添加
+    .condition(StringUtils.isNotBlank(searchName), m -> m.like(User::getName, "%" + searchName + "%"))
+    .condition(minAge != null, m -> m.gte(User::getAge, minAge));
 ```
 
 ### AND / OR 组合
 
+**AND 组合**：默认就是 AND，也可以显式使用：
+
 ```java
-// AND 组合
+// 默认就是 AND（等价于 status = 'active' AND age > 18 AND age < 60）
+MySearchList search = MySearchList.create(User.class)
+    .eq(User::getStatus, "active")
+    .gt(User::getAge, 18)
+    .lt(User::getAge, 60);
+
+// 显式使用 and 组合嵌套条件
 MySearchList search = MySearchList.create(User.class)
     .eq(User::getStatus, "active")
     .and(m -> m.gt(User::getAge, 18).lt(User::getAge, 60));
+// 等价于: status = 'active' AND (age > 18 AND age < 60)
+```
 
-// OR 组合
+**OR 组合**：
+
+```java
+// 简单的 OR 条件
 MySearchList search = MySearchList.create(User.class)
     .or(m -> m.eq(User::getName, "张三"))
     .or(m -> m.eq(User::getName, "李四"));
+// 等价于: name = '张三' OR name = '李四'
+
+// 混合 AND 和 OR
+MySearchList search = MySearchList.create(User.class)
+    .eq(User::getStatus, "active")
+    .or(m -> m.eq(User::getRole, "admin"))
+    .or(m -> m.gt(User::getScore, 100));
+// 等价于: status = 'active' OR role = 'admin' OR score > 100
+```
+
+**复杂的 AND/OR 嵌套**：
+
+```java
+MySearchList search = MySearchList.create(User.class)
+    .eq(User::getStatus, "active")
+    .and(m -> m
+        .or(n -> n.eq(User::getRole, "admin"))
+        .or(n -> n.eq(User::getRole, "manager").gt(User::getLevel, 5))
+    );
+// 等价于: status = 'active' AND (role = 'admin' OR (role = 'manager' AND level > 5))
 ```
 
 ### 自定义SQL片段
 
+当 MySearchList 提供的方法无法满足需求时，可以使用自定义 SQL：
+
 ```java
 MySearchList search = MySearchList.create(User.class)
-    .sql("{u}.id = ?", Collections.singletonList(1))           // 自定义SQL
-    .exists("select 1 from order o where o.user_id = {u}.id", Collections.singletonList(1))
-    .notExists("select 1 from black_list b where b.user_id = {u}.id", Collections.singletonList(1));
+    .setAlias("u")
+    // 自定义 SQL 片段，{u} 会被替换为表别名
+    .sql("{u}.id = ?", Collections.singletonList(1))
 
-// SQLEquation（支持链式表达式）
+    // EXISTS 子查询
+    .exists("select 1 from orders o where o.user_id = {u}.id", Collections.singletonList(1))
+
+    // NOT EXISTS 子查询
+    .notExists("select 1 from black_list b where b.user_id = {u}.id", Collections.singletonList(1));
+```
+
+**使用 MySearchList 子查询**：
+
+```java
 MySearchList search = MySearchList.create(User.class)
-    .sqlEquation(e -> e.column(User::getName).add().column(User::getPassword).equal().value(1))
-    .sqlEquation(e -> e.column(User::getName).in().value(Arrays.asList("a", "b")));
+    .setAlias("u")
+    // 使用 MySearchList 构建 EXISTS 子查询
+    .exists(
+        MySearchList.create(Order.class)
+            .setAlias("o")
+            .eqp("o", Order::getUserId, "u", User::getId)
+            .gt(Order::getAmount, 1000)
+    );
+```
+
+**SqlEquation（链式表达式）**：
+
+```java
+MySearchList search = MySearchList.create(User.class)
+    // 链式表达式：name + password = 1
+    .sqlEquation(e -> e
+        .column(User::getName)
+        .add()
+        .column(User::getPassword)
+        .equal()
+        .value(1)
+    )
+    // 链式表达式：name IN ('a', 'b')
+    .sqlEquation(e -> e
+        .column(User::getName)
+        .in()
+        .value(Arrays.asList("a", "b"))
+    );
 ```
 
 ---
 
 ## 表关联查询
+
+MySearchList 提供了强大的多表关联功能，支持 INNER JOIN、LEFT JOIN、RIGHT JOIN。
 
 ### 内联接 INNER JOIN
 
@@ -427,32 +590,39 @@ MySearchList search = MySearchList.create(User.class)
     .innerJoin(UserDetails.class, t -> t
         .setJoinEntityPath(User::getDetails)       // 关联实体属性（支持 SFunction）
         .setAlias("ud")                            // 关联表别名
-        .on(User::getId, UserDetails::getUserId)  // ON条件（支持 SFunction）
+        .on(User::getId, UserDetails::getUserId)   // ON条件（支持 SFunction）
     );
 
 List<User> list = jdbcUtils.getListT(search);
+// 生成SQL: SELECT ... FROM ws_user u INNER JOIN ws_user_details ud ON u.id = ud.user_id
 ```
 
 ### 左连接 LEFT JOIN
 
 ```java
 MySearchList search = MySearchList.create(User.class)
+    .setAlias("u")
     .leftJoin(Order.class, t -> t
-        .setJoinEntityPath(User::getOrders)
         .setAlias("o")
         .on(User::getId, Order::getUserId)
     );
+
+List<User> list = jdbcUtils.getListT(search);
+// 生成SQL: SELECT ... FROM ws_user u LEFT JOIN ws_order o ON u.id = o.user_id
 ```
 
 ### 右连接 RIGHT JOIN
 
 ```java
 MySearchList search = MySearchList.create(User.class)
+    .setAlias("u")
     .rightJoin(Department.class, t -> t
-        .setJoinEntityPath(User::getDept)
         .setAlias("d")
         .on(User::getDeptId, Department::getId)
     );
+
+List<User> list = jdbcUtils.getListT(search);
+// 生成SQL: SELECT ... FROM ws_user u RIGHT JOIN ws_department d ON u.dept_id = d.id
 ```
 
 ### 多表关联
@@ -462,42 +632,58 @@ MySearchList search = MySearchList.create(User.class)
     .setAlias("u")
     // 第一层关联
     .innerJoin(UserDetails.class, t -> t
-        .setJoinEntityPath(User::getDetails)
         .setAlias("ud")
         .on(User::getId, UserDetails::getUserId)
     )
     // 第二层关联（在已关联的表上继续关联）
     .innerJoin(Order.class, t -> t
-        .setMainEntityPath("ud")                   // 指定已有表别名
-        .setJoinEntityPath(UserDetails::getOrders)
+        .setMainEntityPath("ud")                   // 指定主表为已关联的 ud
         .setAlias("o")
         .on(UserDetails::getId, Order::getDetailsId)
     );
+
+// 生成SQL:
+// SELECT ... FROM ws_user u
+// INNER JOIN ws_user_details ud ON u.id = ud.user_id
+// INNER JOIN ws_order o ON ud.id = o.details_id
 ```
 
 ### 关联附加条件
 
+在 JOIN 的 ON 子句中添加额外条件：
+
 ```java
 MySearchList search = MySearchList.create(User.class)
+    .setAlias("u")
     .innerJoin(Order.class, t -> t
-        .setJoinEntityPath(User::getOrders)
         .setAlias("o")
         .on(User::getId, Order::getUserId)
-        // condition 回调接收 MySearchList，使用 (tableAlias, field, value) 形式
-        .condition(m -> m.eq("o", Order::getStatus, "paid"))
+        // 在 ON 条件中添加额外条件
+        .condition(m -> m
+            .eq("o", Order::getStatus, "paid")
+            .gt("o", Order::getAmount, 100)
+        )
     );
+
+// 生成SQL:
+// SELECT ... FROM ws_user u
+// INNER JOIN ws_order o ON u.id = o.user_id AND o.status = 'paid' AND o.amount > 100
 ```
 
 ### 子查询嵌套
 
 ```java
 MySearchList search = MySearchList.create(User.class)
+    .setAlias("u")
     // IN 子查询
-    .in("details", UserDetails::getId,
+    .in("u", "id",
         MySearchList.create(Order.class)
-            .singleColumnName(Order::getDetailsId)   // 只返回单列
+            .singleColumnName(Order::getUserId)   // 只返回单列
             .eq(Order::getStatus, "paid")
     );
+
+// 生成SQL:
+// SELECT ... FROM ws_user u WHERE u.id IN (SELECT user_id FROM ws_order WHERE status = 'paid')
 ```
 
 ---
@@ -754,168 +940,6 @@ SQLModelFactory.addSqlInterceptor(new UpdateTimeInterceptor());
 | `BaseUpdateSqlInterceptor` | `isUpdate()` | 是否在 UPDATE 时触发 |
 | `BaseUpdateSqlInterceptor` | `updateFill()` | 更新时填充的值 |
 | `BaseSelectSqlInterceptor` | `selectFill()` | 查询时填充的值 |
-
----
-
-## 代码生成器
-
-`code_generator` 模块基于 FreeMarker 模板引擎，可从数据库表结构快速生成代码。
-
-### 引入依赖
-
-```xml
-<dependency>
-    <groupId>cn.katoumegumi.java</groupId>
-    <artifactId>code_generator</artifactId>
-    <version>1.0.8.20250717</version>
-</dependency>
-```
-
-### 使用示例
-
-```java
-// 1. 创建数据源
-DataSource dataSource = HikariCPDataSourceFactory.getDataSource(
-    "jdbc:mysql://localhost:3306/your_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8",
-    "root", "password", "com.mysql.cj.jdbc.Driver"
-);
-
-// 2. 创建生成器
-Generator generator = new Generator("com.example.project", "/path/to/project");
-generator.setEntityPath("entity/model")
-    .setServicePath("service")
-    .setServiceImplPath("service/impl")
-    .setControllerPath("controller")
-    .setEnableMybatisPlus(true)    // 启用 MyBatis-Plus 注解
-    .setEnableHibernate(true)      // 启用 JPA 注解
-    .setEnableSwagger(false)       // 关闭 Swagger
-    .setEnableSpringDoc(true)      // 启用 SpringDoc
-    .setEnableSearchVO(true);      // 生成查询VO
-
-// 3. 获取表结构
-SqlTableToBeanUtils sqlTableToBeanUtils = new SqlTableToBeanUtils(dataSource, "your_db", null);
-List<SqlTableToBeanUtils.Table> tableList = sqlTableToBeanUtils.selectTables("table_name");
-
-// 4. 生成代码
-for (SqlTableToBeanUtils.Table table : tableList) {
-    generator.createEntity(table);          // 实体类
-    generator.createSearchVO(table);        // 查询VO
-    generator.createService(table);         // 服务接口
-    generator.createServiceImpl(table);     // 服务实现
-    generator.createController(table);      // 控制器
-    generator.createMybatisMapper(table);   // Mapper XML
-    generator.createMybatisMapperJava(table); // Mapper Java
-}
-```
-
-### 生成器配置项
-
-| 方法 | 说明 | 默认值 |
-|------|------|--------|
-| `setEntityPath(String)` | 实体类相对路径 | `/entity` |
-| `setServicePath(String)` | 服务接口相对路径 | `/service` |
-| `setServiceImplPath(String)` | 服务实现相对路径 | `/service/impl` |
-| `setControllerPath(String)` | 控制器相对路径 | `/controller` |
-| `setJavaMapperPath(String)` | Mapper Java 相对路径 | `/mapper` |
-| `setXmlMapperPath(String)` | Mapper XML 相对路径 | `/mapper` |
-| `setSearchVOPath(String)` | 查询VO相对路径 | `/vo/search` |
-| `setEnableMybatisPlus(Boolean)` | 启用 MyBatis-Plus 注解 | `true` |
-| `setEnableHibernate(Boolean)` | 启用 JPA 注解 | `true` |
-| `setEnableSwagger(Boolean)` | 启用 Swagger | `false` |
-| `setEnableSpringDoc(Boolean)` | 启用 SpringDoc | `true` |
-| `setEnableSearchVO(Boolean)` | 生成查询VO | `true` |
-| `setEnableEntity(Boolean)` | 生成实体类 | `true` |
-| `setEnableService(Boolean)` | 生成服务接口 | `true` |
-| `setEnableController(Boolean)` | 生成控制器 | `true` |
-| `setEnableMybatis(Boolean)` | 生成 MyBatis Mapper | `true` |
-| `setType(Integer)` | 生成类型：0-sqlUtils 1-mybatisPlus 2-mybatis | `0` |
-
----
-
-## Excel工具
-
-`excel_utils` 模块基于 Apache POI 的 `SXSSFWorkbook`（流式写入），支持大数据量 Excel 导出。
-
-### 引入依赖
-
-```xml
-<dependency>
-    <groupId>cn.katoumegumi.java</groupId>
-    <artifactId>excel_utils</artifactId>
-    <version>1.0.8.20250717</version>
-</dependency>
-```
-
-### 使用示例
-
-```java
-List<String[]> dataList = new ArrayList<>();
-dataList.add(new String[]{"张三", "男", "25"});
-dataList.add(new String[]{"李四", "女", "30"});
-
-// 表头样式
-ExcelTableHeadCellFill headStyle = location -> {
-    CellStyle cellStyle = location.getCellStyle();
-    cellStyle.setAlignment(HorizontalAlignment.CENTER);
-    cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-    cellStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.GREEN.getIndex());
-};
-
-// 创建生成器
-ExcelGenerator<String[]> generator = ExcelGenerator.create(dataList)
-    .setTitle("用户列表")
-    .addColumnProperty(c -> c
-        .setColumnName("姓名")
-        .setColumnWidthCellSize(2)
-        .setExcelTableBodyCellFill((location, data) -> location.getCell().setCellValue(data[0]))
-        .setExcelTableHeadCellFill(headStyle)
-    )
-    .addColumnProperty(c -> c
-        .setColumnName("性别")
-        .setColumnWidthCellSize(2)
-        .setExcelTableBodyCellFill((location, data) -> location.getCell().setCellValue(data[1]))
-        .setExcelTableHeadCellFill(headStyle)
-    )
-    .addColumnProperty(c -> c
-        .setColumnName("年龄")
-        .setColumnWidthCellSize(2)
-        .setExcelTableBodyCellFill((location, data) -> location.getCell().setCellValue(data[2]))
-        .setExcelTableHeadCellFill(headStyle)
-    );
-
-// 生成字节数组
-byte[] bytes = generator.build();
-
-// 写入文件
-Files.write(Paths.get("output.xlsx"), bytes);
-```
-
-### 列配置项
-
-| 方法 | 说明 |
-|------|------|
-| `setColumnName(String)` | 列标题 |
-| `setColumnWidth(Integer)` | 列宽 |
-| `setColumnHeight(Short)` | 列高 |
-| `setColumnWidthCellSize(Integer)` | 横向合并单元格数 |
-| `setColumnHeightCellSize(Integer)` | 纵向合并单元格数 |
-| `setExcelTableHeadCellFill(ExcelTableHeadCellFill)` | 表头单元格样式 |
-| `setExcelTableBodyCellFill(ExcelTableBodyCellFill<T>)` | 表体单元格填充 |
-| `setExcelTableFootCellFill(ExcelTableFootCellFill)` | 表尾单元格样式 |
-
-### ExcelPointLocation API
-
-在单元格填充回调中，可通过 `ExcelPointLocation` 获取完整的 POI 对象：
-
-| 属性 | 说明 |
-|------|------|
-| `getCell()` | 当前单元格 |
-| `getRow()` | 当前行 |
-| `getSheet()` | 当前 Sheet |
-| `getWorkbook()` | 当前 Workbook |
-| `getCellStyle()` | 单元格样式（自动创建） |
-| `getRowValue()` | 当前行数据 |
-| `getGlobalValue()` | 全局共享数据 |
 
 ---
 
