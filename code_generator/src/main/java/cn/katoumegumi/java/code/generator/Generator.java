@@ -101,7 +101,7 @@ public class Generator {
 
     private Boolean enableSwagger = false;
 
-    private final Boolean enableSpringDoc = true;
+    private Boolean enableSpringDoc = true;
 
     private Boolean enableMybatisPlus = true;
 
@@ -273,15 +273,11 @@ public class Generator {
         map.put("baseSearchVOName",baseSearchVOName);
         map.put("table", table);
         try {
-            try {
-                File file = WsFileUtils.createFile(filePath + "/" + fileName);
-                FileWriter writer = new FileWriter(file);
+            File file = WsFileUtils.createFile(filePath + "/" + fileName);
+            try (FileWriter writer = new FileWriter(file)) {
                 template.process(map, writer);
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        } catch (TemplateException e) {
+        } catch (IOException | TemplateException e) {
             e.printStackTrace();
         }
     }
@@ -366,6 +362,12 @@ public class Generator {
 
     public Generator setEnableSwagger(Boolean enableSwagger) {
         this.enableSwagger = enableSwagger;
+        return this;
+    }
+
+
+    public Generator setEnableSpringDoc(Boolean enableSpringDoc) {
+        this.enableSpringDoc = enableSpringDoc;
         return this;
     }
 

@@ -67,13 +67,13 @@ Pluggable via `FieldColumnRelationMapperFactory`. Built-in strategies:
 
 ## Spring Boot Auto-Configuration
 
-Two auto-config classes registered in `META-INF/spring.factories`:
+Two auto-config classes registered in **both** `META-INF/spring.factories` (legacy) and `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` (Spring Boot 3.x):
 - **`DataSourceConfig`** — Configures Druid data sources and AbstractRoutingDataSource for multi-datasource support.
 - **`JdbcConfig`** — Configures WsJdbcUtils bean and transaction manager.
 
-YAML config property prefix: `megumi.datasource.druids[*]` with fields `alias`, `url`, `username`, `password`.
+YAML config property prefix: `megumi.datasource.druids[*]` with fields `alias`, `url`, `username`, `password`. Property class: `DruidDataSourceProperties` in `cn.katoumegumi.java.starter.jdbc.properties`.
 
-Transaction management via `WsTransactionUtils` in boot-starter.
+Transaction management via `WsTransactionUtils` in boot-starter. Default isolation: `READ_COMMITTED`, propagation: `REQUIRED`.
 
 ## Build & Development
 
@@ -89,20 +89,29 @@ mvn install
 
 # Deploy to Maven Central (requires GPG signing)
 mvn deploy
+
+# Compile a single module
+mvn compile -pl sql_utils
+
+# Compile a module with its dependencies
+mvn compile -pl sql_utils -am
 ```
 
-Version managed via `${revision}` property in root pom.xml. Uses `flatten-maven-plugin` for runtime version resolution. Repositories configured with Alibaba mirror + Sonatype snapshots.
+Version managed via `${revision}` property in root pom.xml (currently `1.0.8.20250717`). Uses `flatten-maven-plugin` for runtime version resolution. Repositories configured with Alibaba mirror + Sonatype snapshots.
 
-## Test Classes
+GitHub: `https://github.com/353259576/katoumegumi_all`
 
-Test classes exist under `data-integration-boot-starter/src/test/`:
-- **Models:** `User`, `LUser`, `LUserDetail`, `UserDetails`, `UserDetailsRemake`, etc.
-- **Tests:** `FieldTest.java`, `Test.java`
+## Tests
 
-Run with:
-```bash
-mvn test -pl data-integration-boot-starter
-```
+**Tests are NOT JUnit.** Test classes under `data-integration-boot-starter/src/test/java/cn/katoumegumi/java/sql/test/` use `public static void main(String[] args)` entry points — they are manual verification scripts, not framework tests.
+
+- **`Test.java`** — integration-style demo: constructs a `DataSource`, creates `WsJdbcUtils`, exercises SQL operations, and prints results via `Gson`. Uses a hardcoded MySQL connection (`jdbc:mysql://192.168.3.18:3306/lx`).
+- **`FieldTest.java`** — reflection debugging utility that logs field/method names.
+- **Model classes:** `User`, `LUser`, `LUserDetail`, `UserDetails`, `UserDetailsRemake`, `UserCC`, `BaseTestBean`, `ChildTestBean1/2`.
+
+Run a test by executing its `main` method directly (e.g., from IDE or `mvn exec:java`). There is no `application.yml` in test resources — connection strings are hardcoded in the test classes.
+
+`mvn test -pl data-integration-boot-starter` will technically succeed but runs no actual test cases.
 
 ## Important Notes
 
@@ -110,5 +119,7 @@ mvn test -pl data-integration-boot-starter
 - The GPG signing plugin points to Windows path `C://Program Files (x86)//GnuPG//bin//gpg.exe`.
 - No Lombok used in this project.
 - Chinese comments throughout the codebase; class names are English but some Javadoc is in Chinese.
-- Uses Java module system (`module-info.java`) in each module.
+- Uses Java module system (`module-info.java`) in each module. Dependency chain: `common_utils` → `sql_utils` → `data-integration-boot-starter`. Each module has its own JPMS module name (e.g., `cn.katoumegumi.java.sql.utils`).
 - All modules use `--release 11` compilation flag (not source/target).
+- Base packages: `cn.katoumegumi.java.starter.jdbc.*` (boot-starter), `cn.katoumegumi.java.sql.*` (sql_utils), `cn.katoumegumi.java.common.*` (common_utils), `cn.katoumegumi.java.excel.*` (excel_utils), `cn.katoumegumi.java.code.generator.*` (code_generator).
+- No logback dependency is active (commented out in pom.xml). Logging uses Spring's `spring-jcl` bridge.

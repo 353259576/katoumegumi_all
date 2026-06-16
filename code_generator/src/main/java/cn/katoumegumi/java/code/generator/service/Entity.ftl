@@ -5,17 +5,17 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 </#if>
-<#if enableSwagger = true>
+<#if enableSwagger == true>
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 </#if>
-<#if enableSpringDoc = true>
+<#if enableSpringDoc == true>
 import io.swagger.v3.oas.annotations.media.Schema;
 </#if>
 import lombok.Data;
 import lombok.experimental.Accessors;
 <#if enableHibernate == true>
-import javax.persistence.*;
+import jakarta.persistence.*;
 </#if>
 import java.io.Serializable;
 <#list table.classList as cl>

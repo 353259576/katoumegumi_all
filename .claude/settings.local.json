@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mvn compile *)"
+      "Bash(mvn compile *)",
+      "Bash(dir C:\\\\IdeaProjects\\\\katoumegumi_all\\\\data-integration-boot-starter\\\\src\\\\main\\\\java\\\\cn\\\\katoumegumi\\\\java *)",
+      "Bash(dir C:\\\\IdeaProjects\\\\katoumegumi_all\\\\sql_utils\\\\src\\\\main\\\\java\\\\cn\\\\katoumegumi\\\\java *)",
+      "Bash(dir C:\\\\IdeaProjects\\\\katoumegumi_all\\\\common_utils\\\\src\\\\main\\\\java\\\\cn\\\\katoumegumi\\\\java *)",
+      "Bash(where jdtls *)",
+      "Bash(jdtls --version)",
+      "Bash(findstr /i \"jdt\")",
+      "Bash(xargs grep -l \"jdtls\")",
+      "Bash(xargs -I{} sh -c 'echo \"=== {} ===\"; cat \"{}\"')",
+      "Bash(npm list *)"
     ]
   }
 }

@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 </#if>
 import java.util.List;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 
 /**

@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import ${packageName}${baseJavaMapperName}.${table.entityName}Mapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 </#if>
 
 @Service
@@ -74,7 +75,7 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     @Transactional(rollbackFor = RuntimeException.class)
     public void saveOrUpdateBatch(List<${table.entityName}> ${table.firstLowerEntityName}List){
         for(${table.entityName} ${table.firstLowerEntityName}:${table.firstLowerEntityName}List){
-            if(${table.firstLowerEntityName}.getId() == null){
+            if(${table.firstLowerEntityName}.get${table.pkColumn.beanFieldName?cap_first}() == null){
                 save(${table.firstLowerEntityName});
             }else {
                 update(${table.firstLowerEntityName});
@@ -162,10 +163,10 @@ public class ${table.entityName}ServiceImpl<#if type == 1>  extends ServiceImpl<
     @Transactional(rollbackFor = RuntimeException.class)
     public Integer remove(${table.pkColumn.columnClass.getSimpleName()} ${table.pkColumn.beanFieldName}){
 <#if type == 0>
-        return jdbcUtils.update(MySearchList.create(${table.entityName}.class).set("","").eq("${table.pkColumn.beanFieldName}",${table.pkColumn.beanFieldName}));
+        return jdbcUtils.delete(MySearchList.create(${table.entityName}.class).eq("${table.pkColumn.beanFieldName}",${table.pkColumn.beanFieldName}));
 </#if>
 <#if type == 1>
-        ${table.entityName} ${table.firstLowerEntityName} = new ${table.entityName}();
+        return ${table.firstLowerEntityName}Mapper.deleteById(${table.pkColumn.beanFieldName});
 </#if>
     }
 

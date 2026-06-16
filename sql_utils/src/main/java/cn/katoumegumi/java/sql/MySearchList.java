@@ -64,26 +64,6 @@ public class MySearchList {
         return new MySearchList().setMainClass(tClass);
     }
 
-
-//    /**
-//     * 拼装列名
-//     *
-//     * @param tableName
-//     * @param columnName
-//     * @return
-//     */
-//    private static String Column.name(String tableName, SFunction<?, ?> columnName) {
-//        return Column.name(tableName, WsReflectUtils.getFieldName(columnName));
-//    }
-//
-//    private static String Column.name(String tableName, String columnName) {
-//        if (WsStringUtils.isBlank(tableName)) {
-//            return columnName;
-//        } else {
-//            return tableName + '.' + columnName;
-//        }
-//    }
-
     /**
      * 判断值是不是正确
      *
@@ -199,36 +179,6 @@ public class MySearchList {
     public Iterator<MySearch> iterator() {
         return mySearches.iterator();
     }
-
-//    public MySearch remove(String name) {
-//        MySearch mySearch;
-//        for (int i = 0; i < mySearches.size(); i++) {
-//            mySearch = mySearches.get(i);
-//            if (mySearch.getColumn().equals(name)) {
-//                mySearches.remove(i);
-//                return mySearch;
-//            }
-//        }
-//        return null;
-//    }
-//
-//    public MySearch get(String value) {
-//        for (MySearch m : mySearches) {
-//            if (m.getColumn().equals(value)) {
-//                return m;
-//            }
-//        }
-//        return null;
-//    }
-//
-//    public MySearch get(String value, SqlOperator sqlOperator) {
-//        for (MySearch m : mySearches) {
-//            if (m.getColumn().equals(value) && m.getOperator().equals(sqlOperator)) {
-//                return m;
-//            }
-//        }
-//        return null;
-//    }
 
     public SqlLimit getSqlLimit() {
         return sqlLimit;
@@ -1315,15 +1265,6 @@ public class MySearchList {
         this.isSingleColumn = true;
         return this;
     }
-
-    /*public MySearchList singleColumnName(String tableName, String fieldName) {
-        if (WsStringUtils.isBlank(tableName)) {
-            this.singleColumnName(fieldName);
-        } else {
-            this.singleColumnName(tableName + '.' + fieldName);
-        }
-        return this;
-    }*/
 
     public <T> MySearchList singleColumnName(String tableName, SFunction<T, ?> fieldName) {
         if (WsStringUtils.isBlank(tableName)) {

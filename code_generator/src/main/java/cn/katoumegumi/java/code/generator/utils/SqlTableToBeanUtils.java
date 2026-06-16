@@ -10,9 +10,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -153,7 +153,7 @@ public class SqlTableToBeanUtils {
 
 
     public static class Column {
-        private static final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
+        private static final Map<String, Class<?>> classMap = new HashMap<>();
 
         static {
             classMap.put("varchar", String.class);
@@ -256,7 +256,7 @@ public class SqlTableToBeanUtils {
             this.columnList = columnList;
             this.classList = columnList.stream().map(Column::getColumnClass).distinct().collect(Collectors.toList());
             for (Column column : columnList) {
-                if (column.getColumnKey().equals("PRI")) {
+                if ("PRI".equals(column.getColumnKey())) {
                     pkColumn = column;
                     break;
                 }
