@@ -1,2 +1,2 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=cn.katoumegumi.java.starter.jdbc.config.DataSourceConfig,\
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.katoumegumi.java.starter.jdbc.config.JdbcConfig
