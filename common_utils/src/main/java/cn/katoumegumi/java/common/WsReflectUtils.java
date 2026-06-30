@@ -341,6 +341,39 @@ public class WsReflectUtils {
         }
     }
 
+    /**
+     * 获取属性类型上的所有顶级泛型实参类型，按声明顺序返回。
+     * 例如 {@code List<Foo>} 返回 [Foo]；{@code Map<String, Bar>} 返回 [String, Bar]；
+     * 无泛型或无法解析的元素以 null 占位。
+     *
+     * @param type 字段/getter/setter 上的 {@link Type}
+     * @return 不可变列表，永不为 null
+     */
+public static List<Class<?>> getGenericsTypes(Type type){
+    if (type == null){
+        return java.util.Collections.emptyList();
+    }
+    GenericsTypeModel genericsTypeModel = getGenericsType(type.getTypeName());
+    List<GenericsTypeModel> genericsTypeModelList = genericsTypeModel.getGenericsTypeModelList();
+    if (WsCollectionUtils.isEmpty(genericsTypeModelList)){
+        return java.util.Collections.emptyList();
+    }
+    List<Class<?>> result = new ArrayList<>(genericsTypeModelList.size());
+    for (GenericsTypeModel model : genericsTypeModelList) {
+        String className = model.getClassName();
+        if (WsStringUtils.isEmpty(className)) {
+            result.add(null);
+            continue;
+        }
+        try {
+            result.add(Class.forName(className));
+        } catch (ClassNotFoundException e) {
+            result.add(null);
+        }
+    }
+    return result;
+}
+
     public static GenericsTypeModel getGenericsType(String typeName){
         return getGenericsType(typeName.toCharArray(),new int[]{0,typeName.length()}).get(0);
     }

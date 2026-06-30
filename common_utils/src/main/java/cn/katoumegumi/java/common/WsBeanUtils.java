@@ -1,10 +1,11 @@
 package cn.katoumegumi.java.common;
 
 import cn.katoumegumi.java.common.convert.ConvertUtils;
+import cn.katoumegumi.java.common.model.BeanModel;
+import cn.katoumegumi.java.common.model.BeanPropertyModel;
 
 import java.io.*;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -16,98 +17,273 @@ import java.util.*;
 public class WsBeanUtils {
 
     /**
-     * 转换bean
+     * 基于 {@link WsReflectUtils#createBeanModel} 转换 JavaBean。
+     * <p>规则：
+     * <ol>
+     *   <li>源与目标属性名一致即尝试赋值；</li>
+     *   <li>目标是基本类型（含包装类、String、日期等）走 {@link ConvertUtils#convert(Object, Class)}；</li>
+     *   <li>目标是数组/集合走 {@link #convertToArray}/{@link #convertToList}，元素类型取自目标属性泛型；</li>
+     *   <li>目标是 {@link Map} 时按 K/V 泛型逐项转换；</li>
+     *   <li>目标为普通 JavaBean 时递归调用本方法。</li>
+     * </ol>
      *
-     * @param o
-     * @param tClass
-     * @param <T>
-     * @return
+     * @param o      源对象
+     * @param tClass 目标类型
+     * @param <T>    目标泛型
+     * @return 转换后的实例，无法转换返回 null
      */
     public static <T> T convertBean(Object o, Class<T> tClass) {
+        if (o == null) {
+            return null;
+        }
         if (isArray(o.getClass())) {
             throw new IllegalArgumentException("不支持直接转数组");
         }
-        if (tClass.isInterface()) {
+        if (tClass == null || tClass.isInterface()) {
             throw new IllegalArgumentException("不支持转换为接口");
         }
         if (isBaseType(o.getClass())) {
             return baseTypeConvert(o, tClass);
         }
-        Field[] sourceFields = WsReflectUtils.getFieldAll(o.getClass());
-        Field[] targetFields = WsReflectUtils.getFieldAll(tClass);
-        if (WsCollectionUtils.isEmpty(sourceFields) || WsCollectionUtils.isEmpty(targetFields)) {
+        if (o instanceof Map) {
+            // Map 不支持作为源进行 bean 转换
             return null;
         }
-        Map<String, Field> targetNameAndFieldMap = new HashMap<>(targetFields.length);
-        for (Field field : targetFields) {
-            field.setAccessible(true);
-            targetNameAndFieldMap.put(field.getName(), field);
-        }
-        Field[] orderlyTargetFields = new Field[sourceFields.length];
-        Field targetField;
-        Field sourceField;
-        for (int i = 0; i < sourceFields.length; i++) {
-            sourceField = sourceFields[i];
-            targetField = targetNameAndFieldMap.get(sourceField.getName());
-            orderlyTargetFields[i] = targetField;
-        }
-        T target = createObject(tClass);
-        Object sourceValue;
-        for (int i = 0; i < sourceFields.length; i++) {
-            targetField = orderlyTargetFields[i];
-            if (targetField == null) {
-                continue;
-            }
-            sourceField = sourceFields[i];
-            if (isBaseType(sourceField.getType()) && isBaseType(targetField.getType())) {
-                sourceValue = WsReflectUtils.getValue(o, sourceField);
-                if (sourceValue != null) {
-                    WsReflectUtils.setValue(
-                            target, WsBeanUtils.baseTypeConvert(sourceValue, targetField.getType()), targetField);
-                }
-            } else if (isArray(sourceField.getType()) && isArray(targetField.getType())) {
-                Object value = WsReflectUtils.getValue(o, sourceField);
-                if (value != null) {
-                    if (targetField.getType().isArray()) {
-                        Object setValue = convertToArray(value, targetField.getType().getComponentType());
-                        if (setValue != null) {
-                            WsReflectUtils.setValue(target, setValue, targetField);
-                        }
-                    } else {
-                        Class<?> targetClass = WsReflectUtils.getClassTypeof(targetField);
-                        Object setValue;
-                        Collection<Object> collection = null;
-                        if (targetField.getType().equals(List.class)
-                                || targetField.getType().equals(Collection.class)) {
-                            collection = new ArrayList<>();
-                        } else if (targetField.getType().equals(Set.class)) {
-                            collection = new HashSet<>();
-                        }
-                        if (targetClass == null) {
-                            // setValue = value;
-                            targetClass = Object.class;
-                        }
-                        setValue = convertToList(value, collection, targetClass);
-                        if (setValue != null) {
-                            WsReflectUtils.setValue(target, setValue, targetField);
-                        }
-                    }
-                }
-                continue;
-            }
 
-            if (isArray(sourceField.getType()) || isArray(targetField.getType())) {
+        BeanModel sourceModel = WsReflectUtils.createBeanModel(o.getClass());
+        BeanModel targetModel = WsReflectUtils.createBeanModel(tClass);
+        Map<String, BeanPropertyModel> sourcePmMap = sourceModel.getPropertyModelMap();
+        Map<String, BeanPropertyModel> targetPmMap = targetModel.getPropertyModelMap();
+        if (sourcePmMap.isEmpty() || targetPmMap.isEmpty()) {
+            return null;
+        }
+
+        T target = newTargetInstance(tClass);
+        if (target == null) {
+            return null;
+        }
+
+        for (Map.Entry<String, BeanPropertyModel> sourceEntry : sourcePmMap.entrySet()) {
+            BeanPropertyModel sourcePm = sourceEntry.getValue();
+            BeanPropertyModel targetPm = targetPmMap.get(sourceEntry.getKey());
+            if (targetPm == null) {
                 continue;
             }
-
-            if (WsReflectUtils.classCompare(sourceField.getType(), targetField.getType())) {
-                sourceValue = WsReflectUtils.getValue(o, sourceField);
-                if (sourceValue != null) {
-                    WsReflectUtils.setValue(target, baseTypeConvert(sourceValue, targetField.getType()), targetField);
-                }
+            Object value = sourcePm.getValue(o);
+            if (value == null) {
+                continue;
             }
+            Object converted = convertValue(value, targetPm);
+            if (converted == null) {
+                continue;
+            }
+            targetPm.setValue(target, converted);
         }
         return target;
+    }
+
+    /**
+     * 将源属性值按目标属性类型转换为可写入的值。
+     */
+    private static Object convertValue(Object value, BeanPropertyModel targetPm) {
+        Class<?> targetType = targetPm.getPropertyClass();
+        if (targetType == null) {
+            return null;
+        }
+        Class<?> valueClass = value.getClass();
+        boolean valueIsArray = isArray(valueClass);
+
+        // 基础类型走 ConvertUtils
+        if (isBaseType(targetType)) {
+            return baseTypeConvert(value, targetType);
+        }
+        if (targetType == Object.class) {
+            return value;
+        }
+
+        // 目标为数组
+        if (targetType.isArray()) {
+            if (!valueIsArray) {
+                return null;
+            }
+            return convertToArray(value, targetType.getComponentType());
+        }
+
+        // 目标为 Collection
+        if (WsReflectUtils.classCompare(targetType, Collection.class)) {
+            Collection<Object> collection = newCollectionInstance(targetType);
+            Class<?> elementClass = targetPm.getGenericClass();
+            if (elementClass == null) {
+                elementClass = Object.class;
+            }
+            return convertToList(value, collection, elementClass);
+        }
+
+        // 目标为 Map
+        if (WsReflectUtils.classCompare(targetType, Map.class)) {
+            if (!(value instanceof Map) && !isArray(valueClass)) {
+                return null;
+            }
+            return convertToMap(value, targetPm);
+        }
+
+        // 普通 JavaBean，递归
+        if (valueIsArray) {
+            return null;
+        }
+        if (targetType.isAssignableFrom(valueClass) && targetType == valueClass) {
+            return value;
+        }
+        return convertBean(value, targetType);
+    }
+
+    /**
+     * 将源 Map 转换为指定键值泛型的目标 Map。
+     * <p>仅取目标声明上的第一层泛型（如 {@code Map<String, Bar>}），嵌套 Map 的内层
+     * 泛型在运行时不可用，将退化为 {@code Object} 处理。
+     */
+    @SuppressWarnings("unchecked")
+    private static Map<Object, Object> convertToMap(Object value, BeanPropertyModel targetPm) {
+        Class<?> targetType = targetPm.getPropertyClass();
+        if (!(value instanceof Map)) {
+            return null;
+        }
+        Map<Object, Object> source = (Map<Object, Object>) value;
+        Map<Object, Object> target = newMapInstance(targetType);
+        if (target == null) {
+            return null;
+        }
+        Class<?> keyClass = targetPm.getKeyGenericClass();
+        Class<?> valueClass = targetPm.getValueGenericClass();
+        for (Map.Entry<?, ?> entry : source.entrySet()) {
+            Object dstKey = convertMapElement(entry.getKey(), keyClass);
+            if (dstKey == null && entry.getKey() != null) {
+                continue;
+            }
+            Object dstVal = convertMapElement(entry.getValue(), valueClass);
+            if (dstVal == null && entry.getValue() != null) {
+                continue;
+            }
+            target.put(dstKey, dstVal);
+        }
+        return target;
+    }
+
+    /**
+     * 将单个 Map 元素（key 或 value）转换为指定类型。
+     */
+    private static Object convertMapElement(Object element, Class<?> targetClass) {
+        if (element == null) {
+            return null;
+        }
+        if (targetClass == null || targetClass == Object.class) {
+            return element;
+        }
+        if (isBaseType(targetClass)) {
+            return baseTypeConvert(element, targetClass);
+        }
+        if (targetClass.isArray()) {
+            return isArray(element.getClass()) ? convertToArray(element, targetClass.getComponentType()) : null;
+        }
+        if (WsReflectUtils.classCompare(targetClass, Collection.class)) {
+            Collection<Object> collection = newCollectionInstance(targetClass);
+            // 元素类型未知，退化为 Object
+            return convertToList(element, collection, Object.class);
+        }
+        if (WsReflectUtils.classCompare(targetClass, Map.class)) {
+            Map<Object, Object> nested = newMapInstance(targetClass);
+            if (nested == null) {
+                return null;
+            }
+            Map<?, ?> src;
+            try {
+                src = (Map<?, ?>) element;
+            } catch (ClassCastException e) {
+                return null;
+            }
+            for (Map.Entry<?, ?> entry : src.entrySet()) {
+                nested.put(entry.getKey(), entry.getValue());
+            }
+            return nested;
+        }
+        // 普通 bean
+        if (isArray(element.getClass())) {
+            return null;
+        }
+        if (targetClass.isAssignableFrom(element.getClass()) && targetClass == element.getClass()) {
+            return element;
+        }
+        return convertBean(element, targetClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<Object, Object> toMap(Object value) {
+        if (value instanceof Map) {
+            return (Map<Object, Object>) value;
+        }
+        // 仅支持 Map 源，数组/集合不直接转 Map
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T newTargetInstance(Class<T> tClass) {
+        try {
+            return tClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            Object instance = WsUnsafeUtils.allocateInstance(tClass);
+            return (T) instance;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Collection<Object> newCollectionInstance(Class<?> collectionType) {
+        if (collectionType.equals(List.class)
+                || collectionType.equals(Collection.class)
+                || collectionType.equals(ArrayList.class)) {
+            return new ArrayList<>();
+        }
+        if (collectionType.equals(Set.class)
+                || collectionType.equals(HashSet.class)) {
+            return new HashSet<>();
+        }
+        try {
+            return (Collection<Object>) collectionType.getDeclaredConstructor().newInstance();
+        } catch (Exception ignore) {
+            return new ArrayList<>();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<Object, Object> newMapInstance(Class<?> mapType) {
+        if (mapType.equals(Map.class)
+                || mapType.equals(HashMap.class)) {
+            return new HashMap<>();
+        }
+        if (mapType.equals(java.util.LinkedHashMap.class)) {
+            return new java.util.LinkedHashMap<>();
+        }
+        if (mapType.equals(java.util.TreeMap.class)) {
+            return new java.util.TreeMap<>();
+        }
+        try {
+            return (Map<Object, Object>) mapType.getDeclaredConstructor().newInstance();
+        } catch (Exception ignore) {
+            return new HashMap<>();
+        }
+    }
+
+    /**
+     * 为 Map 值类型构造一个用于元素类型推导的合成 PropertyModel。
+     */
+    private static BeanPropertyModel buildSyntheticPropertyModel(Class<?> targetClass) {
+        // 借用一个目标类的可写属性作为载体，仅为拿到 genericClass/valueGenericClass；
+        // 当目标类型无属性（基础类型/集合等）已由上游处理，这里只对 bean 走常规路径。
+        BeanModel model = WsReflectUtils.createBeanModel(targetClass);
+        Map<String, BeanPropertyModel> pmMap = model.getPropertyModelMap();
+        if (pmMap.isEmpty()) {
+            return null;
+        }
+        return pmMap.values().iterator().next();
     }
 
     /**
@@ -193,110 +369,16 @@ public class WsBeanUtils {
             } else if (tClass == boolean.class) {
                 o = false;
             } else if (tClass == byte.class) {
-                o = 0;
+                o = (byte) 0;
             } else if (tClass == short.class) {
-                o = 0;
+                o = (short) 0;
             } else if (tClass == char.class) {
-                o = 0;
+                o = (char) 0;
             }
         }
         return (T) o;
     }
 
-
-//    private static <T> T convertToT(Object object, Class<T> tClass) {
-//        try {
-//            if (tClass.isPrimitive()) {
-//                tClass = (Class<T>) BaseTypeCommon.getWrapperClass(tClass);
-//            }
-//            if (tClass.equals(object.getClass())) {
-//                return (T) object;
-//            }
-//            if (tClass.equals(Object.class)) {
-//                return (T) object;
-//            }
-//            if (tClass == Integer.class) {
-//                if (object instanceof Number) {
-//                    return (T) Integer.valueOf(((Number) object).intValue());
-//                }
-//                return (T) Integer.valueOf(String.valueOf(object));
-//            } else if (tClass == Short.class) {
-//                if (object instanceof Number) {
-//                    return (T) Short.valueOf(((Number) object).shortValue());
-//                }
-//                return (T) Short.valueOf(String.valueOf(object));
-//            } else if (tClass == Byte.class) {
-//                return (T) Byte.valueOf(String.valueOf(object));
-//            } else if (tClass == Float.class) {
-//                if (object instanceof Number) {
-//                    return (T) Float.valueOf(((Number) object).floatValue());
-//                }
-//                return (T) Float.valueOf(String.valueOf(object));
-//            } else if (tClass == Double.class) {
-//                if (object instanceof Number) {
-//                    return (T) Double.valueOf(((Number) object).doubleValue());
-//                }
-//                return (T) Double.valueOf(String.valueOf(object));
-//            } else if (tClass == Long.class) {
-//                if (object instanceof Number) {
-//                    return (T) Long.valueOf(((Number) object).longValue());
-//                }
-//                return (T) Long.valueOf(String.valueOf(object));
-//            } else if (tClass == Character.class) {
-//                return (T) (Object) String.valueOf(object).charAt(0);
-//            } else if (tClass == Boolean.class) {
-//                return (T) Boolean.valueOf(String.valueOf(object));
-//            } else if (tClass == BigInteger.class) {
-//                return (T) new BigInteger(String.valueOf(object));
-//            } else if (tClass == BigDecimal.class) {
-//                return (T) new BigDecimal(String.valueOf(object));
-//            } else if (tClass == String.class) {
-//                return (T) WsStringUtils.anyToString(object);
-//            } else if (tClass == Date.class
-//                    || tClass == LocalDateTime.class
-//                    || tClass == LocalDate.class
-//                    || tClass == java.sql.Date.class) {
-//                if (object.getClass() == Date.class) {
-//                    if (tClass == LocalDate.class) {
-//                        Date date = (Date) object;
-//                        Calendar calendar = Calendar.getInstance();
-//                        calendar.setTime(date);
-//                        return (T)
-//                                LocalDate.ofYearDay(
-//                                        calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR));
-//                    }
-//                    if (tClass == LocalDateTime.class) {
-//                        return (T) LocalDateTime.ofInstant(((Date) object).toInstant(), ZoneId.systemDefault());
-//                    }
-//                    return (T) new java.sql.Date(((Date) object).getTime());
-//                } else {
-//                    Date date = WsDateUtils.objectToDate(object);
-//                    if (date == null) {
-//                        return null;
-//                    } else {
-//                        if (tClass == LocalDate.class) {
-//                            Calendar calendar = Calendar.getInstance();
-//                            calendar.setTime(date);
-//                            return (T)
-//                                    LocalDate.ofYearDay(
-//                                            calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR));
-//                        }
-//                        if (tClass == LocalDateTime.class) {
-//                            return (T) LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-//                        }
-//                        if (tClass == java.sql.Date.class) {
-//                            return (T) new java.sql.Date(date.getTime());
-//                        }
-//                        return (T) date;
-//                    }
-//                }
-//            } else {
-//                return convertBean(object, tClass);
-//            }
-//        } catch (Exception e) {
-//            return null;
-//        }
-//    }
 
     public static boolean isBaseType(Class<?> clazz) {
         return BaseTypeCommon.isBaseType(clazz);
@@ -310,7 +392,46 @@ public class WsBeanUtils {
         return (T) WsUnsafeUtils.allocateInstance(clazz);
     }
 
+    /**
+     * 按字段类型分派 setValue，避免对 primitive 字段走 putObject 抛 IllegalArgumentException/写脏值。
+     * 当 value 为 null 时不写入（保持自然语义）。
+     */
+    private static void setFieldValue(Object target, Object value, Field field) {
+        if (value == null) {
+            return;
+        }
+        Class<?> ft = field.getType();
+        if (ft == int.class) {
+            WsReflectUtils.setValue(target, ((Number) value).intValue(), field);
+        } else if (ft == long.class) {
+            WsReflectUtils.setValue(target, ((Number) value).longValue(), field);
+        } else if (ft == short.class) {
+            WsReflectUtils.setValue(target, ((Number) value).shortValue(), field);
+        } else if (ft == byte.class) {
+            WsReflectUtils.setValue(target, ((Number) value).byteValue(), field);
+        } else if (ft == float.class) {
+            WsReflectUtils.setValue(target, ((Number) value).floatValue(), field);
+        } else if (ft == double.class) {
+            WsReflectUtils.setValue(target, ((Number) value).doubleValue(), field);
+        } else if (ft == boolean.class) {
+            WsReflectUtils.setValue(target, (Boolean) value, field);
+        } else if (ft == char.class) {
+            if (value instanceof Character) {
+                WsReflectUtils.setValue(target, (Character) value, field);
+            } else if (value instanceof String && ((String) value).length() == 1) {
+                WsReflectUtils.setValue(target, ((String) value).charAt(0), field);
+            } else {
+                WsReflectUtils.setValue(target, ((Number) value).intValue(), field);
+            }
+        } else {
+            WsReflectUtils.setValue(target, value, field);
+        }
+    }
+
     public static <T> Collection<Object> convertToList(Object o, Collection<Object> collection, Class<T> tClass) {
+        if (collection == null) {
+            collection = new ArrayList<>();
+        }
         Object object = convertToArray(o, tClass);
         if (object == null) {
             return null;
@@ -429,13 +550,7 @@ public class WsBeanUtils {
                 }
             }
         } else if (o instanceof Collection) {
-            Collection<?> collection = (Collection<?>) o;
-            Object[] objects = collection.toArray();
-            T[] ts = (T[]) Array.newInstance(tClass, objects.length);
-            for (int i = 0; i < objects.length; i++) {
-                ts[i] = baseTypeConvert(objects[i], tClass);
-            }
-            return ts;
+            return objectArrayToTArray(tClass, ((Collection<?>) o).toArray());
         }
         return null;
     }
@@ -1071,17 +1186,41 @@ public class WsBeanUtils {
             throw new NullPointerException("待转换数组为空");
         }
         if (o.getClass().isArray()){
+            List<Object> list;
+            if (o.getClass().getComponentType().isPrimitive()) {
+                list = new ArrayList<>(Array.getLength(o));
+                if (o instanceof int[]) {
+                    for (int v : (int[]) o) { list.add(v); }
+                } else if (o instanceof short[]) {
+                    for (short v : (short[]) o) { list.add(v); }
+                } else if (o instanceof long[]) {
+                    for (long v : (long[]) o) { list.add(v); }
+                } else if (o instanceof float[]) {
+                    for (float v : (float[]) o) { list.add(v); }
+                } else if (o instanceof double[]) {
+                    for (double v : (double[]) o) { list.add(v); }
+                } else if (o instanceof byte[]) {
+                    for (byte v : (byte[]) o) { list.add(v); }
+                } else if (o instanceof char[]) {
+                    for (char v : (char[]) o) { list.add(v); }
+                } else if (o instanceof boolean[]) {
+                    for (boolean v : (boolean[]) o) { list.add(v); }
+                }
+                return list;
+            }
             Object[] objects = (Object[]) o;
-            List<Object> list = new ArrayList<>(objects.length);
+            list = new ArrayList<>(objects.length);
             for (Object value : objects) {
-                if (WsBeanUtils.isBaseType(value.getClass())) {
+                if (value == null) {
+                    list.add(null);
+                } else if (WsBeanUtils.isBaseType(value.getClass())) {
                     list.add(value);
                 } else if (WsBeanUtils.isArray(value.getClass())) {
                     list.add(arrayToList(value));
                 } else if (value instanceof Map) {
-                    list.add(o);
+                    list.add(value);
                 } else {
-                    list.add(objectToMap(o));
+                    list.add(objectToMap(value));
                 }
             }
             return list;
@@ -1089,14 +1228,16 @@ public class WsBeanUtils {
             Collection<Object> collection = (Collection<Object>) o;
             List<Object> list = new ArrayList<>(collection.size());
             for (Object value : collection) {
-                if (WsBeanUtils.isBaseType(value.getClass())) {
+                if (value == null) {
+                    list.add(null);
+                } else if (WsBeanUtils.isBaseType(value.getClass())) {
                     list.add(value);
                 } else if (WsBeanUtils.isArray(value.getClass())) {
                     list.add(arrayToList(value));
                 } else if (value instanceof Map) {
-                    list.add(o);
+                    list.add(value);
                 } else {
-                    list.add(objectToMap(o));
+                    list.add(objectToMap(value));
                 }
             }
             return list;

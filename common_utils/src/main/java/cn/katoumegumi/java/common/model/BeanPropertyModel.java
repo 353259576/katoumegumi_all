@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class BeanPropertyModel {
 
@@ -28,6 +29,10 @@ public class BeanPropertyModel {
     private final Class<?> propertyClass;
 
     private final Class<?> genericClass;
+
+    private final Class<?> keyGenericClass;
+
+    private final Class<?> valueGenericClass;
 
 
     public BeanPropertyModel(String propertyName, Field field, Method getMethod, MethodHandle getMethodHandle, Method setMethod, MethodHandle setMethodHandle) {
@@ -48,7 +53,16 @@ public class BeanPropertyModel {
             this.propertyClass = this.getMethod.getReturnType();
             propertyType = this.getMethod.getGenericReturnType();
         }
-        this.genericClass = WsReflectUtils.getGenericsType(propertyType);
+        List<Class<?>> generics = WsReflectUtils.getGenericsTypes(propertyType);
+        if (WsReflectUtils.classCompare(this.propertyClass, Map.class)) {
+            this.keyGenericClass = generics.size() > 0 ? generics.get(0) : null;
+            this.valueGenericClass = generics.size() > 1 ? generics.get(1) : null;
+            this.genericClass = this.valueGenericClass;
+        } else {
+            this.keyGenericClass = null;
+            this.valueGenericClass = null;
+            this.genericClass = generics.isEmpty() ? null : generics.get(0);
+        }
     }
 
     public String getPropertyName() {
@@ -166,5 +180,13 @@ public class BeanPropertyModel {
 
     public Class<?> getGenericClass() {
         return genericClass;
+    }
+
+    public Class<?> getKeyGenericClass() {
+        return keyGenericClass;
+    }
+
+    public Class<?> getValueGenericClass() {
+        return valueGenericClass;
     }
 }
