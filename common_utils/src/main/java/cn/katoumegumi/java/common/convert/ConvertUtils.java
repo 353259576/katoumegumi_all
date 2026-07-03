@@ -2,28 +2,35 @@ package cn.katoumegumi.java.common.convert;
 
 import cn.katoumegumi.java.common.BaseTypeCommon;
 import cn.katoumegumi.java.common.WsBeanUtils;
-import cn.katoumegumi.java.common.WsCollectionUtils;
 import cn.katoumegumi.java.common.WsReflectUtils;
-import cn.katoumegumi.java.common.model.GenericsTypeModel;
 
-import java.util.*;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ConvertUtils {
 
-    private static Class<?> getClass(Class<?> c) {
-        GenericsTypeModel genericsTypeModel = WsReflectUtils.getGenericsType(c.getGenericInterfaces()[0].getTypeName());
-        if (WsCollectionUtils.isEmpty(genericsTypeModel.getGenericsTypeModelList())){
-            return null;
-        }
-        try {
-            return Class.forName(genericsTypeModel.getGenericsTypeModelList().get(0).getClassName());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     private static final Map<Class<?>, ConvertBean<?>> CLASS_CONVERT_BEAN_MAP = new HashMap<>();
+
+    private static Class<?> resolveConvertTargetClass(Class<?> clazz) {
+        if (clazz == null) {
+            throw new NullPointerException("clazz is null");
+        }
+        Type type = null;
+        for (Type genericInterface : clazz.getGenericInterfaces()) {
+            if (genericInterface.getTypeName().startsWith(ConvertBean.class.getTypeName())){
+                type = genericInterface;
+                break;
+            }
+        }
+        List<Class<?>> genericsTypes = WsReflectUtils.getGenericClass(type);
+        if (genericsTypes.isEmpty()) {
+            throw new IllegalArgumentException("convert target class " + clazz + " has no generics type");
+        }
+        return genericsTypes.get(0);
+    }
 
     static {
         ConvertToString convertToString = new ConvertToString();
@@ -43,32 +50,34 @@ public class ConvertUtils {
         ConvertToLocalDate convertToLocalDate = new ConvertToLocalDate();
         ConvertToLocalDateTime convertToLocalDateTime = new ConvertToLocalDateTime();
 
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToString.getClass()), convertToString);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToBoolean.getClass()), convertToBoolean);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToCharacter.getClass()), convertToCharacter);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToByte.getClass()), convertToByte);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToShort.getClass()), convertToShort);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToInteger.getClass()), convertToInteger);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToLong.getClass()), convertToLong);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToFloat.getClass()), convertToFloat);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToDouble.getClass()), convertToDouble);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToBigInteger.getClass()), convertToBigInteger);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToBigDecimal.getClass()), convertToBigDecimal);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToDate.getClass()), convertToDate);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToSqlDate.getClass()), convertToSqlDate);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToLocalDate.getClass()), convertToLocalDate);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToLocalDateTime.getClass()), convertToLocalDateTime);
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertToSqlTimestamp.getClass()), convertToSqlTimestamp);
+        register(convertToString);
+        register(convertToBoolean);
+        register(convertToCharacter);
+        register(convertToByte);
+        register(convertToShort);
+        register(convertToInteger);
+        register(convertToLong);
+        register(convertToFloat);
+        register(convertToDouble);
+        register(convertToBigInteger);
+        register(convertToBigDecimal);
+        register(convertToDate);
+        register(convertToSqlDate);
+        register(convertToLocalDate);
+        register(convertToLocalDateTime);
+        register(convertToSqlTimestamp);
+    }
+
+    private static void register(ConvertBean<?> bean) {
+        CLASS_CONVERT_BEAN_MAP.put(resolveConvertTargetClass(bean.getClass()), bean);
     }
 
     public static <T> T convert(Object o, Class<T> targetClass) {
         if (o == null) {
             return null;
-        }
-        if (targetClass == null) {
+        } else if (targetClass == null) {
             throw new NullPointerException("convert target class is null");
-        }
-        if (o.getClass() == targetClass) {
+        } else if (o.getClass() == targetClass) {
             return (T) o;
         }
 
@@ -83,6 +92,12 @@ public class ConvertUtils {
         }
         ConvertBean<T> convertBean = (ConvertBean<T>) CLASS_CONVERT_BEAN_MAP.get(c);
         if (convertBean == null) {
+            // 防止 base→bean 无限递归：convertBean 对 base 源会再次走 baseTypeConvert
+            // → ConvertUtils.convert → convertBean …。若源是基本类型且目标无注册转换器，
+            // 说明无法转换，直接返回 null 而不再回调 convertBean。
+            if (BaseTypeCommon.isBaseType(o.getClass())) {
+                return null;
+            }
             return WsBeanUtils.convertBean(o, targetClass);
         } else {
             return convertBean.convert(o);
@@ -96,11 +111,11 @@ public class ConvertUtils {
      * @param <T>
      */
     public synchronized static <T> void addConvertBean(ConvertBean<T> convertBean) {
-        CLASS_CONVERT_BEAN_MAP.put(getClass(convertBean.getClass()), convertBean);
+        CLASS_CONVERT_BEAN_MAP.put(resolveConvertTargetClass(convertBean.getClass()), convertBean);
     }
 
     public static <T> ConvertBean<T> getConvertBean(Class<T> c) {
-        return  (ConvertBean<T>) CLASS_CONVERT_BEAN_MAP.get(c);
+        return (ConvertBean<T>) CLASS_CONVERT_BEAN_MAP.get(c);
     }
 
 }
