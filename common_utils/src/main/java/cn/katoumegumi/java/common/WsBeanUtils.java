@@ -6,7 +6,10 @@ import cn.katoumegumi.java.common.model.BeanPropertyModel;
 
 import java.io.*;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * bean工具类
@@ -15,6 +18,52 @@ import java.util.*;
  */
 @SuppressWarnings("unchecked")
 public class WsBeanUtils {
+
+    /**
+     * 无参构造缓存。value 为对应类的无参 {@link Constructor}；{@link #NO_CTOR_MARKER}
+     * 使用 {@link ConcurrentHashMap} 稳定持有，避免热路径反复反射查询。
+     */
+    private static final ConcurrentHashMap<Class<?>, Constructor<?>> NO_ARG_CTOR_CACHE = new ConcurrentHashMap<>();
+
+    /** 命中失败的标记值，避免对同一无构造类反复执行 getDeclaredConstructor */
+    private static final Constructor<?> NO_CTOR_MARKER;
+
+    /**
+     * convertBean 递归调用栈（基于对象 identity）。用于检测 A→B→A 循环引用，
+     * 命中时直接返回 null 断开环，避免 StackOverflowError。
+     * 使用 {@link IdentityHashMap} 以引用相等而非 equals 判定，避免重写了
+     * equals/hashCode 的 bean 误判。
+     */
+    private static final ThreadLocal<Set<Object>> CONVERT_BEAN_STACK = ThreadLocal.withInitial(
+            () -> Collections.newSetFromMap(new IdentityHashMap<>()));
+
+    static {
+        try {
+            NO_CTOR_MARKER = Void.class.getDeclaredConstructor();
+        } catch (NoSuchMethodException e) {
+            // Void 一定有无参 private 构造，理论上不会到这里
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static Constructor<?> findNoArgConstructor(Class<?> clazz) {
+        Constructor<?> cached = NO_ARG_CTOR_CACHE.get(clazz);
+        if (cached != null) {
+            return cached;
+        }
+        Constructor<?> resolved;
+        try {
+            resolved = clazz.getDeclaredConstructor();
+            resolved.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            resolved = NO_CTOR_MARKER;
+        }
+        Constructor<?> prev = NO_ARG_CTOR_CACHE.putIfAbsent(clazz, resolved);
+        if (prev != null) {
+            return prev;
+        }
+        return resolved;
+    }
 
     /**
      * 基于 {@link WsReflectUtils#createBeanModel} 转换 JavaBean。
@@ -50,40 +99,54 @@ public class WsBeanUtils {
             return null;
         }
 
-        BeanModel sourceModel = WsReflectUtils.createBeanModel(o.getClass());
-        BeanModel targetModel = WsReflectUtils.createBeanModel(tClass);
-        Map<String, BeanPropertyModel> sourcePmMap = sourceModel.getPropertyModelMap();
-        Map<String, BeanPropertyModel> targetPmMap = targetModel.getPropertyModelMap();
-        if (sourcePmMap.isEmpty() || targetPmMap.isEmpty()) {
+        // 循环引用检测：若当前对象已在转换栈中，说明出现 A→B→A 环，直接断开
+        Set<Object> stack = CONVERT_BEAN_STACK.get();
+        if (!stack.add(o)) {
             return null;
         }
+        try {
+            BeanModel sourceModel = WsReflectUtils.createBeanModel(o.getClass());
+            BeanModel targetModel = WsReflectUtils.createBeanModel(tClass);
+            Map<String, BeanPropertyModel> sourcePmMap = sourceModel.getPropertyModelMap();
+            Map<String, BeanPropertyModel> targetPmMap = targetModel.getPropertyModelMap();
+            if (sourcePmMap.isEmpty() || targetPmMap.isEmpty()) {
+                return null;
+            }
 
-        T target = newTargetInstance(tClass);
-        if (target == null) {
-            return null;
-        }
+            T target = newTargetInstance(tClass);
+            if (target == null) {
+                return null;
+            }
 
-        for (Map.Entry<String, BeanPropertyModel> sourceEntry : sourcePmMap.entrySet()) {
-            BeanPropertyModel sourcePm = sourceEntry.getValue();
-            BeanPropertyModel targetPm = targetPmMap.get(sourceEntry.getKey());
-            if (targetPm == null) {
-                continue;
+            for (Map.Entry<String, BeanPropertyModel> sourceEntry : sourcePmMap.entrySet()) {
+                BeanPropertyModel sourcePm = sourceEntry.getValue();
+                BeanPropertyModel targetPm = targetPmMap.get(sourceEntry.getKey());
+                if (targetPm == null) {
+                    continue;
+                }
+                Object value = sourcePm.getValue(o);
+                if (value == null) {
+                    continue;
+                }
+                Object converted = convertValue(value, targetPm);
+                if (converted == null) {
+                    continue;
+                }
+                targetPm.setValue(target, converted);
             }
-            Object value = sourcePm.getValue(o);
-            if (value == null) {
-                continue;
+            return target;
+        } finally {
+            stack.remove(o);
+            if (stack.isEmpty()) {
+                CONVERT_BEAN_STACK.remove();
             }
-            Object converted = convertValue(value, targetPm);
-            if (converted == null) {
-                continue;
-            }
-            targetPm.setValue(target, converted);
         }
-        return target;
     }
 
     /**
      * 将源属性值按目标属性类型转换为可写入的值。
+     * 走预计算的 {@link BeanPropertyModel.PropertyKind} 快速分派，
+     * 避免热路径上的多次 isAssignableFrom/isBaseType 调用。
      */
     private static Object convertValue(Object value, BeanPropertyModel targetPm) {
         Class<?> targetType = targetPm.getPropertyClass();
@@ -91,50 +154,58 @@ public class WsBeanUtils {
             return null;
         }
         Class<?> valueClass = value.getClass();
-        boolean valueIsArray = isArray(valueClass);
 
-        // 基础类型走 ConvertUtils
-        if (isBaseType(targetType)) {
-            return baseTypeConvert(value, targetType);
-        }
-        if (targetType == Object.class) {
-            return value;
-        }
-
-        // 目标为数组
-        if (targetType.isArray()) {
-            if (!valueIsArray) {
-                return null;
+        switch (targetPm.getPropertyKind()) {
+            case BASE:
+                return baseTypeConvert(value, targetType);
+            case OBJECT:
+                return value;
+            case ARRAY:
+                if (!isArray(valueClass)) {
+                    return null;
+                }
+                return convertToArray(value, targetType.getComponentType());
+            case COLLECTION: {
+                Collection<Object> collection = newCollectionInstance(targetType);
+                List<Class<?>> list = targetPm.getGenericClass();
+                Class<?> tClass;
+                if (WsCollectionUtils.isEmpty(list)) {
+                    tClass = Object.class;
+                }else {
+                    tClass = list.get(0);
+                }
+                return convertToList(value, collection, tClass);
             }
-            return convertToArray(value, targetType.getComponentType());
-        }
-
-        // 目标为 Collection
-        if (WsReflectUtils.classCompare(targetType, Collection.class)) {
-            Collection<Object> collection = newCollectionInstance(targetType);
-            Class<?> elementClass = targetPm.getGenericClass();
-            if (elementClass == null) {
-                elementClass = Object.class;
+            case MAP: {
+                if (!(value instanceof Map)) {
+                    return null;
+                }
+                List<Class<?>> list = targetPm.getGenericClass();
+                if (WsCollectionUtils.isEmpty(list)) {
+                    return value;
+                }
+                Class<?> keyClass = list.get(0);
+                Class<?> valClass = list.get(1);
+                // 同类型 + 无具体泛型约束时直接复用，跳过逐项转换（最高频短路）
+                if ((keyClass == null || keyClass == Object.class)
+                        && (valClass == null || valClass == Object.class)
+                        && targetType.isInstance(value)) {
+                    return value;
+                }
+                return convertToMap(value, targetPm);
             }
-            return convertToList(value, collection, elementClass);
+            case BEAN:
+            default:
+                if (isArray(valueClass)) {
+                    return null;
+                }
+                // 同类型或子类型直接复用引用，与原版 baseTypeConvert→ConvertUtils 的
+                // c.isInstance(o) 短路语义一致，避免无意义的递归深拷贝
+                if (targetType.isAssignableFrom(valueClass)) {
+                    return value;
+                }
+                return convertBean(value, targetType);
         }
-
-        // 目标为 Map
-        if (WsReflectUtils.classCompare(targetType, Map.class)) {
-            if (!(value instanceof Map) && !isArray(valueClass)) {
-                return null;
-            }
-            return convertToMap(value, targetPm);
-        }
-
-        // 普通 JavaBean，递归
-        if (valueIsArray) {
-            return null;
-        }
-        if (targetType.isAssignableFrom(valueClass) && targetType == valueClass) {
-            return value;
-        }
-        return convertBean(value, targetType);
     }
 
     /**
@@ -150,18 +221,21 @@ public class WsBeanUtils {
         }
         Map<Object, Object> source = (Map<Object, Object>) value;
         Map<Object, Object> target = newMapInstance(targetType);
-        if (target == null) {
-            return null;
-        }
-        Class<?> keyClass = targetPm.getKeyGenericClass();
-        Class<?> valueClass = targetPm.getValueGenericClass();
+        List<Class<?>> list = targetPm.getGenericClass();
+        Class<?> keyClass = list.get(0);
+        Class<?> valueClass = list.get(1);
+        // 预计算 K/V 的元素分类，避免每个 entry 重复执行 isBaseType / classCompare
+        BeanPropertyModel.PropertyKind keyKind = classifyElementKind(keyClass);
+        BeanPropertyModel.PropertyKind valKind = classifyElementKind(valueClass);
         for (Map.Entry<?, ?> entry : source.entrySet()) {
-            Object dstKey = convertMapElement(entry.getKey(), keyClass);
-            if (dstKey == null && entry.getKey() != null) {
+            Object srcKey = entry.getKey();
+            Object srcVal = entry.getValue();
+            Object dstKey = convertMapElement(srcKey, keyClass, keyKind);
+            if (dstKey == null && srcKey != null) {
                 continue;
             }
-            Object dstVal = convertMapElement(entry.getValue(), valueClass);
-            if (dstVal == null && entry.getValue() != null) {
+            Object dstVal = convertMapElement(srcVal, valueClass, valKind);
+            if (dstVal == null && srcVal != null) {
                 continue;
             }
             target.put(dstKey, dstVal);
@@ -169,121 +243,138 @@ public class WsBeanUtils {
         return target;
     }
 
+//    /** Map 元素的目标类型分类，构造时一次性确定 */
+//    private enum ElementKind {
+//        /** null 或 Object.class：直接透传 */
+//        OBJECT,
+//        /** 基本类型/包装类/String/日期等 */
+//        BASE,
+//        /** Java 数组 */
+//        ARRAY,
+//        /** Collection 子类型 */
+//        COLLECTION,
+//        /** Map 子类型 */
+//        MAP,
+//        /** 普通 JavaBean */
+//        BEAN
+//    }
+
+    private static BeanPropertyModel.PropertyKind classifyElementKind(Class<?> c) {
+        if (c == null || c == Object.class) {
+            return BeanPropertyModel.PropertyKind.OBJECT;
+        }
+        if (isBaseType(c)) {
+            return BeanPropertyModel.PropertyKind.BASE;
+        }
+        if (c.isArray()) {
+            return BeanPropertyModel.PropertyKind.ARRAY;
+        }
+        if (WsReflectUtils.classCompare(c, Collection.class)) {
+            return BeanPropertyModel.PropertyKind.COLLECTION;
+        }
+        if (WsReflectUtils.classCompare(c, Map.class)) {
+            return BeanPropertyModel.PropertyKind.MAP;
+        }
+        return BeanPropertyModel.PropertyKind.BEAN;
+    }
+
     /**
-     * 将单个 Map 元素（key 或 value）转换为指定类型。
+     * 将单个 Map 元素（key 或 value）按预计算的 {@link BeanPropertyModel.PropertyKind} 分派转换。
      */
-    private static Object convertMapElement(Object element, Class<?> targetClass) {
+    private static Object convertMapElement(Object element, Class<?> targetClass, BeanPropertyModel.PropertyKind kind) {
         if (element == null) {
             return null;
         }
-        if (targetClass == null || targetClass == Object.class) {
-            return element;
-        }
-        if (isBaseType(targetClass)) {
-            return baseTypeConvert(element, targetClass);
-        }
-        if (targetClass.isArray()) {
-            return isArray(element.getClass()) ? convertToArray(element, targetClass.getComponentType()) : null;
-        }
-        if (WsReflectUtils.classCompare(targetClass, Collection.class)) {
-            Collection<Object> collection = newCollectionInstance(targetClass);
-            // 元素类型未知，退化为 Object
-            return convertToList(element, collection, Object.class);
-        }
-        if (WsReflectUtils.classCompare(targetClass, Map.class)) {
-            Map<Object, Object> nested = newMapInstance(targetClass);
-            if (nested == null) {
-                return null;
+        switch (kind) {
+            case OBJECT:
+                return element;
+            case BASE:
+                return baseTypeConvert(element, targetClass);
+            case ARRAY:
+                return isArray(element.getClass())
+                        ? convertToArray(element, targetClass.getComponentType())
+                        : null;
+            case COLLECTION: {
+                Collection<Object> coll = newCollectionInstance(targetClass);
+                // 元素类型未知，退化为 Object
+                return convertToList(element, coll, Object.class);
             }
-            Map<?, ?> src;
-            try {
-                src = (Map<?, ?>) element;
-            } catch (ClassCastException e) {
-                return null;
+            case MAP: {
+                if (!(element instanceof Map)) {
+                    return null;
+                }
+                Map<Object, Object> nested = newMapInstance(targetClass);
+                nested.putAll((Map<?, ?>) element);
+                return nested;
             }
-            for (Map.Entry<?, ?> entry : src.entrySet()) {
-                nested.put(entry.getKey(), entry.getValue());
-            }
-            return nested;
+            case BEAN:
+            default:
+                if (isArray(element.getClass())) {
+                    return null;
+                }
+                if (targetClass.isAssignableFrom(element.getClass())) {
+                    return element;
+                }
+                return convertBean(element, targetClass);
         }
-        // 普通 bean
-        if (isArray(element.getClass())) {
-            return null;
-        }
-        if (targetClass.isAssignableFrom(element.getClass()) && targetClass == element.getClass()) {
-            return element;
-        }
-        return convertBean(element, targetClass);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<Object, Object> toMap(Object value) {
-        if (value instanceof Map) {
-            return (Map<Object, Object>) value;
-        }
-        // 仅支持 Map 源，数组/集合不直接转 Map
-        return null;
     }
 
     @SuppressWarnings("unchecked")
     private static <T> T newTargetInstance(Class<T> tClass) {
+        Constructor<?> ctor = findNoArgConstructor(tClass);
+        if (ctor == NO_CTOR_MARKER) {
+            return (T) WsUnsafeUtils.allocateInstance(tClass);
+        }
         try {
-            return tClass.getDeclaredConstructor().newInstance();
+            return (T) ctor.newInstance();
         } catch (Exception e) {
-            Object instance = WsUnsafeUtils.allocateInstance(tClass);
-            return (T) instance;
+            return (T) WsUnsafeUtils.allocateInstance(tClass);
         }
     }
 
     @SuppressWarnings("unchecked")
     private static Collection<Object> newCollectionInstance(Class<?> collectionType) {
-        if (collectionType.equals(List.class)
-                || collectionType.equals(Collection.class)
-                || collectionType.equals(ArrayList.class)) {
+        if (collectionType == List.class
+                || collectionType == Collection.class
+                || collectionType == ArrayList.class) {
             return new ArrayList<>();
         }
-        if (collectionType.equals(Set.class)
-                || collectionType.equals(HashSet.class)) {
+        if (collectionType == Set.class
+                || collectionType == HashSet.class) {
             return new HashSet<>();
         }
+        Constructor<?> ctor = findNoArgConstructor(collectionType);
+        if (ctor == NO_CTOR_MARKER) {
+            return new ArrayList<>();
+        }
         try {
-            return (Collection<Object>) collectionType.getDeclaredConstructor().newInstance();
-        } catch (Exception ignore) {
+            return (Collection<Object>) ctor.newInstance();
+        } catch (Exception e) {
             return new ArrayList<>();
         }
     }
 
     @SuppressWarnings("unchecked")
     private static Map<Object, Object> newMapInstance(Class<?> mapType) {
-        if (mapType.equals(Map.class)
-                || mapType.equals(HashMap.class)) {
+        if (mapType == Map.class
+                || mapType == HashMap.class) {
             return new HashMap<>();
         }
-        if (mapType.equals(java.util.LinkedHashMap.class)) {
+        if (mapType == java.util.LinkedHashMap.class) {
             return new java.util.LinkedHashMap<>();
         }
-        if (mapType.equals(java.util.TreeMap.class)) {
+        if (mapType == java.util.TreeMap.class) {
             return new java.util.TreeMap<>();
         }
-        try {
-            return (Map<Object, Object>) mapType.getDeclaredConstructor().newInstance();
-        } catch (Exception ignore) {
+        Constructor<?> ctor = findNoArgConstructor(mapType);
+        if (ctor == NO_CTOR_MARKER) {
             return new HashMap<>();
         }
-    }
-
-    /**
-     * 为 Map 值类型构造一个用于元素类型推导的合成 PropertyModel。
-     */
-    private static BeanPropertyModel buildSyntheticPropertyModel(Class<?> targetClass) {
-        // 借用一个目标类的可写属性作为载体，仅为拿到 genericClass/valueGenericClass；
-        // 当目标类型无属性（基础类型/集合等）已由上游处理，这里只对 bean 走常规路径。
-        BeanModel model = WsReflectUtils.createBeanModel(targetClass);
-        Map<String, BeanPropertyModel> pmMap = model.getPropertyModelMap();
-        if (pmMap.isEmpty()) {
-            return null;
+        try {
+            return (Map<Object, Object>) ctor.newInstance();
+        } catch (Exception e) {
+            return new HashMap<>();
         }
-        return pmMap.values().iterator().next();
     }
 
     /**
@@ -356,8 +447,7 @@ public class WsBeanUtils {
      */
     public static <T> T baseTypeConvert(Object object, Class<T> tClass) {
         Object o = ConvertUtils.convert(object, tClass);
-        boolean isPrimitive = tClass.isPrimitive();
-        if (isPrimitive && o == null) {
+        if (o == null && tClass.isPrimitive()) {
             if (tClass == int.class) {
                 o = 0;
             } else if (tClass == long.class) {
@@ -393,113 +483,37 @@ public class WsBeanUtils {
     }
 
     /**
-     * 按字段类型分派 setValue，避免对 primitive 字段走 putObject 抛 IllegalArgumentException/写脏值。
-     * 当 value 为 null 时不写入（保持自然语义）。
+     * 将数组或集合元素收集到指定 {@link Collection}。
+     * 先统一经过 {@link #convertToArray} 归一化为数组，再用 {@link Array#get} 装箱填充，
+     * 避免基本类型数组的逐类型 switch 模板代码。
+     *
+     * @param o        数组或集合
+     * @param collection 目标容器；为 null 时使用 {@link ArrayList}
+     * @param tClass   目标元素类型
+     * @param <T>
+     * @return 填充后的集合；无法转换返回 null
      */
-    private static void setFieldValue(Object target, Object value, Field field) {
-        if (value == null) {
-            return;
-        }
-        Class<?> ft = field.getType();
-        if (ft == int.class) {
-            WsReflectUtils.setValue(target, ((Number) value).intValue(), field);
-        } else if (ft == long.class) {
-            WsReflectUtils.setValue(target, ((Number) value).longValue(), field);
-        } else if (ft == short.class) {
-            WsReflectUtils.setValue(target, ((Number) value).shortValue(), field);
-        } else if (ft == byte.class) {
-            WsReflectUtils.setValue(target, ((Number) value).byteValue(), field);
-        } else if (ft == float.class) {
-            WsReflectUtils.setValue(target, ((Number) value).floatValue(), field);
-        } else if (ft == double.class) {
-            WsReflectUtils.setValue(target, ((Number) value).doubleValue(), field);
-        } else if (ft == boolean.class) {
-            WsReflectUtils.setValue(target, (Boolean) value, field);
-        } else if (ft == char.class) {
-            if (value instanceof Character) {
-                WsReflectUtils.setValue(target, (Character) value, field);
-            } else if (value instanceof String && ((String) value).length() == 1) {
-                WsReflectUtils.setValue(target, ((String) value).charAt(0), field);
-            } else {
-                WsReflectUtils.setValue(target, ((Number) value).intValue(), field);
-            }
-        } else {
-            WsReflectUtils.setValue(target, value, field);
-        }
-    }
-
     public static <T> Collection<Object> convertToList(Object o, Collection<Object> collection, Class<T> tClass) {
         if (collection == null) {
             collection = new ArrayList<>();
         }
-        Object object = convertToArray(o, tClass);
-        if (object == null) {
+        Object array = convertToArray(o, tClass);
+        if (array == null) {
             return null;
         }
-
-        if (object.getClass().getComponentType().isPrimitive()) {
-            switch (object.getClass().getComponentType().getName()) {
-                case "int":
-                    int[] ints = (int[]) object;
-                    for (int i : ints) {
-                        collection.add(i);
-                    }
-                    return collection;
-                case "short":
-                    short[] shorts = (short[]) object;
-                    for (short i : shorts) {
-                        collection.add(i);
-                    }
-                    return collection;
-                case "long":
-                    long[] longs = (long[]) object;
-                    for (long i : longs) {
-                        collection.add(i);
-                    }
-                    return collection;
-                case "float":
-                    float[] floats = (float[]) object;
-                    for (float i : floats) {
-                        collection.add(i);
-                    }
-                    return collection;
-                case "double":
-                    double[] doubles = (double[]) object;
-                    for (double i : doubles) {
-                        collection.add(i);
-                    }
-                    return collection;
-                case "byte":
-                    byte[] bytes = (byte[]) object;
-                    for (byte i : bytes) {
-                        collection.add(i);
-                    }
-                    return collection;
-                case "char":
-                    char[] chars = (char[]) object;
-                    for (char i : chars) {
-                        collection.add(i);
-                    }
-                    return collection;
-                case "boolean":
-                    boolean[] booleans = (boolean[]) object;
-                    for (boolean i : booleans) {
-                        collection.add(i);
-                    }
-                    return collection;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-
-        } else {
-            Object[] objects = (Object[]) object;
-            Collections.addAll(collection, objects);
-            return collection;
+        int len = Array.getLength(array);
+        for (int i = 0; i < len; i++) {
+            // Array.get 对基本类型元素自动装箱，符合集合元素必须是 Object 的语义
+            collection.add(Array.get(array, i));
         }
+        return collection;
     }
 
     /**
-     * 把数组或者list对象转换成数组
+     * 把数组或者 list 对象转换成数组。
+     * 命中常见 same-type 路径时直接返回源引用（无需拷贝），其余情况委托
+     * {@link #convertArray} 按元素 {@link #baseTypeConvert} 统一处理，
+     * 兼顾 primitive→primitive、primitive→wrapper、wrapper→primitive、wrapper→wrapper。
      *
      * @param o      数组或者list
      * @param tClass 需要转换成的对象
@@ -507,635 +521,45 @@ public class WsBeanUtils {
      * @return
      */
     public static <T> Object convertToArray(Object o, Class<T> tClass) {
-        if (o.getClass().isArray()) {
-            if (o.getClass().getComponentType().equals(tClass)) {
-                return o;
+        if (o == null) {
+            return null;
+        }
+        Class<?> srcComp = o.getClass().getComponentType();
+        if (srcComp != null) {
+            return convertArray(o, srcComp, tClass);
+        }
+        if (o instanceof Collection) {
+            Object[] src = ((Collection<?>) o).toArray();
+            if (tClass == Object.class) {
+                return src;
             }
-            if (o.getClass().getComponentType().isPrimitive()) {
-                T[] objects;
-                switch (o.getClass().getComponentType().getName()) {
-                    case "int":
-                        int[] ints = (int[]) o;
-                        return intArrayToTArray(tClass, ints);
-                    case "short":
-                        short[] shorts = (short[]) o;
-                        return shortArrayToTArray(tClass, shorts);
-                    case "long":
-                        long[] longs = (long[]) o;
-                        return longArrayToTArray(tClass, longs);
-                    case "float":
-                        float[] floats = (float[]) o;
-                        return floatArrayToTArray(tClass, floats);
-                    case "double":
-                        double[] doubles = (double[]) o;
-                        return doubleArrayToTArray(tClass, doubles);
-                    case "byte":
-                        byte[] bytes = (byte[]) o;
-                        return byteArrayToTArray(tClass, bytes);
-                    case "char":
-                        char[] chars = (char[]) o;
-                        return charArrayToTArray(tClass, chars);
-                    case "boolean":
-                        boolean[] booleans = (boolean[]) o;
-                        return booleanArrayToTArray(tClass, booleans);
-                    default:
-                        throw new RuntimeException("非基本类型");
-                }
-            } else {
-                if (o.getClass().equals(tClass)) {
-                    return o;
-                } else {
-                    Object[] objects = (Object[]) o;
-                    return objectArrayToTArray(tClass, objects);
-                }
-            }
-        } else if (o instanceof Collection) {
-            return objectArrayToTArray(tClass, ((Collection<?>) o).toArray());
+            return convertArray(src, Object.class, tClass);
         }
         return null;
     }
 
-    private static <T> Object objectArrayToTArray(Class<T> tClass, Object[] objects) {
-        if (tClass.isPrimitive()) {
-            switch (tClass.getName()) {
-                case "int":
-                    int[] rInts = (int[]) Array.newInstance(tClass, objects.length);
-                    for (int i = 0; i < objects.length; i++) {
-                        rInts[i] = (Integer) baseTypeConvert(objects[i], tClass);
-                    }
-                    return rInts;
-                case "short":
-                    short[] rShorts = (short[]) Array.newInstance(tClass, objects.length);
-                    for (int i = 0; i < objects.length; i++) {
-                        rShorts[i] = (Short) baseTypeConvert(objects[i], tClass);
-                    }
-                    return rShorts;
-                case "long":
-                    long[] rLongs = (long[]) Array.newInstance(tClass, objects.length);
-                    for (int i = 0; i < objects.length; i++) {
-                        rLongs[i] = (Long) baseTypeConvert(objects[i], tClass);
-                    }
-                    return rLongs;
-                case "float":
-                    float[] rFloats = (float[]) Array.newInstance(tClass, objects.length);
-                    for (int i = 0; i < objects.length; i++) {
-                        rFloats[i] = (Float) baseTypeConvert(objects[i], tClass);
-                    }
-                    return rFloats;
-                case "double":
-                    double[] rDoubles = (double[]) Array.newInstance(tClass, objects.length);
-                    for (int i = 0; i < objects.length; i++) {
-                        rDoubles[i] = (Double) baseTypeConvert(objects[i], tClass);
-                    }
-                    return rDoubles;
-                case "byte":
-                    byte[] rBytes = (byte[]) Array.newInstance(tClass, objects.length);
-                    for (int i = 0; i < objects.length; i++) {
-                        rBytes[i] = (Byte) baseTypeConvert(objects[i], tClass);
-                    }
-                    return rBytes;
-                case "char":
-                    char[] rChars = (char[]) Array.newInstance(tClass, objects.length);
-                    for (int i = 0; i < objects.length; i++) {
-                        rChars[i] = (Character) baseTypeConvert(objects[i], tClass);
-                    }
-                    return rChars;
-                case "boolean":
-                    boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, objects.length);
-                    for (int i = 0; i < objects.length; i++) {
-                        rBooleans[i] = (Boolean) baseTypeConvert(objects[i], tClass);
-                    }
-                    return rBooleans;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-        } else {
-            T[] ts = (T[]) Array.newInstance(tClass, objects.length);
-            for (int i = 0; i < objects.length; i++) {
-                ts[i] = baseTypeConvert(objects[i], tClass);
-            }
-            return ts;
-        }
-    }
-
-    private static <T> Object booleanArrayToTArray(Class<T> tClass, boolean[] booleans) {
-        T[] objects;
-        if (tClass.isPrimitive()) {
-            switch (tClass.getName()) {
-                case "int":
-                    int[] rInts = (int[]) Array.newInstance(tClass, booleans.length);
-                    for (int i = 0; i < booleans.length; i++) {
-                        rInts[i] = (Integer) baseTypeConvert(booleans[i], tClass);
-                    }
-                    return rInts;
-                case "short":
-                    short[] rShorts = (short[]) Array.newInstance(tClass, booleans.length);
-                    for (int i = 0; i < booleans.length; i++) {
-                        rShorts[i] = (Short) baseTypeConvert(booleans[i], tClass);
-                    }
-                    return rShorts;
-                case "long":
-                    long[] rLongs = (long[]) Array.newInstance(tClass, booleans.length);
-                    for (int i = 0; i < booleans.length; i++) {
-                        rLongs[i] = (Long) baseTypeConvert(booleans[i], tClass);
-                    }
-                    return rLongs;
-                case "float":
-                    float[] rFloats = (float[]) Array.newInstance(tClass, booleans.length);
-                    for (int i = 0; i < booleans.length; i++) {
-                        rFloats[i] = (Float) baseTypeConvert(booleans[i], tClass);
-                    }
-                    return rFloats;
-                case "double":
-                    double[] rDoubles = (double[]) Array.newInstance(tClass, booleans.length);
-                    for (int i = 0; i < booleans.length; i++) {
-                        rDoubles[i] = (Double) baseTypeConvert(booleans[i], tClass);
-                    }
-                    return rDoubles;
-                case "byte":
-                    byte[] rBytes = (byte[]) Array.newInstance(tClass, booleans.length);
-                    for (int i = 0; i < booleans.length; i++) {
-                        rBytes[i] = (Byte) baseTypeConvert(booleans[i], tClass);
-                    }
-                    return rBytes;
-                case "char":
-                    char[] rChars = (char[]) Array.newInstance(tClass, booleans.length);
-                    for (int i = 0; i < booleans.length; i++) {
-                        rChars[i] = (Character) baseTypeConvert(booleans[i], tClass);
-                    }
-                    return rChars;
-                case "boolean":
-                    boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, booleans.length);
-                    for (int i = 0; i < booleans.length; i++) {
-                        rBooleans[i] = (Boolean) baseTypeConvert(booleans[i], tClass);
-                    }
-                    return rBooleans;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-        } else {
-            objects = (T[]) Array.newInstance(tClass, booleans.length);
-            for (int i = 0; i < booleans.length; i++) {
-                objects[i] = baseTypeConvert(booleans[i], tClass);
-            }
-            return objects;
-        }
-    }
-
-    private static <T> Object charArrayToTArray(Class<T> tClass, char[] chars) {
-        T[] objects;
-        if (tClass.isPrimitive()) {
-            switch (tClass.getName()) {
-                case "int":
-                    int[] rInts = (int[]) Array.newInstance(tClass, chars.length);
-                    for (int i = 0; i < chars.length; i++) {
-                        rInts[i] = (Integer) baseTypeConvert(chars[i], tClass);
-                    }
-                    return rInts;
-                case "short":
-                    short[] rShorts = (short[]) Array.newInstance(tClass, chars.length);
-                    for (int i = 0; i < chars.length; i++) {
-                        rShorts[i] = (Short) baseTypeConvert(chars[i], tClass);
-                    }
-                    return rShorts;
-                case "long":
-                    long[] rLongs = (long[]) Array.newInstance(tClass, chars.length);
-                    for (int i = 0; i < chars.length; i++) {
-                        rLongs[i] = (Long) baseTypeConvert(chars[i], tClass);
-                    }
-                    return rLongs;
-                case "float":
-                    float[] rFloats = (float[]) Array.newInstance(tClass, chars.length);
-                    for (int i = 0; i < chars.length; i++) {
-                        rFloats[i] = (Float) baseTypeConvert(chars[i], tClass);
-                    }
-                    return rFloats;
-                case "double":
-                    double[] rDoubles = (double[]) Array.newInstance(tClass, chars.length);
-                    for (int i = 0; i < chars.length; i++) {
-                        rDoubles[i] = (Double) baseTypeConvert(chars[i], tClass);
-                    }
-                    return rDoubles;
-                case "byte":
-                    byte[] rBytes = (byte[]) Array.newInstance(tClass, chars.length);
-                    for (int i = 0; i < chars.length; i++) {
-                        rBytes[i] = (Byte) baseTypeConvert(chars[i], tClass);
-                    }
-                    return rBytes;
-                case "char":
-                    char[] rChars = (char[]) Array.newInstance(tClass, chars.length);
-                    for (int i = 0; i < chars.length; i++) {
-                        rChars[i] = (Character) baseTypeConvert(chars[i], tClass);
-                    }
-                    return rChars;
-                case "boolean":
-                    boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, chars.length);
-                    for (int i = 0; i < chars.length; i++) {
-                        rBooleans[i] = (Boolean) baseTypeConvert(chars[i], tClass);
-                    }
-                    return rBooleans;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-        } else {
-            objects = (T[]) Array.newInstance(tClass, chars.length);
-            for (int i = 0; i < chars.length; i++) {
-                objects[i] = baseTypeConvert(chars[i], tClass);
-            }
-            return objects;
-        }
-    }
-
-    private static <T> Object byteArrayToTArray(Class<T> tClass, byte[] bytes) {
-        T[] objects;
-        if (tClass.isPrimitive()) {
-            switch (tClass.getName()) {
-                case "int":
-                    int[] rInts = (int[]) Array.newInstance(tClass, bytes.length);
-                    for (int i = 0; i < bytes.length; i++) {
-                        rInts[i] = (Integer) baseTypeConvert(bytes[i], tClass);
-                    }
-                    return rInts;
-                case "short":
-                    short[] rShorts = (short[]) Array.newInstance(tClass, bytes.length);
-                    for (int i = 0; i < bytes.length; i++) {
-                        rShorts[i] = (Short) baseTypeConvert(bytes[i], tClass);
-                    }
-                    return rShorts;
-                case "long":
-                    long[] rLongs = (long[]) Array.newInstance(tClass, bytes.length);
-                    for (int i = 0; i < bytes.length; i++) {
-                        rLongs[i] = (Long) baseTypeConvert(bytes[i], tClass);
-                    }
-                    return rLongs;
-                case "float":
-                    float[] rFloats = (float[]) Array.newInstance(tClass, bytes.length);
-                    for (int i = 0; i < bytes.length; i++) {
-                        rFloats[i] = (Float) baseTypeConvert(bytes[i], tClass);
-                    }
-                    return rFloats;
-                case "double":
-                    double[] rDoubles = (double[]) Array.newInstance(tClass, bytes.length);
-                    for (int i = 0; i < bytes.length; i++) {
-                        rDoubles[i] = (Double) baseTypeConvert(bytes[i], tClass);
-                    }
-                    return rDoubles;
-                case "byte":
-                    byte[] rBytes = (byte[]) Array.newInstance(tClass, bytes.length);
-                    for (int i = 0; i < bytes.length; i++) {
-                        rBytes[i] = (Byte) baseTypeConvert(bytes[i], tClass);
-                    }
-                    return rBytes;
-                case "char":
-                    char[] rChars = (char[]) Array.newInstance(tClass, bytes.length);
-                    for (int i = 0; i < bytes.length; i++) {
-                        rChars[i] = (Character) baseTypeConvert(bytes[i], tClass);
-                    }
-                    return rChars;
-                case "boolean":
-                    boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, bytes.length);
-                    for (int i = 0; i < bytes.length; i++) {
-                        rBooleans[i] = (Boolean) baseTypeConvert(bytes[i], tClass);
-                    }
-                    return rBooleans;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-        } else {
-            objects = (T[]) Array.newInstance(tClass, bytes.length);
-            for (int i = 0; i < bytes.length; i++) {
-                objects[i] = baseTypeConvert(bytes[i], tClass);
-            }
-            return objects;
-        }
-    }
-
-    private static <T> Object doubleArrayToTArray(Class<T> tClass, double[] doubles) {
-        T[] objects;
-        if (tClass.isPrimitive()) {
-            switch (tClass.getName()) {
-                case "int":
-                    int[] rInts = (int[]) Array.newInstance(tClass, doubles.length);
-                    for (int i = 0; i < doubles.length; i++) {
-                        rInts[i] = (Integer) baseTypeConvert(doubles[i], tClass);
-                    }
-                    return rInts;
-                case "short":
-                    short[] rShorts = (short[]) Array.newInstance(tClass, doubles.length);
-                    for (int i = 0; i < doubles.length; i++) {
-                        rShorts[i] = (Short) baseTypeConvert(doubles[i], tClass);
-                    }
-                    return rShorts;
-                case "long":
-                    long[] rLongs = (long[]) Array.newInstance(tClass, doubles.length);
-                    for (int i = 0; i < doubles.length; i++) {
-                        rLongs[i] = (Long) baseTypeConvert(doubles[i], tClass);
-                    }
-                    return rLongs;
-                case "float":
-                    float[] rFloats = (float[]) Array.newInstance(tClass, doubles.length);
-                    for (int i = 0; i < doubles.length; i++) {
-                        rFloats[i] = (Float) baseTypeConvert(doubles[i], tClass);
-                    }
-                    return rFloats;
-                case "double":
-                    double[] rDoubles = (double[]) Array.newInstance(tClass, doubles.length);
-                    for (int i = 0; i < doubles.length; i++) {
-                        rDoubles[i] = (Double) baseTypeConvert(doubles[i], tClass);
-                    }
-                    return rDoubles;
-                case "byte":
-                    byte[] rBytes = (byte[]) Array.newInstance(tClass, doubles.length);
-                    for (int i = 0; i < doubles.length; i++) {
-                        rBytes[i] = (Byte) baseTypeConvert(doubles[i], tClass);
-                    }
-                    return rBytes;
-                case "char":
-                    char[] rChars = (char[]) Array.newInstance(tClass, doubles.length);
-                    for (int i = 0; i < doubles.length; i++) {
-                        rChars[i] = (Character) baseTypeConvert(doubles[i], tClass);
-                    }
-                    return rChars;
-                case "boolean":
-                    boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, doubles.length);
-                    for (int i = 0; i < doubles.length; i++) {
-                        rBooleans[i] = (Boolean) baseTypeConvert(doubles[i], tClass);
-                    }
-                    return rBooleans;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-        } else {
-            objects = (T[]) Array.newInstance(tClass, doubles.length);
-            for (int i = 0; i < doubles.length; i++) {
-                objects[i] = baseTypeConvert(doubles[i], tClass);
-            }
-            return objects;
-        }
-    }
-
-    private static <T> Object floatArrayToTArray(Class<T> tClass, float[] floats) {
-        T[] objects;
-        if (tClass.isPrimitive()) {
-            switch (tClass.getName()) {
-                case "int":
-                    int[] rInts = (int[]) Array.newInstance(tClass, floats.length);
-                    for (int i = 0; i < floats.length; i++) {
-                        rInts[i] = (Integer) baseTypeConvert(floats[i], tClass);
-                    }
-                    return rInts;
-                case "short":
-                    short[] rShorts = (short[]) Array.newInstance(tClass, floats.length);
-                    for (int i = 0; i < floats.length; i++) {
-                        rShorts[i] = (Short) baseTypeConvert(floats[i], tClass);
-                    }
-                    return rShorts;
-                case "long":
-                    long[] rLongs = (long[]) Array.newInstance(tClass, floats.length);
-                    for (int i = 0; i < floats.length; i++) {
-                        rLongs[i] = (Long) baseTypeConvert(floats[i], tClass);
-                    }
-                    return rLongs;
-                case "float":
-                    float[] rFloats = (float[]) Array.newInstance(tClass, floats.length);
-                    for (int i = 0; i < floats.length; i++) {
-                        rFloats[i] = (Float) baseTypeConvert(floats[i], tClass);
-                    }
-                    return rFloats;
-                case "double":
-                    double[] rDoubles = (double[]) Array.newInstance(tClass, floats.length);
-                    for (int i = 0; i < floats.length; i++) {
-                        rDoubles[i] = (Double) baseTypeConvert(floats[i], tClass);
-                    }
-                    return rDoubles;
-                case "byte":
-                    byte[] rBytes = (byte[]) Array.newInstance(tClass, floats.length);
-                    for (int i = 0; i < floats.length; i++) {
-                        rBytes[i] = (Byte) baseTypeConvert(floats[i], tClass);
-                    }
-                    return rBytes;
-                case "char":
-                    char[] rChars = (char[]) Array.newInstance(tClass, floats.length);
-                    for (int i = 0; i < floats.length; i++) {
-                        rChars[i] = (Character) baseTypeConvert(floats[i], tClass);
-                    }
-                    return rChars;
-                case "boolean":
-                    boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, floats.length);
-                    for (int i = 0; i < floats.length; i++) {
-                        rBooleans[i] = (Boolean) baseTypeConvert(floats[i], tClass);
-                    }
-                    return rBooleans;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-        } else {
-            objects = (T[]) Array.newInstance(tClass, floats.length);
-            for (int i = 0; i < floats.length; i++) {
-                objects[i] = baseTypeConvert(floats[i], tClass);
-            }
-            return objects;
-        }
-    }
-
-    private static <T> Object longArrayToTArray(Class<T> tClass, long[] longs) {
-        T[] objects;
-        if (tClass.isPrimitive()) {
-            switch (tClass.getName()) {
-                case "int":
-                    int[] rInts = (int[]) Array.newInstance(tClass, longs.length);
-                    for (int i = 0; i < longs.length; i++) {
-                        rInts[i] = (Integer) baseTypeConvert(longs[i], tClass);
-                    }
-                    return rInts;
-                case "short":
-                    short[] rShorts = (short[]) Array.newInstance(tClass, longs.length);
-                    for (int i = 0; i < longs.length; i++) {
-                        rShorts[i] = (Short) baseTypeConvert(longs[i], tClass);
-                    }
-                    return rShorts;
-                case "long":
-                    long[] rLongs = (long[]) Array.newInstance(tClass, longs.length);
-                    for (int i = 0; i < longs.length; i++) {
-                        rLongs[i] = (Long) baseTypeConvert(longs[i], tClass);
-                    }
-                    return rLongs;
-                case "float":
-                    float[] rFloats = (float[]) Array.newInstance(tClass, longs.length);
-                    for (int i = 0; i < longs.length; i++) {
-                        rFloats[i] = (Float) baseTypeConvert(longs[i], tClass);
-                    }
-                    return rFloats;
-                case "double":
-                    double[] rDoubles = (double[]) Array.newInstance(tClass, longs.length);
-                    for (int i = 0; i < longs.length; i++) {
-                        rDoubles[i] = (Double) baseTypeConvert(longs[i], tClass);
-                    }
-                    return rDoubles;
-                case "byte":
-                    byte[] rBytes = (byte[]) Array.newInstance(tClass, longs.length);
-                    for (int i = 0; i < longs.length; i++) {
-                        rBytes[i] = (Byte) baseTypeConvert(longs[i], tClass);
-                    }
-                    return rBytes;
-                case "char":
-                    char[] rChars = (char[]) Array.newInstance(tClass, longs.length);
-                    for (int i = 0; i < longs.length; i++) {
-                        rChars[i] = (Character) baseTypeConvert(longs[i], tClass);
-                    }
-                    return rChars;
-                case "boolean":
-                    boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, longs.length);
-                    for (int i = 0; i < longs.length; i++) {
-                        rBooleans[i] = (Boolean) baseTypeConvert(longs[i], tClass);
-                    }
-                    return rBooleans;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-        } else {
-            objects = (T[]) Array.newInstance(tClass, longs.length);
-            for (int i = 0; i < longs.length; i++) {
-                objects[i] = baseTypeConvert(longs[i], tClass);
-            }
-            return objects;
-        }
-    }
-
-    private static <T> Object shortArrayToTArray(Class<T> tClass, short[] shorts) {
-        T[] objects;
-        if (tClass.isPrimitive()) {
-            switch (tClass.getName()) {
-                case "int":
-                    int[] rInts = (int[]) Array.newInstance(tClass, shorts.length);
-                    for (int i = 0; i < shorts.length; i++) {
-                        rInts[i] = (Integer) baseTypeConvert(shorts[i], tClass);
-                    }
-                    return rInts;
-                case "short":
-                    short[] rShorts = (short[]) Array.newInstance(tClass, shorts.length);
-                    for (int i = 0; i < shorts.length; i++) {
-                        rShorts[i] = (Short) baseTypeConvert(shorts[i], tClass);
-                    }
-                    return rShorts;
-                case "long":
-                    long[] rLongs = (long[]) Array.newInstance(tClass, shorts.length);
-                    for (int i = 0; i < shorts.length; i++) {
-                        rLongs[i] = (Long) baseTypeConvert(shorts[i], tClass);
-                    }
-                    return rLongs;
-                case "float":
-                    float[] rFloats = (float[]) Array.newInstance(tClass, shorts.length);
-                    for (int i = 0; i < shorts.length; i++) {
-                        rFloats[i] = (Float) baseTypeConvert(shorts[i], tClass);
-                    }
-                    return rFloats;
-                case "double":
-                    double[] rDoubles = (double[]) Array.newInstance(tClass, shorts.length);
-                    for (int i = 0; i < shorts.length; i++) {
-                        rDoubles[i] = (Double) baseTypeConvert(shorts[i], tClass);
-                    }
-                    return rDoubles;
-                case "byte":
-                    byte[] rBytes = (byte[]) Array.newInstance(tClass, shorts.length);
-                    for (int i = 0; i < shorts.length; i++) {
-                        rBytes[i] = (Byte) baseTypeConvert(shorts[i], tClass);
-                    }
-                    return rBytes;
-                case "char":
-                    char[] rChars = (char[]) Array.newInstance(tClass, shorts.length);
-                    for (int i = 0; i < shorts.length; i++) {
-                        rChars[i] = (Character) baseTypeConvert(shorts[i], tClass);
-                    }
-                    return rChars;
-                case "boolean":
-                    boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, shorts.length);
-                    for (int i = 0; i < shorts.length; i++) {
-                        rBooleans[i] = (Boolean) baseTypeConvert(shorts[i], tClass);
-                    }
-                    return rBooleans;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-        } else {
-            objects = (T[]) Array.newInstance(tClass, shorts.length);
-            for (int i = 0; i < shorts.length; i++) {
-                objects[i] = baseTypeConvert(shorts[i], tClass);
-            }
-            return objects;
-        }
-    }
-
     /**
-     * int数组转换
+     * 统一的数组元素转换。命中完全同类型直接返回源数组引用；其余情况按元素
+     * {@link #baseTypeConvert} 处理，{@link Array#set} 会在目标为 primitive 数组时
+     * 自动拆箱。这替代了原先 8 份 primitive 源 × primitive/对象目标的模板代码。
      *
-     * @param tClass
-     * @param ints
-     * @param <T>
-     * @return
+     * @param srcArr   源数组（primitive 或对象数组均可）
+     * @param srcComp  源数组的 component 类型
+     * @param tgtComp  目标 component 类型
+     * @return 目标类型数组；若 srcComp == tgtComp 则直接返回源数组引用
      */
-    private static <T> Object intArrayToTArray(Class<T> tClass, int[] ints) {
-        T[] objects;
-        if (tClass.isPrimitive()) {
-            switch (tClass.getName()) {
-                case "int":
-                    int[] rInts = (int[]) Array.newInstance(tClass, ints.length);
-                    for (int i = 0; i < ints.length; i++) {
-                        rInts[i] = (Integer) baseTypeConvert(ints[i], tClass);
-                    }
-                    return rInts;
-                case "short":
-                    short[] rShorts = (short[]) Array.newInstance(tClass, ints.length);
-                    for (int i = 0; i < ints.length; i++) {
-                        rShorts[i] = (Short) baseTypeConvert(ints[i], tClass);
-                    }
-                    return rShorts;
-                case "long":
-                    long[] rLongs = (long[]) Array.newInstance(tClass, ints.length);
-                    for (int i = 0; i < ints.length; i++) {
-                        rLongs[i] = (Long) baseTypeConvert(ints[i], tClass);
-                    }
-                    return rLongs;
-                case "float":
-                    float[] rFloats = (float[]) Array.newInstance(tClass, ints.length);
-                    for (int i = 0; i < ints.length; i++) {
-                        rFloats[i] = (Float) baseTypeConvert(ints[i], tClass);
-                    }
-                    return rFloats;
-                case "double":
-                    double[] rDoubles = (double[]) Array.newInstance(tClass, ints.length);
-                    for (int i = 0; i < ints.length; i++) {
-                        rDoubles[i] = (Double) baseTypeConvert(ints[i], tClass);
-                    }
-                    return rDoubles;
-                case "byte":
-                    byte[] rBytes = (byte[]) Array.newInstance(tClass, ints.length);
-                    for (int i = 0; i < ints.length; i++) {
-                        rBytes[i] = (Byte) baseTypeConvert(ints[i], tClass);
-                    }
-                    return rBytes;
-                case "char":
-                    char[] rChars = (char[]) Array.newInstance(tClass, ints.length);
-                    for (int i = 0; i < ints.length; i++) {
-                        rChars[i] = (Character) baseTypeConvert(ints[i], tClass);
-                    }
-                    return rChars;
-                case "boolean":
-                    boolean[] rBooleans = (boolean[]) Array.newInstance(tClass, ints.length);
-                    for (int i = 0; i < ints.length; i++) {
-                        rBooleans[i] = (Boolean) baseTypeConvert(ints[i], tClass);
-                    }
-                    return rBooleans;
-                default:
-                    throw new RuntimeException("不支持的类型");
-            }
-        } else {
-            objects = (T[]) Array.newInstance(tClass, ints.length);
-            for (int i = 0; i < ints.length; i++) {
-                objects[i] = baseTypeConvert(ints[i], tClass);
-            }
-            return objects;
+    private static Object convertArray(Object srcArr, Class<?> srcComp, Class<?> tgtComp) {
+        if (srcComp == tgtComp) {
+            return srcArr;
         }
+        int len = Array.getLength(srcArr);
+        Object dst = Array.newInstance(tgtComp, len);
+        for (int i = 0; i < len; i++) {
+            Object srcVal = Array.get(srcArr, i);
+            Object conv = baseTypeConvert(srcVal, tgtComp);
+            Array.set(dst, i, conv);
+        }
+        return dst;
     }
 
 
