@@ -54,8 +54,13 @@ public class PropertyObjectColumnJoinRelation {
     public PropertyObjectColumnJoinRelation(BeanPropertyModel beanPropertyModel,int abbreviation) {
         this.isArray = WsReflectUtils.isArrayType(beanPropertyModel.getPropertyClass());
         this.beanProperty = beanPropertyModel;
-        this.joinEntityClass = this.isArray?beanPropertyModel.getGenericClass():beanPropertyModel.getPropertyClass();
+        //this.joinEntityClass = this.isArray?beanPropertyModel.getGenericClass():beanPropertyModel.getPropertyClass();
         this.abbreviation = abbreviation;
+        if (this.isArray) {
+            this.joinEntityClass = beanPropertyModel.getGenericClass().get(0);
+        }else {
+            this.joinEntityClass = beanPropertyModel.getPropertyClass();
+        }
     }
 
     public boolean isArray() {

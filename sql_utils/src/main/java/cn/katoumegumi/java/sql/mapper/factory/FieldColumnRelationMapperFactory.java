@@ -267,10 +267,12 @@ public class FieldColumnRelationMapperFactory {
             }
         }
 
-        if (!WsCollectionUtils.isEmpty(joinClassFieldList)) {
+        if (WsCollectionUtils.isNotEmpty(joinClassFieldList)) {
             putIncompleteMapper(clazz, propertyColumnRelationMapper);
             for (BeanPropertyModel propertyModel : joinClassFieldList) {
-                Class<?> joinClass = WsReflectUtils.isArrayType(propertyModel.getPropertyClass()) ? propertyModel.getGenericClass() : propertyModel.getPropertyClass();
+                //Class<?> joinClass = WsReflectUtils.isArrayType(propertyModel.getPropertyClass()) ? propertyModel.getGenericClass() : propertyModel.getPropertyClass();
+                Class<?> joinClass = getJoinClass(propertyModel);
+
                 if (joinClass == null) {
                     continue;
                 }
@@ -294,6 +296,19 @@ public class FieldColumnRelationMapperFactory {
             removeIncompleteMapper(clazz);
         }
         return propertyColumnRelationMapper;
+    }
+
+    private static Class<?> getJoinClass(BeanPropertyModel propertyModel) {
+        Class<?> joinClass = null;
+        if ((propertyModel.getPropertyKind() == BeanPropertyModel.PropertyKind.COLLECTION
+                || propertyModel.getPropertyKind() == BeanPropertyModel.PropertyKind.ARRAY)) {
+            if (WsCollectionUtils.isNotEmpty(propertyModel.getGenericClass())) {
+                joinClass = propertyModel.getGenericClass().get(0);
+            }
+        }else {
+            joinClass = propertyModel.getPropertyClass();
+        }
+        return joinClass;
     }
 
 
