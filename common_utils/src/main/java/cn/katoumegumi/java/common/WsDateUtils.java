@@ -44,8 +44,13 @@ public class WsDateUtils {
     public static final long ONE_HOUR = 60L * ONE_MINUTES;
     public static final long ONE_DAY = 24L * ONE_HOUR;
     public static final long ONE_WEEK = 7L * ONE_DAY;
+    /**
+     * 类初始化时的时区偏移快照。对于有夏令时的时区，跨 DST 边界后此值会过期。
+     * 新代码应使用 {@link #getDefaultZoneOffset()} 获取动态值。
+     */
+    @Deprecated
     public static final long DEFAULT_ZONE_OFFSET = ZoneId.systemDefault().getRules()
-            .getOffset(Instant.now()).getTotalSeconds() * 1000L;//Calendar.getInstance().get(Calendar.ZONE_OFFSET);
+            .getOffset(Instant.now()).getTotalSeconds() * 1000L;
 
     public static void main(String[] args) {
 
@@ -205,9 +210,8 @@ public class WsDateUtils {
         if (date == null) {
             return null;
         }
-        if (date.getClass() != (Date.class)) {
-            date = new Date(date.getTime());
-        }
+        // 所有 Date 子类（java.sql.Date / Time / Timestamp）的 toInstant()
+        // 都基于 getTime() 返回正确的 Instant，无需拷贝为 java.util.Date
         LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
         return dateToString(localDateTime, dateType);
     }
@@ -257,7 +261,7 @@ public class WsDateUtils {
                     return dateToString((Date) object, LONGTIMESTRING);
                 }
             } else if (object instanceof Number) {
-                return dateToString(new Date(Long.parseLong(String.valueOf(object))), LONGTIMESTRING);
+                return dateToString(new Date(((Number) object).longValue()), LONGTIMESTRING);
             }  else if (clazz == LocalDateTime.class) {
                 return ((LocalDateTime) object).format(getDateFormat(LONGTIMESTRING));
             } else if (clazz == LocalDate.class) {
@@ -287,12 +291,11 @@ public class WsDateUtils {
      * @return 中文星期
      */
     public static String getCNWeekdayName(Date date) {
+        if (date == null) {
+            return null;
+        }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
         int weekday = localDateTime.getDayOfWeek().getValue();
-        /*Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int weekday = calendar.get(Calendar.DAY_OF_WEEK);*/
-        //weekday = getCnWeek(weekday);
         return CN_WEEK_NAMES[weekday - 1];
     }
 
@@ -303,6 +306,9 @@ public class WsDateUtils {
      * @return 中文月
      */
     public static String getCNMonthName(Date date) {
+        if (date == null) {
+            return null;
+        }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
         return CN_MONTH_NAMES[localDateTime.getMonthValue() - 1];
     }
@@ -401,11 +407,21 @@ public class WsDateUtils {
         return longs;
     }
 
+    /**
+     * 获取或创建日期格式化器。使用 get + putIfAbsent 而非 computeIfAbsent，
+     * 命中路径无 bin 锁，仅 miss 时可能多创建一个临时对象（pattern 种类有限，可忽略）。
+     */
     public static DateTimeFormatter getDateFormat(String pattern) {
         if (pattern == null) {
             return null;
         }
-        return DATE_TIME_FORMATTER_MAP.computeIfAbsent(pattern,p->DateTimeFormatter.ofPattern(pattern));
+        DateTimeFormatter cached = DATE_TIME_FORMATTER_MAP.get(pattern);
+        if (cached != null) {
+            return cached;
+        }
+        DateTimeFormatter created = DateTimeFormatter.ofPattern(pattern);
+        DateTimeFormatter prev = DATE_TIME_FORMATTER_MAP.putIfAbsent(pattern, created);
+        return prev != null ? prev : created;
     }
 
     /**
@@ -435,12 +451,14 @@ public class WsDateUtils {
     }
 
     /**
-     * 日期与时间忽略分钟
+     * 忽略分钟，截断到当前时区的整点。
      * @param timestamp
      * @return
      */
     public static long ignoreMinute(long timestamp){
-        return timestamp - timestamp % ONE_HOUR;
+        long local = timestamp + getDefaultZoneOffset();
+        long minuteOfHour = ((local % ONE_HOUR) + ONE_HOUR) % ONE_HOUR;
+        return timestamp - minuteOfHour;
     }
 
     public static Date ignoreMinute(Date dateTime){
@@ -448,12 +466,14 @@ public class WsDateUtils {
     }
 
     /**
-     * 日期与时间忽略秒
+     * 忽略秒，截断到当前时区的整分钟。
      * @param timestamp
      * @return
      */
     public static long ignoreSecond(long timestamp){
-        return timestamp - timestamp % ONE_MINUTES;
+        long local = timestamp + getDefaultZoneOffset();
+        long secondOfMinute = ((local % ONE_MINUTES) + ONE_MINUTES) % ONE_MINUTES;
+        return timestamp - secondOfMinute;
     }
 
     public static Date ignoreSecond(Date dateTime){
@@ -474,7 +494,12 @@ public class WsDateUtils {
         return new Date(date.getTime() + day * ONE_DAY);
     }
 
+    /**
+     * 动态获取当前系统时区偏移（毫秒）。每次调用都基于 {@link Instant#now()} 计算，
+     * 确保跨夏令时边界后偏移值正确。
+     */
     public static long getDefaultZoneOffset() {
-        return DEFAULT_ZONE_OFFSET;
+        return ZoneId.systemDefault().getRules()
+                .getOffset(Instant.now()).getTotalSeconds() * 1000L;
     }
 }
