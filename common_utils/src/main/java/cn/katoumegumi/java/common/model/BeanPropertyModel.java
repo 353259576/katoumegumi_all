@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.common.model;
 
+import cn.katoumegumi.java.common.BaseTypeCommon;
 import cn.katoumegumi.java.common.WsReflectUtils;
 
 import java.lang.annotation.Annotation;
@@ -7,12 +8,28 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BeanPropertyModel {
+
+    /**
+     * 预计算的属性类型分类。构造时一次性确定，热路径用 switch 替代多次
+     * {@code isAssignableFrom}/{@code isBaseType} 调用。
+     */
+    public enum PropertyKind {
+        /** 基本类型及其包装类、String、日期、BigDecimal 等 */
+        BASE,
+        /** Java 数组（含基本类型数组） */
+        ARRAY,
+        /** Collection 子类型 */
+        COLLECTION,
+        /** Map 子类型 */
+        MAP,
+        /** Object 及其他未知类型，直接透传 */
+        OBJECT,
+        /** 普通 JavaBean */
+        BEAN
+    }
 
     private final String propertyName;
 
@@ -28,11 +45,10 @@ public class BeanPropertyModel {
 
     private final Class<?> propertyClass;
 
-    private final Class<?> genericClass;
+    private final List<Class<?>> genericClass;
 
-    private final Class<?> keyGenericClass;
 
-    private final Class<?> valueGenericClass;
+    private final PropertyKind propertyKind;
 
 
     public BeanPropertyModel(String propertyName, Field field, Method getMethod, MethodHandle getMethodHandle, Method setMethod, MethodHandle setMethodHandle) {
@@ -49,19 +65,29 @@ public class BeanPropertyModel {
         } else if (setMethod != null){
             this.propertyClass = this.setMethod.getParameterTypes()[0];
             propertyType = this.setMethod.getGenericParameterTypes()[0];
-        } else  {
+        } else {
             this.propertyClass = this.getMethod.getReturnType();
             propertyType = this.getMethod.getGenericReturnType();
         }
-        List<Class<?>> generics = WsReflectUtils.getGenericsTypes(propertyType);
-        if (WsReflectUtils.classCompare(this.propertyClass, Map.class)) {
-            this.keyGenericClass = generics.size() > 0 ? generics.get(0) : null;
-            this.valueGenericClass = generics.size() > 1 ? generics.get(1) : null;
-            this.genericClass = this.valueGenericClass;
+
+        if (BaseTypeCommon.isBaseType(this.propertyClass)) {
+            this.genericClass = Collections.emptyList();
+            this.propertyKind = PropertyKind.BASE;
+        } else if (WsReflectUtils.classCompare(this.propertyClass, Collection.class)) {
+            this.genericClass = WsReflectUtils.getGenericClass(propertyType);
+            this.propertyKind = PropertyKind.COLLECTION;
+        } else if (WsReflectUtils.classCompare(this.propertyClass, Map.class)) {
+            this.genericClass = WsReflectUtils.getGenericClass(propertyType);
+            this.propertyKind = PropertyKind.MAP;
+        } else if (this.propertyClass.isArray()) {
+            this.genericClass = WsReflectUtils.getGenericClass(propertyType);
+            this.propertyKind = PropertyKind.ARRAY;
+        } else if (this.propertyClass == Object.class) {
+            this.genericClass = Collections.emptyList();
+            this.propertyKind = PropertyKind.OBJECT;
         } else {
-            this.keyGenericClass = null;
-            this.valueGenericClass = null;
-            this.genericClass = generics.isEmpty() ? null : generics.get(0);
+            this.genericClass = WsReflectUtils.getGenericClass(propertyType);
+            this.propertyKind = PropertyKind.BEAN;
         }
     }
 
@@ -178,15 +204,11 @@ public class BeanPropertyModel {
         return propertyClass;
     }
 
-    public Class<?> getGenericClass() {
+    public List<Class<?>> getGenericClass() {
         return genericClass;
     }
 
-    public Class<?> getKeyGenericClass() {
-        return keyGenericClass;
-    }
-
-    public Class<?> getValueGenericClass() {
-        return valueGenericClass;
+    public PropertyKind getPropertyKind() {
+        return propertyKind;
     }
 }
