@@ -1,0 +1,51 @@
+[
+  {
+    "name": "cn.katoumegumi.java.sql.annotation.TableTemplate",
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "jakarta.persistence.Table",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "jakarta.persistence.Column",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "jakarta.persistence.Id",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "jakarta.persistence.Transient",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "jakarta.persistence.JoinColumn",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "jakarta.persistence.OneToMany",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "jakarta.persistence.ManyToOne",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "javax.persistence.Table",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "com.baomidou.mybatisplus.annotation.TableName",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "com.baomidou.mybatisplus.annotation.TableField",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "com.baomidou.mybatisplus.annotation.TableId",
+    "allDeclaredMethods": true
+  }
+]

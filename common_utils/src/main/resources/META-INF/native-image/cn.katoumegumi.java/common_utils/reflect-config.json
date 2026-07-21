@@ -1,0 +1,93 @@
+[
+  {
+    "name": "sun.misc.Unsafe",
+    "methods": [
+      { "name": "objectFieldOffset", "parameterTypes": ["java.lang.reflect.Field"] },
+      { "name": "staticFieldOffset", "parameterTypes": ["java.lang.reflect.Field"] },
+      { "name": "staticFieldBase", "parameterTypes": ["java.lang.reflect.Field"] },
+      { "name": "allocateInstance", "parameterTypes": ["java.lang.Class"] },
+      { "name": "arrayBaseOffset", "parameterTypes": ["java.lang.Class"] },
+      { "name": "arrayIndexScale", "parameterTypes": ["java.lang.Class"] },
+      { "name": "getObject", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putObject", "parameterTypes": ["java.lang.Object", "long", "java.lang.Object"] },
+      { "name": "getObjectVolatile", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putObjectVolatile", "parameterTypes": ["java.lang.Object", "long", "java.lang.Object"] },
+      { "name": "putOrderedObject", "parameterTypes": ["java.lang.Object", "long", "java.lang.Object"] },
+      { "name": "getInt", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putInt", "parameterTypes": ["java.lang.Object", "long", "int"] },
+      { "name": "getIntVolatile", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putIntVolatile", "parameterTypes": ["java.lang.Object", "long", "int"] },
+      { "name": "getByte", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putByte", "parameterTypes": ["java.lang.Object", "long", "byte"] },
+      { "name": "getByteVolatile", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putByteVolatile", "parameterTypes": ["java.lang.Object", "long", "byte"] },
+      { "name": "getBoolean", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putBoolean", "parameterTypes": ["java.lang.Object", "long", "boolean"] },
+      { "name": "getBooleanVolatile", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putBooleanVolatile", "parameterTypes": ["java.lang.Object", "long", "boolean"] },
+      { "name": "getChar", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putChar", "parameterTypes": ["java.lang.Object", "long", "char"] },
+      { "name": "getCharVolatile", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putCharVolatile", "parameterTypes": ["java.lang.Object", "long", "char"] },
+      { "name": "getShort", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putShort", "parameterTypes": ["java.lang.Object", "long", "short"] },
+      { "name": "getShortVolatile", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putShortVolatile", "parameterTypes": ["java.lang.Object", "long", "short"] },
+      { "name": "getLong", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putLong", "parameterTypes": ["java.lang.Object", "long", "long"] },
+      { "name": "getLongVolatile", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putLongVolatile", "parameterTypes": ["java.lang.Object", "long", "long"] },
+      { "name": "getFloat", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putFloat", "parameterTypes": ["java.lang.Object", "long", "float"] },
+      { "name": "getFloatVolatile", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putFloatVolatile", "parameterTypes": ["java.lang.Object", "long", "float"] },
+      { "name": "getDouble", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putDouble", "parameterTypes": ["java.lang.Object", "long", "double"] },
+      { "name": "getDoubleVolatile", "parameterTypes": ["java.lang.Object", "long"] },
+      { "name": "putDoubleVolatile", "parameterTypes": ["java.lang.Object", "long", "double"] },
+      { "name": "compareAndSwapObject", "parameterTypes": ["java.lang.Object", "long", "java.lang.Object", "java.lang.Object"] },
+      { "name": "compareAndSwapInt", "parameterTypes": ["java.lang.Object", "long", "int", "int"] },
+      { "name": "compareAndSwapLong", "parameterTypes": ["java.lang.Object", "long", "long", "long"] },
+      { "name": "getAndAddInt", "parameterTypes": ["java.lang.Object", "long", "int"] },
+      { "name": "getAndAddLong", "parameterTypes": ["java.lang.Object", "long", "long"] },
+      { "name": "getAndSetInt", "parameterTypes": ["java.lang.Object", "long", "int"] },
+      { "name": "getAndSetLong", "parameterTypes": ["java.lang.Object", "long", "long"] },
+      { "name": "getAndSetObject", "parameterTypes": ["java.lang.Object", "long", "java.lang.Object"] },
+      { "name": "allocateMemory", "parameterTypes": ["long"] },
+      { "name": "reallocateMemory", "parameterTypes": ["long", "long"] },
+      { "name": "freeMemory", "parameterTypes": ["long"] },
+      { "name": "setMemory", "parameterTypes": ["long", "long", "byte"] },
+      { "name": "copyMemory", "parameterTypes": ["long", "long", "long"] },
+      { "name": "addressSize", "parameterTypes": [] },
+      { "name": "pageSize", "parameterTypes": [] },
+      { "name": "throwException", "parameterTypes": ["java.lang.Throwable"] },
+      { "name": "park", "parameterTypes": ["boolean", "long"] },
+      { "name": "unpark", "parameterTypes": ["java.lang.Object"] },
+      { "name": "getLoadAverage", "parameterTypes": ["double[]", "int"] },
+      { "name": "loadFence", "parameterTypes": [] },
+      { "name": "storeFence", "parameterTypes": [] },
+      { "name": "fullFence", "parameterTypes": [] },
+      { "name": "invokeCleaner", "parameterTypes": ["java.nio.ByteBuffer"] }
+    ],
+    "fields": [
+      { "name": "theUnsafe" }
+    ],
+    "allDeclaredFields": true
+  },
+  {
+    "name": "java.lang.invoke.SerializedLambda",
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "java.io.ObjectStreamClass",
+    "fields": [
+      { "name": "writeReplaceMethod" }
+    ],
+    "allDeclaredFields": true
+  },
+  {
+    "name": "java.io.ObjectStreamField",
+    "allDeclaredFields": true
+  }
+]

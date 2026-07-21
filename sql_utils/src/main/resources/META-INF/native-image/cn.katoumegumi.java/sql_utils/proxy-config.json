@@ -1,0 +1,5 @@
+[
+  ["cn.katoumegumi.java.sql.interceptor.BaseInsertSqlInterceptor"],
+  ["cn.katoumegumi.java.sql.interceptor.BaseUpdateSqlInterceptor"],
+  ["cn.katoumegumi.java.sql.interceptor.BaseSelectSqlInterceptor"]
+]

@@ -1,0 +1,16 @@
+{
+  "types": [
+    {
+      "name": "cn.katoumegumi.java.common.SFunction",
+      "allPublicMethods": true
+    },
+    {
+      "name": "cn.katoumegumi.java.common.SupplierFunc",
+      "allPublicMethods": true
+    }
+  ],
+  "lambdaCapturingTypes": [
+    "cn.katoumegumi.java.common.SFunction",
+    "cn.katoumegumi.java.common.SupplierFunc"
+  ]
+}

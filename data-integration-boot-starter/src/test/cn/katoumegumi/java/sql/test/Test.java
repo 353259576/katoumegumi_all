@@ -126,6 +126,8 @@ public class Test {
         }*/
         //test2();
 
+        System.out.println(WsBeanUtils.baseTypeConvert("1",Integer.class));
+
         BeanModel beanModel = WsReflectUtils.createBeanModel(User.class);
         System.out.println(beanModel.toString());
         SQLModelFactory sqlModelFactory = new SQLModelFactory(MySearchList.create(User.class)

@@ -54,34 +54,35 @@ public class WsDateUtils {
 
     public static void main(String[] args) {
 
-        System.out.println(getDefaultZoneOffset());
+//        System.out.println(getDefaultZoneOffset());
+//
+//        System.out.println(Character.isDigit('-'));
+//        System.out.println(Character.isDigit('.'));
+//        System.out.println(Character.isDigit('1'));
+//
+//        System.out.println(WsDateUtils.dateToString(stringToDate("11111111111111111"),CNLONGTIMESTRING));
+//        System.out.println(WsDateUtils.dateToString(stringToDate("2020-01-01"),SMALLTIMESTRING));
+//
+//        Date date = WsDateUtils.stringToDate("1980-08-25 23:01:59");
+//        System.out.println(objectDateFormatString(date));
+//        System.out.println(dateToString(date,CNLONGTIMESTRING));
+//        System.out.println(objectDateFormatString(ignoreTime(date)));
+//        System.out.println(objectDateFormatString(ignoreMinute(date)));
+//        System.out.println(objectDateFormatString(ignoreSecond(date)));
+//        System.out.println(objectDateFormatString(addDay(date,10)));
+//        System.out.println(objectDateFormatString(addDay(date,-10)));
+//
+//        Date date1 = stringToDate("2020-01-01 09:09:09");
+//        LocalDate localDate = LocalDate.now();
+//        java.sql.Date date2 = ConvertUtils.convert(date1,java.sql.Date.class);
+//        Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+//        Time time = Time.valueOf(LocalTime.now());
+//        java.sql.Date date3 = java.sql.Date.valueOf(localDate);
+//        String date2Str = objectDateFormatString(date3);
+//        System.out.println(date2);
+//        System.out.println(getCNWeekdayName(new Date()));
+//        System.out.println(getCNMonthName(new Date()));
 
-        System.out.println(Character.isDigit('-'));
-        System.out.println(Character.isDigit('.'));
-        System.out.println(Character.isDigit('1'));
-
-        System.out.println(WsDateUtils.dateToString(stringToDate("11111111111111111"),CNLONGTIMESTRING));
-        System.out.println(WsDateUtils.dateToString(stringToDate("2020-01-01"),SMALLTIMESTRING));
-
-        Date date = WsDateUtils.stringToDate("1980-08-25 23:01:59");
-        System.out.println(objectDateFormatString(date));
-        System.out.println(dateToString(date,CNLONGTIMESTRING));
-        System.out.println(objectDateFormatString(ignoreTime(date)));
-        System.out.println(objectDateFormatString(ignoreMinute(date)));
-        System.out.println(objectDateFormatString(ignoreSecond(date)));
-        System.out.println(objectDateFormatString(addDay(date,10)));
-        System.out.println(objectDateFormatString(addDay(date,-10)));
-
-        Date date1 = stringToDate("2020-01-01 09:09:09");
-        LocalDate localDate = LocalDate.now();
-        java.sql.Date date2 = ConvertUtils.convert(date1,java.sql.Date.class);
-        Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
-        Time time = Time.valueOf(LocalTime.now());
-        java.sql.Date date3 = java.sql.Date.valueOf(localDate);
-        String date2Str = objectDateFormatString(date3);
-        System.out.println(date2);
-        System.out.println(getCNWeekdayName(new Date()));
-        System.out.println(getCNMonthName(new Date()));
     }
 
     public static String dateStringFormat(String date) {

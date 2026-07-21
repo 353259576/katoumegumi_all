@@ -10,7 +10,13 @@
       "Bash(findstr /i \"jdt\")",
       "Bash(xargs grep -l \"jdtls\")",
       "Bash(xargs -I{} sh -c 'echo \"=== {} ===\"; cat \"{}\"')",
-      "Bash(npm list *)"
+      "Bash(npm list *)",
+      "Bash(rtk git *)",
+      "PowerShell(mvn clean *)",
+      "Bash(Select-Object -First 5)",
+      "Bash(git rm *)",
+      "Bash(git reset *)",
+      "Bash(git add *)"
     ]
   }
 }

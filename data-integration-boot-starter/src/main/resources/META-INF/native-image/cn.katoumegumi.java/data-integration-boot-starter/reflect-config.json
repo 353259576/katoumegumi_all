@@ -1,0 +1,14 @@
+[
+  {
+    "name": "cn.katoumegumi.java.starter.jdbc.config.JdbcConfig",
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils",
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allDeclaredConstructors": true
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "\\Qcn/katoumegumi/java/code/generator/service/ServiceImpl.ftl\\E"
+      },
+      {
+        "pattern": "\\Qcn/katoumegumi/java/code/generator/service/Service.ftl\\E"
+      },
+      {
+        "pattern": "\\Qcn/katoumegumi/java/code/generator/service/SearchVO.ftl\\E"
+      },
+      {
+        "pattern": "\\Qcn/katoumegumi/java/code/generator/service/MybatisMapperJava.ftl\\E"
+      },
+      {
+        "pattern": "\\Qcn/katoumegumi/java/code/generator/service/MybatisMapper.ftl\\E"
+      },
+      {
+        "pattern": "\\Qcn/katoumegumi/java/code/generator/service/Entity.ftl\\E"
+      },
+      {
+        "pattern": "\\Qcn/katoumegumi/java/code/generator/service/Controller.ftl\\E"
+      }
+    ]
+  }
+}
