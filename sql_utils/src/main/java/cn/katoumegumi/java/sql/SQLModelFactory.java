@@ -204,7 +204,7 @@ public class SQLModelFactory {
         Object[] ids = new Object[mapper.getIds().size()];
         boolean isNotNullObject = false;
         for (int i = 0; i < ids.length; i++) {
-            ids[i] = resultSet.getObject(location[0][i] + 1);
+            ids[i] = resultSet.getObject(location[0][i] + 1,columnRelationList.get(location[0][i]).getBeanProperty().getPropertyClass());
             if (ids[i] != null) {
                 isNotNullObject = true;
             }
@@ -338,11 +338,12 @@ public class SQLModelFactory {
     private static boolean fillObjectValue(Object o, WsResultSet resultSet, int[] location, List<PropertyBaseColumnRelation> columnRelationList) throws SQLException {
         boolean isAdd = false;
         for (int j : location) {
-            Object value = resultSet.getObject(j + 1);
+            BeanPropertyModel b = columnRelationList.get(j).getBeanProperty();
+            Object value = resultSet.getObject(j + 1,b.getPropertyClass());
             if (value == null) {
                 continue;
             }
-            setValue(o, value, columnRelationList.get(j).getBeanProperty());
+            setValue(o, value, b);
             isAdd = true;
         }
         return isAdd;
@@ -493,10 +494,10 @@ public class SQLModelFactory {
             return convertMultiResult(selectModel,resultSet);
         } else {
             List<Object> tList = new ArrayList<>();
-            TableColumn tableColumn = selectModel.getSelect().get(0);
+            Class<?> clazz = selectModel.getSelect().get(0).getBeanProperty().getPropertyClass();
             try {
                 while (resultSet.next()) {
-                    Object o = WsBeanUtils.baseTypeConvert(resultSet.getObject(1), tableColumn.getBeanProperty().getPropertyClass());
+                    Object o = WsBeanUtils.baseTypeConvert(resultSet.getObject(1,clazz), clazz);
                     if (o != null) {
                         tList.add(o);
                     }

@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.sql.resultSet;
 
+import cn.katoumegumi.java.sql.mapper.model.PropertyBaseColumnRelation;
+
 import java.sql.SQLException;
 
 public interface WsResultSet {
@@ -33,4 +35,6 @@ public interface WsResultSet {
      * @return
      */
     Object getObject(int index) throws SQLException;
+
+    Object getObject(int index, Class<?> clazz) throws SQLException;
 }
