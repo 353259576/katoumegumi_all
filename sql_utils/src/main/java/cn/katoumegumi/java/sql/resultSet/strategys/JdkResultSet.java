@@ -2,13 +2,9 @@ package cn.katoumegumi.java.sql.resultSet.strategys;
 
 import cn.katoumegumi.java.sql.resultSet.WsResultSet;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiFunction;
 
 /**
  * 转换ResultSet
