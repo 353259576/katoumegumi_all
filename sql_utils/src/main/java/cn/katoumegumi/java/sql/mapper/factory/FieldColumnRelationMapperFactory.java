@@ -38,6 +38,9 @@ public class FieldColumnRelationMapperFactory {
      */
     private static final Map<Class<?>, PropertyColumnRelationMapper> MAPPER_MAP = new ConcurrentHashMap<>();
 
+    /**
+     * 缓存没处理join的对象实体与列名关联
+     */
     private static final Map<Class<?>, PropertyColumnRelationMapper> INCOMPLETE_MAPPER_MAP = new ConcurrentHashMap<>();
 
     private static final Map<Class<?>, Object> CLASS_LOCK_MAP = new ConcurrentHashMap<>();
@@ -50,7 +53,7 @@ public class FieldColumnRelationMapperFactory {
     /**
      * 默认的mapper处理方式
      */
-    private static final FieldColumnRelationMapperHandleStrategy defaultFieldColumnRelationMapperHandleStrategy;
+    private static final FieldColumnRelationMapperHandleStrategy DEFAULT_FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY;
 
     static {
         addFieldColumnRelationMapperHandleStrategy(
@@ -65,7 +68,7 @@ public class FieldColumnRelationMapperFactory {
         addFieldColumnRelationMapperHandleStrategy(
                 new MybatisPlusColumnRelationMapperHandleStrategy()
         );
-        defaultFieldColumnRelationMapperHandleStrategy = new DefaultFieldColumnRelationMapperHandleStrategy();
+        DEFAULT_FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY = new DefaultFieldColumnRelationMapperHandleStrategy();
     }
 
     /**
@@ -153,8 +156,8 @@ public class FieldColumnRelationMapperFactory {
             }
             index = (index + 1) % FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size();
         } while (index != startIndex);
-        if (defaultFieldColumnRelationMapperHandleStrategy != null) {
-            return function.apply(defaultFieldColumnRelationMapperHandleStrategy);
+        if (DEFAULT_FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY != null) {
+            return function.apply(DEFAULT_FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY);
         }
         return Optional.empty();
     }
