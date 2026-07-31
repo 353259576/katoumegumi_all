@@ -3,7 +3,6 @@ package cn.katoumegumi.java.sql.test;
 import cn.katoumegumi.java.common.*;
 import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.sql.*;
-import cn.katoumegumi.java.sql.common.OrderByTypeEnums;
 import cn.katoumegumi.java.sql.handler.SqlEntityFactory;
 import cn.katoumegumi.java.sql.handler.model.SqlParameter;
 import cn.katoumegumi.java.sql.model.component.SqlEquation;
@@ -13,17 +12,12 @@ import cn.katoumegumi.java.sql.handler.model.UpdateSqlEntity;
 import cn.katoumegumi.java.sql.model.component.TableColumn;
 import cn.katoumegumi.java.sql.model.result.SelectModel;
 import cn.katoumegumi.java.sql.model.result.UpdateModel;
-import cn.katoumegumi.java.sql.test.model.LUser;
 import cn.katoumegumi.java.sql.test.model.User;
 import cn.katoumegumi.java.sql.test.model.UserDetails;
-import cn.katoumegumi.java.sql.test.model.UserDetailsRemake;
-import cn.katoumegumi.java.starter.jdbc.datasource.WsJdbcUtils;
 import com.google.gson.Gson;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
