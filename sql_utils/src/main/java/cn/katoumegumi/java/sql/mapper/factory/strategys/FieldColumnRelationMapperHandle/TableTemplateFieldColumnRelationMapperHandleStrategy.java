@@ -12,12 +12,6 @@ import java.util.Optional;
 
 public class TableTemplateFieldColumnRelationMapperHandleStrategy implements FieldColumnRelationMapperHandleStrategy {
 
-    private final FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory;
-
-    public TableTemplateFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory) {
-        this.fieldColumnRelationMapperFactory = fieldColumnRelationMapperFactory;
-    }
-
     @Override
     public boolean canUse() {
         try {

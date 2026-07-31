@@ -15,12 +15,6 @@ import java.util.Optional;
 
 public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColumnRelationMapperHandleStrategy {
 
-    private final FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory;
-
-    public MybatisPlusColumnRelationMapperHandleStrategy(FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory) {
-        this.fieldColumnRelationMapperFactory = fieldColumnRelationMapperFactory;
-    }
-
     @Override
     public boolean canUse() {
         try {
@@ -45,7 +39,7 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
         }
         String tableName;
         if (WsStringUtils.isBlank(table.value())) {
-            tableName = fieldColumnRelationMapperFactory.getChangeColumnName(clazz.getSimpleName());
+            tableName = FieldColumnRelationMapperFactory.getChangeColumnName(clazz.getSimpleName());
         } else {
             tableName = table.value();
         }
@@ -75,7 +69,7 @@ public class MybatisPlusColumnRelationMapperHandleStrategy implements FieldColum
             columnName = tableField.value();
         }
         if (WsStringUtils.isBlank(columnName)) {
-            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
+            columnName = FieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
         }
         return Optional.of(new PropertyBaseColumnRelation(tableId != null, columnName, beanProperty,abbreviation));
 

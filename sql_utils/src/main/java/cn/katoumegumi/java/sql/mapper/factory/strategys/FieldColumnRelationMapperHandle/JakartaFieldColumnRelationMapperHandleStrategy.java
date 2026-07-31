@@ -14,12 +14,6 @@ import java.util.Optional;
 
 public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColumnRelationMapperHandleStrategy {
 
-    private final FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory;
-
-    public JakartaFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory) {
-        this.fieldColumnRelationMapperFactory = fieldColumnRelationMapperFactory;
-    }
-
     @Override
     public boolean canUse() {
         try {
@@ -44,7 +38,7 @@ public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColu
         }
         String tableName;
         if (WsStringUtils.isBlank(table.name())) {
-            tableName = fieldColumnRelationMapperFactory.getChangeColumnName(clazz.getSimpleName());
+            tableName = FieldColumnRelationMapperFactory.getChangeColumnName(clazz.getSimpleName());
         } else {
             tableName = table.name();
         }
@@ -66,7 +60,7 @@ public class JakartaFieldColumnRelationMapperHandleStrategy implements FieldColu
         }
         String columnName;
         if (column == null || WsStringUtils.isBlank(column.name())) {
-            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
+            columnName = FieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
         } else {
             columnName = column.name();
         }

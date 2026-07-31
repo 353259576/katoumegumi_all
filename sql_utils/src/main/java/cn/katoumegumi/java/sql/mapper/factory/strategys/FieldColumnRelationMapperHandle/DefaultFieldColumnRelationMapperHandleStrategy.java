@@ -25,12 +25,6 @@ public class DefaultFieldColumnRelationMapperHandleStrategy implements FieldColu
         DEFAULT_IGNORE_FIELD.add(Object.class);
     }
 
-    private final FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory;
-
-    public DefaultFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory) {
-        this.fieldColumnRelationMapperFactory = fieldColumnRelationMapperFactory;
-    }
-
     @Override
     public boolean canUse() {
         return true;
@@ -53,7 +47,7 @@ public class DefaultFieldColumnRelationMapperHandleStrategy implements FieldColu
 
     @Override
     public Optional<PropertyBaseColumnRelation> getColumnName(PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty,int abbreviation) {
-        return Optional.of(new PropertyBaseColumnRelation(false, fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName()), beanProperty,abbreviation));
+        return Optional.of(new PropertyBaseColumnRelation(false, FieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName()), beanProperty,abbreviation));
     }
 
     @Override

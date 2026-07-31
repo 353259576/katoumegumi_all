@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -30,6 +30,9 @@ public class FieldColumnRelationMapperFactory {
 
     private static final Log log = LogFactory.getLog(FieldColumnRelationMapperFactory.class);
 
+    private FieldColumnRelationMapperFactory() {
+    }
+
     /**
      * 缓存实体对应的对象属性与列名的关联
      */
@@ -37,22 +40,12 @@ public class FieldColumnRelationMapperFactory {
 
     private static final Map<Class<?>, PropertyColumnRelationMapper> INCOMPLETE_MAPPER_MAP = new ConcurrentHashMap<>();
 
-    private static final Map<Class<?>, CountDownLatch> CLASS_COUNT_DOWN_LATCH_MAP = new ConcurrentHashMap<>();
-    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(0, 200, 0L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        thread.setName("sqlUtils mapper生成线程");
-        thread.setPriority(Thread.NORM_PRIORITY);
-        return thread;
-    });
+    private static final Map<Class<?>, Object> CLASS_LOCK_MAP = new ConcurrentHashMap<>();
 
     /**
      * 不同的mapper处理方式
      */
     private static final List<FieldColumnRelationMapperHandleStrategy> FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST = new ArrayList<>();
-
-
-    private static final FieldColumnRelationMapperFactory FIELD_COLUMN_RELATION_MAPPER_FACTORY = new FieldColumnRelationMapperFactory();
 
     /**
      * 默认的mapper处理方式
@@ -61,18 +54,18 @@ public class FieldColumnRelationMapperFactory {
 
     static {
         addFieldColumnRelationMapperHandleStrategy(
-                new TableTemplateFieldColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY)
+                new TableTemplateFieldColumnRelationMapperHandleStrategy()
         );
         addFieldColumnRelationMapperHandleStrategy(
-                new JakartaFieldColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY)
+                new JakartaFieldColumnRelationMapperHandleStrategy()
         );
         addFieldColumnRelationMapperHandleStrategy(
-                new HibernateFieldColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY)
+                new HibernateFieldColumnRelationMapperHandleStrategy()
         );
         addFieldColumnRelationMapperHandleStrategy(
-                new MybatisPlusColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY)
+                new MybatisPlusColumnRelationMapperHandleStrategy()
         );
-        defaultFieldColumnRelationMapperHandleStrategy = new DefaultFieldColumnRelationMapperHandleStrategy(FIELD_COLUMN_RELATION_MAPPER_FACTORY);
+        defaultFieldColumnRelationMapperHandleStrategy = new DefaultFieldColumnRelationMapperHandleStrategy();
     }
 
     /**
@@ -92,46 +85,33 @@ public class FieldColumnRelationMapperFactory {
      * @return 表与实例映射关系
      */
     public static PropertyColumnRelationMapper analysisClassRelation(Class<?> clazz, boolean allowIncomplete) {
-        PropertyColumnRelationMapper propertyColumnRelationMapper = MAPPER_MAP.get(clazz);
-        if (propertyColumnRelationMapper != null) {
-            return propertyColumnRelationMapper;
+        PropertyColumnRelationMapper mapper = MAPPER_MAP.get(clazz);
+        if (mapper != null) {
+            return mapper;
         }
         if (allowIncomplete) {
-            propertyColumnRelationMapper = INCOMPLETE_MAPPER_MAP.get(clazz);
-            if (propertyColumnRelationMapper != null) {
-                return propertyColumnRelationMapper;
+            mapper = INCOMPLETE_MAPPER_MAP.get(clazz);
+            if (mapper != null) {
+                return mapper;
             }
         }
-        CountDownLatch countDownLatch = CLASS_COUNT_DOWN_LATCH_MAP.computeIfAbsent(clazz, c -> {
-            CountDownLatch cdl = new CountDownLatch(1);
-            EXECUTOR_SERVICE.execute(() -> {
-                try {
-                    FIELD_COLUMN_RELATION_MAPPER_FACTORY.createFieldColumnRelationMapper(c);
-                } catch (Throwable e) {
-                    log.error(e.getMessage(), e);
-                } finally {
-                    CLASS_COUNT_DOWN_LATCH_MAP.remove(c);
-                    cdl.countDown();
-                }
-            });
-
-            return cdl;
-        });
-        try {
-            boolean k = countDownLatch.await(1, TimeUnit.MINUTES);
-            if (k) {
-                propertyColumnRelationMapper = MAPPER_MAP.get(clazz);
-                if (propertyColumnRelationMapper == null) {
-                    throw new RuntimeException("解析失败,无法解析：" + clazz);
-                }
-                return propertyColumnRelationMapper;
-            } else {
-                throw new RuntimeException("解析超时,无法解析：" + clazz);
+        Object lock = CLASS_LOCK_MAP.computeIfAbsent(clazz, c -> new Object());
+        synchronized (lock) {
+            mapper = MAPPER_MAP.get(clazz);
+            if (mapper != null) {
+                return mapper;
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("程序异常中断:" + clazz.getName(),e);
+            if (allowIncomplete) {
+                mapper = INCOMPLETE_MAPPER_MAP.get(clazz);
+                if (mapper != null) {
+                    return mapper;
+                }
+            }
+            try {
+                return createFieldColumnRelationMapper(clazz);
+            } finally {
+                CLASS_LOCK_MAP.remove(clazz);
+            }
         }
     }
 
@@ -142,7 +122,7 @@ public class FieldColumnRelationMapperFactory {
      * @param fieldName 对象字段名称
      * @return 返回表列名
      */
-    public String getChangeColumnName(String fieldName) {
+    public static String getChangeColumnName(String fieldName) {
         return fieldNameChange ? WsStringUtils.camel_case(fieldName) : fieldName;
     }
 
@@ -152,7 +132,7 @@ public class FieldColumnRelationMapperFactory {
      * @param clazz
      * @return
      */
-    public int getCanHandleFieldColumnRelationMapperStrategyIndex(Class<?> clazz) {
+    public static int getCanHandleFieldColumnRelationMapperStrategyIndex(Class<?> clazz) {
         for (int i = 0; i < FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size(); i++) {
             if (FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.get(i).canHandle(clazz)) {
                 return i;
@@ -162,7 +142,7 @@ public class FieldColumnRelationMapperFactory {
     }
 
 
-    public <T> Optional<T> getStrategyAndHandle(int startIndex, Function<FieldColumnRelationMapperHandleStrategy, Optional<T>> function) {
+    public static <T> Optional<T> getStrategyAndHandle(int startIndex, Function<FieldColumnRelationMapperHandleStrategy, Optional<T>> function) {
         startIndex = startIndex % FIELD_COLUMN_RELATION_MAPPER_HANDLE_STRATEGY_LIST.size();
         int index = startIndex;
         Optional<T> optional;
@@ -179,11 +159,11 @@ public class FieldColumnRelationMapperFactory {
         return Optional.empty();
     }
 
-    public PropertyColumnRelationMapper getTableName(int startIndex, Class<?> clazz) {
+    public static PropertyColumnRelationMapper getTableName(int startIndex, Class<?> clazz) {
         return getStrategyAndHandle(startIndex, strategy -> strategy.getTableName(clazz)).orElse(null);
     }
 
-    public boolean isIgnoreField(int startIndex, BeanPropertyModel beanProperty) {
+    public static boolean isIgnoreField(int startIndex, BeanPropertyModel beanProperty) {
         return getStrategyAndHandle(startIndex, strategy -> {
             if (strategy.isIgnoreField(beanProperty)) {
                 return Optional.of(Boolean.TRUE);
@@ -193,11 +173,11 @@ public class FieldColumnRelationMapperFactory {
         }).orElse(false);
     }
 
-    public PropertyBaseColumnRelation getColumnName(int startIndex, PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty,int abbreviation) {
+    public static PropertyBaseColumnRelation getColumnName(int startIndex, PropertyColumnRelationMapper mainMapper, BeanPropertyModel beanProperty,int abbreviation) {
         return getStrategyAndHandle(startIndex, strategy -> strategy.getColumnName(mainMapper, beanProperty,abbreviation)).orElse(null);
     }
 
-    public PropertyObjectColumnJoinRelation getJoinRelation(int startIndex, PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty,int abbreviation) {
+    public static PropertyObjectColumnJoinRelation getJoinRelation(int startIndex, PropertyColumnRelationMapper mainMapper, PropertyColumnRelationMapper joinMapper, BeanPropertyModel beanProperty,int abbreviation) {
         return getStrategyAndHandle(startIndex, strategy -> strategy.getJoinRelation(mainMapper, joinMapper, beanProperty,abbreviation)).orElse(null);
     }
 
@@ -224,7 +204,7 @@ public class FieldColumnRelationMapperFactory {
     }
 
 
-    public PropertyColumnRelationMapper createFieldColumnRelationMapper(Class<?> clazz) {
+    public static PropertyColumnRelationMapper createFieldColumnRelationMapper(Class<?> clazz) {
         int startIndex = getCanHandleFieldColumnRelationMapperStrategyIndex(clazz);
         if (startIndex == -1) {
             return null;

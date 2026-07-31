@@ -14,12 +14,6 @@ import java.util.Optional;
 
 public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldColumnRelationMapperHandleStrategy {
 
-    private final FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory;
-
-    public HibernateFieldColumnRelationMapperHandleStrategy(FieldColumnRelationMapperFactory fieldColumnRelationMapperFactory) {
-        this.fieldColumnRelationMapperFactory = fieldColumnRelationMapperFactory;
-    }
-
     @Override
     public boolean canUse() {
         try {
@@ -44,7 +38,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
         }
         String tableName;
         if (WsStringUtils.isBlank(table.name())) {
-            tableName = fieldColumnRelationMapperFactory.getChangeColumnName(clazz.getSimpleName());
+            tableName = FieldColumnRelationMapperFactory.getChangeColumnName(clazz.getSimpleName());
         } else {
             tableName = table.name();
         }
@@ -67,7 +61,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
         }
         String columnName;
         if (column == null || WsStringUtils.isBlank(column.name())) {
-            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
+            columnName = FieldColumnRelationMapperFactory.getChangeColumnName(beanProperty.getPropertyName());
         } else {
             columnName = column.name();
         }
@@ -108,7 +102,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //        Table table = clazz.getAnnotation(Table.class);
 //        String tableName;
 //        if (WsStringUtils.isBlank(table.name())) {
-//            tableName = fieldColumnRelationMapperFactory.getChangeColumnName(table.name());
+//            tableName = FieldColumnRelationMapperFactory.getChangeColumnName(table.name());
 //        } else {
 //            tableName = table.name();
 //        }
@@ -185,7 +179,7 @@ public class HibernateFieldColumnRelationMapperHandleStrategy implements FieldCo
 //            }
 //        }
 //        if (WsStringUtils.isBlank(columnName)) {
-//            columnName = fieldColumnRelationMapperFactory.getChangeColumnName(field.getName());
+//            columnName = FieldColumnRelationMapperFactory.getChangeColumnName(field.getName());
 //        }
 //        return new PropertyBaseColumnRelation(isId, field.getName(), field, columnName, field.getType());
 //    }
