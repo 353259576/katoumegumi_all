@@ -10,8 +10,10 @@ import freemarker.template.TemplateException;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class Generator {
 
     private static final String TEMPLATE_PATH = "cn/katoumegumi/java/code/generator/service";
 
-    public static final FreeMarkerUtils freeMarkerUtils = new FreeMarkerUtils(TEMPLATE_PATH);
+    private static final FreeMarkerUtils freeMarkerUtils = new FreeMarkerUtils(TEMPLATE_PATH);
 
     /**
      * 导出地址
@@ -274,11 +276,11 @@ public class Generator {
         map.put("table", table);
         try {
             File file = WsFileUtils.createFile(filePath + "/" + fileName);
-            try (FileWriter writer = new FileWriter(file)) {
+            try (Writer writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
                 template.process(map, writer);
             }
         } catch (IOException | TemplateException e) {
-            e.printStackTrace();
+            throw new RuntimeException("代码生成失败: " + fileName, e);
         }
     }
 
@@ -297,14 +299,12 @@ public class Generator {
     }
 
     public Generator setJavaPath(String javaPath) {
-        defaultSettingPath(javaPath);
-        this.javaPath = javaPath;
+        this.javaPath = defaultSettingPath(javaPath);
         return this;
     }
 
     public Generator setResourcePath(String resourcePath) {
-        defaultSettingPath(resourcePath);
-        this.resourcePath = resourcePath;
+        this.resourcePath = defaultSettingPath(resourcePath);
         return this;
     }
 

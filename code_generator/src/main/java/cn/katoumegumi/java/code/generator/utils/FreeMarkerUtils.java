@@ -31,7 +31,7 @@ public class FreeMarkerUtils {
     }
 
     private static Configuration createConfiguration(String templatePath) {
-        Configuration configuration = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+        Configuration configuration = new Configuration(Configuration.VERSION_2_3_30);
         configuration.setDefaultEncoding("UTF-8");
         configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         configuration.setClassForTemplateLoading(Generator.class, "/" + templatePath);
@@ -47,8 +47,7 @@ public class FreeMarkerUtils {
             try {
                 return configuration.getTemplate(name);
             } catch (IOException e) {
-                e.printStackTrace();
-                return null;
+                throw new IllegalStateException("模板加载失败: " + name, e);
             }
         });
     }

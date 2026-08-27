@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,8 +69,7 @@ public class SqlTableToBeanUtils {
             }
             return columnList;
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return null;
+            throw new RuntimeException("查询表字段失败: " + tableName, throwables);
         } finally {
             if(resultSet != null){
                 try {
@@ -116,9 +116,11 @@ public class SqlTableToBeanUtils {
                 String name = resultSet.getString("TABLE_NAME");
                 String remark = resultSet.getString("TABLE_COMMENT");
                 String entityName = WsStringUtils.camelCase(name);
-                if (WsStringUtils.isNotBlank(prefix) && entityName.startsWith(prefix)) {
-                    entityName = entityName.substring(prefix.length());
-                    entityName = entityName.substring(0, 1).toLowerCase() + entityName.substring(1);
+                if (WsStringUtils.isNotBlank(prefix) && name.startsWith(prefix)) {
+                    entityName = WsStringUtils.camelCase(name.substring(prefix.length()));
+                    if (!entityName.isEmpty()) {
+                        entityName = Character.toLowerCase(entityName.charAt(0)) + entityName.substring(1);
+                    }
                 }
                 Table table = new Table(name, remark, entityName, selectTableColumns(name));
                 tableList.add(table);
@@ -157,16 +159,27 @@ public class SqlTableToBeanUtils {
 
         static {
             classMap.put("varchar", String.class);
+            classMap.put("char", String.class);
+            classMap.put("text", String.class);
+            classMap.put("mediumtext", String.class);
+            classMap.put("longtext", String.class);
+            classMap.put("json", String.class);
             classMap.put("int", Integer.class);
             classMap.put("int unsigned", Integer.class);
+            classMap.put("mediumint", Integer.class);
             classMap.put("bigint", Long.class);
+            classMap.put("bigint unsigned", Long.class);
+            classMap.put("smallint", Short.class);
             classMap.put("float", Float.class);
             classMap.put("double", Double.class);
             classMap.put("decimal", BigDecimal.class);
             classMap.put("tinyint", Integer.class);
+            classMap.put("bool", Boolean.class);
+            classMap.put("boolean", Boolean.class);
             classMap.put("blob", String.class);
             classMap.put("timestamp", Date.class);
             classMap.put("datetime", Date.class);
+            classMap.put("date", LocalDate.class);
 
         }
 
@@ -251,7 +264,9 @@ public class SqlTableToBeanUtils {
         public Table(String tableName, String tableRemark, String firstLowerEntityName, List<Column> columnList) {
             this.tableName = tableName;
             this.tableRemark = tableRemark;
-            this.entityName = firstLowerEntityName.substring(0, 1).toUpperCase() + firstLowerEntityName.substring(1);
+            this.entityName = firstLowerEntityName.isEmpty()
+                    ? ""
+                    : Character.toUpperCase(firstLowerEntityName.charAt(0)) + firstLowerEntityName.substring(1);
             this.firstLowerEntityName = firstLowerEntityName;
             this.columnList = columnList;
             this.classList = columnList.stream().map(Column::getColumnClass).distinct().collect(Collectors.toList());
@@ -261,7 +276,7 @@ public class SqlTableToBeanUtils {
                     break;
                 }
             }
-            if (pkColumn == null) {
+            if (pkColumn == null && !columnList.isEmpty()) {
                 pkColumn = columnList.get(0);
             }
         }
