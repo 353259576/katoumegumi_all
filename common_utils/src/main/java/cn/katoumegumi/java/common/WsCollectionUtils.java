@@ -1,5 +1,7 @@
 package cn.katoumegumi.java.common;
 
+import cn.katoumegumi.java.common.convert.BaseType;
+
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
@@ -57,7 +59,7 @@ public class WsCollectionUtils {
             return ((Map<?, ?>) obj).isEmpty();
         } else {
             if (obj.getClass().isArray()) {
-                if (BaseTypeCommon.isBaseTypeArray(obj.getClass())) {
+                if (BaseType.isBaseTypeArray(obj.getClass())) {
                     return Array.getLength(obj) == 0;
                 } else {
                     return ((Object[]) obj).length == 0;

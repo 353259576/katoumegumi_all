@@ -1,6 +1,7 @@
 package cn.katoumegumi.java.sql;
 
 import cn.katoumegumi.java.common.*;
+import cn.katoumegumi.java.common.function.SFunction;
 import cn.katoumegumi.java.sql.common.OrderByTypeEnums;
 import cn.katoumegumi.java.sql.common.SqlOperator;
 import cn.katoumegumi.java.sql.common.TableJoinType;

@@ -1,5 +1,6 @@
 package cn.katoumegumi.java.common;
 
+import cn.katoumegumi.java.common.convert.BaseType;
 import cn.katoumegumi.java.common.convert.ConvertUtils;
 import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
@@ -471,7 +472,7 @@ public class WsBeanUtils {
 
 
     public static boolean isBaseType(Class<?> clazz) {
-        return BaseTypeCommon.isBaseType(clazz);
+        return BaseType.isBaseType(clazz);
     }
 
     public static boolean isArray(Class<?> clazz) {

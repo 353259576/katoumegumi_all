@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.common.convert;
 
-import cn.katoumegumi.java.common.BaseTypeCommon;
 import cn.katoumegumi.java.common.WsBeanUtils;
 import cn.katoumegumi.java.common.WsReflectUtils;
 
@@ -12,7 +11,7 @@ import java.util.Map;
 public class ConvertUtils {
 
 
-    private static final Map<Class<?>, ConvertBean<?>> CLASS_CONVERT_BEAN_MAP = new HashMap<>();
+    private static final Map<Class<?>, BaseTypeConvert<?>> BASE_TYPE_CONVERT_MAP = new HashMap<>();
 
     private static Class<?> resolveConvertTargetClass(Class<?> clazz) {
         if (clazz == null) {
@@ -20,7 +19,7 @@ public class ConvertUtils {
         }
         Type type = null;
         for (Type genericInterface : clazz.getGenericInterfaces()) {
-            if (genericInterface.getTypeName().startsWith(ConvertBean.class.getTypeName())){
+            if (genericInterface.getTypeName().startsWith(BaseTypeConvert.class.getTypeName())){
                 type = genericInterface;
                 break;
             }
@@ -33,22 +32,22 @@ public class ConvertUtils {
     }
 
     static {
-        ConvertToString convertToString = new ConvertToString();
-        ConvertToBoolean convertToBoolean = new ConvertToBoolean();
-        ConvertToCharacter convertToCharacter = new ConvertToCharacter();
-        ConvertToByte convertToByte = new ConvertToByte();
-        ConvertToShort convertToShort = new ConvertToShort();
-        ConvertToInteger convertToInteger = new ConvertToInteger();
-        ConvertToLong convertToLong = new ConvertToLong();
-        ConvertToFloat convertToFloat = new ConvertToFloat();
-        ConvertToDouble convertToDouble = new ConvertToDouble();
-        ConvertToBigInteger convertToBigInteger = new ConvertToBigInteger();
-        ConvertToBigDecimal convertToBigDecimal = new ConvertToBigDecimal();
-        ConvertToDate convertToDate = new ConvertToDate();
-        ConvertToSqlDate convertToSqlDate = new ConvertToSqlDate();
-        ConvertToSqlTimestamp convertToSqlTimestamp = new ConvertToSqlTimestamp();
-        ConvertToLocalDate convertToLocalDate = new ConvertToLocalDate();
-        ConvertToLocalDateTime convertToLocalDateTime = new ConvertToLocalDateTime();
+        ToStringConvert convertToString = new ToStringConvert();
+        ToBooleanConvert convertToBoolean = new ToBooleanConvert();
+        ToCharacterConvert convertToCharacter = new ToCharacterConvert();
+        ToByteConvert convertToByte = new ToByteConvert();
+        ToShortConvert convertToShort = new ToShortConvert();
+        ToIntegerConvert convertToInteger = new ToIntegerConvert();
+        ToLongConvert convertToLong = new ToLongConvert();
+        ToFloatConvert convertToFloat = new ToFloatConvert();
+        ToDoubleConvert convertToDouble = new ToDoubleConvert();
+        ToBigIntegerConvert convertToBigInteger = new ToBigIntegerConvert();
+        ToBigDecimalConvert convertToBigDecimal = new ToBigDecimalConvert();
+        ToDateConvert convertToDate = new ToDateConvert();
+        ToSqlDateConvert convertToSqlDate = new ToSqlDateConvert();
+        ToSqlTimestampConvert convertToSqlTimestamp = new ToSqlTimestampConvert();
+        ToLocalDateConvert convertToLocalDate = new ToLocalDateConvert();
+        ToLocalDateTimeConvert convertToLocalDateTime = new ToLocalDateTimeConvert();
 
         register(convertToString);
         register(convertToBoolean);
@@ -68,8 +67,8 @@ public class ConvertUtils {
         register(convertToSqlTimestamp);
     }
 
-    private static void register(ConvertBean<?> bean) {
-        CLASS_CONVERT_BEAN_MAP.put(resolveConvertTargetClass(bean.getClass()), bean);
+    private static void register(BaseTypeConvert<?> convert) {
+        BASE_TYPE_CONVERT_MAP.put(resolveConvertTargetClass(convert.getClass()), convert);
     }
 
     public static <T> T convert(Object o, Class<T> targetClass) {
@@ -83,39 +82,39 @@ public class ConvertUtils {
 
         Class<?> c;
         if (targetClass.isPrimitive()) {
-            c = BaseTypeCommon.getWrapperClass(targetClass);
+            c = BaseType.getWrapperClass(targetClass);
         } else {
             c = targetClass;
         }
         if (c.isInstance(o)) {
             return (T) o;
         }
-        ConvertBean<T> convertBean = (ConvertBean<T>) CLASS_CONVERT_BEAN_MAP.get(c);
-        if (convertBean == null) {
-            // 防止 base→bean 无限递归：convertBean 对 base 源会再次走 baseTypeConvert
-            // → ConvertUtils.convert → convertBean …。若源是基本类型且目标无注册转换器，
-            // 说明无法转换，直接返回 null 而不再回调 convertBean。
-            if (BaseTypeCommon.isBaseType(o.getClass())) {
+        BaseTypeConvert<T> baseTypeConvert = (BaseTypeConvert<T>) BASE_TYPE_CONVERT_MAP.get(c);
+        if (baseTypeConvert == null) {
+            // 防止 base→bean 无限递归：baseTypeConvert 对 base 源会再次走 baseTypeConvert
+            // → ConvertUtils.convert → baseTypeConvert …。若源是基本类型且目标无注册转换器，
+            // 说明无法转换，直接返回 null 而不再回调 baseTypeConvert。
+            if (BaseType.isBaseType(o.getClass())) {
                 return null;
             }
             return WsBeanUtils.convertBean(o, targetClass);
         } else {
-            return convertBean.convert(o);
+            return baseTypeConvert.convert(o);
         }
     }
 
     /**
      * 增加转换规则
      *
-     * @param convertBean
+     * @param baseTypeConvert
      * @param <T>
      */
-    public synchronized static <T> void addConvertBean(ConvertBean<T> convertBean) {
-        CLASS_CONVERT_BEAN_MAP.put(resolveConvertTargetClass(convertBean.getClass()), convertBean);
+    public synchronized static <T> void addBaseTypeConvert(BaseTypeConvert<T> baseTypeConvert) {
+        BASE_TYPE_CONVERT_MAP.put(resolveConvertTargetClass(baseTypeConvert.getClass()), baseTypeConvert);
     }
 
-    public static <T> ConvertBean<T> getConvertBean(Class<T> c) {
-        return (ConvertBean<T>) CLASS_CONVERT_BEAN_MAP.get(c);
+    public static <T> BaseTypeConvert<T> getBaseTypeConvert(Class<T> c) {
+        return (BaseTypeConvert<T>) BASE_TYPE_CONVERT_MAP.get(c);
     }
 
 }

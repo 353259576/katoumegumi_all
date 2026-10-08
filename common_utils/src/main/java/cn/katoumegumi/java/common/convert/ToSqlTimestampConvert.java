@@ -1,6 +1,5 @@
 package cn.katoumegumi.java.common.convert;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -9,11 +8,11 @@ import java.util.Date;
  *
  * @author 星梦苍天
  */
-public class ConvertToSqlTimestamp implements ConvertBean<Timestamp> {
+public class ToSqlTimestampConvert implements BaseTypeConvert<Timestamp> {
 
 
-    public Timestamp convertBean(Object bean) {
-        Date date = ConvertUtils.convert(bean, Date.class);
+    public Timestamp convertBaseType(Object source) {
+        Date date = ConvertUtils.convert(source, Date.class);
         if (date == null) {
             return null;
         } else {
@@ -22,7 +21,7 @@ public class ConvertToSqlTimestamp implements ConvertBean<Timestamp> {
     }
 
     @Override
-    public Timestamp convert(Object bean) {
-        return this.convertBean(bean);
+    public Timestamp convert(Object source) {
+        return this.convertBaseType(source);
     }
 }

@@ -1,13 +1,13 @@
 package cn.katoumegumi.java.common.convert;
 
-public interface ConvertBean<T> {
+public interface BaseTypeConvert<T> {
 
     /**
      * 通用转化
      *
-     * @param bean
+     * @param source
      * @return
      */
-    T convert(Object bean);
+    T convert(Object source);
 
 }

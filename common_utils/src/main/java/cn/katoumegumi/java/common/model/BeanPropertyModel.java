@@ -1,6 +1,6 @@
 package cn.katoumegumi.java.common.model;
 
-import cn.katoumegumi.java.common.BaseTypeCommon;
+import cn.katoumegumi.java.common.convert.BaseType;
 import cn.katoumegumi.java.common.WsReflectUtils;
 
 import java.lang.annotation.Annotation;
@@ -70,7 +70,7 @@ public class BeanPropertyModel {
             propertyType = this.getMethod.getGenericReturnType();
         }
 
-        if (BaseTypeCommon.isBaseType(this.propertyClass)) {
+        if (BaseType.isBaseType(this.propertyClass)) {
             this.genericClass = Collections.emptyList();
             this.propertyKind = PropertyKind.BASE;
         } else if (WsReflectUtils.classCompare(this.propertyClass, Collection.class)) {

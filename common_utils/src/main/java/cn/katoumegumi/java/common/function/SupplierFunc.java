@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.common;
+package cn.katoumegumi.java.common.function;
 
 import java.io.Serializable;
 import java.util.function.Supplier;

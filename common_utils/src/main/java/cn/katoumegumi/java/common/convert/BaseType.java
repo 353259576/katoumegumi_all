@@ -1,4 +1,4 @@
-package cn.katoumegumi.java.common;
+package cn.katoumegumi.java.common.convert;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -13,7 +13,7 @@ import java.util.*;
  *
  * @author ws
  */
-public class BaseTypeCommon {
+public class BaseType {
 
     private static final Set<Class<?>> CLASS_SET = new HashSet<>();
 

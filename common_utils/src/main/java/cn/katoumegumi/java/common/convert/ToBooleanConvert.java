@@ -8,7 +8,7 @@ import java.util.Map;
  *
  * @author 星梦苍天
  */
-public class ConvertToBoolean implements ConvertBean<Boolean> {
+public class ToBooleanConvert implements BaseTypeConvert<Boolean> {
 
     private final Map<String, Boolean> map = new HashMap<>();
 
@@ -31,13 +31,13 @@ public class ConvertToBoolean implements ConvertBean<Boolean> {
         map.put("FALSE", false);
     }
 
-    public Boolean convertBean(Number bean) {
-        return bean.intValue() == 1;
+    public Boolean convertBaseType(Number source) {
+        return source.intValue() == 1;
     }
 
 
-    public Boolean convertBean(Object bean) {
-        String s = ConvertUtils.convert(bean, String.class);
+    public Boolean convertBaseType(Object source) {
+        String s = ConvertUtils.convert(source, String.class);
         if (s == null) {
             return null;
         } else {
@@ -46,11 +46,11 @@ public class ConvertToBoolean implements ConvertBean<Boolean> {
     }
 
     @Override
-    public Boolean convert(Object bean) {
-        if (bean instanceof Number) {
-            return convertBean((Number) bean);
+    public Boolean convert(Object source) {
+        if (source instanceof Number) {
+            return convertBaseType((Number) source);
         } else {
-            return this.convertBean(bean);
+            return this.convertBaseType(source);
         }
     }
 }

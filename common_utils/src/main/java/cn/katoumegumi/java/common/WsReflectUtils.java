@@ -1,6 +1,8 @@
 package cn.katoumegumi.java.common;
 
 import cn.katoumegumi.java.common.cache.SoftReferenceCache;
+import cn.katoumegumi.java.common.function.SFunction;
+import cn.katoumegumi.java.common.function.SupplierFunc;
 import cn.katoumegumi.java.common.model.BeanModel;
 import cn.katoumegumi.java.common.model.BeanPropertyModel;
 import cn.katoumegumi.java.common.model.GenericsType;

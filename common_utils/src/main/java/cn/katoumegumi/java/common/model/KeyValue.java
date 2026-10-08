@@ -1,21 +1,21 @@
 package cn.katoumegumi.java.common.model;
 
-public class KeyValue <T,K>{
+public class KeyValue <K,V>{
 
-    private final T key;
+    private final K key;
 
-    private final K value;
+    private final V value;
 
-    public KeyValue(T key, K value) {
+    public KeyValue(K key, V value) {
         this.key = key;
         this.value = value;
     }
 
-    public T getKey() {
+    public K getKey() {
         return key;
     }
 
-    public K getValue() {
+    public V getValue() {
         return value;
     }
 }

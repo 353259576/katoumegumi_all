@@ -11,16 +11,16 @@ import java.util.logging.Logger;
  *
  * @author 星梦苍天
  */
-public class OSMessageUtils {
+public class OSInfoUtils {
 
     public static void main(String[] args) {
-        Logger logger = Logger.getLogger(OSMessageUtils.class.getName());
+        Logger logger = Logger.getLogger(OSInfoUtils.class.getName());
         logger.info(getOSName());
         logger.info(getJdkVersion());
         logger.info(getOSType().getBaseName());
         logger.info(getLocalIpv4());
-        logger.info(OSMessageUtils::getLocalIpv6);
-        logger.info(OSMessageUtils::getLocalMac);
+        logger.info(OSInfoUtils::getLocalIpv6);
+        logger.info(OSInfoUtils::getLocalMac);
     }
 
     /**

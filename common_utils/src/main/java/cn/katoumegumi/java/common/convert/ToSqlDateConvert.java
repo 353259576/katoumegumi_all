@@ -7,11 +7,11 @@ import java.sql.Date;
  *
  * @author 星梦苍天
  */
-public class ConvertToSqlDate implements ConvertBean<Date> {
+public class ToSqlDateConvert implements BaseTypeConvert<Date> {
 
 
-    public Date convertBean(Object bean) {
-        java.util.Date date = ConvertUtils.convert(bean, java.util.Date.class);
+    public Date convertBaseType(Object source) {
+        java.util.Date date = ConvertUtils.convert(source, java.util.Date.class);
         if (date == null) {
             return null;
         } else {
@@ -20,7 +20,7 @@ public class ConvertToSqlDate implements ConvertBean<Date> {
     }
 
     @Override
-    public Date convert(Object bean) {
-        return this.convertBean(bean);
+    public Date convert(Object source) {
+        return this.convertBaseType(source);
     }
 }
